@@ -1,4 +1,4 @@
-import { cn } from '~/lib/utils'
+import { cn } from '~/utils/cn.utils'
 
 interface InputViewProps extends React.HTMLAttributes<HTMLElement> {
   text: string

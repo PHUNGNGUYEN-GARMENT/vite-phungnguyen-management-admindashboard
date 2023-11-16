@@ -1,29 +1,23 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import Main from './components/layout/Main'
-import { routes, routesMobile } from './constants/route.constant'
-import SignIn from './pages/auth/SignIn'
-import SignUp from './pages/auth/SignUp'
+import SignIn from './pages/auth/signin/SignIn'
+import SignUp from './pages/auth/signup/Signup'
 
-import useBreakpoint from './hooks/useBreakpoint'
+import { appRoutes } from './utils/route'
 
 function App() {
-  const { breakpoint } = useBreakpoint()
-
-  const renderRoutes = breakpoint === 'md' || breakpoint === 'sm' ? routesMobile : routes
-
   return (
     <>
       <div className='App'>
         <Routes>
-          <Route path='/sign-up' element={<SignUp />} />
-          <Route path='/sign-in' element={<SignIn />} />
+          <Route path='signup' element={<SignUp />} />
+          <Route path='signin' element={<SignIn />} />
           <Route element={<Main />}>
-            <Route path='/' element={<Navigate to='dashboard' replace />} />
-            {renderRoutes.map((route) => {
+            {appRoutes.map((route) => {
               return (
                 <Route key={route.key} path={route.path} element={<route.component />}>
-                  {route.childs
-                    ? route.childs.map((child) => {
+                  {route.children
+                    ? route.children.map((child) => {
                         return <Route key={child.key} path={child.path} element={<child.component />} />
                       })
                     : null}

@@ -1,8 +1,6 @@
-import { Avatar, Badge, Button, Modal, Space } from 'antd'
+import { Avatar, Badge, Button, Space } from 'antd'
 import { BellRing, ChevronDown, Menu } from 'lucide-react'
 import React, { useState } from 'react'
-import SearchInput from '../search/SearchInput'
-import UserDialog from '../user/user-dialog'
 
 interface HeaderProps extends React.HTMLAttributes<HTMLElement> {
   collapsed: boolean
@@ -12,6 +10,7 @@ interface HeaderProps extends React.HTMLAttributes<HTMLElement> {
 // eslint-disable-next-line no-empty-pattern
 const Header = ({ onMenuClick }: HeaderProps) => {
   const url = 'https://www.elle.vn/wp-content/uploads/2014/07/08/Justin-Bieber-0.jpg'
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [openUserInfo, setOpenUserInfo] = useState(false)
 
   return (
@@ -21,7 +20,7 @@ const Header = ({ onMenuClick }: HeaderProps) => {
           <button className='flex-shrink-0' onClick={onMenuClick}>
             <Menu size={20} />
           </button>
-          <SearchInput />
+          {/* <SearchInput /> */}
         </div>
         <div className='relative flex h-full w-fit flex-row items-center justify-center gap-5'>
           <Button type='default' className='flex items-center justify-center' shape='circle'>
@@ -48,7 +47,7 @@ const Header = ({ onMenuClick }: HeaderProps) => {
           </Space>
         </div>
       </div>
-      <Modal
+      {/* <Modal
         open={openUserInfo}
         onOk={() => setOpenUserInfo(false)}
         onCancel={() => setOpenUserInfo(false)}
@@ -63,7 +62,7 @@ const Header = ({ onMenuClick }: HeaderProps) => {
           position={'IT'}
           gender={false}
         />
-      </Modal>
+      </Modal> */}
     </>
   )
 }
