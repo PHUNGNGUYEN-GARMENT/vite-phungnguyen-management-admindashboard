@@ -12,11 +12,7 @@ export type Product = {
 export type Color = {
   colorID: number
   nameColor: string
-  rgbColor: string
   hexColor: string
-  cmykColor: string
-  hsvColor: string
-  hslColor: string
   createdAt: string
   updatedAt: string
   orderNumber: number

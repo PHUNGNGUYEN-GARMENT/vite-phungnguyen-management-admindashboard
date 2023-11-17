@@ -1,6 +1,7 @@
 import { Avatar, Badge, Button, Space } from 'antd'
 import { BellRing, ChevronDown, Menu } from 'lucide-react'
 import React, { useState } from 'react'
+import { cn } from '~/utils/helpers'
 
 interface HeaderProps extends React.HTMLAttributes<HTMLElement> {
   collapsed: boolean
@@ -8,18 +9,21 @@ interface HeaderProps extends React.HTMLAttributes<HTMLElement> {
 }
 
 // eslint-disable-next-line no-empty-pattern
-const Header = ({ onMenuClick }: HeaderProps) => {
+const Header = ({ onMenuClick, ...props }: HeaderProps) => {
   const url = 'https://www.elle.vn/wp-content/uploads/2014/07/08/Justin-Bieber-0.jpg'
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [openUserInfo, setOpenUserInfo] = useState(false)
 
   return (
     <>
-      <div className='flex h-[56px] flex-row items-center justify-between gap-5 bg-card px-5'>
+      <div
+        {...props}
+        className={cn('flex h-[56px] flex-row items-center justify-between gap-5 bg-card px-5', props.className)}
+      >
         <div className='flex flex-row items-center justify-start gap-5'>
-          <button className='flex-shrink-0' onClick={onMenuClick}>
+          <Button className='flex-shrink-0' onClick={onMenuClick}>
             <Menu size={20} />
-          </button>
+          </Button>
           {/* <SearchInput /> */}
         </div>
         <div className='relative flex h-full w-fit flex-row items-center justify-center gap-5'>
@@ -34,7 +38,7 @@ const Header = ({ onMenuClick }: HeaderProps) => {
                 <Avatar size='large' src={<img src={url} alt='avatar' />} />
               </span>
             </Button>
-            <button className='hidden md:flex' onClick={() => setOpenUserInfo(true)}>
+            <Button className='hidden md:flex' onClick={() => setOpenUserInfo(true)}>
               <Space size='small'>
                 <span>
                   <p>Justin Bieber</p>
@@ -43,7 +47,7 @@ const Header = ({ onMenuClick }: HeaderProps) => {
                   <ChevronDown />
                 </span>
               </Space>
-            </button>
+            </Button>
           </Space>
         </div>
       </div>

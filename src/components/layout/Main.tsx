@@ -3,7 +3,6 @@ import React, { useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import { cn } from '~/utils/helpers'
 import Footer from './Footer'
-import Header from './Header'
 import SideNav from './sidenav/SideNav'
 
 const { Sider, Header: AntHeader, Content } = Layout
@@ -57,7 +56,8 @@ const Main: React.FC = () => {
         })}
       >
         <AntHeader className='h-fit p-0'>
-          <Header
+          {/* <Header
+            className='hidden'
             collapsed={collapsed}
             onMenuClick={() => {
               if (breakpoint) {
@@ -66,9 +66,9 @@ const Main: React.FC = () => {
                 setCollapsed(!collapsed)
               }
             }}
-          />
+          /> */}
         </AntHeader>
-        <Content className=''>
+        <Content className='p-5'>
           <Outlet />
         </Content>
         <Footer className=''>Ant Design ©2023 Created by Ant UED</Footer>

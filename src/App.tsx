@@ -15,7 +15,7 @@ function App() {
           <Route element={<Main />}>
             {appRoutes.map((route) => {
               return (
-                <Route key={route.key} path={route.path} element={<route.component />}>
+                <Route id={route.key} key={route.key} path={route.path} element={<route.component />}>
                   {route.children
                     ? route.children.map((child) => {
                         return <Route key={child.key} path={child.path} element={<child.component />} />

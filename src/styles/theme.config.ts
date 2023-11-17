@@ -2,11 +2,14 @@ import { ThemeConfig } from 'antd'
 
 const theme: ThemeConfig = {
   token: {
-    colorPrimary: '#1890ff'
+    colorPrimary: '#ff6b00'
   },
   components: {
     Layout: {
       siderBg: '#fff'
+    },
+    Button: {
+      defaultColor: '#000'
     }
   }
 }
