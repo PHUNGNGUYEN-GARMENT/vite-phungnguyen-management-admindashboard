@@ -1,6 +1,7 @@
 import { Drawer, Layout } from 'antd'
 import React, { useState } from 'react'
 import { Outlet } from 'react-router-dom'
+import { cn } from '~/utils/helpers'
 import Footer from './Footer'
 import Header from './Header'
 import SideNav from './sidenav/SideNav'
@@ -13,7 +14,7 @@ const Main: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false)
 
   return (
-    <Layout className='w-full bg-background'>
+    <Layout className='w-full bg-background' hasSider>
       <Drawer
         title={false}
         placement='left'
@@ -39,10 +40,22 @@ const Main: React.FC = () => {
         collapsed={collapsed}
         trigger={null}
         width={250}
+        style={{
+          position: 'fixed',
+          left: '0px',
+          top: '0px',
+          bottom: '0px',
+          overflow: 'auto',
+          height: '100vh'
+        }}
       >
         <SideNav />
       </Sider>
-      <Layout className=''>
+      <Layout
+        className={cn('ml-[250px]', {
+          'ml-[80px]': collapsed
+        })}
+      >
         <AntHeader className='h-fit p-0'>
           <Header
             collapsed={collapsed}

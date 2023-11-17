@@ -83,7 +83,7 @@ const SideNav = ({ ...props }: SideNavProps) => {
   return (
     <div {...props} className={cn('bg-white', props.className)}>
       <Link to={'/'} onClick={() => {}} className='relative flex justify-center py-5'>
-        <img src={logo} alt='logo' className='h-10 w-10 object-contain lg:h-20 lg:w-20' />
+        <img src={logo} alt='logo' className='h-10 w-10 object-contain lg:h-10 lg:w-10' />
       </Link>
       <Menu onClick={onClick} defaultSelectedKeys={['1']} defaultOpenKeys={['sub1']} mode='inline' items={items} />
     </div>
