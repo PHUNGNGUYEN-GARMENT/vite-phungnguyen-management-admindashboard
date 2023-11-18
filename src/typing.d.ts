@@ -1,3 +1,12 @@
+export type ResponseDataType = {
+  isSuccess?: boolean
+  message: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data?: any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  meta?: any
+}
+
 export type Product = {
   productID?: number
   productCode: string

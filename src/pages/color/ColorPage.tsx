@@ -1,14 +1,23 @@
-import { Button, Flex, Form, Input, InputNumber, Popconfirm, Switch, Table, Typography } from 'antd'
+import { Button, Flex, Form, Input, InputNumber, Modal, Popconfirm, Switch, Table, Typography } from 'antd'
 import { AnyObject } from 'antd/es/_util/type'
-import React from 'react'
+import { Plus } from 'lucide-react'
+import React, { useEffect } from 'react'
+import { Color } from '~/typing'
+import colorApi from './api/color.api'
+import AddNewColor from './components/AddNewColor'
+import { useColorPage } from './hooks/useColorPage'
 import { useTable } from './hooks/useTable'
 
-interface DataType {
-  key: string
-  name: string
-  age: number
-  address: string
+export interface IColor {
+  key: React.Key
+  colorID: number
+  nameColor: string
+  hexColor: string
+  createdAt: string
+  updatedAt: string
+  orderNumber: number
 }
+
 type EditableTableProps = Parameters<typeof Table>[0]
 type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>
 
@@ -18,7 +27,7 @@ interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   title: any
   inputType: 'number' | 'text'
-  record: DataType
+  record: IColor
   index: number
   children: React.ReactNode
 }
@@ -63,9 +72,10 @@ const EditableCell: React.FC<EditableCellProps> = ({
 const ColorPage: React.FC = () => {
   const [form] = Form.useForm()
   const table = useTable()
+  const colorPage = useColorPage()
 
-  const isEditing = (record: DataType) => record.key === table.editingKey
-  const isDelete = (record: DataType) => record.key === table.deleteKey
+  const isEditing = (record: IColor) => record.key === table.editingKey
+  const isDelete = (record: IColor) => record.key === table.deleteKey
 
   const handleSave = async (key: React.Key) => {
     try {
@@ -93,30 +103,42 @@ const ColorPage: React.FC = () => {
 
   const columns: (ColumnTypes[number] & { editable?: boolean; dataIndex: string })[] = [
     {
-      title: 'name',
-      dataIndex: 'name',
-      width: '25%',
+      title: 'ID',
+      dataIndex: 'colorID',
+      width: '5%',
       editable: true
     },
     {
-      title: 'age',
-      dataIndex: 'age',
+      title: 'Name color',
+      dataIndex: 'nameColor',
+      width: '20%',
+      editable: true
+    },
+    {
+      title: 'Hex color',
+      dataIndex: 'hexColor',
+      width: '20%',
+      editable: true
+    },
+    {
+      title: 'Created date',
+      dataIndex: 'updatedAt',
       width: '15%',
       editable: true
     },
     {
-      title: 'address',
-      dataIndex: 'address',
-      width: '40%',
+      title: 'Updated date',
+      dataIndex: 'createdAt',
+      width: '15%',
       editable: true
     },
     {
-      title: 'operation',
+      title: 'Operation',
       dataIndex: 'operation',
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       render: (_: any, record: AnyObject) => {
-        const editable = isEditing(record as DataType)
-        const deletable = isDelete(record as DataType)
+        const editable = isEditing(record as IColor)
+        const deletable = isDelete(record as IColor)
         return editable ? (
           <Flex gap={30}>
             <Typography.Link onClick={() => handleSave(record.key)}>Save</Typography.Link>
@@ -130,7 +152,7 @@ const ColorPage: React.FC = () => {
               type='dashed'
               disabled={table.editingKey !== ''}
               onClick={() => {
-                table.handleEdit(record as DataType)
+                table.handleEdit(record as IColor)
                 form.setFieldsValue({ name: '', age: '', address: '', ...record })
               }}
             >
@@ -138,7 +160,6 @@ const ColorPage: React.FC = () => {
             </Button>
 
             <Popconfirm
-              open={deletable}
               title={`Sure to delete?`}
               onCancel={() => table.setDeleteKey('')}
               onConfirm={() => table.handleDelete(record.key)}
@@ -172,6 +193,35 @@ const ColorPage: React.FC = () => {
     }
   }) as ColumnTypes
 
+  const handleAddNew = () => {
+    colorApi
+      .createNewColor(colorPage.nameColor, colorPage.hexColor)
+      .then((meta) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        table.setLoading(true)
+        const data = meta?.data as Color
+        const item: IColor = { ...data, key: data.colorID }
+        table.setDataSource([...table.dataSource, item])
+        colorPage.setOpenModal(false)
+      })
+      .finally(() => {
+        table.setLoading(false)
+      })
+  }
+
+  useEffect(() => {
+    colorApi.getAllColors().then((meta) => {
+      const data = meta?.data as Color[]
+      if (data.length !== 0) {
+        table.setDataSource(
+          data.map((item) => {
+            return { ...item, key: item.colorID }
+          })
+        )
+      }
+    })
+  }, [])
+
   return (
     <>
       <Flex justify='space-between'>
@@ -180,18 +230,12 @@ const ColorPage: React.FC = () => {
           <Switch checked={table.isLoading} onChange={table.handleLoadingChange} />
         </Flex>
         <Button
-          onClick={() => {
-            table.handleAdd({
-              key: `${0}`,
-              name: `Edward King ${0}`,
-              age: 32,
-              address: `London, Park Lane no. ${0}`
-            })
-          }}
+          onClick={() => colorPage.setOpenModal(true)}
+          className='flex items-center'
           type='primary'
-          style={{ marginBottom: 16 }}
+          icon={<Plus size={20} />}
         >
-          Add a row
+          New
         </Button>
       </Flex>
       <Form form={form} component={false}>
@@ -211,6 +255,14 @@ const ColorPage: React.FC = () => {
           }}
         />
       </Form>
+      <Modal
+        title='Basic Modal'
+        open={colorPage.openModal}
+        onOk={handleAddNew}
+        onCancel={() => colorPage.setOpenModal(false)}
+      >
+        <AddNewColor />
+      </Modal>
     </>
   )
 }
