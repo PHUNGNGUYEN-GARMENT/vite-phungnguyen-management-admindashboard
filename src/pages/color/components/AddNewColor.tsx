@@ -28,6 +28,7 @@ function AddNewColor({}: AddNewColorProps) {
         </Flex>
       </Flex>
     </Flex>
+    
   )
 }
 

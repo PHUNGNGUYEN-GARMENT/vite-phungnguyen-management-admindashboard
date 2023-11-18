@@ -14,8 +14,7 @@ import {
   UnitIcon
 } from '~/assets/icons'
 import Finish from '~/pages/Finish/Finish'
-import Color from '~/pages/color/ColorPage'
-import ColorPage2 from '~/pages/color/ColorPage2'
+import ColorPage from '~/pages/color/ColorPage'
 import Cutting from '~/pages/cutting/Cutting'
 import Dashboard from '~/pages/dashboard/Dashboard'
 import Delivery from '~/pages/delivery/Delivery'
@@ -96,7 +95,7 @@ export const appRoutes = [
         key: '7.1',
         name: 'Màu',
         path: '/structure/colors',
-        component: ColorPage2,
+        component: ColorPage,
         icon: ColorIcon,
         loader: async () => ProductApi.listProduct()
       },
