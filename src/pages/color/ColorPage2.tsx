@@ -1,8 +1,8 @@
-import { Button, Flex, Form, Input, InputNumber, Popconfirm, Table, Typography } from 'antd'
+import { Button, Flex, Form, Input, InputNumber, Popconfirm, Switch, Table, Typography } from 'antd'
 import { AnyObject } from 'antd/es/_util/type'
 import React, { useState } from 'react'
 
-interface Item {
+interface DataType {
   key: string
   name: string
   age: number
@@ -11,7 +11,7 @@ interface Item {
 type EditableTableProps = Parameters<typeof Table>[0]
 type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>
 
-const originData: Item[] = []
+const originData: DataType[] = []
 for (let i = 0; i < 10; i++) {
   originData.push({
     key: i.toString(),
@@ -26,7 +26,7 @@ interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   title: any
   inputType: 'number' | 'text'
-  record: Item
+  record: DataType
   index: number
   children: React.ReactNode
 }
@@ -74,11 +74,12 @@ const ColorPage2: React.FC = () => {
   const [editingKey, setEditingKey] = useState('')
   const [deleteKey, setDeleteKey] = useState('')
   const [count, setCount] = useState(10)
+  const [loading, setLoading] = useState(false)
 
-  const isEditing = (record: Item) => record.key === editingKey
-  const isDelete = (record: Item) => record.key === deleteKey
+  const isEditing = (record: DataType) => record.key === editingKey
+  const isDelete = (record: DataType) => record.key === deleteKey
 
-  const handleEdit = (record: Partial<Item> & { key: React.Key }) => {
+  const handleEdit = (record: Partial<DataType> & { key: React.Key }) => {
     form.setFieldsValue({ name: '', age: '', address: '', ...record })
     setEditingKey(record.key)
   }
@@ -87,9 +88,13 @@ const ColorPage2: React.FC = () => {
     setEditingKey('')
   }
 
+  const handleLoadingChange = (enable: boolean) => {
+    setLoading(enable)
+  }
+
   const handleSave = async (key: React.Key) => {
     try {
-      const row = (await form.validateFields()) as Item
+      const row = (await form.validateFields()) as DataType
 
       const newData = [...data]
       const index = newData.findIndex((item) => key === item.key)
@@ -112,7 +117,7 @@ const ColorPage2: React.FC = () => {
   }
 
   const handleAdd = () => {
-    const newData: Item = {
+    const newData: DataType = {
       key: `${count}`,
       name: `Edward King ${count}`,
       age: 32,
@@ -151,8 +156,8 @@ const ColorPage2: React.FC = () => {
       dataIndex: 'operation',
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       render: (_: any, record: AnyObject) => {
-        const editable = isEditing(record as Item)
-        const deletable = isDelete(record as Item)
+        const editable = isEditing(record as DataType)
+        const deletable = isDelete(record as DataType)
         return editable ? (
           <Flex gap={30}>
             <Typography.Link onClick={() => handleSave(record.key)}>Save</Typography.Link>
@@ -165,7 +170,7 @@ const ColorPage2: React.FC = () => {
             {/* <Typography.Link disabled={editingKey !== ''} onClick={() => handleEdit(record as Item)}>
               Edit
               </Typography.Link> */}
-            <Button type='dashed' disabled={editingKey !== ''} onClick={() => handleEdit(record as Item)}>
+            <Button type='dashed' disabled={editingKey !== ''} onClick={() => handleEdit(record as DataType)}>
               Edit
             </Button>
 
@@ -194,7 +199,7 @@ const ColorPage2: React.FC = () => {
     }
     return {
       ...col,
-      onCell: (record: Item) => ({
+      onCell: (record: DataType) => ({
         record,
         inputType: col.dataIndex === 'age' ? 'number' : 'text',
         dataIndex: col.dataIndex,
@@ -205,10 +210,16 @@ const ColorPage2: React.FC = () => {
   }) as ColumnTypes
 
   return (
-    <div>
-      <Button onClick={handleAdd} type='primary' style={{ marginBottom: 16 }}>
-        Add a row
-      </Button>
+    <>
+      <Flex justify='space-between'>
+        <Flex>
+          Loading
+          <Switch checked={loading} onChange={handleLoadingChange} />
+        </Flex>
+        <Button onClick={handleAdd} type='primary' style={{ marginBottom: 16 }}>
+          Add a row
+        </Button>
+      </Flex>
       <Form form={form} component={false}>
         <Table
           components={{
@@ -216,6 +227,7 @@ const ColorPage2: React.FC = () => {
               cell: EditableCell
             }
           }}
+          loading={loading}
           bordered
           dataSource={data}
           columns={mergedColumns}
@@ -225,7 +237,7 @@ const ColorPage2: React.FC = () => {
           }}
         />
       </Form>
-    </div>
+    </>
   )
 }
 
