@@ -1,9 +1,11 @@
 import { Button, Flex, Modal, Switch } from 'antd'
 import { Plus } from 'lucide-react'
-import React from 'react'
+import React, { useState } from 'react'
+import ColorAPI from '~/services/api/services/ColorAPI'
+import { Color } from '~/typing'
 import AddNewColor from './components/AddNewColor'
 import TableColorPage from './components/TableColorPage'
-import { useColors } from './hooks/useColors'
+import useColor from './hooks/useColor'
 import useTable from './hooks/useTable'
 
 export interface ColorTableDataType {
@@ -17,10 +19,21 @@ export interface ColorTableDataType {
 }
 
 const ColorPage: React.FC = () => {
-  const { loading, handleLoadingChange, handleAddNewItemData } = useTable()
-  const { nameColor, hexColor, openModal, setOpenModal } = useColors()
+  const { loading, handleLoadingChange } = useTable()
+  const { nameColor, hexColor, openModal, setOpenModal } = useColor()
+  const [dataSource, setDataSource] = useState<ColorTableDataType[]>([])
 
   console.log('loading page color...')
+
+  const handleAddNewItemData = (nameColor: string, hexColor: string) => {
+    ColorAPI.createNew(nameColor, hexColor).then((meta) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const data = meta?.data as Color
+      const item: ColorTableDataType = { ...data, key: data.colorID }
+      console.log(item)
+      setDataSource([...dataSource, item])
+    })
+  }
 
   return (
     <>
@@ -38,11 +51,14 @@ const ColorPage: React.FC = () => {
           New
         </Button>
       </Flex>
-      <TableColorPage />
+      <TableColorPage dataSource={dataSource} setDataSource={setDataSource} />
       <Modal
         title='Basic Modal'
         open={openModal}
-        onOk={() => handleAddNewItemData(nameColor, hexColor)}
+        onOk={() => {
+          handleAddNewItemData(nameColor, hexColor)
+          setOpenModal(false)
+        }}
         onCancel={() => setOpenModal(false)}
       >
         <AddNewColor />

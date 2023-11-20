@@ -3,7 +3,6 @@ import React, { useState } from 'react'
 import ColorAPI from '~/services/api/services/ColorAPI'
 import { Color } from '~/typing'
 import { ColorTableDataType } from '../ColorPage'
-import { useColors } from './useColors'
 
 export default function useTable() {
   const [form] = useForm()
@@ -11,7 +10,6 @@ export default function useTable() {
   const [editingKey, setEditingKey] = useState<React.Key>('')
   const [deleteKey, setDeleteKey] = useState<React.Key>('')
   const [loading, setLoading] = useState<boolean>(false)
-  const { setOpenModal } = useColors()
 
   // useEffect(() => {
   //   ColorAPI.getAllColors().then((meta) => {
@@ -102,7 +100,6 @@ export default function useTable() {
         setTimeout(() => {
           setLoading(false)
         }, 3000)
-        setOpenModal(false)
       })
   }
 

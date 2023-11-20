@@ -7,13 +7,18 @@ import { ColorTableDataType } from '../ColorPage'
 import useTable from '../hooks/useTable'
 import EditableCell, { EditableTableProps } from './EditableCell'
 
+interface TableColorPageProps {
+  dataSource: ColorTableDataType[]
+  setDataSource: React.Dispatch<React.SetStateAction<ColorTableDataType[]>>
+}
+
 // eslint-disable-next-line react-refresh/only-export-components, no-empty-pattern
-const TableColorPage: React.FC = () => {
+const TableColorPage: React.FC<TableColorPageProps> = ({ dataSource, setDataSource }) => {
   const {
     form,
     loading,
-    dataSource,
-    setDataSource,
+    // dataSource,
+    // setDataSource,
     editingKey,
     setEditingKey,
     isEditing,

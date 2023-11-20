@@ -1,12 +1,12 @@
 import { ColorPicker, Flex, Input, Typography } from 'antd'
-import { useColors } from '../hooks/useColors'
 import { memo } from 'react'
+import useColor from '../hooks/useColor'
 
 interface AddNewColorProps extends React.HTMLAttributes<HTMLElement> {}
 
 // eslint-disable-next-line no-empty-pattern, react-refresh/only-export-components
 function AddNewColor({}: AddNewColorProps) {
-  const { hexColor, nameColor, setHexColor, setNameColor } = useColors()
+  const { hexColor, nameColor, setHexColor, setNameColor } = useColor()
 
   return (
     <Flex vertical gap={20}>
