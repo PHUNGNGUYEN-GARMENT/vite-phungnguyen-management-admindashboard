@@ -1,31 +1,26 @@
 import { Button, Flex, Modal, Switch } from 'antd'
 import { Plus } from 'lucide-react'
 import React from 'react'
-import { Color } from '~/typing'
-import ColorAPI from '../../services/api/services/ColorAPI'
 import AddNewColor from './components/AddNewColor'
-import TableColorPage, { ColorTableDataType } from './components/TableColorPage'
-import { useColor } from './hooks/useColor'
-import { useTable } from './hooks/useTable'
+import TableColorPage from './components/TableColorPage'
+import { useColors } from './hooks/useColors'
+import useTable from './hooks/useTable'
+
+export interface ColorTableDataType {
+  key: React.Key
+  colorID: number
+  nameColor: string
+  hexColor: string
+  createdAt: string
+  updatedAt: string
+  orderNumber: number
+}
 
 const ColorPage: React.FC = () => {
-  const { loading, setLoading, handleLoadingChange, dataSource, setDataSource } = useTable()
-  const { nameColor, hexColor, openModal, setOpenModal } = useColor()
+  const { loading, handleLoadingChange, handleAddNewItemData } = useTable()
+  const { nameColor, hexColor, openModal, setOpenModal } = useColors()
 
-  const handleAddNewItemData = () => {
-    ColorAPI.createNew(nameColor, hexColor)
-      .then((meta) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setLoading(true)
-        const data = meta?.data as Color
-        const item: ColorTableDataType = { ...data, key: data.colorID }
-        setDataSource([...dataSource, item])
-      })
-      .finally(() => {
-        setLoading(false)
-        setOpenModal(false)
-      })
-  }
+  console.log('loading page color...')
 
   return (
     <>
@@ -44,7 +39,12 @@ const ColorPage: React.FC = () => {
         </Button>
       </Flex>
       <TableColorPage />
-      <Modal title='Basic Modal' open={openModal} onOk={handleAddNewItemData} onCancel={() => setOpenModal(false)}>
+      <Modal
+        title='Basic Modal'
+        open={openModal}
+        onOk={() => handleAddNewItemData(nameColor, hexColor)}
+        onCancel={() => setOpenModal(false)}
+      >
         <AddNewColor />
       </Modal>
     </>

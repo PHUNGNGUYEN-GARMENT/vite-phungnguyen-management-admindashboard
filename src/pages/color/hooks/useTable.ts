@@ -1,28 +1,30 @@
-import { Form } from 'antd'
-import React, { useEffect, useState } from 'react'
+import { useForm } from 'antd/es/form/Form'
+import React, { useState } from 'react'
 import ColorAPI from '~/services/api/services/ColorAPI'
 import { Color } from '~/typing'
-import { ColorTableDataType } from '../components/TableColorPage'
+import { ColorTableDataType } from '../ColorPage'
+import { useColors } from './useColors'
 
-export function useTable() {
-  const [form] = Form.useForm()
+export default function useTable() {
+  const [form] = useForm()
   const [dataSource, setDataSource] = useState<ColorTableDataType[]>([])
   const [editingKey, setEditingKey] = useState<React.Key>('')
   const [deleteKey, setDeleteKey] = useState<React.Key>('')
   const [loading, setLoading] = useState<boolean>(false)
+  const { setOpenModal } = useColors()
 
-  useEffect(() => {
-    ColorAPI.getAllColors().then((meta) => {
-      const data = meta?.data as Color[]
-      if (data.length > 0) {
-        setDataSource(
-          data.map((item) => {
-            return { ...item, key: item.colorID }
-          }) as ColorTableDataType[]
-        )
-      }
-    })
-  }, [])
+  // useEffect(() => {
+  //   ColorAPI.getAllColors().then((meta) => {
+  //     const data = meta?.data as Color[]
+  //     if (data.length > 0) {
+  //       setDataSource(
+  //         data.map((item) => {
+  //           return { ...item, key: item.colorID }
+  //         }) as ColorTableDataType[]
+  //       )
+  //     }
+  //   })
+  // }, [])
 
   const isEditing = (record: ColorTableDataType) => record.key === editingKey
   const isDelete = (record: ColorTableDataType) => record.key === deleteKey
@@ -86,10 +88,30 @@ export function useTable() {
     }
   }
 
+  const handleAddNewItemData = (nameColor: string, hexColor: string) => {
+    ColorAPI.createNew(nameColor, hexColor)
+      .then((meta) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        setLoading(true)
+        const data = meta?.data as Color
+        const item: ColorTableDataType = { ...data, key: data.colorID }
+        console.log(item)
+        setDataSource([...dataSource, item])
+      })
+      .finally(() => {
+        setTimeout(() => {
+          setLoading(false)
+        }, 3000)
+        setOpenModal(false)
+      })
+  }
+
   return {
     form,
     editingKey,
+    setEditingKey,
     deleteKey,
+    setDeleteKey,
     dataSource,
     setDataSource,
     loading,
@@ -103,6 +125,7 @@ export function useTable() {
     handleSaveEditing,
     handleDeleteRow,
     handleCancelConfirmEditing,
-    handleCancelConfirmDelete
+    handleCancelConfirmDelete,
+    handleAddNewItemData
   }
 }

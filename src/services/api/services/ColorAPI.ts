@@ -4,7 +4,7 @@ import { errorFormatter } from '~/utils/promise-formatter'
 
 export default {
   getAllColors: async (): Promise<ResponseDataType | undefined> => {
-    return client
+    return await client
       .post('colors/find')
       .then((res) => {
         return res.data
@@ -20,7 +20,6 @@ export default {
         hexColor: hexColor
       })
       .then((res) => {
-        // console.log(JSON.stringify(res.data))
         return res.data
       })
       .catch(function (error) {

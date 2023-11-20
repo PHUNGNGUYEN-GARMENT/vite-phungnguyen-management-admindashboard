@@ -1,84 +1,32 @@
-import { Button, Flex, Form, Input, InputNumber, Popconfirm, Table, Typography } from 'antd'
+import { Button, Flex, Form, Popconfirm, Table, Typography } from 'antd'
 import { AnyObject } from 'antd/es/_util/type'
-import React from 'react'
-import { useTable } from '../hooks/useTable'
+import React, { memo, useCallback, useEffect } from 'react'
+import ColorAPI from '~/services/api/services/ColorAPI'
+import { Color } from '~/typing'
+import { ColorTableDataType } from '../ColorPage'
+import useTable from '../hooks/useTable'
+import EditableCell, { EditableTableProps } from './EditableCell'
 
-export interface ColorTableDataType {
-  key: React.Key
-  colorID: number
-  nameColor: string
-  hexColor: string
-  createdAt: string
-  updatedAt: string
-  orderNumber: number
-}
-
-type EditableTableProps = Parameters<typeof Table>[0]
-
-type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>
-
-interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
-  editing: boolean
-  dataIndex: string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  title: any
-  inputType: 'number' | 'text'
-  record: ColorTableDataType
-  index: number
-  children: React.ReactNode
-}
-
-const EditableCell: React.FC<EditableCellProps> = ({
-  editing,
-  dataIndex,
-  title,
-  inputType,
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  record,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  index,
-  children,
-  ...restProps
-}) => {
-  const inputNode = inputType === 'number' ? <InputNumber /> : <Input />
-
-  return (
-    <td {...restProps}>
-      {editing ? (
-        <Form.Item
-          name={dataIndex}
-          style={{ margin: 0 }}
-          rules={[
-            {
-              required: true,
-              message: `Please Input ${title}!`
-            }
-          ]}
-        >
-          {inputNode}
-        </Form.Item>
-      ) : (
-        children
-      )}
-    </td>
-  )
-}
-
+// eslint-disable-next-line react-refresh/only-export-components, no-empty-pattern
 const TableColorPage: React.FC = () => {
   const {
     form,
     loading,
     dataSource,
+    setDataSource,
     editingKey,
+    setEditingKey,
     isEditing,
-    handleSaveEditing,
     handleCancelConfirmDelete,
     handleEdit,
     handleDelete,
     handleCancelEditing,
     handleDeleteRow
   } = useTable()
+
+  console.log('Load table...')
+
+  type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>
 
   const columns: (ColumnTypes[number] & { editable?: boolean; dataIndex: string })[] = [
     {
@@ -130,7 +78,14 @@ const TableColorPage: React.FC = () => {
             {/* <Typography.Link disabled={editingKey !== ''} onClick={() => handleEdit(record as Item)}>
               Edit
               </Typography.Link> */}
-            <Button type='dashed' disabled={editingKey !== ''} onClick={() => handleEdit(record as ColorTableDataType)}>
+            <Button
+              type='dashed'
+              disabled={editingKey !== ''}
+              onClick={() => {
+                form.setFieldsValue({ nameColor: '', hexColor: '', createdAt: '', updatedAt: '', ...record })
+                handleEdit(record as ColorTableDataType)
+              }}
+            >
               Edit
             </Button>
 
@@ -165,6 +120,43 @@ const TableColorPage: React.FC = () => {
     }
   }) as ColumnTypes
 
+  const handleSaveEditing = useCallback(async (key: React.Key) => {
+    try {
+      const row = (await form.validateFields()) as ColorTableDataType
+
+      const newData = [...dataSource]
+      const index = newData.findIndex((item) => key === item.key)
+      if (index > -1) {
+        const item = newData[index]
+        newData.splice(index, 1, {
+          ...item,
+          ...row
+        })
+        setEditingKey('')
+        setDataSource(newData)
+      } else {
+        newData.push(row)
+        setEditingKey('')
+        setDataSource(newData)
+      }
+    } catch (errInfo) {
+      console.log('Validate Failed:', errInfo)
+    }
+  }, [])
+
+  useEffect(() => {
+    ColorAPI.getAllColors().then((meta) => {
+      const data = meta?.data as Color[]
+      if (data.length > 0) {
+        setDataSource(
+          data.map((item) => {
+            return { ...item, key: item.colorID }
+          }) as ColorTableDataType[]
+        )
+      }
+    })
+  }, [])
+
   return (
     <>
       <Form form={form} component={false}>
@@ -179,9 +171,9 @@ const TableColorPage: React.FC = () => {
           dataSource={dataSource}
           columns={mergedColumns}
           rowClassName='editable-row'
-          onChange={(pagination, filter, sorter, extra) => {
-            extra.currentDataSource = dataSource
-          }}
+          // onChange={(pagination, filter, sorter, extra) => {
+          //   extra.currentDataSource = dataSource
+          // }}
           pagination={{
             onChange: () => {
               handleCancelEditing()
@@ -194,4 +186,5 @@ const TableColorPage: React.FC = () => {
   )
 }
 
-export default TableColorPage
+// eslint-disable-next-line react-refresh/only-export-components
+export default memo(TableColorPage)
