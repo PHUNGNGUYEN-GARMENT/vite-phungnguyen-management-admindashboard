@@ -161,7 +161,7 @@ const ColorPage2: React.FC = () => {
         return editable ? (
           <Flex gap={30}>
             <Typography.Link onClick={() => handleSave(record.key)}>Save</Typography.Link>
-            <Popconfirm open={editable} title={`Sure to cancel?`} onConfirm={cancel}>
+            <Popconfirm title={`Sure to cancel?`} onConfirm={cancel}>
               <a>Cancel</a>
             </Popconfirm>
           </Flex>
