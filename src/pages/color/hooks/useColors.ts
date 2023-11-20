@@ -9,7 +9,7 @@ interface ColorsState {
   setOpenModal: (status: boolean) => void
 }
 
-export const useColorPage = create<ColorsState>()((set) => ({
+export const useColors = create<ColorsState>()((set) => ({
   nameColor: '',
   hexColor: '#ffffff',
   openModal: false,
