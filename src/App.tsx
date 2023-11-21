@@ -14,10 +14,10 @@ function App() {
           <Route path='signup' element={<SignUp />} />
           <Route path='signin' element={<SignIn />} />
           <Route element={<Main />}>
-            {appRoutes.map((route) => {
+            {appRoutes.map((route, i) => {
               return (
                 <Route
-                  id={route.key}
+                  id={route.key || i.toString()}
                   key={route.key}
                   path={route.path}
                   element={
@@ -27,10 +27,10 @@ function App() {
                   }
                 >
                   {route.children
-                    ? route.children.map((child) => {
+                    ? route.children.map((child, j) => {
                         return (
                           <Route
-                            key={child.key}
+                            key={child.key || j.toString()}
                             path={child.path}
                             element={
                               <Suspense fallback={<div>loading...</div>}>

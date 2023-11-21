@@ -42,7 +42,7 @@ const Unit = lazy(() => import('~/pages/unit/Unit'))
 const Finish = lazy(() => import('~/pages/Finish/Finish'))
 
 export type SideType = {
-  key: string | number
+  key: string
   name: string
   path: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
