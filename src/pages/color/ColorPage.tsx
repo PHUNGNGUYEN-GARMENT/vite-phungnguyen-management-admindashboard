@@ -1,7 +1,10 @@
-import { Button, Flex, Form, Modal, Popconfirm, Switch, Table, Typography } from 'antd'
+import { Button, Flex, Form, Modal, Popconfirm, Table, Typography } from 'antd'
 import { AnyObject } from 'antd/es/_util/type'
 import { Plus } from 'lucide-react'
 import React, { useEffect } from 'react'
+import { dateDistance } from '~/utils/date-formatter'
+import { cn } from '~/utils/helpers'
+import { firstLetterUppercase } from '~/utils/text'
 import AddNewColor from './components/AddNewColor'
 import EditableCell, { EditableTableProps } from './components/EditableCell'
 import useColor from './hooks/useColor'
@@ -54,25 +57,50 @@ const ColorPage = () => {
       title: 'Name color',
       dataIndex: 'nameColor',
       width: '20%',
-      editable: true
+      editable: true,
+      filters: dataSource.map((item) => {
+        return { value: item.nameColor, text: item.nameColor }
+      }),
+      filterMode: 'tree',
+      filterSearch: true,
+      onFilter: (value, record) => record.nameColor.includes(value)
     },
     {
       title: 'Hex color',
       dataIndex: 'hexColor',
       width: '20%',
-      editable: true
+      editable: true,
+      render: (hex) => (
+        <div
+          style={{
+            backgroundColor: `${hex}`
+          }}
+          className={cn('flex-items flex w-16 justify-center rounded-sm font-semibold text-white', {
+            'text-foreground': hex === '#ffffff',
+            'text-background': hex === '#000000'
+          })}
+        >
+          <span>{hex}</span>
+        </div>
+      )
     },
     {
       title: 'Created date',
       dataIndex: 'updatedAt',
       width: '15%',
-      editable: true
+      editable: true,
+      render(value) {
+        return <Typography.Text className='text-sm'>{firstLetterUppercase(dateDistance(value))}</Typography.Text>
+      }
     },
     {
       title: 'Updated date',
       dataIndex: 'createdAt',
       width: '15%',
-      editable: true
+      editable: true,
+      render(value) {
+        return <Typography.Text className='text-sm'>{firstLetterUppercase(dateDistance(value))}</Typography.Text>
+      }
     },
     {
       title: 'operation',
@@ -137,11 +165,7 @@ const ColorPage = () => {
 
   return (
     <>
-      <Flex justify='space-between'>
-        <Flex>
-          Loading
-          <Switch checked={loading} onClick={handleToggleLoading} onChange={handleLoadingChange} />
-        </Flex>
+      <Flex justify='flex-end'>
         <Button
           onClick={() => setOpenModal(true)}
           className='flex items-center'

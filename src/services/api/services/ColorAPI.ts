@@ -1,5 +1,5 @@
 import client from '~/services/api/client'
-import { ResponseDataType } from '~/typing'
+import { Color, ResponseDataType } from '~/typing'
 import { errorFormatter } from '~/utils/promise-formatter'
 
 export default {
@@ -20,6 +20,24 @@ export default {
         hexColor: hexColor
       })
       .then((res) => {
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  updateItem: async (color: Color): Promise<ResponseDataType | undefined> => {
+    return client
+      .put('colors', {
+        colorID: color.colorID,
+        nameColor: color.nameColor,
+        hexColor: color.hexColor,
+        createdAt: color.createdAt,
+        updatedAt: color.updatedAt,
+        orderNumber: color.orderNumber
+      })
+      .then((res) => {
+        console.log(res.data)
         return res.data
       })
       .catch(function (error) {

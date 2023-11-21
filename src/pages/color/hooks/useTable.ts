@@ -68,6 +68,16 @@ export default function useTable() {
         })
         setDataSource(newData)
         setEditingKey('')
+
+        // After updated local data
+        // We need to update on database
+        await ColorAPI.updateItem(row)
+          .then(() => {
+            setLoading(true)
+          })
+          .finally(() => {
+            setLoading(false)
+          })
       } else {
         newData.push(row)
         setDataSource(newData)
