@@ -1,7 +1,7 @@
 import type { MenuProps } from 'antd'
 import { Menu } from 'antd'
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import logo from '~/assets/logo.svg'
 import { cn } from '~/utils/helpers'
 import { appRoutes } from '~/utils/route'
@@ -48,8 +48,24 @@ const items: MenuProps['items'] = appRoutes.map((route) => {
 
 // eslint-disable-next-line no-empty-pattern
 const SideNav = ({ ...props }: SideNavProps) => {
+  const { pathname } = useLocation()
+  const [selectedKey, setSelectedKey] = useState<string>(appRoutes[0].key)
+
+  useEffect(() => {
+    const arrPath = pathname.split('/')
+    const path = arrPath[arrPath.length - 1]
+    const keyFound = appRoutes.find((route) => route.path === path)
+
+    console.log(keyFound?.key)
+
+    if (keyFound) {
+      setSelectedKey(keyFound.key)
+    }
+    // setSelectedKey()
+  }, [pathname])
+
   const onClick: MenuProps['onClick'] = (e) => {
-    console.log('click ', e)
+    setSelectedKey(e.key)
   }
 
   return (
@@ -57,7 +73,14 @@ const SideNav = ({ ...props }: SideNavProps) => {
       <Link to={'/'} onClick={() => {}} className='relative flex justify-center py-5'>
         <img src={logo} alt='logo' className='h-10 w-10 object-contain lg:h-10 lg:w-10' />
       </Link>
-      <Menu onClick={onClick} defaultSelectedKeys={['1']} defaultOpenKeys={['sub1']} mode='inline' items={items} />
+      <Menu
+        onClick={onClick}
+        selectedKeys={[selectedKey]}
+        defaultSelectedKeys={[selectedKey]}
+        defaultOpenKeys={['sub1']}
+        mode='inline'
+        items={items}
+      />
     </div>
   )
 }
