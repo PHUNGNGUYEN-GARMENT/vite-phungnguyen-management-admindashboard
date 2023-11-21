@@ -1,5 +1,5 @@
 import { useForm } from 'antd/es/form/Form'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import ColorAPI from '~/services/api/services/ColorAPI'
 import { Color } from '~/typing'
 import { ColorTableDataType } from '../ColorPage'
@@ -10,6 +10,17 @@ export default function useTable() {
   const [editingKey, setEditingKey] = useState<React.Key>('')
   const [deleteKey, setDeleteKey] = useState<React.Key>('')
   const [loading, setLoading] = useState<boolean>(false)
+
+  useEffect(() => {
+    ColorAPI.getAllColors().then((meta) => {
+      const data = meta?.data as Color[]
+      const items: ColorTableDataType[] = data.map((item) => {
+        return { ...item, key: item.colorID }
+      })
+      console.log(items)
+      setDataSource(items)
+    })
+  }, [])
 
   const isEditing = (record: ColorTableDataType) => record.key === editingKey
   const isDelete = (record: ColorTableDataType) => record.key === deleteKey
@@ -37,6 +48,10 @@ export default function useTable() {
 
   const handleLoadingChange = (enable: boolean) => {
     setLoading(enable)
+  }
+
+  const handleToggleLoading = () => {
+    setLoading(!loading)
   }
 
   const handleSaveEditing = async (key: React.Key) => {
@@ -80,13 +95,10 @@ export default function useTable() {
         setLoading(true)
         const data = meta?.data as Color
         const item: ColorTableDataType = { ...data, key: data.colorID }
-        console.log(item)
         setDataSource([...dataSource, item])
       })
       .finally(() => {
-        setTimeout(() => {
-          setLoading(false)
-        }, 3000)
+        setLoading(false)
       })
   }
 
@@ -102,6 +114,7 @@ export default function useTable() {
     isEditing,
     isDelete,
     setLoading,
+    handleToggleLoading,
     handleEdit,
     handleDelete,
     handleCancelEditing,

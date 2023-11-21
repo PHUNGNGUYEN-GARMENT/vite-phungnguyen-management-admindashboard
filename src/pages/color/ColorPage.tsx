@@ -1,8 +1,9 @@
-import { Button, Flex, Modal, Switch } from 'antd'
-import { Plus, ThermometerSunIcon } from 'lucide-react'
-import React from 'react'
+import { Button, Flex, Form, Modal, Popconfirm, Switch, Table, Typography } from 'antd'
+import { AnyObject } from 'antd/es/_util/type'
+import { Plus } from 'lucide-react'
+import React, { useEffect } from 'react'
 import AddNewColor from './components/AddNewColor'
-import TableColorPage from './components/TableColorPage'
+import EditableCell, { EditableTableProps } from './components/EditableCell'
 import useColor from './hooks/useColor'
 import useTable from './hooks/useTable'
 
@@ -17,33 +18,130 @@ export interface ColorTableDataType {
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
-const ColorPage: React.FC = () => {
-  const { loading, handleLoadingChange, handleAddNewItemData } = useTable()
-  const { nameColor, hexColor, openModal, setOpenModal } = useColor()
-  // const [dataSource, setDataSource] = useState<ColorTableDataType[]>([])
+const ColorPage = () => {
+  const { nameColor, hexColor, setNameColor, setHexColor, openModal, setOpenModal } = useColor()
+  const {
+    form,
+    loading,
+    dataSource,
+    editingKey,
+    handleSaveEditing,
+    isEditing,
+    handleCancelConfirmDelete,
+    handleToggleLoading,
+    handleLoadingChange,
+    handleAddNewItemData,
+    handleEdit,
+    handleDelete,
+    handleCancelEditing,
+    handleDeleteRow
+  } = useTable()
 
-  // const handleAddNewItemData = (nameColor: string, hexColor: string) => {
-  //   ColorAPI.createNew(nameColor, hexColor).then((meta) => {
-  //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  //     const data = meta?.data as Color
-  //     const item: ColorTableDataType = { ...data, key: data.colorID }
-  //     console.log(item)
-  //     setDataSource([...dataSource, item])
-  //   })
-  // }
+  useEffect(() => {
+    console.log(loading)
+  }, [loading])
+
+  type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>
+
+  const columns: (ColumnTypes[number] & { editable?: boolean; dataIndex: string })[] = [
+    {
+      title: 'ID',
+      dataIndex: 'colorID',
+      width: '5%',
+      editable: true
+    },
+    {
+      title: 'Name color',
+      dataIndex: 'nameColor',
+      width: '20%',
+      editable: true
+    },
+    {
+      title: 'Hex color',
+      dataIndex: 'hexColor',
+      width: '20%',
+      editable: true
+    },
+    {
+      title: 'Created date',
+      dataIndex: 'updatedAt',
+      width: '15%',
+      editable: true
+    },
+    {
+      title: 'Updated date',
+      dataIndex: 'createdAt',
+      width: '15%',
+      editable: true
+    },
+    {
+      title: 'operation',
+      dataIndex: 'operation',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      render: (_: any, record: AnyObject) => {
+        const editable = isEditing(record as ColorTableDataType)
+        // const deletable = isDelete(record as ColorTableDataType)
+        return editable ? (
+          <Flex gap={30}>
+            <Typography.Link onClick={() => handleSaveEditing(record.key)}>Save</Typography.Link>
+            <Popconfirm title={`Sure to cancel?`} onConfirm={handleCancelEditing}>
+              <a>Cancel</a>
+            </Popconfirm>
+          </Flex>
+        ) : (
+          <Flex gap={30}>
+            {/* <Typography.Link disabled={editingKey !== ''} onClick={() => handleEdit(record as Item)}>
+              Edit
+              </Typography.Link> */}
+            <Button
+              type='dashed'
+              disabled={editingKey !== ''}
+              onClick={() => {
+                form.setFieldsValue({ nameColor: '', hexColor: '', createdAt: '', updatedAt: '', ...record })
+                handleEdit(record as ColorTableDataType)
+              }}
+            >
+              Edit
+            </Button>
+
+            <Popconfirm
+              title={`Sure to delete?`}
+              onCancel={handleCancelConfirmDelete}
+              onConfirm={() => handleDeleteRow(record.key)}
+            >
+              <Button danger onClick={() => handleDelete(record.key)}>
+                Delete
+              </Button>
+            </Popconfirm>
+          </Flex>
+        )
+      }
+    }
+  ]
+
+  const mergedColumns = columns.map((col) => {
+    if (!col.editable) {
+      return col
+    }
+    return {
+      ...col,
+      onCell: (record: ColorTableDataType) => ({
+        record,
+        inputType: col.dataIndex === 'age' ? 'number' : 'text',
+        dataIndex: col.dataIndex,
+        title: col.title,
+        editing: isEditing(record)
+      })
+    }
+  }) as ColumnTypes
 
   return (
     <>
       <Flex justify='space-between'>
         <Flex>
           Loading
-          <Switch checked={loading} onChange={handleLoadingChange} />
+          <Switch checked={loading} onClick={handleToggleLoading} onChange={handleLoadingChange} />
         </Flex>
-
-        <Button onClick={() => {}} className='flex items-center' type='primary' icon={<ThermometerSunIcon size={20} />}>
-          Toggle theme
-        </Button>
-
         <Button
           onClick={() => setOpenModal(true)}
           className='flex items-center'
@@ -53,7 +151,29 @@ const ColorPage: React.FC = () => {
           New
         </Button>
       </Flex>
-      <TableColorPage />
+      <Form form={form} component={false}>
+        <Table
+          components={{
+            body: {
+              cell: EditableCell
+            }
+          }}
+          loading={loading}
+          bordered
+          dataSource={dataSource}
+          columns={mergedColumns}
+          rowClassName='editable-row'
+          // onChange={(pagination, filter, sorter, extra) => {
+          //   extra.currentDataSource = dataSource
+          // }}
+          pagination={{
+            onChange: () => {
+              handleCancelEditing()
+              handleCancelConfirmDelete()
+            }
+          }}
+        />
+      </Form>
       <Modal
         title='Basic Modal'
         open={openModal}
@@ -63,7 +183,7 @@ const ColorPage: React.FC = () => {
         }}
         onCancel={() => setOpenModal(false)}
       >
-        <AddNewColor />
+        <AddNewColor nameColor={nameColor} setNameColor={setNameColor} hexColor={hexColor} setHexColor={setHexColor} />
       </Modal>
     </>
   )
