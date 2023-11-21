@@ -1,7 +1,4 @@
-interface DeliveryProps extends React.HTMLAttributes<HTMLElement> {}
-
-// eslint-disable-next-line no-empty-pattern
-function Delivery({}: DeliveryProps) {
+function Delivery() {
   return <div>Delivery</div>
 }
 

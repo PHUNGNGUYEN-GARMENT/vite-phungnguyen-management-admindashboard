@@ -41,12 +41,24 @@ const Sewing = lazy(() => import('~/pages/sewing/Sewing'))
 const Unit = lazy(() => import('~/pages/unit/Unit'))
 const Finish = lazy(() => import('~/pages/Finish/Finish'))
 
-export const appRoutes = [
+export type SideType = {
+  key: string | number
+  name: string
+  path: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  component: React.LazyExoticComponent<() => JSX.Element> | React.ReactNode | any
+  isGroup?: boolean
+  icon: string
+  children?: SideType[]
+}
+
+export const appRoutes: SideType[] = [
   {
     key: '0',
     name: 'Dashboard',
     path: '/',
     component: Dashboard,
+    isGroup: false,
     icon: DashboardIcon
   },
   {
@@ -54,12 +66,14 @@ export const appRoutes = [
     name: 'Sản phẩm',
     path: 'products',
     component: Product,
+    isGroup: false,
     icon: PackageSearchIcon
   },
   {
     key: '2',
     name: 'Nhập khẩu',
     path: 'importations',
+    isGroup: false,
     component: Importation,
     icon: ImportIcon
   },
@@ -68,12 +82,14 @@ export const appRoutes = [
     name: 'May mẫu',
     path: 'sewing',
     component: Sewing,
+    isGroup: false,
     icon: SewingMachineIcon
   },
   {
     key: '4',
     name: 'Tổ cắt',
     path: 'cutting',
+    isGroup: false,
     component: Cutting,
     icon: CutIcon
   },
@@ -82,6 +98,7 @@ export const appRoutes = [
     name: 'Chuyền may',
     path: 'deliveries',
     component: Delivery,
+    isGroup: false,
     icon: DeliveryIcon
   },
   {
@@ -89,45 +106,47 @@ export const appRoutes = [
     name: 'Hoàn thành',
     path: 'finish',
     component: Finish,
+    isGroup: false,
     icon: PackageSuccessIcon
   },
   {
-    key: '7',
+    key: '8',
     name: 'Định nghĩa',
     path: 'structure',
     component: Outlet,
+    isGroup: true,
     icon: PackageSuccessIcon,
     children: [
       {
-        key: '7.1',
+        key: '8.1',
         name: 'Màu',
         path: '/structure/colors',
         component: ColorPage,
         icon: ColorIcon
       },
       {
-        key: '7.2',
+        key: '8.2',
         name: 'Nhóm',
         path: '/structure/groups',
         component: Group,
         icon: AgeGroupIcon
       },
       {
-        key: '7.3',
+        key: '8.3',
         name: 'Nơi In - Thêu',
         path: '/structure/print',
         component: Print,
         icon: PrintIcon
       },
       {
-        key: '7.4',
+        key: '8.4',
         name: 'Đơn vị',
         path: '/structure/units',
         component: Unit,
         icon: UnitIcon
       },
       {
-        key: '7.5',
+        key: '8.5',
         name: 'Ghi chú',
         path: '/structure/notes',
         component: Note,

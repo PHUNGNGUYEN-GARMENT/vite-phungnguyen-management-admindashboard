@@ -1,18 +1,21 @@
-import React from 'react'
+import { Divider, Flex, Typography } from 'antd'
 import { Link } from 'react-router-dom'
+import { SideType } from '~/utils/route'
 
-export interface SideItemProps extends React.HTMLAttributes<HTMLElement> {
-  name: string
-  path: string
-}
-
-const SideItem = (name: string, path: string) => {
+const SideItem = (item: SideType) => {
   return (
-    <div className=''>
-      <Link to={path}>
-        <span>{name}</span>
-      </Link>
-    </div>
+    <>
+      {item.isGroup ? (
+        <Flex vertical>
+          <Divider />
+          <Typography.Text type='secondary'>{item.name}</Typography.Text>
+        </Flex>
+      ) : (
+        <Link to={item.path}>
+          <span>{item.name}</span>
+        </Link>
+      )}
+    </>
   )
 }
 

@@ -1,7 +1,4 @@
-interface ImportationProps extends React.HTMLAttributes<HTMLElement> {}
-
-// eslint-disable-next-line no-empty-pattern
-function Importation({}: ImportationProps) {
+function Importation() {
   return <div>Importation</div>
 }
 

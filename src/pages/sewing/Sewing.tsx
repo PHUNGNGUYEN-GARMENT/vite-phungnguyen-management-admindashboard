@@ -1,7 +1,4 @@
-interface SewingProps extends React.HTMLAttributes<HTMLElement> {}
-
-// eslint-disable-next-line no-empty-pattern
-function Sewing({}: SewingProps) {
+function Sewing() {
   return <div>Sewing</div>
 }
 

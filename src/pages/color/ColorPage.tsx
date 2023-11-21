@@ -1,8 +1,6 @@
 import { Button, Flex, Modal, Switch } from 'antd'
 import { Plus, ThermometerSunIcon } from 'lucide-react'
 import React from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { handleToggleTheme } from '~/redux/actions'
 import AddNewColor from './components/AddNewColor'
 import TableColorPage from './components/TableColorPage'
 import useColor from './hooks/useColor'
@@ -22,8 +20,6 @@ export interface ColorTableDataType {
 const ColorPage: React.FC = () => {
   const { loading, handleLoadingChange, handleAddNewItemData } = useTable()
   const { nameColor, hexColor, openModal, setOpenModal } = useColor()
-  const theme = useSelector(state => state.theme)
-  const dispatch = useDispatch()
   // const [dataSource, setDataSource] = useState<ColorTableDataType[]>([])
 
   // const handleAddNewItemData = (nameColor: string, hexColor: string) => {
@@ -44,14 +40,7 @@ const ColorPage: React.FC = () => {
           <Switch checked={loading} onChange={handleLoadingChange} />
         </Flex>
 
-        <Button
-          onClick={() => {
-            dispatch(handleToggleTheme())
-          }}
-          className='flex items-center'
-          type='primary'
-          icon={<ThermometerSunIcon size={20} />}
-        >
+        <Button onClick={() => {}} className='flex items-center' type='primary' icon={<ThermometerSunIcon size={20} />}>
           Toggle theme
         </Button>
 

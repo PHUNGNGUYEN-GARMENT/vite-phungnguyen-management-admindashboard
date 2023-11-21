@@ -1,7 +1,4 @@
-interface ProductPageProps extends React.HTMLAttributes<HTMLElement> {}
-
-// eslint-disable-next-line no-empty-pattern
-function ProductPage({}: ProductPageProps) {
+function ProductPage() {
   // useEffect(() => {
   //   ProductApi.listProduct().then((res) => {
   //     colorApi.colors().then((col) => {})

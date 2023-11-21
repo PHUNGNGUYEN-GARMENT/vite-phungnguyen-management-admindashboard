@@ -1,7 +1,4 @@
-interface FinishProps extends React.HTMLAttributes<HTMLElement> {}
-
-// eslint-disable-next-line no-empty-pattern
-function Finish({}: FinishProps) {
+function Finish() {
   return <div>Finish</div>
 }
 

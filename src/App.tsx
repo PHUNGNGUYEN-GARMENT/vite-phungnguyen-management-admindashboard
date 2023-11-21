@@ -28,7 +28,17 @@ function App() {
                 >
                   {route.children
                     ? route.children.map((child) => {
-                        return <Route key={child.key} path={child.path} element={<child.component />} />
+                        return (
+                          <Route
+                            key={child.key}
+                            path={child.path}
+                            element={
+                              <Suspense fallback={<div>loading...</div>}>
+                                <child.component />
+                              </Suspense>
+                            }
+                          />
+                        )
                       })
                     : null}
                 </Route>
