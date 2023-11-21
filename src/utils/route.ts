@@ -49,7 +49,6 @@ export type SideType = {
   component: React.LazyExoticComponent<() => JSX.Element> | React.ReactNode | any
   isGroup?: boolean
   icon: string
-  children?: SideType[]
 }
 
 export const appRoutes: SideType[] = [
@@ -115,43 +114,41 @@ export const appRoutes: SideType[] = [
     path: 'structure',
     component: Outlet,
     isGroup: true,
-    icon: PackageSuccessIcon,
-    children: [
-      {
-        key: '8.1',
-        name: 'Màu',
-        path: '/structure/colors',
-        component: ColorPage,
-        icon: ColorIcon
-      },
-      {
-        key: '8.2',
-        name: 'Nhóm',
-        path: '/structure/groups',
-        component: Group,
-        icon: AgeGroupIcon
-      },
-      {
-        key: '8.3',
-        name: 'Nơi In - Thêu',
-        path: '/structure/print',
-        component: Print,
-        icon: PrintIcon
-      },
-      {
-        key: '8.4',
-        name: 'Đơn vị',
-        path: '/structure/units',
-        component: Unit,
-        icon: UnitIcon
-      },
-      {
-        key: '8.5',
-        name: 'Ghi chú',
-        path: '/structure/notes',
-        component: Note,
-        icon: NoteIcon
-      }
-    ]
+    icon: PackageSuccessIcon
+  },
+  {
+    key: '9',
+    name: 'Màu',
+    path: 'colors',
+    component: ColorPage,
+    icon: ColorIcon
+  },
+  {
+    key: '10',
+    name: 'Nhóm',
+    path: 'groups',
+    component: Group,
+    icon: AgeGroupIcon
+  },
+  {
+    key: '11',
+    name: 'Nơi In - Thêu',
+    path: 'print',
+    component: Print,
+    icon: PrintIcon
+  },
+  {
+    key: '12',
+    name: 'Đơn vị',
+    path: 'units',
+    component: Unit,
+    icon: UnitIcon
+  },
+  {
+    key: '13',
+    name: 'Ghi chú',
+    path: 'notes',
+    component: Note,
+    icon: NoteIcon
   }
 ]

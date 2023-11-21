@@ -25,23 +25,7 @@ function App() {
                       <route.component />
                     </Suspense>
                   }
-                >
-                  {route.children
-                    ? route.children.map((child, j) => {
-                        return (
-                          <Route
-                            key={child.key || j.toString()}
-                            path={child.path}
-                            element={
-                              <Suspense fallback={<div>loading...</div>}>
-                                <child.component />
-                              </Suspense>
-                            }
-                          />
-                        )
-                      })
-                    : null}
-                </Route>
+                />
               )
             })}
           </Route>

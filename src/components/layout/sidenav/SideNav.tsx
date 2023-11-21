@@ -14,17 +14,10 @@ export interface SideNavProps extends React.HTMLAttributes<HTMLElement> {
 
 type MenuItem = Required<MenuProps>['items'][number]
 
-function getItem(
-  label: React.ReactNode,
-  key: React.Key,
-  icon?: React.ReactNode,
-  children?: MenuItem[],
-  type?: 'group'
-): MenuItem {
+function getItem(label: React.ReactNode, key: React.Key, icon?: React.ReactNode, type?: 'group'): MenuItem {
   return {
     key,
     icon,
-    children,
     label,
     type
   } as MenuItem
@@ -32,15 +25,7 @@ function getItem(
 
 const items: MenuProps['items'] = appRoutes.map((route) => {
   if (route.isGroup) {
-    return getItem(
-      SideItem(route),
-      route.key,
-      null,
-      route.children!.map((child) => {
-        return getItem(SideItem(child), child.key, SideIcon(child.icon))
-      }),
-      'group'
-    )
+    return getItem(SideItem(route), route.key, null, 'group')
   } else {
     return getItem(SideItem(route), route.key, SideIcon(route.icon))
   }
@@ -52,17 +37,17 @@ const SideNav = ({ ...props }: SideNavProps) => {
   const [selectedKey, setSelectedKey] = useState<string>(appRoutes[0].key)
 
   useEffect(() => {
-    const arrPath = pathname.split('/')
-    const path = arrPath[arrPath.length - 1]
-    const keyFound = appRoutes.find((route) => route.path === path)
-
-    console.log(keyFound?.key)
-
+    const keyFound = appRoutes.find((route) => route.path === lastPath(pathname))
     if (keyFound) {
       setSelectedKey(keyFound.key)
     }
-    // setSelectedKey()
   }, [pathname])
+
+  const lastPath: (pathname: string) => string = function (pathname) {
+    const arrPath = pathname.split('/')
+    const path = arrPath[arrPath.length - 1]
+    return path
+  }
 
   const onClick: MenuProps['onClick'] = (e) => {
     setSelectedKey(e.key)
@@ -77,7 +62,6 @@ const SideNav = ({ ...props }: SideNavProps) => {
         onClick={onClick}
         selectedKeys={[selectedKey]}
         defaultSelectedKeys={[selectedKey]}
-        defaultOpenKeys={['sub1']}
         mode='inline'
         items={items}
       />
