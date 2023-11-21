@@ -31,8 +31,6 @@ const ColorPage = () => {
     handleSaveEditing,
     isEditing,
     handleCancelConfirmDelete,
-    handleToggleLoading,
-    handleLoadingChange,
     handleAddNewItemData,
     handleEdit,
     handleDelete,
