@@ -1,24 +1,22 @@
 import { Button, Flex, Form, Popconfirm, Table, Typography } from 'antd'
 import { AnyObject } from 'antd/es/_util/type'
 import React, { memo, useCallback, useEffect } from 'react'
-import ColorAPI from '~/services/api/services/ColorAPI'
-import { Color } from '~/typing'
 import { ColorTableDataType } from '../ColorPage'
 import useTable from '../hooks/useTable'
 import EditableCell, { EditableTableProps } from './EditableCell'
 
 interface TableColorPageProps {
-  dataSource: ColorTableDataType[]
-  setDataSource: React.Dispatch<React.SetStateAction<ColorTableDataType[]>>
+  // dataSource: ColorTableDataType[]
+  // setDataSource: React.Dispatch<React.SetStateAction<ColorTableDataType[]>>
 }
 
 // eslint-disable-next-line react-refresh/only-export-components, no-empty-pattern
-const TableColorPage: React.FC<TableColorPageProps> = ({ dataSource, setDataSource }) => {
+const TableColorPage: React.FC<TableColorPageProps> = ({}) => {
   const {
     form,
     loading,
-    // dataSource,
-    // setDataSource,
+    dataSource,
+    setDataSource,
     editingKey,
     setEditingKey,
     isEditing,
@@ -29,7 +27,9 @@ const TableColorPage: React.FC<TableColorPageProps> = ({ dataSource, setDataSour
     handleDeleteRow
   } = useTable()
 
-  console.log('Load table...')
+  useEffect(() => {
+    console.log('Load table...')
+  }, [])
 
   type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>
 
@@ -149,18 +149,18 @@ const TableColorPage: React.FC<TableColorPageProps> = ({ dataSource, setDataSour
     }
   }, [])
 
-  useEffect(() => {
-    ColorAPI.getAllColors().then((meta) => {
-      const data = meta?.data as Color[]
-      if (data.length > 0) {
-        setDataSource(
-          data.map((item) => {
-            return { ...item, key: item.colorID }
-          }) as ColorTableDataType[]
-        )
-      }
-    })
-  }, [])
+  // useEffect(() => {
+  //   ColorAPI.getAllColors().then((meta) => {
+  //     const data = meta?.data as Color[]
+  //     if (data.length > 0) {
+  //       setDataSource(
+  //         data.map((item) => {
+  //           return { ...item, key: item.colorID }
+  //         }) as ColorTableDataType[]
+  //       )
+  //     }
+  //   })
+  // }, [])
 
   return (
     <>

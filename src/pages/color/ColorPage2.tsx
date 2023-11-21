@@ -210,13 +210,13 @@ const ColorPage2: React.FC = () => {
   }) as ColumnTypes
 
   return (
-    <>
+    <Flex vertical gap={10}>
       <Flex justify='space-between'>
         <Flex>
           Loading
           <Switch checked={loading} onChange={handleLoadingChange} />
         </Flex>
-        <Button onClick={handleAdd} type='primary' style={{ marginBottom: 16 }}>
+        <Button onClick={handleAdd} type='primary'>
           Add a row
         </Button>
       </Flex>
@@ -237,7 +237,7 @@ const ColorPage2: React.FC = () => {
           }}
         />
       </Form>
-    </>
+    </Flex>
   )
 }
 

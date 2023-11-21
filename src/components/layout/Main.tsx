@@ -8,7 +8,7 @@ import SideNav from './sidenav/SideNav'
 const { Sider, Header: AntHeader, Content } = Layout
 
 const Main: React.FC = () => {
-  const [breakpoint, setBreakpoint] = useState(false)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [openDrawer, setOpenDrawer] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
 
@@ -32,7 +32,6 @@ const Main: React.FC = () => {
       <Sider
         breakpoint='lg'
         onBreakpoint={(state) => {
-          setBreakpoint(state)
           setCollapsed(state)
         }}
         collapsible

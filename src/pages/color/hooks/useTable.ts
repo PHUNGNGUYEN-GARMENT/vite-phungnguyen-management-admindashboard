@@ -11,19 +11,6 @@ export default function useTable() {
   const [deleteKey, setDeleteKey] = useState<React.Key>('')
   const [loading, setLoading] = useState<boolean>(false)
 
-  // useEffect(() => {
-  //   ColorAPI.getAllColors().then((meta) => {
-  //     const data = meta?.data as Color[]
-  //     if (data.length > 0) {
-  //       setDataSource(
-  //         data.map((item) => {
-  //           return { ...item, key: item.colorID }
-  //         }) as ColorTableDataType[]
-  //       )
-  //     }
-  //   })
-  // }, [])
-
   const isEditing = (record: ColorTableDataType) => record.key === editingKey
   const isDelete = (record: ColorTableDataType) => record.key === deleteKey
 

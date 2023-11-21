@@ -1,8 +1,8 @@
 import { Button, Flex, Modal, Switch } from 'antd'
-import { Plus } from 'lucide-react'
-import React, { useState } from 'react'
-import ColorAPI from '~/services/api/services/ColorAPI'
-import { Color } from '~/typing'
+import { Plus, ThermometerSunIcon } from 'lucide-react'
+import React from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { handleToggleTheme } from '~/redux/actions'
 import AddNewColor from './components/AddNewColor'
 import TableColorPage from './components/TableColorPage'
 import useColor from './hooks/useColor'
@@ -18,22 +18,23 @@ export interface ColorTableDataType {
   orderNumber: number
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 const ColorPage: React.FC = () => {
-  const { loading, handleLoadingChange } = useTable()
+  const { loading, handleLoadingChange, handleAddNewItemData } = useTable()
   const { nameColor, hexColor, openModal, setOpenModal } = useColor()
-  const [dataSource, setDataSource] = useState<ColorTableDataType[]>([])
+  const theme = useSelector(state => state.theme)
+  const dispatch = useDispatch()
+  // const [dataSource, setDataSource] = useState<ColorTableDataType[]>([])
 
-  console.log('loading page color...')
-
-  const handleAddNewItemData = (nameColor: string, hexColor: string) => {
-    ColorAPI.createNew(nameColor, hexColor).then((meta) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const data = meta?.data as Color
-      const item: ColorTableDataType = { ...data, key: data.colorID }
-      console.log(item)
-      setDataSource([...dataSource, item])
-    })
-  }
+  // const handleAddNewItemData = (nameColor: string, hexColor: string) => {
+  //   ColorAPI.createNew(nameColor, hexColor).then((meta) => {
+  //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  //     const data = meta?.data as Color
+  //     const item: ColorTableDataType = { ...data, key: data.colorID }
+  //     console.log(item)
+  //     setDataSource([...dataSource, item])
+  //   })
+  // }
 
   return (
     <>
@@ -42,6 +43,18 @@ const ColorPage: React.FC = () => {
           Loading
           <Switch checked={loading} onChange={handleLoadingChange} />
         </Flex>
+
+        <Button
+          onClick={() => {
+            dispatch(handleToggleTheme())
+          }}
+          className='flex items-center'
+          type='primary'
+          icon={<ThermometerSunIcon size={20} />}
+        >
+          Toggle theme
+        </Button>
+
         <Button
           onClick={() => setOpenModal(true)}
           className='flex items-center'
@@ -51,7 +64,7 @@ const ColorPage: React.FC = () => {
           New
         </Button>
       </Flex>
-      <TableColorPage dataSource={dataSource} setDataSource={setDataSource} />
+      <TableColorPage />
       <Modal
         title='Basic Modal'
         open={openModal}
@@ -67,4 +80,5 @@ const ColorPage: React.FC = () => {
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export default ColorPage

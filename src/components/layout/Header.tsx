@@ -1,6 +1,6 @@
 import { Avatar, Badge, Button, Space } from 'antd'
 import { BellRing, ChevronDown, Menu } from 'lucide-react'
-import React, { useState } from 'react'
+import React from 'react'
 import { cn } from '~/utils/helpers'
 
 interface HeaderProps extends React.HTMLAttributes<HTMLElement> {
@@ -12,7 +12,6 @@ interface HeaderProps extends React.HTMLAttributes<HTMLElement> {
 const Header = ({ onMenuClick, ...props }: HeaderProps) => {
   const url = 'https://www.elle.vn/wp-content/uploads/2014/07/08/Justin-Bieber-0.jpg'
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [openUserInfo, setOpenUserInfo] = useState(false)
 
   return (
     <>
@@ -33,12 +32,12 @@ const Header = ({ onMenuClick, ...props }: HeaderProps) => {
             </Badge>
           </Button>
           <Space className=''>
-            <Button onClick={() => setOpenUserInfo(true)} className='m-0 h-fit w-fit p-0' shape='circle' type='default'>
+            <Button onClick={() => {}} className='m-0 h-fit w-fit p-0' shape='circle' type='default'>
               <span role='img'>
                 <Avatar size='large' src={<img src={url} alt='avatar' />} />
               </span>
             </Button>
-            <Button className='hidden md:flex' onClick={() => setOpenUserInfo(true)}>
+            <Button className='hidden md:flex' onClick={() => {}}>
               <Space size='small'>
                 <span>
                   <p>Justin Bieber</p>
