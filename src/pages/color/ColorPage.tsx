@@ -1,7 +1,11 @@
-import { Button, Flex, Form, Modal, Popconfirm, Table, Typography } from 'antd'
+import type { DragEndEvent } from '@dnd-kit/core'
+import { DndContext } from '@dnd-kit/core'
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
+import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { Button, Flex, Form, Modal, Popconfirm, Table, Tag, Typography } from 'antd'
 import { AnyObject } from 'antd/es/_util/type'
 import { Plus } from 'lucide-react'
-import React, { useEffect } from 'react'
+import React from 'react'
 import { dateDistance } from '~/utils/date-formatter'
 import { cn } from '~/utils/helpers'
 import { firstLetterUppercase } from '~/utils/text'
@@ -27,6 +31,7 @@ const ColorPage = () => {
     form,
     loading,
     dataSource,
+    setDataSource,
     editingKey,
     handleSaveEditing,
     isEditing,
@@ -38,13 +43,13 @@ const ColorPage = () => {
     handleDeleteRow
   } = useTable()
 
-  useEffect(() => {
-    console.log(loading)
-  }, [loading])
-
   type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>
 
   const columns: (ColumnTypes[number] & { editable?: boolean; dataIndex: string })[] = [
+    {
+      key: 'sort',
+      dataIndex: 'sort'
+    },
     {
       title: 'ID',
       dataIndex: 'colorID',
@@ -69,7 +74,7 @@ const ColorPage = () => {
       width: '20%',
       editable: true,
       render: (hex) => (
-        <div
+        <Tag
           style={{
             backgroundColor: `${hex}`
           }}
@@ -78,8 +83,8 @@ const ColorPage = () => {
             'text-background': hex === '#000000'
           })}
         >
-          <span>{hex}</span>
-        </div>
+          {hex}
+        </Tag>
       )
     },
     {
@@ -161,41 +166,60 @@ const ColorPage = () => {
     }
   }) as ColumnTypes
 
+  const onDragEnd = ({ active, over }: DragEndEvent) => {
+    if (active.id !== over?.id) {
+      setDataSource((previous) => {
+        const activeIndex = previous.findIndex((i) => i.key === active.id)
+        const overIndex = previous.findIndex((i) => i.key === over?.id)
+        return arrayMove(previous, activeIndex, overIndex)
+      })
+    }
+  }
+
   return (
     <>
-      <Flex justify='flex-end'>
-        <Button
-          onClick={() => setOpenModal(true)}
-          className='flex items-center'
-          type='primary'
-          icon={<Plus size={20} />}
-        >
-          New
-        </Button>
+      <Flex vertical gap={30}>
+        <Flex justify='flex-end'>
+          <Button
+            onClick={() => setOpenModal(true)}
+            className='flex items-center'
+            type='primary'
+            icon={<Plus size={20} />}
+          >
+            New
+          </Button>
+        </Flex>
+        <DndContext modifiers={[restrictToVerticalAxis]} onDragEnd={onDragEnd}>
+          <SortableContext
+            // rowKey array
+            items={dataSource.map((i) => {
+              return i.colorID
+            })}
+            strategy={verticalListSortingStrategy}
+          >
+            <Form form={form} component={false}>
+              <Table
+                components={{
+                  body: {
+                    cell: EditableCell
+                  }
+                }}
+                loading={loading}
+                bordered
+                dataSource={dataSource}
+                columns={mergedColumns}
+                rowClassName='editable-row'
+                pagination={{
+                  onChange: () => {
+                    handleCancelEditing()
+                    handleCancelConfirmDelete()
+                  }
+                }}
+              />
+            </Form>
+          </SortableContext>
+        </DndContext>
       </Flex>
-      <Form form={form} component={false}>
-        <Table
-          components={{
-            body: {
-              cell: EditableCell
-            }
-          }}
-          loading={loading}
-          bordered
-          dataSource={dataSource}
-          columns={mergedColumns}
-          rowClassName='editable-row'
-          // onChange={(pagination, filter, sorter, extra) => {
-          //   extra.currentDataSource = dataSource
-          // }}
-          pagination={{
-            onChange: () => {
-              handleCancelEditing()
-              handleCancelConfirmDelete()
-            }
-          }}
-        />
-      </Form>
       <Modal
         title='Basic Modal'
         open={openModal}
