@@ -31,15 +31,15 @@ import {
 const Dashboard = lazy(() => import('~/pages/dashboard/Dashboard'))
 const Cutting = lazy(() => import('~/pages/cutting/Cutting'))
 const ColorPage = lazy(() => import('~/pages/color/ColorPage'))
-const Delivery = lazy(() => import('~/pages/delivery/Delivery'))
-const Group = lazy(() => import('~/pages/group/Group'))
-const Importation = lazy(() => import('~/pages/importation/Importation'))
-const Note = lazy(() => import('~/pages/note/Note'))
-const Print = lazy(() => import('~/pages/print/Print'))
-const Product = lazy(() => import('~/pages/product/ProductPage'))
-const Sewing = lazy(() => import('~/pages/sewing/Sewing'))
-const Unit = lazy(() => import('~/pages/unit/Unit'))
-const Finish = lazy(() => import('~/pages/Finish/Finish'))
+const DeliveryPage = lazy(() => import('~/pages/delivery/Delivery'))
+const GroupPage = lazy(() => import('~/pages/group/Group'))
+const ImportationPage = lazy(() => import('~/pages/importation/Importation'))
+const NotePage = lazy(() => import('~/pages/note/Note'))
+const PrintPage = lazy(() => import('~/pages/print/PrintPage'))
+const ProductPage = lazy(() => import('~/pages/product/ProductPage'))
+const SewingPage = lazy(() => import('~/pages/sewing/Sewing'))
+const UnitPage = lazy(() => import('~/pages/unit/Unit'))
+const FinishPage = lazy(() => import('~/pages/Finish/Finish'))
 
 export type SideType = {
   key: string
@@ -64,7 +64,7 @@ export const appRoutes: SideType[] = [
     key: '1',
     name: 'Sản phẩm',
     path: 'products',
-    component: Product,
+    component: ProductPage,
     isGroup: false,
     icon: PackageSearchIcon
   },
@@ -73,14 +73,14 @@ export const appRoutes: SideType[] = [
     name: 'Nhập khẩu',
     path: 'importations',
     isGroup: false,
-    component: Importation,
+    component: ImportationPage,
     icon: ImportIcon
   },
   {
     key: '3',
     name: 'May mẫu',
     path: 'sewing',
-    component: Sewing,
+    component: SewingPage,
     isGroup: false,
     icon: SewingMachineIcon
   },
@@ -96,7 +96,7 @@ export const appRoutes: SideType[] = [
     key: '5',
     name: 'Chuyền may',
     path: 'deliveries',
-    component: Delivery,
+    component: DeliveryPage,
     isGroup: false,
     icon: DeliveryIcon
   },
@@ -104,7 +104,7 @@ export const appRoutes: SideType[] = [
     key: '6',
     name: 'Hoàn thành',
     path: 'finish',
-    component: Finish,
+    component: FinishPage,
     isGroup: false,
     icon: PackageSuccessIcon
   },
@@ -127,28 +127,28 @@ export const appRoutes: SideType[] = [
     key: '10',
     name: 'Nhóm',
     path: 'groups',
-    component: Group,
+    component: GroupPage,
     icon: AgeGroupIcon
   },
   {
     key: '11',
     name: 'Nơi In - Thêu',
     path: 'print',
-    component: Print,
+    component: PrintPage,
     icon: PrintIcon
   },
   {
     key: '12',
     name: 'Đơn vị',
     path: 'units',
-    component: Unit,
+    component: UnitPage,
     icon: UnitIcon
   },
   {
     key: '13',
     name: 'Ghi chú',
     path: 'notes',
-    component: Note,
+    component: NotePage,
     icon: NoteIcon
   }
 ]

@@ -43,6 +43,14 @@ export type Group = {
   orderNumber: number
 }
 
+export type Print = {
+  printID: number
+  name: string
+  createdAt: string
+  updatedAt: string
+  orderNumber: number
+}
+
 export type ProductGroup = {
   groupID: number
   productID: number
