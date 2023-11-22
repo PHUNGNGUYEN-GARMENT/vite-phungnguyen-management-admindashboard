@@ -8,7 +8,7 @@ import { firstLetterUppercase } from '~/utils/text'
 import AddNewColor from './components/AddNewColor'
 import EditableCell, { EditableTableProps } from './components/EditableCell'
 import useColor from './hooks/useColor'
-import useTable from './hooks/useTable'
+import useColorTable from './hooks/useColorTable'
 
 export interface ColorTableDataType {
   key: React.Key
@@ -36,7 +36,7 @@ const ColorPage = () => {
     handleDelete,
     handleCancelEditing,
     handleDeleteRow
-  } = useTable()
+  } = useColorTable()
 
   type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>
 

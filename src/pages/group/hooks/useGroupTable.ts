@@ -1,36 +1,36 @@
 import { useForm } from 'antd/es/form/Form'
 import React, { useEffect, useState } from 'react'
-import ColorAPI from '~/services/api/services/ColorAPI'
-import { Color } from '~/typing'
-import { ColorTableDataType } from '../ColorPage'
+import { Group } from '~/typing'
+import { GroupTableDataType } from '../Group'
+import GroupAPI from '../api/GroupAPI'
 
-export default function useTable() {
+export default function useGroupTable() {
   const [form] = useForm()
-  const [dataSource, setDataSource] = useState<ColorTableDataType[]>([])
+  const [dataSource, setDataSource] = useState<GroupTableDataType[]>([])
   const [editingKey, setEditingKey] = useState<React.Key>('')
   const [deleteKey, setDeleteKey] = useState<React.Key>('')
   const [loading, setLoading] = useState<boolean>(false)
 
   useEffect(() => {
-    ColorAPI.getAllColors().then((meta) => {
-      const data = meta?.data as Color[]
-      const items: ColorTableDataType[] = data.map((item) => {
-        return { ...item, key: item.colorID }
+    GroupAPI.getAlls().then((meta) => {
+      const data = meta?.data as Group[]
+      const items: GroupTableDataType[] = data.map((item) => {
+        return { ...item, key: item.groupID }
       })
       console.log(items)
       setDataSource(items)
     })
   }, [])
 
-  const isEditing = (record: ColorTableDataType) => record.key === editingKey
-  const isDelete = (record: ColorTableDataType) => record.key === deleteKey
+  const isEditing = (record: GroupTableDataType) => record.key === editingKey
+  const isDelete = (record: GroupTableDataType) => record.key === deleteKey
 
-  const handleEdit = (record: Partial<ColorTableDataType> & { key: React.Key }) => {
-    form.setFieldsValue({ nameColor: '', hexColor: '', createdAt: '', updatedAt: '', ...record })
+  const handleEdit = (record: Partial<GroupTableDataType> & { key: React.Key }) => {
+    form.setFieldsValue({ name: '', createdAt: '', updatedAt: '', ...record })
     setEditingKey(record.key)
   }
 
-  const handleDelete = (record: ColorTableDataType) => {
+  const handleDelete = (record: GroupTableDataType) => {
     setDeleteKey(record.key)
   }
 
@@ -56,7 +56,7 @@ export default function useTable() {
 
   const handleSaveEditing = async (key: React.Key) => {
     try {
-      const row = (await form.validateFields()) as ColorTableDataType
+      const row = (await form.validateFields()) as GroupTableDataType
 
       const newData = [...dataSource]
       const index = newData.findIndex((item) => key === item.key)
@@ -71,7 +71,8 @@ export default function useTable() {
 
         // After updated local data
         // We need to update on database
-        await ColorAPI.updateItem(row)
+
+        await GroupAPI.updateItem(row)
           .then(() => {
             setLoading(true)
           })
@@ -91,20 +92,20 @@ export default function useTable() {
   const handleDeleteRow = (key: React.Key) => {
     const itemFound = dataSource.find((item) => item.key === key)
     if (itemFound) {
-      ColorAPI.deleteItem(itemFound.colorID).then(() => {
-        const dataSourceRemovedItem = dataSource.filter((item) => item.colorID !== key)
+      GroupAPI.deleteItem(itemFound.groupID).then(() => {
+        const dataSourceRemovedItem = dataSource.filter((item) => item.groupID !== key)
         setDataSource(dataSourceRemovedItem)
       })
     }
   }
 
-  const handleAddNewItemData = (nameColor: string, hexColor: string) => {
-    ColorAPI.createNew(nameColor, hexColor)
+  const handleAddNewItemData = (name: string) => {
+    GroupAPI.createNew(name)
       .then((meta) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         setLoading(true)
-        const data = meta?.data as Color
-        const item: ColorTableDataType = { ...data, key: data.colorID }
+        const data = meta?.data as Group
+        const item: GroupTableDataType = { ...data, key: data.groupID }
         setDataSource([...dataSource, item])
       })
       .finally(() => {
