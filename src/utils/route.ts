@@ -14,6 +14,7 @@ import {
   SewingMachineIcon,
   UnitIcon
 } from '~/assets/icons'
+import SampleSewingPage from '~/pages/sample-sewing/SampleSewingPage'
 // import Finish from '~/pages/Finish/Finish'
 // import ColorPage from '~/pages/color/ColorPage'
 // import Cutting from '~/pages/cutting/Cutting'
@@ -31,13 +32,12 @@ import {
 const Dashboard = lazy(() => import('~/pages/dashboard/Dashboard'))
 const Cutting = lazy(() => import('~/pages/cutting/Cutting'))
 const ColorPage = lazy(() => import('~/pages/color/ColorPage'))
-const DeliveryPage = lazy(() => import('~/pages/delivery/Delivery'))
 const GroupPage = lazy(() => import('~/pages/group/Group'))
 const ImportationPage = lazy(() => import('~/pages/importation/Importation'))
 const NotePage = lazy(() => import('~/pages/note/Note'))
 const PrintPage = lazy(() => import('~/pages/print/PrintPage'))
 const ProductPage = lazy(() => import('~/pages/product/ProductPage'))
-const SewingPage = lazy(() => import('~/pages/sewing/Sewing'))
+const SewingLineDeliveryPage = lazy(() => import('~/pages/sewing-line-delivery/SewingLineDeliveryPage'))
 const UnitPage = lazy(() => import('~/pages/unit/Unit'))
 const FinishPage = lazy(() => import('~/pages/Finish/Finish'))
 
@@ -80,7 +80,7 @@ export const appRoutes: SideType[] = [
     key: '3',
     name: 'May mẫu',
     path: 'sewing',
-    component: SewingPage,
+    component: SampleSewingPage,
     isGroup: false,
     icon: SewingMachineIcon
   },
@@ -91,14 +91,6 @@ export const appRoutes: SideType[] = [
     isGroup: false,
     component: Cutting,
     icon: CutIcon
-  },
-  {
-    key: '5',
-    name: 'Chuyền may',
-    path: 'deliveries',
-    component: DeliveryPage,
-    isGroup: false,
-    icon: DeliveryIcon
   },
   {
     key: '6',
@@ -129,6 +121,14 @@ export const appRoutes: SideType[] = [
     path: 'groups',
     component: GroupPage,
     icon: AgeGroupIcon
+  },
+  {
+    key: '5',
+    name: 'Chuyền may',
+    path: 'deliveries',
+    component: SewingLineDeliveryPage,
+    isGroup: false,
+    icon: DeliveryIcon
   },
   {
     key: '11',
