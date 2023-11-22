@@ -9,13 +9,12 @@ export type ResponseDataType = {
 
 export type Product = {
   productID?: number
-  productCode: string
-  quantityPO: number
-  dateInputNPL: string
-  dateOutputFCR: string
-  placePrintIn: string
-  createdAt: string
-  updatedAt: string
+  productCode?: string
+  quantityPO?: number
+  dateInputNPL?: string
+  dateOutputFCR?: string
+  createdAt?: string
+  updatedAt?: string
 }
 
 export type Color = {
