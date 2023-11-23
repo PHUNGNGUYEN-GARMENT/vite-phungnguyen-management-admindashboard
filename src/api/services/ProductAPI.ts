@@ -1,5 +1,5 @@
-import client from '~/api/client'
-import { Product, ResponseDataType } from '~/typing'
+import client, { ResponseDataType } from '~/api/client'
+import { Product } from '~/typing'
 import { errorFormatter } from '~/utils/promise-formatter'
 
 const PATH_API = 'products'
@@ -27,6 +27,9 @@ export default {
         dateOutputFCR: product.dateOutputFCR
       })
       .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
         return res.data
       })
       .catch(function (error) {
@@ -37,6 +40,9 @@ export default {
     return client
       .get(`${PATH_API}/${id}`)
       .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
         return res.data
       })
       .catch(function (error) {
@@ -54,6 +60,9 @@ export default {
         updatedAt: product.updatedAt
       })
       .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
         return res.data
       })
       .catch(function (error) {
@@ -65,6 +74,9 @@ export default {
       .delete(`${PATH_API}/${id}`)
       .then((res) => {
         // console.log(JSON.stringify(res.data))
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
         return res.data
       })
       .catch(function (error) {

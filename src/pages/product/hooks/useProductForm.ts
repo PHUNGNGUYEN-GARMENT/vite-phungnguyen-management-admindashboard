@@ -1,74 +1,70 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { SelectProps } from 'antd'
-import { Dayjs } from 'dayjs'
+import dayjs, { Dayjs } from 'dayjs'
 import { useState } from 'react'
+import PrintablePlaceAPI from '~/api/services/PrintablePlaceAPI'
+import ProductAPI from '~/api/services/ProductAPI'
 import { Print, Product } from '~/typing'
+import { DatePattern } from '~/utils/date-formatter'
 
 export default function useProductForm() {
   const [product, setProduct] = useState<Product>({})
   const [prints, setPrints] = useState<Print[]>([])
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [dateInputNPLSelectedValue, setDateInputNPLSelectedValue] = useState<Date | string>()
-  const [dateInputNPLValue, setDateInputNPLValue] = useState<Date | string>()
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [dateOutputFCRSelectedValue, setDateOutputFCRSelectedValue] = useState<Date | string>()
-  const [dateOutputFCRValue, setDateOutputFCRValue] = useState<Date | string>()
+  const [printSelected, setPrintSelected] = useState<string[]>([])
+  const [dateInputNPL, setDateInputNPL] = useState(() => dayjs(Date.now()))
+  const [dateOutputFCR, setDateOutputFCR] = useState(() => dayjs(Date.now()))
 
   const onSelectDateInputNPL = (newValue: Dayjs) => {
-    setDateInputNPLValue(newValue.format('YYYY-MM-DD HH:mm:ss'))
-    setDateInputNPLSelectedValue(newValue.format('YYYY-MM-DD HH:mm:ss'))
-    setProduct({ ...product, dateInputNPL: newValue.format('YYYY-MM-DD HH:mm:ss') })
+    setDateInputNPL(newValue)
+    setProduct({ ...product, dateInputNPL: new Date(newValue.format(DatePattern.input)) })
   }
 
   const onPanelChangeDateInputNPL = (newValue: Dayjs) => {
-    setDateInputNPLValue(newValue.format('YYYY-MM-DD HH:mm:ss'))
-    console.log('onPanelChangeDateInputNPL', newValue.format('YYYY-MM-DD HH:mm:ss'))
+    setDateInputNPL(newValue)
+    setProduct({ ...product, dateOutputFCR: new Date(newValue.format(DatePattern.input)) })
   }
 
   const onSelectDateOutputFCR = (newValue: Dayjs) => {
-    setDateOutputFCRValue(newValue)
-    setDateOutputFCRSelectedValue(newValue)
-    setProduct({ ...product, dateOutputFCR: newValue.format() })
-    console.log('onSelectDateOutputFCR', newValue.format('YYYY-MM-DD HH:mm:ss'))
+    setDateOutputFCR(newValue)
+    setProduct({ ...product, dateOutputFCR: new Date(newValue.format(DatePattern.input)) })
   }
 
   const onPanelChangeDateOutputFCR = (newValue: Dayjs) => {
-    setDateInputNPLValue(newValue)
-    console.log('onPanelChangeDateOutputFCR', newValue.format('YYYY-MM-DD HH:mm:ss'))
+    setDateOutputFCR(newValue)
+    setProduct({ ...product, dateOutputFCR: new Date(newValue.format(DatePattern.input)) })
   }
 
-  // const options: SelectProps['options'] =
-
-  const options: SelectProps['options'] = [
-    {
-      label: 'China',
-      value: 'china',
-      emoji: '🇨🇳',
-      desc: 'China (中国)'
-    },
-    {
-      label: 'USA',
-      value: 'usa',
-      emoji: '🇺🇸',
-      desc: 'USA (美国)'
-    },
-    {
-      label: 'Japan',
-      value: 'japan',
-      emoji: '🇯🇵',
-      desc: 'Japan (日本)'
-    },
-    {
-      label: 'Korea',
-      value: 'korea',
-      emoji: '🇰🇷',
-      desc: 'Korea (韩国)'
-    }
-  ]
+  const options: SelectProps['options'] = prints.map((item) => {
+    return { label: item.name, value: item.printID, desc: item.name }
+  })
 
   const handleChangeSelector = (value: string[]) => {
-    // setSelectedValue(value)
+    setPrintSelected(value)
   }
+
+  const handleOk = () => {
+    console.log({
+      product: product,
+      prints: printSelected
+    })
+    ProductAPI.createNew({
+      productCode: product.productCode,
+      quantityPO: product.quantityPO,
+      dateInputNPL: product.dateInputNPL,
+      dateOutputFCR: product.dateOutputFCR
+    }).then((res) => {
+      if (res?.isSuccess) {
+        const parseProduct = res.data as Product
+        for (const val of printSelected) {
+          PrintablePlaceAPI.createNew(parseInt(val), parseProduct.productID!).then((res2) => {
+            console.log(res2)
+          })
+        }
+      }
+    })
+  }
+
+  const handleCancel = () => {}
 
   return {
     product,
@@ -76,12 +72,14 @@ export default function useProductForm() {
     setProduct,
     prints,
     setPrints,
-    dateInputNPLValue,
-    dateOutputFCRValue,
+    dateInputNPL,
+    dateOutputFCR,
     onSelectDateInputNPL,
     onSelectDateOutputFCR,
     onPanelChangeDateInputNPL,
     onPanelChangeDateOutputFCR,
-    handleChangeSelector
+    handleChangeSelector,
+    handleOk,
+    handleCancel
   }
 }

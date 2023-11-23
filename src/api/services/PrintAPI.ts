@@ -1,5 +1,5 @@
-import client from '~/api/client'
-import { Print, ResponseDataType } from '~/typing'
+import client, { ResponseDataType } from '~/api/client'
+import { Print } from '~/typing'
 import { errorFormatter } from '~/utils/promise-formatter'
 
 const PATH_API = 'prints'

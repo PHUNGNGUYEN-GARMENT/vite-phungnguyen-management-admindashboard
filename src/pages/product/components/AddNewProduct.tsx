@@ -1,14 +1,12 @@
 import { Calendar, Flex, Input, InputNumber, Modal, Select, Space, Typography } from 'antd'
 import React, { memo, useEffect } from 'react'
 import PrintAPI from '~/api/services/PrintAPI'
-import { Print, ResponseDataType } from '~/typing'
+import { Print } from '~/typing'
 import useFormProduct from '../hooks/useProductForm'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
-  // dataSource: ProductTableDataType[]
-  // setDateSource: (data: ProductTableDataType[]) => void
-  setLoading: (enable: boolean) => void
   openModal: boolean
+  setLoading: (enable: boolean) => void
   setOpenModal: (status: boolean) => void
 }
 
@@ -18,43 +16,29 @@ const AddNewProduct: React.FC<Props> = ({ ...props }) => {
     product,
     setProduct,
     options,
-    prints,
     setPrints,
-    // selectedValue,
-    dateInputNPLValue,
-    dateOutputFCRValue,
+    dateInputNPL,
+    dateOutputFCR,
     onSelectDateInputNPL,
     onSelectDateOutputFCR,
     onPanelChangeDateInputNPL,
     onPanelChangeDateOutputFCR,
-    handleChangeSelector
+    handleChangeSelector,
+    handleOk,
+    handleCancel
   } = useFormProduct()
   console.log('Load AddNewProduct...')
 
   useEffect(() => {
-    PrintAPI.getAlls()
-      .then((res) => {
+    PrintAPI.getAlls().then((res) => {
+      if (res?.isSuccess) {
         if (res?.isSuccess) {
-          props.setLoading(true)
-          if (res?.isSuccess) {
-            const data = res as ResponseDataType
-            setPrints(data.data as Print[])
-          }
+          console.log(res)
+          setPrints(res.data as Print[])
         }
-      })
-      .finally(() => {
-        props.setLoading(false)
-      })
-    console.log('object')
+      }
+    })
   }, [])
-
-  const handleOk = () => {
-    // ProductAPI.createNew()
-    //   .then((res) => {})
-    //   .finally(() => {})
-  }
-
-  const handleCancel = () => {}
 
   return (
     <Modal
@@ -124,7 +108,7 @@ const AddNewProduct: React.FC<Props> = ({ ...props }) => {
             <Typography.Text className='flex-shrink-0'>Ngày nhập NPL:</Typography.Text>
             <Calendar
               fullscreen={false}
-              value={dateInputNPLValue}
+              value={dateInputNPL}
               onSelect={onSelectDateInputNPL}
               onPanelChange={onPanelChangeDateInputNPL}
             />
@@ -133,7 +117,7 @@ const AddNewProduct: React.FC<Props> = ({ ...props }) => {
             <Typography.Text className='flex-shrink-0'>Ngày xuất FCR:</Typography.Text>
             <Calendar
               fullscreen={false}
-              value={dateOutputFCRValue}
+              value={dateOutputFCR}
               onSelect={onSelectDateOutputFCR}
               onPanelChange={onPanelChangeDateOutputFCR}
             />

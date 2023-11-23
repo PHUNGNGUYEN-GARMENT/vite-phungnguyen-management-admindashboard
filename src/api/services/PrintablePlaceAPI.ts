@@ -1,5 +1,5 @@
-import client from '~/api/client'
-import { PrintablePlace, ResponseDataType } from '~/typing'
+import client, { ResponseDataType } from '~/api/client'
+import { PrintablePlace } from '~/typing'
 import { errorFormatter } from '~/utils/promise-formatter'
 
 const PATH_API = 'printable-places'
@@ -21,10 +21,16 @@ export default {
         errorFormatter(error)
       })
   },
-  getAlls: async (): Promise<ResponseDataType | undefined> => {
+  getAlls: async (printID: number, productID: number): Promise<ResponseDataType | undefined> => {
     return await client
-      .post(`${PATH_API}/find`)
+      .post(`${PATH_API}/find`, {
+        printID: printID,
+        productID: productID
+      })
       .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
         return res.data
       })
       .catch(function (error) {
@@ -35,6 +41,9 @@ export default {
     return client
       .get(`${PATH_API}/${id}`)
       .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
         return res.data
       })
       .catch(function (error) {
@@ -51,6 +60,9 @@ export default {
         orderNumber: item.orderNumber
       })
       .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
         return res.data
       })
       .catch(function (error) {
@@ -61,6 +73,9 @@ export default {
     return client
       .delete(`${PATH_API}/${id}`)
       .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
         return res.data
       })
       .catch(function (error) {

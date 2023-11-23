@@ -1,5 +1,5 @@
-import client from '~/api/client'
-import { Color, ResponseDataType } from '~/typing'
+import client, { ResponseDataType } from '~/api/client'
+import { Color } from '~/typing'
 import { errorFormatter } from '~/utils/promise-formatter'
 
 export default {

@@ -1,5 +1,5 @@
-import client from '~/api/client'
-import { ResponseDataType, SampleSewing } from '~/typing'
+import client, { ResponseDataType } from '~/api/client'
+import { SampleSewing } from '~/typing'
 import { errorFormatter } from '~/utils/promise-formatter'
 
 const PATH_API = 'sample-sewings'

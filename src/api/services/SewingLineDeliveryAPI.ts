@@ -1,5 +1,5 @@
-import client from '~/api/client'
-import { ResponseDataType, SewingLineDelivery } from '~/typing'
+import client, { ResponseDataType } from '~/api/client'
+import { SewingLineDelivery } from '~/typing'
 import { errorFormatter } from '~/utils/promise-formatter'
 
 const PATH_API = 'sewing-line-deliveries'

@@ -1,20 +1,11 @@
-export type ResponseDataType = {
-  isSuccess?: boolean
-  message: string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data?: any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  meta?: any
-}
-
 export type Product = {
   productID?: number
   productCode?: string
   quantityPO?: number
-  dateInputNPL?: date
-  dateOutputFCR?: date
-  createdAt?: date
-  updatedAt?: date
+  dateInputNPL?: Date
+  dateOutputFCR?: Date
+  createdAt?: Date
+  updatedAt?: Date
 }
 
 export type Color = {

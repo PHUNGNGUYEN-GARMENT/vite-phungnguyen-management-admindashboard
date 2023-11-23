@@ -3,9 +3,10 @@ import { Button, Flex, Form, Popconfirm, Table, Tag, Typography } from 'antd'
 import { AnyObject } from 'antd/es/_util/type'
 import { Plus } from 'lucide-react'
 import { memo, useEffect } from 'react'
+import { ResponseDataType } from '~/api/client'
 import PrintablePlaceAPI from '~/api/services/PrintablePlaceAPI'
 import ProductAPI from '~/api/services/ProductAPI'
-import { PrintablePlace, Product, ResponseDataType } from '~/typing'
+import { PrintablePlace, Product } from '~/typing'
 import { dateDistance } from '~/utils/date-formatter'
 import { firstLetterUppercase } from '~/utils/text'
 import AddNewProduct from './components/AddNewProduct'
@@ -50,12 +51,11 @@ const ProductPage: React.FC = () => {
         setLoading(true)
         if (res1?.isSuccess) {
           const data1 = res1 as ResponseDataType
-          console.log(data1)
           setProducts(data1.data as Product[])
         }
       })
       .then(() => {
-        PrintablePlaceAPI.getAlls().then((res2) => {
+        PrintablePlaceAPI.getAlls(4, 18).then((res2) => {
           if (res2?.isSuccess) {
             setPrintablePlaces(res2.data as PrintablePlace[])
           }
