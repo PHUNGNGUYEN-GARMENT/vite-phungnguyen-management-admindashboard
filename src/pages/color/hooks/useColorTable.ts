@@ -2,7 +2,7 @@ import { useForm } from 'antd/es/form/Form'
 import React, { useEffect, useState } from 'react'
 import { Color } from '~/typing'
 import { ColorTableDataType } from '../ColorPage'
-import ColorAPI from '../api/ColorAPI'
+import ColorAPI from '../../../api/services/ColorAPI'
 
 export default function useColorTable() {
   const [form] = useForm()

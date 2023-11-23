@@ -1,59 +1,64 @@
-import type { SelectProps } from 'antd'
-import { Calendar, Flex, Input, InputNumber, Modal, Select, Typography } from 'antd'
-import type { Dayjs } from 'dayjs'
-import dayjs from 'dayjs'
-import React, { memo, useState } from 'react'
-import { Print, Product } from '~/typing'
+import { Calendar, Flex, Input, InputNumber, Modal, Select, Space, Typography } from 'antd'
+import React, { memo } from 'react'
+import useFormProduct from '../hooks/useProductForm'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
-  product: Product
-  prints: Print[]
   openModal: boolean
-  setProduct: (product: Product) => void
-  setPrints: (prints: Print[]) => void
   setOpenModal: (status: boolean) => void
 }
 
 // eslint-disable-next-line no-empty-pattern, react-refresh/only-export-components
 const AddNewProduct: React.FC<Props> = ({ ...props }) => {
-  
-
+  const {
+    product,
+    setProduct,
+    options,
+    selectedValue,
+    dateInputNPLValue,
+    dateOutputFCRValue,
+    onSelectDateInputNPL,
+    onSelectDateOutputFCR,
+    onPanelChangeDateInputNPL,
+    onPanelChangeDateOutputFCR,
+    handleOk,
+    handleCancel,
+    handleChangeSelector
+  } = useFormProduct()
   console.log('Load AddNewProduct...')
 
   return (
     <Modal
       open={props.openModal}
-      onOk={() => {
-        // handleAddNewItemData(product)
-        // setOpenModal(false)
-        console.log(selfProduct)
-      }}
+      onOk={() => handleOk()}
       centered
       width='auto'
-      onCancel={() => props.setOpenModal(false)}
+      onCancel={() => {
+        props.setOpenModal(false)
+        handleCancel()
+      }}
     >
       <Flex vertical gap={20} className='w-full sm:w-[500px] md:w-[600px] lg:w-[900px]'>
         <Typography.Title level={2}>Add new product</Typography.Title>
         <Flex vertical={false} gap={20} className='w-full'>
           <Flex align='center' gap={5} className='w-full'>
-            <Typography.Text className='w-20 flex-shrink-0'>Mã Code:</Typography.Text>
+            <Typography.Text className='w-24 flex-shrink-0'>Mã Code:</Typography.Text>
             <Input
-              value={selfProduct.productCode}
-              onChange={(e) => setSelfProduct({ ...selfProduct, productCode: e.target.value })}
+              value={product.productCode}
+              onChange={(e) => setProduct({ ...product, productCode: e.target.value })}
               allowClear
               className='w-full'
               placeholder='Product code..'
             />
           </Flex>
           <Flex align='center' gap={5} className='w-full'>
-            <Typography.Text className='w-20 flex-shrink-0'>Số lượng PO:</Typography.Text>
+            <Typography.Text className='w-24 flex-shrink-0'>Số lượng PO:</Typography.Text>
             <InputNumber
               className='w-full'
-              value={selfProduct.quantityPO}
+              value={product.quantityPO}
               onChange={(value) => {
                 console.log(value)
                 if (value) {
-                  setSelfProduct({ ...selfProduct, quantityPO: value })
+                  setProduct({ ...product, quantityPO: value })
                 }
               }}
               placeholder='Quantity po..'
@@ -66,9 +71,18 @@ const AddNewProduct: React.FC<Props> = ({ ...props }) => {
             mode='multiple'
             allowClear
             placeholder='Please select'
-            defaultValue={['a10', 'c12']}
-            onChange={handleChange}
+            defaultValue={selectedValue}
+            onChange={handleChangeSelector}
+            optionLabelProp='label'
             options={options}
+            optionRender={(option) => (
+              <Space>
+                <span role='img' aria-label={option.data.label}>
+                  {option.data.emoji}
+                </span>
+                {option.data.desc}
+              </Space>
+            )}
             className='w-full'
             style={{
               width: '100%'
@@ -77,7 +91,7 @@ const AddNewProduct: React.FC<Props> = ({ ...props }) => {
         </Flex>
         <Flex vertical={false} gap={30} className='flex w-full flex-col items-center justify-center lg:flex-row'>
           <Flex vertical>
-            <Typography.Text className='w-24 flex-shrink-0'>Ngày nhập NPL:</Typography.Text>
+            <Typography.Text className='flex-shrink-0'>Ngày nhập NPL:</Typography.Text>
             <Calendar
               fullscreen={false}
               value={dateInputNPLValue}
@@ -86,7 +100,7 @@ const AddNewProduct: React.FC<Props> = ({ ...props }) => {
             />
           </Flex>
           <Flex vertical>
-            <Typography.Text className='w-24 flex-shrink-0'>Ngày xuất FCR:</Typography.Text>
+            <Typography.Text className='flex-shrink-0'>Ngày xuất FCR:</Typography.Text>
             <Calendar
               fullscreen={false}
               value={dateOutputFCRValue}

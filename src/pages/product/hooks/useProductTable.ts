@@ -1,8 +1,8 @@
 import { useForm } from 'antd/es/form/Form'
 import React, { useEffect, useState } from 'react'
 import { Product } from '~/typing'
+import ProductAPI from '../../../api/services/ProductAPI'
 import { ProductTableDataType } from '../ProductPage'
-import ProductAPI from '../api/ProductAPI'
 
 export default function useProductTable() {
   const [form] = useForm()
@@ -12,14 +12,16 @@ export default function useProductTable() {
   const [loading, setLoading] = useState<boolean>(false)
 
   useEffect(() => {
-    // ProductAPI.getAlls().then((meta) => {
-    //   const data = meta?.data as Product[]
-    //   const items: ProductTableDataType[] = data.map((item) => {
-    //     return { ...item, key: item.productID }
-    //   })
-    //   console.log(items)
-    //   setDataSource(items)
-    // })
+    ProductAPI.getAlls().then((res) => {
+      if (res?.isSuccess) {
+        console.log(res.data)
+        const products = res.data as Product[]
+        const items: ProductTableDataType[] = products.map((item) => {
+          return { ...item, key: item.productID }
+        })
+        setDataSource(items)
+      }
+    })
   }, [])
 
   const isEditing = (record: ProductTableDataType) => record.key === editingKey

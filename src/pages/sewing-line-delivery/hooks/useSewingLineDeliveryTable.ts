@@ -2,7 +2,7 @@ import { useForm } from 'antd/es/form/Form'
 import React, { useEffect, useState } from 'react'
 import { SewingLineDelivery } from '~/typing'
 import { SewingLineDeliveryTableDataType } from '../SewingLineDeliveryPage'
-import SewingLineDeliveryAPI from '../api/SewingLineDeliveryAPI'
+import SewingLineDeliveryAPI from '../../../api/services/SewingLineDeliveryAPI'
 
 export default function useSewingLineDeliveryTable() {
   const [form] = useForm()

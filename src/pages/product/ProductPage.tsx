@@ -22,7 +22,7 @@ export interface ProductTableDataType {
 }
 
 const ProductPage: React.FC = () => {
-  const { product, setProduct, prints, setPrints, openModal, setOpenModal } = useProduct()
+  const { openModal, setOpenModal } = useProduct()
   const {
     form,
     loading,
@@ -31,7 +31,6 @@ const ProductPage: React.FC = () => {
     handleSaveEditing,
     isEditing,
     handleCancelConfirmDelete,
-    handleAddNewItemData,
     handleEdit,
     handleDelete,
     handleCancelEditing,
@@ -111,9 +110,6 @@ const ProductPage: React.FC = () => {
           </Flex>
         ) : (
           <Flex gap={30}>
-            {/* <Typography.Link disabled={editingKey !== ''} onClick={() => handleEdit(record as Item)}>
-              Edit
-              </Typography.Link> */}
             <Button
               type='dashed'
               disabled={editingKey !== ''}
@@ -201,16 +197,7 @@ const ProductPage: React.FC = () => {
           />
         </Form>
       </Flex>
-      {openModal && (
-        <AddNewProduct
-          product={product}
-          setProduct={setProduct}
-          prints={prints}
-          setPrints={setPrints}
-          openModal={openModal}
-          setOpenModal={setOpenModal}
-        />
-      )}
+      {openModal && <AddNewProduct openModal={openModal} setOpenModal={setOpenModal} />}
     </>
   )
 }

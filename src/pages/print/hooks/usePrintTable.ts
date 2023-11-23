@@ -2,7 +2,7 @@ import { useForm } from 'antd/es/form/Form'
 import React, { useEffect, useState } from 'react'
 import { Print } from '~/typing'
 import { PrintTableDataType } from '../PrintPage'
-import PrintAPI from '../api/PrintAPI'
+import PrintAPI from '../../../api/services/PrintAPI'
 
 export default function usePrintTable() {
   const [form] = useForm()

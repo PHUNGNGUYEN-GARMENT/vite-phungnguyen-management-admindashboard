@@ -1,8 +1,8 @@
-import client from '~/services/api/client'
-import { ResponseDataType, SampleSewing } from '~/typing'
+import client from '~/api/client'
+import { ResponseDataType, SewingLineDelivery } from '~/typing'
 import { errorFormatter } from '~/utils/promise-formatter'
 
-const PATH_API = 'sample-sewings'
+const PATH_API = 'sewing-line-deliveries'
 
 export default {
   getAlls: async (): Promise<ResponseDataType | undefined> => {
@@ -15,11 +15,10 @@ export default {
         errorFormatter(error)
       })
   },
-  createNew: async (productID: number, dateSewingNPL: string): Promise<ResponseDataType | undefined> => {
+  createNew: async (sewingLine: string): Promise<ResponseDataType | undefined> => {
     return client
       .post(`${PATH_API}`, {
-        productID: productID,
-        dateSewingNPL: dateSewingNPL
+        sewingLine: sewingLine
       })
       .then((res) => {
         return res.data
@@ -38,11 +37,10 @@ export default {
         errorFormatter(error)
       })
   },
-  updateItem: async (item: SampleSewing): Promise<ResponseDataType | undefined> => {
+  updateItem: async (item: SewingLineDelivery): Promise<ResponseDataType | undefined> => {
     return client
-      .put(`${PATH_API}/${item.sampleSewingID}`, {
-        productID: item.productID,
-        dateSewingNPL: item.dateSewingNPL,
+      .put(`${PATH_API}/${item.sewingLineDeliveryID}`, {
+        sewingLine: item.sewingLine,
         createdAt: item.createdAt,
         updatedAt: item.updatedAt,
         orderNumber: item.orderNumber

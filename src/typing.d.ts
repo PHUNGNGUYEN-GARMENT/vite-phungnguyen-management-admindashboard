@@ -11,10 +11,10 @@ export type Product = {
   productID?: number
   productCode?: string
   quantityPO?: number
-  dateInputNPL?: string
-  dateOutputFCR?: string
-  createdAt?: string
-  updatedAt?: string
+  dateInputNPL?: date
+  dateOutputFCR?: date
+  createdAt?: date
+  updatedAt?: date
 }
 
 export type Color = {
@@ -45,6 +45,14 @@ export type Group = {
 export type Print = {
   printID: number
   name: string
+  createdAt: string
+  updatedAt: string
+  orderNumber: number
+}
+
+export type PrintablePlace = {
+  printID: number
+  productID: number
   createdAt: string
   updatedAt: string
   orderNumber: number

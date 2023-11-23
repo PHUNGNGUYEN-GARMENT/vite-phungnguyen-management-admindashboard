@@ -1,8 +1,8 @@
-import client from '~/services/api/client'
-import { Print, ResponseDataType } from '~/typing'
+import client from '~/api/client'
+import { Group, ResponseDataType } from '~/typing'
 import { errorFormatter } from '~/utils/promise-formatter'
 
-const PATH_API = 'prints'
+const PATH_API = 'groups'
 
 export default {
   getAlls: async (): Promise<ResponseDataType | undefined> => {
@@ -37,9 +37,9 @@ export default {
         errorFormatter(error)
       })
   },
-  updateItem: async (item: Print): Promise<ResponseDataType | undefined> => {
+  updateItem: async (item: Group): Promise<ResponseDataType | undefined> => {
     return client
-      .put(`${PATH_API}/${item.printID}`, {
+      .put(`${PATH_API}/${item.groupID}`, {
         name: item.name,
         createdAt: item.createdAt,
         updatedAt: item.updatedAt,

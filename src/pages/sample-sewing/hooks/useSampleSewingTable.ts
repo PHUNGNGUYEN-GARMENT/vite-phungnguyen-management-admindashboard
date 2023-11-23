@@ -2,7 +2,7 @@ import { useForm } from 'antd/es/form/Form'
 import React, { useEffect, useState } from 'react'
 import { SampleSewing } from '~/typing'
 import { SampleSewingTableDataType } from '../SampleSewingPage'
-import SampleSewingAPI from '../api/SampleSewingAPI'
+import SampleSewingAPI from '../../../api/services/SampleSewingAPI'
 
 export default function useSampleSewingTable() {
   const [form] = useForm()

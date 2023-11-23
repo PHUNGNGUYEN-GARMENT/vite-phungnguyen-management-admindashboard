@@ -2,7 +2,7 @@ import { useForm } from 'antd/es/form/Form'
 import React, { useEffect, useState } from 'react'
 import { Group } from '~/typing'
 import { GroupTableDataType } from '../Group'
-import GroupAPI from '../api/GroupAPI'
+import GroupAPI from '../../../api/services/GroupAPI'
 
 export default function useGroupTable() {
   const [form] = useForm()

@@ -1,8 +1,8 @@
-import client from '~/services/api/client'
-import { Group, ResponseDataType } from '~/typing'
+import client from '~/api/client'
+import { ResponseDataType, SampleSewing } from '~/typing'
 import { errorFormatter } from '~/utils/promise-formatter'
 
-const PATH_API = 'groups'
+const PATH_API = 'sample-sewings'
 
 export default {
   getAlls: async (): Promise<ResponseDataType | undefined> => {
@@ -15,10 +15,11 @@ export default {
         errorFormatter(error)
       })
   },
-  createNew: async (name: string): Promise<ResponseDataType | undefined> => {
+  createNew: async (productID: number, dateSewingNPL: string): Promise<ResponseDataType | undefined> => {
     return client
       .post(`${PATH_API}`, {
-        name: name
+        productID: productID,
+        dateSewingNPL: dateSewingNPL
       })
       .then((res) => {
         return res.data
@@ -37,10 +38,11 @@ export default {
         errorFormatter(error)
       })
   },
-  updateItem: async (item: Group): Promise<ResponseDataType | undefined> => {
+  updateItem: async (item: SampleSewing): Promise<ResponseDataType | undefined> => {
     return client
-      .put(`${PATH_API}/${item.groupID}`, {
-        name: item.name,
+      .put(`${PATH_API}/${item.sampleSewingID}`, {
+        productID: item.productID,
+        dateSewingNPL: item.dateSewingNPL,
         createdAt: item.createdAt,
         updatedAt: item.updatedAt,
         orderNumber: item.orderNumber
