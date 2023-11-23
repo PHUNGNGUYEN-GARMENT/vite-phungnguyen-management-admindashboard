@@ -1,16 +1,19 @@
 import { useState } from 'react'
-import { Print, Product } from '~/typing'
+import { PrintablePlace, Product } from '~/typing'
 
 export default function useProduct() {
-  const [product, setProduct] = useState<Product>({})
-  const [prints, setPrints] = useState<Print[]>([])
+  const [products, setProducts] = useState<Product[]>([])
+  const [printablePlaces, setPrintablePlaces] = useState<PrintablePlace[]>([])
   const [openModal, setOpenModal] = useState<boolean>(false)
+  const [loading, setLoading] = useState<boolean>(false)
 
   return {
-    product,
-    setProduct,
-    prints,
-    setPrints,
+    products,
+    setProducts,
+    printablePlaces,
+    setPrintablePlaces,
+    loading,
+    setLoading,
     openModal,
     setOpenModal
   }

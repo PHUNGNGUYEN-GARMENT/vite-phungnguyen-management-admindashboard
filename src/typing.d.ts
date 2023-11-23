@@ -53,6 +53,7 @@ export type Print = {
 export type PrintablePlace = {
   printID: number
   productID: number
+  name: string
   createdAt: string
   updatedAt: string
   orderNumber: number

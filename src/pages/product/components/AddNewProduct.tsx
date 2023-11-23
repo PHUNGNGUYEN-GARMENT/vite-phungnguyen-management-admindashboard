@@ -1,8 +1,13 @@
 import { Calendar, Flex, Input, InputNumber, Modal, Select, Space, Typography } from 'antd'
-import React, { memo } from 'react'
+import React, { memo, useEffect } from 'react'
+import PrintAPI from '~/api/services/PrintAPI'
+import { Print, ResponseDataType } from '~/typing'
 import useFormProduct from '../hooks/useProductForm'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
+  // dataSource: ProductTableDataType[]
+  // setDateSource: (data: ProductTableDataType[]) => void
+  setLoading: (enable: boolean) => void
   openModal: boolean
   setOpenModal: (status: boolean) => void
 }
@@ -13,18 +18,43 @@ const AddNewProduct: React.FC<Props> = ({ ...props }) => {
     product,
     setProduct,
     options,
-    selectedValue,
+    prints,
+    setPrints,
+    // selectedValue,
     dateInputNPLValue,
     dateOutputFCRValue,
     onSelectDateInputNPL,
     onSelectDateOutputFCR,
     onPanelChangeDateInputNPL,
     onPanelChangeDateOutputFCR,
-    handleOk,
-    handleCancel,
     handleChangeSelector
   } = useFormProduct()
   console.log('Load AddNewProduct...')
+
+  useEffect(() => {
+    PrintAPI.getAlls()
+      .then((res) => {
+        if (res?.isSuccess) {
+          props.setLoading(true)
+          if (res?.isSuccess) {
+            const data = res as ResponseDataType
+            setPrints(data.data as Print[])
+          }
+        }
+      })
+      .finally(() => {
+        props.setLoading(false)
+      })
+    console.log('object')
+  }, [])
+
+  const handleOk = () => {
+    // ProductAPI.createNew()
+    //   .then((res) => {})
+    //   .finally(() => {})
+  }
+
+  const handleCancel = () => {}
 
   return (
     <Modal
@@ -71,7 +101,7 @@ const AddNewProduct: React.FC<Props> = ({ ...props }) => {
             mode='multiple'
             allowClear
             placeholder='Please select'
-            defaultValue={selectedValue}
+            // defaultValue={selectedValue}
             onChange={handleChangeSelector}
             optionLabelProp='label'
             options={options}

@@ -9,6 +9,9 @@ export default {
     return await client
       .post(`${PATH_API}/find`)
       .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
         return res.data
       })
       .catch(function (error) {

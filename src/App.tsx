@@ -10,26 +10,28 @@ function App() {
   return (
     <>
       <div className='App'>
-        <Routes>
-          <Route path='signup' element={<SignUp />} />
-          <Route path='signin' element={<SignIn />} />
-          <Route element={<Main />}>
-            {appRoutes.map((route, i) => {
-              return (
-                <Route
-                  id={route.key || i.toString()}
-                  key={route.key}
-                  path={route.path}
-                  element={
-                    <Suspense fallback={<div>loading...</div>}>
-                      <route.component />
-                    </Suspense>
-                  }
-                />
-              )
-            })}
-          </Route>
-        </Routes>
+        <Suspense fallback={<div>Loading...</div>}>
+          <Routes>
+            <Route path='signup' element={<SignUp />} />
+            <Route path='signin' element={<SignIn />} />
+            <Route element={<Main />}>
+              {appRoutes.map((route, i) => {
+                return (
+                  <Route
+                    id={route.key || i.toString()}
+                    key={route.key}
+                    path={route.path}
+                    element={
+                      <Suspense fallback={<div>loading...</div>}>
+                        <route.component />
+                      </Suspense>
+                    }
+                  />
+                )
+              })}
+            </Route>
+          </Routes>
+        </Suspense>
       </div>
     </>
   )

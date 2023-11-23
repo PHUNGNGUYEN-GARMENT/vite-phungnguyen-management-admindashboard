@@ -1,5 +1,5 @@
 import { useForm } from 'antd/es/form/Form'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Product } from '~/typing'
 import ProductAPI from '../../../api/services/ProductAPI'
 import { ProductTableDataType } from '../ProductPage'
@@ -9,20 +9,6 @@ export default function useProductTable() {
   const [dataSource, setDataSource] = useState<ProductTableDataType[]>([])
   const [editingKey, setEditingKey] = useState<React.Key>('')
   const [deleteKey, setDeleteKey] = useState<React.Key>('')
-  const [loading, setLoading] = useState<boolean>(false)
-
-  useEffect(() => {
-    ProductAPI.getAlls().then((res) => {
-      if (res?.isSuccess) {
-        console.log(res.data)
-        const products = res.data as Product[]
-        const items: ProductTableDataType[] = products.map((item) => {
-          return { ...item, key: item.productID }
-        })
-        setDataSource(items)
-      }
-    })
-  }, [])
 
   const isEditing = (record: ProductTableDataType) => record.key === editingKey
   const isDelete = (record: ProductTableDataType) => record.key === deleteKey
@@ -48,15 +34,7 @@ export default function useProductTable() {
     setDeleteKey('')
   }
 
-  const handleLoadingChange = (enable: boolean) => {
-    setLoading(enable)
-  }
-
-  const handleToggleLoading = () => {
-    setLoading(!loading)
-  }
-
-  const handleSaveEditing = async (key: React.Key) => {
+  const handleSaveEditing = async (key: React.Key, setLoading: (status: boolean) => void) => {
     try {
       const row = (await form.validateFields()) as ProductTableDataType
 
@@ -73,7 +51,6 @@ export default function useProductTable() {
 
         // After updated local data
         // We need to update on database
-
         await ProductAPI.updateItem(row)
           .then(() => {
             setLoading(true)
@@ -123,15 +100,11 @@ export default function useProductTable() {
     setDeleteKey,
     dataSource,
     setDataSource,
-    loading,
     isEditing,
     isDelete,
-    setLoading,
-    handleToggleLoading,
     handleEdit,
     handleDelete,
     handleCancelEditing,
-    handleLoadingChange,
     handleSaveEditing,
     handleDeleteRow,
     handleCancelConfirmEditing,

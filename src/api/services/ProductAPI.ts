@@ -9,6 +9,9 @@ export default {
     return await client
       .post(`${PATH_API}/find`)
       .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
         return res.data
       })
       .catch(function (error) {
@@ -16,7 +19,7 @@ export default {
       })
   },
   createNew: async (product: Product): Promise<ResponseDataType | undefined> => {
-    return client
+    return await client
       .post(`${PATH_API}`, {
         productCode: product.productCode,
         quantityPO: product.quantityPO,

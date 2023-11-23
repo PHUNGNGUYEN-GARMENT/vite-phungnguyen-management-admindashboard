@@ -12,6 +12,9 @@ export default {
         productID: productID
       })
       .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
         return res.data
       })
       .catch(function (error) {

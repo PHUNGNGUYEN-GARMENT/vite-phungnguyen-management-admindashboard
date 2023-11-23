@@ -1,43 +1,43 @@
 import { SelectProps } from 'antd'
-import dayjs, { Dayjs } from 'dayjs'
+import { Dayjs } from 'dayjs'
 import { useState } from 'react'
-import ProductAPI from '~/api/services/ProductAPI'
-import { Product } from '~/typing'
+import { Print, Product } from '~/typing'
 
 export default function useProductForm() {
   const [product, setProduct] = useState<Product>({})
-  const [selectedValue, setSelectedValue] = useState<string[]>([])
+  const [prints, setPrints] = useState<Print[]>([])
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [dateInputNPLSelectedValue, setDateInputNPLSelectedValue] = useState(() => dayjs(Date.now()))
-  const [dateInputNPLValue, setDateInputNPLValue] = useState(() => dayjs(Date.now()))
+  const [dateInputNPLSelectedValue, setDateInputNPLSelectedValue] = useState<Date | string>()
+  const [dateInputNPLValue, setDateInputNPLValue] = useState<Date | string>()
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [dateOutputFCRSelectedValue, setDateOutputFCRSelectedValue] = useState(() => dayjs(Date.now()))
-  const [dateOutputFCRValue, setDateOutputFCRValue] = useState(() => dayjs(Date.now()))
+  const [dateOutputFCRSelectedValue, setDateOutputFCRSelectedValue] = useState<Date | string>()
+  const [dateOutputFCRValue, setDateOutputFCRValue] = useState<Date | string>()
 
   const onSelectDateInputNPL = (newValue: Dayjs) => {
-    setDateInputNPLValue(newValue)
-    setDateInputNPLSelectedValue(newValue)
-    setProduct({ ...product, dateInputNPL: newValue.format() })
-    console.log('onSelectDateInputNPL', newValue.format())
+    setDateInputNPLValue(newValue.format('YYYY-MM-DD HH:mm:ss'))
+    setDateInputNPLSelectedValue(newValue.format('YYYY-MM-DD HH:mm:ss'))
+    setProduct({ ...product, dateInputNPL: newValue.format('YYYY-MM-DD HH:mm:ss') })
   }
 
   const onPanelChangeDateInputNPL = (newValue: Dayjs) => {
-    setDateInputNPLValue(newValue)
-    console.log('onPanelChangeDateInputNPL', newValue.format())
+    setDateInputNPLValue(newValue.format('YYYY-MM-DD HH:mm:ss'))
+    console.log('onPanelChangeDateInputNPL', newValue.format('YYYY-MM-DD HH:mm:ss'))
   }
 
   const onSelectDateOutputFCR = (newValue: Dayjs) => {
     setDateOutputFCRValue(newValue)
     setDateOutputFCRSelectedValue(newValue)
     setProduct({ ...product, dateOutputFCR: newValue.format() })
-    console.log('onSelectDateOutputFCR', newValue.format())
+    console.log('onSelectDateOutputFCR', newValue.format('YYYY-MM-DD HH:mm:ss'))
   }
 
   const onPanelChangeDateOutputFCR = (newValue: Dayjs) => {
     setDateInputNPLValue(newValue)
-    console.log('onPanelChangeDateOutputFCR', newValue.format())
+    console.log('onPanelChangeDateOutputFCR', newValue.format('YYYY-MM-DD HH:mm:ss'))
   }
+
+  // const options: SelectProps['options'] =
 
   const options: SelectProps['options'] = [
     {
@@ -67,41 +67,21 @@ export default function useProductForm() {
   ]
 
   const handleChangeSelector = (value: string[]) => {
-    setSelectedValue(value)
+    // setSelectedValue(value)
   }
-
-  const handleOk = () => {
-    ProductAPI.createNew({
-      ...product,
-      dateInputNPL: dateInputNPLValue,
-      dateOutputFCR: dateOutputFCRValue
-    }).then((res) => {
-      // PrintablePlaceAPI.createNew()
-      console.log(res?.data)
-    })
-    // console.log({
-    //   ...product,
-    //   dateInputNPL: dateInputNPLValue.format(),
-    //   dateOutputFCR: dateOutputFCRValue.format(),
-    //   prints: selectedValue
-    // })
-  }
-
-  const handleCancel = () => {}
 
   return {
     product,
     options,
     setProduct,
-    selectedValue,
+    prints,
+    setPrints,
     dateInputNPLValue,
     dateOutputFCRValue,
     onSelectDateInputNPL,
     onSelectDateOutputFCR,
     onPanelChangeDateInputNPL,
     onPanelChangeDateOutputFCR,
-    handleChangeSelector,
-    handleOk,
-    handleCancel
+    handleChangeSelector
   }
 }
