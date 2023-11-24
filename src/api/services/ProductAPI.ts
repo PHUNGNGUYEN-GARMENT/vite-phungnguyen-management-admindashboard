@@ -18,7 +18,9 @@ export default {
         errorFormatter(error)
       })
   },
-  createNew: async (product: Product): Promise<ResponseDataType | undefined> => {
+  createNew: async (
+    product: Product
+  ): Promise<ResponseDataType | undefined> => {
     return await client
       .post(`${PATH_API}`, {
         productCode: product.productCode,
@@ -49,7 +51,9 @@ export default {
         errorFormatter(error)
       })
   },
-  updateItem: async (product: Product): Promise<ResponseDataType | undefined> => {
+  updateItem: async (
+    product: Product
+  ): Promise<ResponseDataType | undefined> => {
     return client
       .put(`${PATH_API}/${product.productID}`, {
         productCode: product.productCode,

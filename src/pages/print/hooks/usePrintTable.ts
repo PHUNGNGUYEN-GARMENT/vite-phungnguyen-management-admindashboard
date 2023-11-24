@@ -25,7 +25,9 @@ export default function usePrintTable() {
   const isEditing = (record: PrintTableDataType) => record.key === editingKey
   const isDelete = (record: PrintTableDataType) => record.key === deleteKey
 
-  const handleEdit = (record: Partial<PrintTableDataType> & { key: React.Key }) => {
+  const handleEdit = (
+    record: Partial<PrintTableDataType> & { key: React.Key }
+  ) => {
     form.setFieldsValue({ name: '', createdAt: '', updatedAt: '', ...record })
     setEditingKey(record.key)
   }
@@ -93,7 +95,9 @@ export default function usePrintTable() {
     const itemFound = dataSource.find((item) => item.key === key)
     if (itemFound) {
       PrintAPI.deleteItem(itemFound.printID).then(() => {
-        const dataSourceRemovedItem = dataSource.filter((item) => item.printID !== key)
+        const dataSourceRemovedItem = dataSource.filter(
+          (item) => item.printID !== key
+        )
         setDataSource(dataSourceRemovedItem)
       })
     }

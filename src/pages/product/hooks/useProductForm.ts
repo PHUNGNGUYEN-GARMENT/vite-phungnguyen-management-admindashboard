@@ -16,9 +16,15 @@ export default function useProductForm() {
   const [prints, setPrints] = useState<Print[]>([])
   const [printableSelected, setPrintableSelected] = useState<Print[]>([])
   const [dateInputValue, setDateInputValue] = useState(() => dayjs(Date.now()))
-  const [dateInputSelectedValue, setDateInputSelectedValue] = useState(() => dayjs(Date.now()))
-  const [dateOutputValue, setDateOutputValue] = useState(() => dayjs(Date.now()))
-  const [dateOutputSelectedValue, setDateOutputSelectedValue] = useState(() => dayjs(Date.now()))
+  const [dateInputSelectedValue, setDateInputSelectedValue] = useState(() =>
+    dayjs(Date.now())
+  )
+  const [dateOutputValue, setDateOutputValue] = useState(() =>
+    dayjs(Date.now())
+  )
+  const [dateOutputSelectedValue, setDateOutputSelectedValue] = useState(() =>
+    dayjs(Date.now())
+  )
 
   useEffect(() => {
     setProduct({
@@ -26,7 +32,12 @@ export default function useProductForm() {
       dateOutputFCR: dateOutputSelectedValue.format(DatePattern.input),
       dateInputNPL: dateInputSelectedValue.format(DatePattern.input)
     })
-  }, [dateInputValue, dateOutputValue, dateInputSelectedValue, dateOutputSelectedValue])
+  }, [
+    dateInputValue,
+    dateOutputValue,
+    dateInputSelectedValue,
+    dateOutputSelectedValue
+  ])
 
   const onSelectDateInputNPL = (newValue: Dayjs) => {
     setDateInputValue(newValue)
@@ -50,7 +61,10 @@ export default function useProductForm() {
     return { label: item.name, value: item.printID, desc: item.name }
   })
 
-  const handleChangeSelector = (_value: string[], option: DefaultOptionType | DefaultOptionType[]) => {
+  const handleChangeSelector = (
+    _value: string[],
+    option: DefaultOptionType | DefaultOptionType[]
+  ) => {
     setPrintableSelected(
       option.map((item: DefaultOptionType) => {
         return { printID: item.value, name: item.label } as Print

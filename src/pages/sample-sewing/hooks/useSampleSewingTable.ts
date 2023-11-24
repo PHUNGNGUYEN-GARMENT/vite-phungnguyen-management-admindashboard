@@ -22,11 +22,21 @@ export default function useSampleSewingTable() {
     })
   }, [])
 
-  const isEditing = (record: SampleSewingTableDataType) => record.key === editingKey
-  const isDelete = (record: SampleSewingTableDataType) => record.key === deleteKey
+  const isEditing = (record: SampleSewingTableDataType) =>
+    record.key === editingKey
+  const isDelete = (record: SampleSewingTableDataType) =>
+    record.key === deleteKey
 
-  const handleEdit = (record: Partial<SampleSewingTableDataType> & { key: React.Key }) => {
-    form.setFieldsValue({ productID: '', dateSewingNPL: '', createdAt: '', updatedAt: '', ...record })
+  const handleEdit = (
+    record: Partial<SampleSewingTableDataType> & { key: React.Key }
+  ) => {
+    form.setFieldsValue({
+      productID: '',
+      dateSewingNPL: '',
+      createdAt: '',
+      updatedAt: '',
+      ...record
+    })
     setEditingKey(record.key)
   }
 
@@ -93,7 +103,9 @@ export default function useSampleSewingTable() {
     const itemFound = dataSource.find((item) => item.key === key)
     if (itemFound) {
       SampleSewingAPI.deleteItem(itemFound.sampleSewingID).then(() => {
-        const dataSourceRemovedItem = dataSource.filter((item) => item.sampleSewingID !== key)
+        const dataSourceRemovedItem = dataSource.filter(
+          (item) => item.sampleSewingID !== key
+        )
         setDataSource(dataSourceRemovedItem)
       })
     }
@@ -105,7 +117,10 @@ export default function useSampleSewingTable() {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         setLoading(true)
         const data = meta?.data as SampleSewing
-        const item: SampleSewingTableDataType = { ...data, key: data.sampleSewingID }
+        const item: SampleSewingTableDataType = {
+          ...data,
+          key: data.sampleSewingID
+        }
         setDataSource([...dataSource, item])
       })
       .finally(() => {

@@ -13,7 +13,10 @@ export default {
         errorFormatter(error)
       })
   },
-  createNew: async (nameColor: string, hexColor: string): Promise<ResponseDataType | undefined> => {
+  createNew: async (
+    nameColor: string,
+    hexColor: string
+  ): Promise<ResponseDataType | undefined> => {
     return client
       .post('colors', {
         nameColor: nameColor,
@@ -44,7 +47,9 @@ export default {
         errorFormatter(error)
       })
   },
-  deleteItem: async (colorID: number): Promise<ResponseDataType | undefined> => {
+  deleteItem: async (
+    colorID: number
+  ): Promise<ResponseDataType | undefined> => {
     return client
       .delete(`colors/${colorID}`)
       .then((res) => {

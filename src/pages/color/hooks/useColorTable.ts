@@ -25,8 +25,16 @@ export default function useColorTable() {
   const isEditing = (record: ColorTableDataType) => record.key === editingKey
   const isDelete = (record: ColorTableDataType) => record.key === deleteKey
 
-  const handleEdit = (record: Partial<ColorTableDataType> & { key: React.Key }) => {
-    form.setFieldsValue({ nameColor: '', hexColor: '', createdAt: '', updatedAt: '', ...record })
+  const handleEdit = (
+    record: Partial<ColorTableDataType> & { key: React.Key }
+  ) => {
+    form.setFieldsValue({
+      nameColor: '',
+      hexColor: '',
+      createdAt: '',
+      updatedAt: '',
+      ...record
+    })
     setEditingKey(record.key)
   }
 
@@ -92,7 +100,9 @@ export default function useColorTable() {
     const itemFound = dataSource.find((item) => item.key === key)
     if (itemFound) {
       ColorAPI.deleteItem(itemFound.colorID).then(() => {
-        const dataSourceRemovedItem = dataSource.filter((item) => item.colorID !== key)
+        const dataSourceRemovedItem = dataSource.filter(
+          (item) => item.colorID !== key
+        )
         setDataSource(dataSourceRemovedItem)
       })
     }

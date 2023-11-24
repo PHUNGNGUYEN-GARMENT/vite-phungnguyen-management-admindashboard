@@ -1,4 +1,13 @@
-import { Button, Flex, Form, Modal, Popconfirm, Table, Tag, Typography } from 'antd'
+import {
+  Button,
+  Flex,
+  Form,
+  Modal,
+  Popconfirm,
+  Table,
+  Tag,
+  Typography
+} from 'antd'
 import { AnyObject } from 'antd/es/_util/type'
 import { Plus } from 'lucide-react'
 import React from 'react'
@@ -22,7 +31,14 @@ export interface ColorTableDataType {
 
 // eslint-disable-next-line react-refresh/only-export-components
 const ColorPage = () => {
-  const { nameColor, hexColor, setNameColor, setHexColor, openModal, setOpenModal } = useColor()
+  const {
+    nameColor,
+    hexColor,
+    setNameColor,
+    setHexColor,
+    openModal,
+    setOpenModal
+  } = useColor()
   const {
     form,
     loading,
@@ -40,7 +56,10 @@ const ColorPage = () => {
 
   type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>
 
-  const columns: (ColumnTypes[number] & { editable?: boolean; dataIndex: string })[] = [
+  const columns: (ColumnTypes[number] & {
+    editable?: boolean
+    dataIndex: string
+  })[] = [
     {
       title: 'ID',
       dataIndex: 'colorID',
@@ -69,10 +88,13 @@ const ColorPage = () => {
           style={{
             backgroundColor: `${hex}`
           }}
-          className={cn('flex-items flex w-16 justify-center rounded-sm font-semibold text-white', {
-            'text-foreground': hex === '#ffffff',
-            'text-background': hex === '#000000'
-          })}
+          className={cn(
+            'flex-items flex w-16 justify-center rounded-sm font-semibold text-white',
+            {
+              'text-foreground': hex === '#ffffff',
+              'text-background': hex === '#000000'
+            }
+          )}
         >
           {hex}
         </Tag>
@@ -84,7 +106,11 @@ const ColorPage = () => {
       width: '15%',
       editable: true,
       render(value) {
-        return <Typography.Text className='text-sm'>{firstLetterUppercase(dateDistance(value))}</Typography.Text>
+        return (
+          <Typography.Text className='text-sm'>
+            {firstLetterUppercase(dateDistance(value))}
+          </Typography.Text>
+        )
       }
     },
     {
@@ -93,7 +119,11 @@ const ColorPage = () => {
       width: '15%',
       editable: true,
       render(value) {
-        return <Typography.Text className='text-sm'>{firstLetterUppercase(dateDistance(value))}</Typography.Text>
+        return (
+          <Typography.Text className='text-sm'>
+            {firstLetterUppercase(dateDistance(value))}
+          </Typography.Text>
+        )
       }
     },
     {
@@ -105,8 +135,13 @@ const ColorPage = () => {
         // const deletable = isDelete(record as ColorTableDataType)
         return editable ? (
           <Flex gap={30}>
-            <Typography.Link onClick={() => handleSaveEditing(record.key)}>Save</Typography.Link>
-            <Popconfirm title={`Sure to cancel?`} onConfirm={handleCancelEditing}>
+            <Typography.Link onClick={() => handleSaveEditing(record.key)}>
+              Save
+            </Typography.Link>
+            <Popconfirm
+              title={`Sure to cancel?`}
+              onConfirm={handleCancelEditing}
+            >
               <a>Cancel</a>
             </Popconfirm>
           </Flex>
@@ -119,7 +154,13 @@ const ColorPage = () => {
               type='dashed'
               disabled={editingKey !== ''}
               onClick={() => {
-                form.setFieldsValue({ nameColor: '', hexColor: '', createdAt: '', updatedAt: '', ...record })
+                form.setFieldsValue({
+                  nameColor: '',
+                  hexColor: '',
+                  createdAt: '',
+                  updatedAt: '',
+                  ...record
+                })
                 handleEdit(record as ColorTableDataType)
               }}
             >
@@ -200,7 +241,12 @@ const ColorPage = () => {
         }}
         onCancel={() => setOpenModal(false)}
       >
-        <AddNewColor nameColor={nameColor} setNameColor={setNameColor} hexColor={hexColor} setHexColor={setHexColor} />
+        <AddNewColor
+          nameColor={nameColor}
+          setNameColor={setNameColor}
+          hexColor={hexColor}
+          setHexColor={setHexColor}
+        />
       </Modal>
     </>
   )

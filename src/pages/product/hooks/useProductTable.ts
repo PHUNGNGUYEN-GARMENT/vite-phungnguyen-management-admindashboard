@@ -13,7 +13,9 @@ export default function useProductTable() {
   const isEditing = (record: ProductTableDataType) => record.key === editingKey
   const isDelete = (record: ProductTableDataType) => record.key === deleteKey
 
-  const handleEdit = (record: Partial<ProductTableDataType> & { key: React.Key }) => {
+  const handleEdit = (
+    record: Partial<ProductTableDataType> & { key: React.Key }
+  ) => {
     form.setFieldsValue({ name: '', createdAt: '', updatedAt: '', ...record })
     setEditingKey(record.key)
   }
@@ -34,7 +36,10 @@ export default function useProductTable() {
     setDeleteKey('')
   }
 
-  const handleSaveEditing = async (key: React.Key, setLoading: (status: boolean) => void) => {
+  const handleSaveEditing = async (
+    key: React.Key,
+    setLoading: (status: boolean) => void
+  ) => {
     try {
       const row = (await form.validateFields()) as ProductTableDataType
 
@@ -72,7 +77,9 @@ export default function useProductTable() {
     const itemFound = dataSource.find((item) => item.key === key)
     if (itemFound) {
       ProductAPI.deleteItem(itemFound.productID).then(() => {
-        const dataSourceRemovedItem = dataSource.filter((item) => item.productID !== key)
+        const dataSourceRemovedItem = dataSource.filter(
+          (item) => item.productID !== key
+        )
         setDataSource(dataSourceRemovedItem)
       })
     }

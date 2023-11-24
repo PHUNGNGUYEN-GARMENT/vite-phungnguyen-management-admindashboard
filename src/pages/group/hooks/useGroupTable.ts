@@ -25,7 +25,9 @@ export default function useGroupTable() {
   const isEditing = (record: GroupTableDataType) => record.key === editingKey
   const isDelete = (record: GroupTableDataType) => record.key === deleteKey
 
-  const handleEdit = (record: Partial<GroupTableDataType> & { key: React.Key }) => {
+  const handleEdit = (
+    record: Partial<GroupTableDataType> & { key: React.Key }
+  ) => {
     form.setFieldsValue({ name: '', createdAt: '', updatedAt: '', ...record })
     setEditingKey(record.key)
   }
@@ -93,7 +95,9 @@ export default function useGroupTable() {
     const itemFound = dataSource.find((item) => item.key === key)
     if (itemFound) {
       GroupAPI.deleteItem(itemFound.groupID).then(() => {
-        const dataSourceRemovedItem = dataSource.filter((item) => item.groupID !== key)
+        const dataSourceRemovedItem = dataSource.filter(
+          (item) => item.groupID !== key
+        )
         setDataSource(dataSourceRemovedItem)
       })
     }

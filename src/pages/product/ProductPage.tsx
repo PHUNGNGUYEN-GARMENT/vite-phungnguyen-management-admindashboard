@@ -3,7 +3,6 @@ import { Button, Flex, Form, Popconfirm, Table, Tag, Typography } from 'antd'
 import { AnyObject } from 'antd/es/_util/type'
 import { Plus } from 'lucide-react'
 import { memo, useEffect } from 'react'
-import { ResponseDataType } from '~/api/client'
 import PrintablePlaceAPI from '~/api/services/PrintablePlaceAPI'
 import ProductAPI from '~/api/services/ProductAPI'
 import { PrintablePlace, Product } from '~/typing'
@@ -21,16 +20,24 @@ export interface ProductTableDataType {
   productID: number
   productCode: string
   quantityPO: number
-  dateInputNPL: Date
-  dateOutputFCR: Date
+  dateInputNPL: string
+  dateOutputFCR: string
   prints: string[]
-  createdAt: Date
-  updatedAt: Date
+  createdAt: string
+  updatedAt: string
 }
 
 const ProductPage: React.FC = () => {
-  const { products, setProducts, printablePlaces, setPrintablePlaces, openModal, setOpenModal, loading, setLoading } =
-    useProduct()
+  const {
+    products,
+    setProducts,
+    printablePlaces,
+    setPrintablePlaces,
+    openModal,
+    setOpenModal,
+    loading,
+    setLoading
+  } = useProduct()
   const {
     form,
     dataSource,
@@ -47,17 +54,16 @@ const ProductPage: React.FC = () => {
 
   useEffect(() => {
     ProductAPI.getAlls()
-      .then((res1) => {
+      .then((res) => {
         setLoading(true)
-        if (res1?.isSuccess) {
-          const data1 = res1 as ResponseDataType
-          setProducts(data1.data as Product[])
+        if (res?.isSuccess) {
+          setProducts(res.data as Product[])
         }
       })
       .then(() => {
-        PrintablePlaceAPI.getAlls(4, 18).then((res2) => {
-          if (res2?.isSuccess) {
-            setPrintablePlaces(res2.data as PrintablePlace[])
+        PrintablePlaceAPI.getAlls().then((res) => {
+          if (res?.isSuccess) {
+            setPrintablePlaces(res.data as PrintablePlace[])
           }
         })
       })
@@ -70,7 +76,9 @@ const ProductPage: React.FC = () => {
     setDataSource(
       products.length > 0 && printablePlaces.length > 0
         ? products.map((item) => {
-            const prints = printablePlaces.filter((print) => print.productID === item.productID)
+            const prints = printablePlaces.filter(
+              (print) => print.productID === item.productID
+            )
             return {
               ...item,
               key: item.productID,
@@ -125,10 +133,26 @@ const ProductPage: React.FC = () => {
             }}
           >
             <Column title='ID' dataIndex='productID' key='productID' />
-            <Column title='Product Code' dataIndex='productCode' key='productCode' />
-            <Column title='Quantity PO' dataIndex='quantityPO' key='quantityPO' />
-            <Column title='Date Input NPL' dataIndex='dateInputNPL' key='dateInputNPL' />
-            <Column title='Date Output FCR' dataIndex='dateOutputFCR' key='dateOutputFCR' />
+            <Column
+              title='Product Code'
+              dataIndex='productCode'
+              key='productCode'
+            />
+            <Column
+              title='Quantity PO'
+              dataIndex='quantityPO'
+              key='quantityPO'
+            />
+            <Column
+              title='Date Input NPL'
+              dataIndex='dateInputNPL'
+              key='dateInputNPL'
+            />
+            <Column
+              title='Date Output FCR'
+              dataIndex='dateOutputFCR'
+              key='dateOutputFCR'
+            />
             <Column
               title='Nơi in - Thêu'
               dataIndex='prints'
@@ -146,7 +170,11 @@ const ProductPage: React.FC = () => {
               dataIndex='createdAt'
               key='createdAt'
               render={(val) => {
-                return <Typography.Text className='text-sm'>{firstLetterUppercase(dateDistance(val))}</Typography.Text>
+                return (
+                  <Typography.Text className='text-sm'>
+                    {firstLetterUppercase(dateDistance(val))}
+                  </Typography.Text>
+                )
               }}
             />
             <Column
@@ -154,7 +182,11 @@ const ProductPage: React.FC = () => {
               dataIndex='updatedAt'
               key='updatedAt'
               render={(val) => {
-                return <Typography.Text className='text-sm'>{firstLetterUppercase(dateDistance(val))}</Typography.Text>
+                return (
+                  <Typography.Text className='text-sm'>
+                    {firstLetterUppercase(dateDistance(val))}
+                  </Typography.Text>
+                )
               }}
             />
             <Column
@@ -166,8 +198,15 @@ const ProductPage: React.FC = () => {
                 // const deletable = isDelete(record as ColorTableDataType)
                 return editable ? (
                   <Flex gap={30}>
-                    <Typography.Link onClick={() => handleSaveEditing(record.key, setLoading)}>Save</Typography.Link>
-                    <Popconfirm title={`Sure to cancel?`} onConfirm={handleCancelEditing}>
+                    <Typography.Link
+                      onClick={() => handleSaveEditing(record.key, setLoading)}
+                    >
+                      Save
+                    </Typography.Link>
+                    <Popconfirm
+                      title={`Sure to cancel?`}
+                      onConfirm={handleCancelEditing}
+                    >
                       <a>Cancel</a>
                     </Popconfirm>
                   </Flex>
@@ -209,7 +248,11 @@ const ProductPage: React.FC = () => {
           </Table>
         </Form>
       </Flex>
-      {openModal && <AddNewProduct setLoading={setLoading} openModal={openModal} setOpenModal={setOpenModal} />}
+      <AddNewProduct
+        setLoading={setLoading}
+        openModal={openModal}
+        setOpenModal={setOpenModal}
+      />
     </>
   )
 }

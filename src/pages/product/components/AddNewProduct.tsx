@@ -1,4 +1,12 @@
-import { Calendar, Flex, Input, InputNumber, Modal, Select, Typography } from 'antd'
+import {
+  Calendar,
+  Flex,
+  Input,
+  InputNumber,
+  Modal,
+  Select,
+  Typography
+} from 'antd'
 import React, { memo, useEffect } from 'react'
 import PrintAPI from '~/api/services/PrintAPI'
 import { Print } from '~/typing'
@@ -33,7 +41,6 @@ const AddNewProduct: React.FC<Props> = ({ ...props }) => {
     PrintAPI.getAlls().then((res) => {
       if (res?.isSuccess) {
         if (res?.isSuccess) {
-          console.log(res)
           setPrints(res.data as Print[])
         }
       }
@@ -51,21 +58,31 @@ const AddNewProduct: React.FC<Props> = ({ ...props }) => {
         handleCancel()
       }}
     >
-      <Flex vertical gap={20} className='w-full sm:w-[500px] md:w-[600px] lg:w-[900px]'>
+      <Flex
+        vertical
+        gap={20}
+        className='w-full sm:w-[500px] md:w-[600px] lg:w-[900px]'
+      >
         <Typography.Title level={2}>Add new product</Typography.Title>
         <Flex vertical={false} gap={20} className='w-full'>
           <Flex align='center' gap={5} className='w-full'>
-            <Typography.Text className='w-24 flex-shrink-0'>Mã Code:</Typography.Text>
+            <Typography.Text className='w-24 flex-shrink-0'>
+              Mã Code:
+            </Typography.Text>
             <Input
               value={product.productCode}
-              onChange={(e) => setProduct({ ...product, productCode: e.target.value })}
+              onChange={(e) =>
+                setProduct({ ...product, productCode: e.target.value })
+              }
               allowClear
               className='w-full'
               placeholder='Product code..'
             />
           </Flex>
           <Flex align='center' gap={5} className='w-full'>
-            <Typography.Text className='w-24 flex-shrink-0'>Số lượng PO:</Typography.Text>
+            <Typography.Text className='w-24 flex-shrink-0'>
+              Số lượng PO:
+            </Typography.Text>
             <InputNumber
               className='w-full'
               value={product.quantityPO}
@@ -80,7 +97,9 @@ const AddNewProduct: React.FC<Props> = ({ ...props }) => {
           </Flex>
         </Flex>
         <Flex align='center' gap={5} className='w-full'>
-          <Typography.Text className='w-24 flex-shrink-0'>Nơi in - Thêu:</Typography.Text>
+          <Typography.Text className='w-24 flex-shrink-0'>
+            Nơi in - Thêu:
+          </Typography.Text>
           <Select
             mode='multiple'
             allowClear
@@ -94,9 +113,15 @@ const AddNewProduct: React.FC<Props> = ({ ...props }) => {
             }}
           />
         </Flex>
-        <Flex vertical={false} gap={30} className='flex w-full flex-col items-center justify-center lg:flex-row'>
+        <Flex
+          vertical={false}
+          gap={30}
+          className='flex w-full flex-col items-center justify-center lg:flex-row'
+        >
           <Flex vertical>
-            <Typography.Text className='flex-shrink-0'>Ngày nhập NPL:</Typography.Text>
+            <Typography.Text className='flex-shrink-0'>
+              Ngày nhập NPL:
+            </Typography.Text>
             <Calendar
               fullscreen={false}
               value={dateInputValue}
@@ -105,7 +130,9 @@ const AddNewProduct: React.FC<Props> = ({ ...props }) => {
             />
           </Flex>
           <Flex vertical>
-            <Typography.Text className='flex-shrink-0'>Ngày xuất FCR:</Typography.Text>
+            <Typography.Text className='flex-shrink-0'>
+              Ngày xuất FCR:
+            </Typography.Text>
             <Calendar
               fullscreen={false}
               value={dateOutputValue}

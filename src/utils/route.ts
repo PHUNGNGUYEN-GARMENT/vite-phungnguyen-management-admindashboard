@@ -37,7 +37,9 @@ const ImportationPage = lazy(() => import('~/pages/importation/Importation'))
 const NotePage = lazy(() => import('~/pages/note/Note'))
 const PrintPage = lazy(() => import('~/pages/print/PrintPage'))
 const ProductPage = lazy(() => import('~/pages/product/ProductPage'))
-const SewingLineDeliveryPage = lazy(() => import('~/pages/sewing-line-delivery/SewingLineDeliveryPage'))
+const SewingLineDeliveryPage = lazy(
+  () => import('~/pages/sewing-line-delivery/SewingLineDeliveryPage')
+)
 const UnitPage = lazy(() => import('~/pages/unit/Unit'))
 const FinishPage = lazy(() => import('~/pages/Finish/Finish'))
 
@@ -46,7 +48,10 @@ export type SideType = {
   name: string
   path: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  component: React.LazyExoticComponent<() => JSX.Element> | React.ReactNode | any
+  component:
+    | React.LazyExoticComponent<() => JSX.Element>
+    | React.ReactNode
+    | any
   isGroup?: boolean
   icon: string
 }

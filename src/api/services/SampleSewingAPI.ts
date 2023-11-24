@@ -15,7 +15,10 @@ export default {
         errorFormatter(error)
       })
   },
-  createNew: async (productID: number, dateSewingNPL: string): Promise<ResponseDataType | undefined> => {
+  createNew: async (
+    productID: number,
+    dateSewingNPL: string
+  ): Promise<ResponseDataType | undefined> => {
     return client
       .post(`${PATH_API}`, {
         productID: productID,
@@ -38,7 +41,9 @@ export default {
         errorFormatter(error)
       })
   },
-  updateItem: async (item: SampleSewing): Promise<ResponseDataType | undefined> => {
+  updateItem: async (
+    item: SampleSewing
+  ): Promise<ResponseDataType | undefined> => {
     return client
       .put(`${PATH_API}/${item.sampleSewingID}`, {
         productID: item.productID,

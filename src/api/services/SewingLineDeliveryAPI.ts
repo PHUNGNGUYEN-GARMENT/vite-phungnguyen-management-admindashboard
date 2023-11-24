@@ -15,7 +15,9 @@ export default {
         errorFormatter(error)
       })
   },
-  createNew: async (sewingLine: string): Promise<ResponseDataType | undefined> => {
+  createNew: async (
+    sewingLine: string
+  ): Promise<ResponseDataType | undefined> => {
     return client
       .post(`${PATH_API}`, {
         sewingLine: sewingLine
@@ -37,7 +39,9 @@ export default {
         errorFormatter(error)
       })
   },
-  updateItem: async (item: SewingLineDelivery): Promise<ResponseDataType | undefined> => {
+  updateItem: async (
+    item: SewingLineDelivery
+  ): Promise<ResponseDataType | undefined> => {
     return client
       .put(`${PATH_API}/${item.sewingLineDeliveryID}`, {
         sewingLine: item.sewingLine,

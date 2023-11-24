@@ -15,7 +15,9 @@ const AddNewColor: React.FC<Props> = ({ ...props }) => {
       <Typography.Title level={2}>Add new color</Typography.Title>
       <Flex vertical gap={10}>
         <Flex align='center' gap={5}>
-          <Typography.Text className='w-24 flex-shrink-0'>Color name:</Typography.Text>
+          <Typography.Text className='w-24 flex-shrink-0'>
+            Color name:
+          </Typography.Text>
           <Input
             value={props.nameColor}
             onChange={(e) => props.setNameColor(e.target.value)}
@@ -24,7 +26,9 @@ const AddNewColor: React.FC<Props> = ({ ...props }) => {
           />
         </Flex>
         <Flex align='center' gap={5}>
-          <Typography.Text className='w-24 flex-shrink-0'>Pick color:</Typography.Text>
+          <Typography.Text className='w-24 flex-shrink-0'>
+            Pick color:
+          </Typography.Text>
           <ColorPicker
             onChange={(_, hex) => {
               props.setHexColor(hex)

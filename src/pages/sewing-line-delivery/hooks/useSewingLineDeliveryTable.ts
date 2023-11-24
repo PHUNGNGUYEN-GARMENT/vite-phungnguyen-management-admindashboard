@@ -6,7 +6,9 @@ import SewingLineDeliveryAPI from '../../../api/services/SewingLineDeliveryAPI'
 
 export default function useSewingLineDeliveryTable() {
   const [form] = useForm()
-  const [dataSource, setDataSource] = useState<SewingLineDeliveryTableDataType[]>([])
+  const [dataSource, setDataSource] = useState<
+    SewingLineDeliveryTableDataType[]
+  >([])
   const [editingKey, setEditingKey] = useState<React.Key>('')
   const [deleteKey, setDeleteKey] = useState<React.Key>('')
   const [loading, setLoading] = useState<boolean>(false)
@@ -22,10 +24,14 @@ export default function useSewingLineDeliveryTable() {
     })
   }, [])
 
-  const isEditing = (record: SewingLineDeliveryTableDataType) => record.key === editingKey
-  const isDelete = (record: SewingLineDeliveryTableDataType) => record.key === deleteKey
+  const isEditing = (record: SewingLineDeliveryTableDataType) =>
+    record.key === editingKey
+  const isDelete = (record: SewingLineDeliveryTableDataType) =>
+    record.key === deleteKey
 
-  const handleEdit = (record: Partial<SewingLineDeliveryTableDataType> & { key: React.Key }) => {
+  const handleEdit = (
+    record: Partial<SewingLineDeliveryTableDataType> & { key: React.Key }
+  ) => {
     form.setFieldsValue({ name: '', createdAt: '', updatedAt: '', ...record })
     setEditingKey(record.key)
   }
@@ -56,7 +62,8 @@ export default function useSewingLineDeliveryTable() {
 
   const handleSaveEditing = async (key: React.Key) => {
     try {
-      const row = (await form.validateFields()) as SewingLineDeliveryTableDataType
+      const row =
+        (await form.validateFields()) as SewingLineDeliveryTableDataType
 
       const newData = [...dataSource]
       const index = newData.findIndex((item) => key === item.key)
@@ -92,10 +99,14 @@ export default function useSewingLineDeliveryTable() {
   const handleDeleteRow = (key: React.Key) => {
     const itemFound = dataSource.find((item) => item.key === key)
     if (itemFound) {
-      SewingLineDeliveryAPI.deleteItem(itemFound.sewingLineDeliveryID).then(() => {
-        const dataSourceRemovedItem = dataSource.filter((item) => item.sewingLineDeliveryID !== key)
-        setDataSource(dataSourceRemovedItem)
-      })
+      SewingLineDeliveryAPI.deleteItem(itemFound.sewingLineDeliveryID).then(
+        () => {
+          const dataSourceRemovedItem = dataSource.filter(
+            (item) => item.sewingLineDeliveryID !== key
+          )
+          setDataSource(dataSourceRemovedItem)
+        }
+      )
     }
   }
 
@@ -104,7 +115,10 @@ export default function useSewingLineDeliveryTable() {
       .then((meta) => {
         setLoading(true)
         const data = meta?.data as SewingLineDelivery
-        const item: SewingLineDeliveryTableDataType = { ...data, key: data.sewingLineDeliveryID }
+        const item: SewingLineDeliveryTableDataType = {
+          ...data,
+          key: data.sewingLineDeliveryID
+        }
         setDataSource([...dataSource, item])
       })
       .finally(() => {

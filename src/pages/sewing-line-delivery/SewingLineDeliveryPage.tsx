@@ -20,7 +20,12 @@ export interface SewingLineDeliveryTableDataType {
 
 // eslint-disable-next-line react-refresh/only-export-components
 const SewingLineDeliveryPage = () => {
-  const { sewingLineDeliveryName, setSewingLineDeliveryName, openModal, setOpenModal } = useSewingLineDelivery()
+  const {
+    sewingLineDeliveryName,
+    setSewingLineDeliveryName,
+    openModal,
+    setOpenModal
+  } = useSewingLineDelivery()
   const {
     form,
     loading,
@@ -38,7 +43,10 @@ const SewingLineDeliveryPage = () => {
 
   type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>
 
-  const columns: (ColumnTypes[number] & { editable?: boolean; dataIndex: string })[] = [
+  const columns: (ColumnTypes[number] & {
+    editable?: boolean
+    dataIndex: string
+  })[] = [
     {
       title: 'ID',
       dataIndex: 'sewingLineDeliveryID',
@@ -57,7 +65,11 @@ const SewingLineDeliveryPage = () => {
       width: '15%',
       editable: true,
       render(value) {
-        return <Typography.Text className='text-sm'>{firstLetterUppercase(dateDistance(value))}</Typography.Text>
+        return (
+          <Typography.Text className='text-sm'>
+            {firstLetterUppercase(dateDistance(value))}
+          </Typography.Text>
+        )
       }
     },
     {
@@ -66,7 +78,11 @@ const SewingLineDeliveryPage = () => {
       width: '15%',
       editable: true,
       render(value) {
-        return <Typography.Text className='text-sm'>{firstLetterUppercase(dateDistance(value))}</Typography.Text>
+        return (
+          <Typography.Text className='text-sm'>
+            {firstLetterUppercase(dateDistance(value))}
+          </Typography.Text>
+        )
       }
     },
     {
@@ -78,8 +94,13 @@ const SewingLineDeliveryPage = () => {
         // const deletable = isDelete(record as PrintInTableDataType)
         return editable ? (
           <Flex gap={30}>
-            <Typography.Link onClick={() => handleSaveEditing(record.key)}>Save</Typography.Link>
-            <Popconfirm title={`Sure to cancel?`} onConfirm={handleCancelEditing}>
+            <Typography.Link onClick={() => handleSaveEditing(record.key)}>
+              Save
+            </Typography.Link>
+            <Popconfirm
+              title={`Sure to cancel?`}
+              onConfirm={handleCancelEditing}
+            >
               <a>Cancel</a>
             </Popconfirm>
           </Flex>
@@ -92,7 +113,12 @@ const SewingLineDeliveryPage = () => {
               type='dashed'
               disabled={editingKey !== ''}
               onClick={() => {
-                form.setFieldsValue({ sewingLine: '', createdAt: '', updatedAt: '', ...record })
+                form.setFieldsValue({
+                  sewingLine: '',
+                  createdAt: '',
+                  updatedAt: '',
+                  ...record
+                })
                 handleEdit(record as SewingLineDeliveryTableDataType)
               }}
             >

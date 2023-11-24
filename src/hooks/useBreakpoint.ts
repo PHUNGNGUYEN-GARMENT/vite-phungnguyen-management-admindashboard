@@ -8,11 +8,17 @@ const useBreakpoint = () => {
   useEffect(() => {
     if (window.matchMedia('only screen and (max-width: 640px)').matches) {
       setBreakpoint('sm')
-    } else if (window.matchMedia('only screen and (max-width: 768px)').matches) {
+    } else if (
+      window.matchMedia('only screen and (max-width: 768px)').matches
+    ) {
       setBreakpoint('md')
-    } else if (window.matchMedia('only screen and (max-width: 1024px)').matches) {
+    } else if (
+      window.matchMedia('only screen and (max-width: 1024px)').matches
+    ) {
       setBreakpoint('lg')
-    } else if (window.matchMedia('only screen and (max-width: 1280px)').matches) {
+    } else if (
+      window.matchMedia('only screen and (max-width: 1280px)').matches
+    ) {
       setBreakpoint('xl')
     } else {
       setBreakpoint('2xl')

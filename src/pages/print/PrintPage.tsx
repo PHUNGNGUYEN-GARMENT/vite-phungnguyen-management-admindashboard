@@ -38,7 +38,10 @@ const PrintPage = () => {
 
   type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>
 
-  const columns: (ColumnTypes[number] & { editable?: boolean; dataIndex: string })[] = [
+  const columns: (ColumnTypes[number] & {
+    editable?: boolean
+    dataIndex: string
+  })[] = [
     {
       title: 'ID',
       dataIndex: 'printID',
@@ -63,7 +66,11 @@ const PrintPage = () => {
       width: '15%',
       editable: true,
       render(value) {
-        return <Typography.Text className='text-sm'>{firstLetterUppercase(dateDistance(value))}</Typography.Text>
+        return (
+          <Typography.Text className='text-sm'>
+            {firstLetterUppercase(dateDistance(value))}
+          </Typography.Text>
+        )
       }
     },
     {
@@ -72,7 +79,11 @@ const PrintPage = () => {
       width: '15%',
       editable: true,
       render(value) {
-        return <Typography.Text className='text-sm'>{firstLetterUppercase(dateDistance(value))}</Typography.Text>
+        return (
+          <Typography.Text className='text-sm'>
+            {firstLetterUppercase(dateDistance(value))}
+          </Typography.Text>
+        )
       }
     },
     {
@@ -84,8 +95,13 @@ const PrintPage = () => {
         // const deletable = isDelete(record as PrintInTableDataType)
         return editable ? (
           <Flex gap={30}>
-            <Typography.Link onClick={() => handleSaveEditing(record.key)}>Save</Typography.Link>
-            <Popconfirm title={`Sure to cancel?`} onConfirm={handleCancelEditing}>
+            <Typography.Link onClick={() => handleSaveEditing(record.key)}>
+              Save
+            </Typography.Link>
+            <Popconfirm
+              title={`Sure to cancel?`}
+              onConfirm={handleCancelEditing}
+            >
               <a>Cancel</a>
             </Popconfirm>
           </Flex>
@@ -98,7 +114,12 @@ const PrintPage = () => {
               type='dashed'
               disabled={editingKey !== ''}
               onClick={() => {
-                form.setFieldsValue({ name: '', createdAt: '', updatedAt: '', ...record })
+                form.setFieldsValue({
+                  name: '',
+                  createdAt: '',
+                  updatedAt: '',
+                  ...record
+                })
                 handleEdit(record as PrintTableDataType)
               }}
             >

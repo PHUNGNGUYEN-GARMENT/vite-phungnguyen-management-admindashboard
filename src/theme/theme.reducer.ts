@@ -1,4 +1,7 @@
-export type ThemeActionType = 'HANDLE_SET_DARK_THEME' | 'HANDLE_SET_LIGHT_THEME' | 'HANDLE_TOGGLE_THEME'
+export type ThemeActionType =
+  | 'HANDLE_SET_DARK_THEME'
+  | 'HANDLE_SET_LIGHT_THEME'
+  | 'HANDLE_TOGGLE_THEME'
 
 export type ThemeType = 'dark' | 'light' | 'os'
 
@@ -15,7 +18,10 @@ const initState: ThemeState = {
   theme: 'light'
 }
 
-const themeReducer = (state: ThemeState = initState, action: ThemeAction): ThemeState => {
+const themeReducer = (
+  state: ThemeState = initState,
+  action: ThemeAction
+): ThemeState => {
   switch (action.type) {
     // Dark theme action
     case 'HANDLE_SET_DARK_THEME':

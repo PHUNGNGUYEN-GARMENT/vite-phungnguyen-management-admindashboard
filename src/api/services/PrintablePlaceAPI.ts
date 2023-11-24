@@ -22,7 +22,10 @@ export default {
         errorFormatter(error)
       })
   },
-  getAlls: async (printID: number, productID: number): Promise<ResponseDataType | undefined> => {
+  getAlls: async (
+    printID?: number | null,
+    productID?: number | null
+  ): Promise<ResponseDataType | undefined> => {
     return await client
       .post(`${PATH_API}/find`, {
         printID: printID,
@@ -51,7 +54,9 @@ export default {
         errorFormatter(error)
       })
   },
-  updateItem: async (item: PrintablePlace): Promise<ResponseDataType | undefined> => {
+  updateItem: async (
+    item: PrintablePlace
+  ): Promise<ResponseDataType | undefined> => {
     return client
       .put(`${PATH_API}`, {
         printID: item.printID,
