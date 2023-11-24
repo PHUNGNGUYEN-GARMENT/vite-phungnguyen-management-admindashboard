@@ -1,4 +1,4 @@
-import { Calendar, Flex, Input, InputNumber, Modal, Select, Space, Typography } from 'antd'
+import { Calendar, Flex, Input, InputNumber, Modal, Select, Typography } from 'antd'
 import React, { memo, useEffect } from 'react'
 import PrintAPI from '~/api/services/PrintAPI'
 import { Print } from '~/typing'
@@ -17,8 +17,8 @@ const AddNewProduct: React.FC<Props> = ({ ...props }) => {
     setProduct,
     options,
     setPrints,
-    dateInputNPL,
-    dateOutputFCR,
+    dateInputValue,
+    dateOutputValue,
     onSelectDateInputNPL,
     onSelectDateOutputFCR,
     onPanelChangeDateInputNPL,
@@ -43,7 +43,7 @@ const AddNewProduct: React.FC<Props> = ({ ...props }) => {
   return (
     <Modal
       open={props.openModal}
-      onOk={() => handleOk()}
+      onOk={() => handleOk(props.setLoading)}
       centered
       width='auto'
       onCancel={() => {
@@ -85,18 +85,9 @@ const AddNewProduct: React.FC<Props> = ({ ...props }) => {
             mode='multiple'
             allowClear
             placeholder='Please select'
-            // defaultValue={selectedValue}
             onChange={handleChangeSelector}
             optionLabelProp='label'
             options={options}
-            optionRender={(option) => (
-              <Space>
-                <span role='img' aria-label={option.data.label}>
-                  {option.data.emoji}
-                </span>
-                {option.data.desc}
-              </Space>
-            )}
             className='w-full'
             style={{
               width: '100%'
@@ -108,7 +99,7 @@ const AddNewProduct: React.FC<Props> = ({ ...props }) => {
             <Typography.Text className='flex-shrink-0'>Ngày nhập NPL:</Typography.Text>
             <Calendar
               fullscreen={false}
-              value={dateInputNPL}
+              value={dateInputValue}
               onSelect={onSelectDateInputNPL}
               onPanelChange={onPanelChangeDateInputNPL}
             />
@@ -117,7 +108,7 @@ const AddNewProduct: React.FC<Props> = ({ ...props }) => {
             <Typography.Text className='flex-shrink-0'>Ngày xuất FCR:</Typography.Text>
             <Calendar
               fullscreen={false}
-              value={dateOutputFCR}
+              value={dateOutputValue}
               onSelect={onSelectDateOutputFCR}
               onPanelChange={onPanelChangeDateOutputFCR}
             />

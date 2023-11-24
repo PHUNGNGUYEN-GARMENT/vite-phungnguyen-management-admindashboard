@@ -5,11 +5,12 @@ import { errorFormatter } from '~/utils/promise-formatter'
 const PATH_API = 'printable-places'
 
 export default {
-  createNew: async (printID: number, productID: number): Promise<ResponseDataType | undefined> => {
+  createNew: async (
+    items: { printID: number; productID: number; name?: string }[]
+  ): Promise<ResponseDataType | undefined> => {
     return client
       .post(`${PATH_API}`, {
-        printID: printID,
-        productID: productID
+        items
       })
       .then((res) => {
         if (res.data) {

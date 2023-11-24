@@ -2,10 +2,10 @@ export type Product = {
   productID?: number
   productCode?: string
   quantityPO?: number
-  dateInputNPL?: Date
-  dateOutputFCR?: Date
-  createdAt?: Date
-  updatedAt?: Date
+  dateInputNPL?: string
+  dateOutputFCR?: string
+  createdAt?: string
+  updatedAt?: string
 }
 
 export type Color = {
