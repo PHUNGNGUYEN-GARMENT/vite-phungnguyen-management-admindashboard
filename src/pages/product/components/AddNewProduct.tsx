@@ -7,9 +7,7 @@ import {
   Select,
   Typography
 } from 'antd'
-import React, { memo, useEffect } from 'react'
-import PrintAPI from '~/api/services/PrintAPI'
-import { Print } from '~/typing'
+import React, { memo } from 'react'
 import useFormProduct from '../hooks/useProductForm'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
@@ -24,7 +22,7 @@ const AddNewProduct: React.FC<Props> = ({ ...props }) => {
     product,
     setProduct,
     options,
-    setPrints,
+    prints,
     dateInputValue,
     dateOutputValue,
     onSelectDateInputNPL,
@@ -36,16 +34,6 @@ const AddNewProduct: React.FC<Props> = ({ ...props }) => {
     handleCancel
   } = useFormProduct()
   console.log('Load AddNewProduct...')
-
-  useEffect(() => {
-    PrintAPI.getAlls().then((res) => {
-      if (res?.isSuccess) {
-        if (res?.isSuccess) {
-          setPrints(res.data as Print[])
-        }
-      }
-    })
-  }, [])
 
   return (
     <Modal
@@ -106,7 +94,11 @@ const AddNewProduct: React.FC<Props> = ({ ...props }) => {
             placeholder='Please select'
             onChange={handleChangeSelector}
             optionLabelProp='label'
-            options={options}
+            options={options(
+              prints.map((item) => {
+                return { value: item.printID, label: item.name }
+              })
+            )}
             className='w-full'
             style={{
               width: '100%'

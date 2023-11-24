@@ -6,8 +6,11 @@ export default function useProduct() {
   const [printablePlaces, setPrintablePlaces] = useState<PrintablePlace[]>([])
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [loading, setLoading] = useState<boolean>(false)
+  const [expandedDate, setExpandedDate] = useState<boolean>(false)
 
   return {
+    expandedDate,
+    setExpandedDate,
     products,
     setProducts,
     printablePlaces,

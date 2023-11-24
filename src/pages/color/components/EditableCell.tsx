@@ -1,6 +1,6 @@
 import { Form, Input, InputNumber, Table } from 'antd'
-import { ColorTableDataType } from '../ColorPage'
 import { memo } from 'react'
+import { ColorTableDataType } from '../ColorPage'
 
 type InputType = 'number' | 'text'
 

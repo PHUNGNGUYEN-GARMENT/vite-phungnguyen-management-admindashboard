@@ -3,6 +3,7 @@ import { SelectProps } from 'antd'
 import { DefaultOptionType } from 'antd/es/select'
 import dayjs, { Dayjs } from 'dayjs'
 import { useEffect, useState } from 'react'
+import PrintAPI from '~/api/services/PrintAPI'
 import PrintablePlaceAPI from '~/api/services/PrintablePlaceAPI'
 import ProductAPI from '~/api/services/ProductAPI'
 import { Print, Product } from '~/typing'
@@ -25,6 +26,16 @@ export default function useProductForm() {
   const [dateOutputSelectedValue, setDateOutputSelectedValue] = useState(() =>
     dayjs(Date.now())
   )
+
+  useEffect(() => {
+    PrintAPI.getAlls().then((res) => {
+      if (res?.isSuccess) {
+        if (res?.isSuccess) {
+          setPrints(res.data as Print[])
+        }
+      }
+    })
+  }, [])
 
   useEffect(() => {
     setProduct({
@@ -57,9 +68,13 @@ export default function useProductForm() {
     setDateOutputValue(newValue)
   }
 
-  const options: SelectProps['options'] = prints.map((item) => {
-    return { label: item.name, value: item.printID, desc: item.name }
-  })
+  const options = (
+    items: { value: string | number; label: string }[]
+  ): SelectProps['options'] => {
+    return items.map((item) => {
+      return { label: item.label, value: item.value, desc: item.label }
+    })
+  }
 
   const handleChangeSelector = (
     _value: string[],
