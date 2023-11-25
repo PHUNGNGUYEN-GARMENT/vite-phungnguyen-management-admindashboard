@@ -44,6 +44,7 @@ const ProductPage: React.FC = () => {
     setPrintablePlaces,
     openModal,
     setOpenModal,
+    getNameOfPrints,
     loading,
     setLoading,
     expandedDate,
@@ -94,7 +95,7 @@ const ProductPage: React.FC = () => {
               ...item,
               key: item.productID,
               prints: prints.map((print) => {
-                return print.name
+                return `${print.printID}`
               }),
               productID: item.productID
             } as ProductTableDataType
@@ -152,10 +153,10 @@ const ProductPage: React.FC = () => {
       dataIndex: 'prints',
       width: '20%',
       editable: true,
-      render: (prints: string[]) => (
+      render: (_prints: string[]) => (
         <>
-          {prints.map((print, index) => {
-            return <Tag key={index}>{print}</Tag>
+          {getNameOfPrints(_prints, printablePlaces).map((item, index) => {
+            return <Tag key={index}>{item}</Tag>
           })}
         </>
       )
@@ -375,7 +376,9 @@ const ProductPage: React.FC = () => {
                   ? 'datepicker'
                   : col.dataIndex === 'dateOutputFCR'
                     ? 'datepicker'
-                    : 'select',
+                    : col.dataIndex === 'productID'
+                      ? 'view'
+                      : 'select',
           dataIndex: col.dataIndex,
           title: col.title,
           editing: isEditing(record),

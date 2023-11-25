@@ -1,11 +1,13 @@
+/* eslint-disable react-refresh/only-export-components */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DatePicker, Input, InputNumber, Select, Table } from 'antd'
 import dayjs from 'dayjs'
 import { memo, useEffect } from 'react'
+import useMultipleSelector from '~/components/hooks/useMultipleSelector'
 import { ProductTableDataType } from '../ProductPage'
 import useProductForm from '../hooks/useProductForm'
 
-type InputType = 'select' | 'text' | 'number' | 'datepicker'
+type InputType = 'select' | 'text' | 'number' | 'datepicker' | 'view'
 
 interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
   editing: boolean
@@ -27,19 +29,30 @@ const EditableCell: React.FC<EditableCellProps> = ({
   children,
   ...restProps
 }) => {
-  const { prints, options, product, setProduct, handleChangeSelector } =
-    useProductForm()
+  const { prints, product, setProduct } = useProductForm()
+  const { options, onChangeSelector, values, setValues } = useMultipleSelector()
   useEffect(() => {
     if (record) {
       setProduct({
+        productID: record.productID,
         productCode: record.productCode,
         quantityPO: record.quantityPO,
         dateInputNPL: record.dateInputNPL,
         dateOutputFCR: record.dateOutputFCR
       })
-      console.log(record)
+      if (prints && prints.length > 0 && record.prints.length > 0) {
+        const items = prints.filter(
+          (item) => !record.prints.includes(item.name)
+        )
+        console.log(record.prints)
+        setValues(
+          record.prints.map((item) => {
+            return `${item}`
+          })
+        )
+      }
     }
-  }, [])
+  }, [record])
 
   const inputTypeComponentMap: Record<string, React.ReactNode> = {
     number: (
@@ -70,19 +83,21 @@ const EditableCell: React.FC<EditableCellProps> = ({
         mode='multiple'
         allowClear
         placeholder='Please select'
-        onChange={handleChangeSelector}
+        onChange={onChangeSelector}
         optionLabelProp='label'
-        // options={options(
-        //   record.prints.map((item) => {
-        //     return {
-        //       value: item,
-        //       label:
-        //         prints.length > 0
-        //           ? prints.find((i) => i.name === item)?.name ?? ''
-        //           : item
-        //     }
-        //   })
-        // )}
+        labelInValue={true}
+        defaultValue={values}
+        options={options(
+          prints && prints.length > 0
+            ? prints.map((item) => {
+                return {
+                  value: `${item.printID}`,
+                  label: item.name,
+                  desc: item.name
+                }
+              })
+            : []
+        )}
         className='w-full'
         style={{
           width: '100%'
@@ -97,7 +112,8 @@ const EditableCell: React.FC<EditableCellProps> = ({
             : product.dateOutputFCR
         )}
       />
-    )
+    ),
+    view: <>{product.productID}</>
   }
 
   const inputNode: React.ReactNode =

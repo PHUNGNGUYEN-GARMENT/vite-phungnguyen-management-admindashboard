@@ -15,6 +15,7 @@ export default function useProductForm() {
     dateOutputFCR: dayjs(Date.now()).format(DatePattern.input)
   })
   const [prints, setPrints] = useState<Print[]>([])
+  const [valueSelector, setValueSelector] = useState<string[]>([])
   const [printableSelected, setPrintableSelected] = useState<Print[]>([])
   const [dateInputValue, setDateInputValue] = useState(() => dayjs(Date.now()))
   const [dateInputSelectedValue, setDateInputSelectedValue] = useState(() =>
@@ -80,6 +81,7 @@ export default function useProductForm() {
     _value: string[],
     option: DefaultOptionType | DefaultOptionType[]
   ) => {
+    setValueSelector(_value)
     setPrintableSelected(
       option.map((item: DefaultOptionType) => {
         return { printID: item.value, name: item.label } as Print
@@ -121,8 +123,12 @@ export default function useProductForm() {
     setProduct,
     prints,
     setPrints,
+    printableSelected,
+    setPrintableSelected,
     dateInputValue,
     dateOutputValue,
+    valueSelector,
+    setValueSelector,
     onSelectDateInputNPL,
     onSelectDateOutputFCR,
     onPanelChangeDateInputNPL,
