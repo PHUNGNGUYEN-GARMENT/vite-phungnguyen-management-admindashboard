@@ -1,354 +1,334 @@
 /* eslint-disable react-refresh/only-export-components */
-import {
-  Button,
-  Flex,
-  Form,
-  Popconfirm,
-  Switch,
-  Table,
-  Tag,
-  Typography
-} from 'antd'
-import { AnyObject } from 'antd/es/_util/type'
-import { Plus } from 'lucide-react'
-import React, { memo, useEffect } from 'react'
-import PrintablePlaceAPI from '~/api/services/PrintablePlaceAPI'
-import ProductAPI from '~/api/services/ProductAPI'
-import { PrintablePlace, Product } from '~/typing'
-import { dateDistance } from '~/utils/date-formatter'
-import { firstLetterUppercase } from '~/utils/text'
-import AddNewProduct from './components/AddNewProduct'
-import EditableCell, { EditableTableProps } from './components/EditableCell'
-import useProduct from './hooks/useProduct'
-import useProductTable from './hooks/useProductTable'
-
-export interface ProductTableDataType {
-  key: React.Key
-  productID: number
-  productCode: string
-  quantityPO: number
-  dateInputNPL: string
-  dateOutputFCR: string
-  prints: string[]
-  createdAt: string
-  updatedAt: string
+import { EllipsisOutlined, PlusOutlined } from '@ant-design/icons'
+import type { ActionType, ProColumns } from '@ant-design/pro-components'
+import { ProTable, TableDropdown } from '@ant-design/pro-components'
+import { Button, Dropdown, Input, Select, Space, Tag } from 'antd'
+import { useEffect, useRef, useState } from 'react'
+import request from 'umi-request'
+import appConfig from '~/config/app.config'
+export const waitTimePromise = async (time: number = 100) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(true)
+    }, time)
+  })
 }
 
-type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>
+export const waitTime = async (time: number = 100) => {
+  await waitTimePromise(time)
+}
 
-const ProductPage: React.FC = () => {
-  const {
-    openModal,
-    setOpenModal,
-    products,
-    setProducts,
-    loading,
-    setLoading,
-    printablePlaces,
-    setPrintablePlaces,
-    expandedDate,
-    setExpandedDate
-  } = useProduct()
-  const {
-    form,
-    isEditing,
-    editingKey,
-    dataSource,
-    setDataSource,
-    handleEdit,
-    handleDelete,
-    handleDeleteRow,
-    handleSaveEditing,
-    handleCancelEditing,
-    handleCancelConfirmDelete
-  } = useProductTable()
+const MySelect: React.FC<{
+  state: {
+    type: number
+  }
+  value?: string
+  onChange?: (value: string) => void
+}> = (props) => {
+  const { state } = props
+
+  const [innerOptions, setOptions] = useState<
+    {
+      label: React.ReactNode
+      value: number
+    }[]
+  >([])
 
   useEffect(() => {
-    ProductAPI.getAlls()
-      .then((res) => {
-        setLoading(true)
-        if (res?.isSuccess) {
-          setProducts(res.data as Product[])
+    const { type } = state || {}
+    if (type === 2) {
+      setOptions([
+        {
+          label: '星期一',
+          value: 1
+        },
+        {
+          label: '星期二',
+          value: 2
         }
-      })
-      .then(() => {
-        PrintablePlaceAPI.getAlls().then((res) => {
-          if (res?.isSuccess) {
-            setPrintablePlaces(res.data as PrintablePlace[])
-          }
-        })
-      })
-      .finally(() => {
-        setLoading(false)
-      })
-  }, [])
-
-  useEffect(() => {
-    const isChecked = products.length > 0 && printablePlaces.length > 0
-    setDataSource(
-      isChecked
-        ? products.map((item) => {
-            const productPrints = printablePlaces.filter(
-              (print) => print.productID === item.productID
-            )
-            return {
-              ...item,
-              key: item.productID,
-              prints: productPrints.map((print) => {
-                return `${print.name}`
-              })
-            } as ProductTableDataType
-          })
-        : products.map((item) => {
-            return {
-              ...item,
-              key: item.productID,
-              prints: []
-            } as ProductTableDataType
-          })
-    )
-  }, [printablePlaces, products])
-
-  console.log('Load ProductPage...')
-
-  const rowActionsCol: ColumnTypes[number] & {
-    editable?: boolean
-    dataIndex: string
-  } = {
-    title: 'Operation',
-    dataIndex: 'operation',
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    render: (_: any, record: AnyObject) => {
-      const editable = isEditing(record as ProductTableDataType)
-      // const deletable = isDelete(record as ColorTableDataType)
-      return editable ? (
-        <Flex gap={30}>
-          <Typography.Link
-            onClick={() => handleSaveEditing(record.key, setLoading)}
-          >
-            Save
-          </Typography.Link>
-          <Popconfirm title={`Sure to cancel?`} onConfirm={handleCancelEditing}>
-            <a>Cancel</a>
-          </Popconfirm>
-        </Flex>
-      ) : (
-        <Flex className='flex flex-col gap-3 lg:flex-row'>
-          <Button
-            type='dashed'
-            disabled={editingKey !== ''}
-            onClick={() => {
-              form.setFieldsValue({
-                nameColor: '',
-                hexColor: '',
-                createdAt: '',
-                updatedAt: '',
-                ...record
-              })
-              handleEdit(record as ProductTableDataType)
-            }}
-          >
-            Edit
-          </Button>
-
-          <Popconfirm
-            title={`Sure to delete?`}
-            onCancel={handleCancelConfirmDelete}
-            onConfirm={() => handleDeleteRow(record.key)}
-          >
-            <Button
-              disabled={editingKey !== ''}
-              danger
-              onClick={() => handleDelete(record.key)}
-            >
-              Delete
-            </Button>
-          </Popconfirm>
-        </Flex>
-      )
+      ])
+    } else {
+      setOptions([
+        {
+          label: '一月',
+          value: 1
+        },
+        {
+          label: '二月',
+          value: 2
+        }
+      ])
     }
-  }
-
-  const commonCols: (ColumnTypes[number] & {
-    editable?: boolean
-    dataIndex: string
-  })[] = [
-    {
-      title: 'ID',
-      dataIndex: 'productID',
-      width: '5%',
-      editable: true,
-      responsive: ['lg']
-    },
-    {
-      title: 'Code',
-      dataIndex: 'productCode',
-      width: '15%',
-      editable: true
-    },
-    {
-      title: 'Quantity PO',
-      dataIndex: 'quantityPO',
-      width: '15%',
-      editable: true
-    },
-    {
-      title: 'Date Input NPL',
-      dataIndex: 'dateInputNPL',
-      width: '15%',
-      editable: true
-    },
-    {
-      title: 'Date Output FCR',
-      dataIndex: 'dateOutputFCR',
-      width: '15%',
-      editable: true
-    },
-    {
-      title: 'Nơi in - Thêu',
-      dataIndex: 'prints',
-      width: '20%',
-      editable: true,
-      render: (prints: string[]) => (
-        <div className='flex flex-row flex-wrap gap-1'>
-          {prints.map((print, index) => {
-            return (
-              <Tag className='m-0' key={index}>
-                {print}
-              </Tag>
-            )
-          })}
-        </div>
-      )
-    }
-  ]
-
-  const fixedColumns: (ColumnTypes[number] & {
-    editable?: boolean
-    dataIndex: string
-  })[] = [
-    ...commonCols,
-    {
-      title: 'Created date',
-      dataIndex: 'createdAt',
-      width: '15%',
-      editable: true,
-      render(value) {
-        return (
-          <Typography.Text className='text-sm'>
-            {firstLetterUppercase(dateDistance(value))}
-          </Typography.Text>
-        )
-      }
-    },
-    {
-      title: 'Updated date',
-      dataIndex: 'updatedAt',
-      width: '15%',
-      editable: true,
-      responsive: ['md'],
-      render(value) {
-        return (
-          <Typography.Text className='text-sm'>
-            {firstLetterUppercase(dateDistance(value))}
-          </Typography.Text>
-        )
-      }
-    },
-    rowActionsCol
-  ]
-
-  const columns: (ColumnTypes[number] & {
-    editable?: boolean
-    dataIndex: string
-  })[] = [...commonCols, rowActionsCol]
-
-  const mergedColumns = (
-    cols: (ColumnTypes[number] & {
-      editable?: boolean
-      dataIndex: string
-    })[]
-  ): ColumnTypes => {
-    return cols.map((col) => {
-      if (!col.editable) {
-        return col
-      }
-      return {
-        ...col,
-        responsive: col.responsive,
-        onCell: (record: ProductTableDataType) => ({
-          record,
-          inputType:
-            col.dataIndex === 'productCode'
-              ? 'text'
-              : col.dataIndex === 'quantityPO'
-                ? 'number'
-                : col.dataIndex === 'dateInputNPL'
-                  ? 'datepicker'
-                  : col.dataIndex === 'dateOutputFCR'
-                    ? 'datepicker'
-                    : col.dataIndex === 'productID'
-                      ? 'view'
-                      : 'select',
-          dataIndex: col.dataIndex,
-          title: col.title,
-          editing: isEditing(record),
-          responsive: col.responsive
-        })
-      }
-    }) as ColumnTypes
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(state)])
 
   return (
-    <>
-      <Flex vertical gap={30}>
-        <Flex justify='space-between' align='end'>
-          <Switch
-            checkedChildren='Ngày tạo & sửa'
-            unCheckedChildren='Ngày tạo & sửa'
-            defaultChecked={false}
-            checked={expandedDate}
-            onChange={setExpandedDate}
-          />
-          <Button
-            onClick={() => setOpenModal(true)}
-            className='flex items-center'
-            type='primary'
-            icon={<Plus size={20} />}
-          >
-            New
-          </Button>
-        </Flex>
-        <Form form={form} component={false}>
-          <Table
-            components={{
-              body: {
-                cell: EditableCell
-              }
-            }}
-            loading={loading}
-            bordered
-            dataSource={dataSource}
-            columns={mergedColumns(expandedDate ? fixedColumns : columns)}
-            rowClassName='editable-row'
-            pagination={{
-              onChange: () => {
-                handleCancelEditing()
-                handleCancelConfirmDelete()
-              }
-            }}
-          />
-        </Form>
-      </Flex>
-      {openModal && (
-        <AddNewProduct
-          setLoading={setLoading}
-          openModal={openModal}
-          setOpenModal={setOpenModal}
-        />
-      )}
-    </>
+    <Select
+      options={innerOptions}
+      value={props.value}
+      onChange={props.onChange}
+    />
   )
 }
 
-export default memo(ProductPage)
+const columns: ProColumns<API.ProductInfoItem>[] = [
+  {
+    title: 'ID',
+    dataIndex: 'productID',
+    width: 48
+  },
+  {
+    title: '动态表单',
+    key: 'direction',
+    hideInTable: true,
+    dataIndex: 'direction',
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    renderFormItem: (item, { type, defaultRender, ...rest }, form) => {
+      if (type === 'form') {
+        return null
+      }
+      const stateType = form.getFieldValue('state')
+      if (stateType === 3) {
+        return <Input />
+      }
+      if (stateType === 4) {
+        return null
+      }
+      return (
+        <MySelect
+          {...rest}
+          state={{
+            type: stateType
+          }}
+        />
+      )
+    }
+  },
+  {
+    title: 'Code',
+    dataIndex: 'productCode',
+    copyable: true,
+    ellipsis: true,
+    formItemProps: {
+      rules: [
+        {
+          required: true,
+          message: 'Can not empty'
+        }
+      ]
+    }
+  },
+  {
+    title: 'Số lượng PO',
+    dataIndex: 'quantityPO',
+    copyable: false,
+    ellipsis: true,
+    formItemProps: {
+      rules: [
+        {
+          required: true,
+          message: 'Can not empty'
+        }
+      ]
+    }
+  },
+  {
+    disable: true,
+    title: 'Trạng thái',
+    dataIndex: 'state',
+    filters: true,
+    onFilter: true,
+    ellipsis: true,
+    valueType: 'select',
+    valueEnum: {
+      todo: {
+        text: 'To do',
+        status: 'normal'
+      },
+      progressing: {
+        text: 'Progressing',
+        status: 'warning'
+      },
+      error: {
+        text: 'Error',
+        status: 'error'
+      },
+      processing: {
+        text: 'Done',
+        status: 'success',
+        disabled: true
+      }
+    }
+  },
+  {
+    disable: true,
+    title: 'Progressing',
+    dataIndex: 'progress',
+    search: false,
+    renderFormItem: (_, { defaultRender }) => {
+      return defaultRender(_)
+    },
+    render: (_, record) => (
+      <Space>
+        <Tag>{record.progress.length}</Tag>
+      </Space>
+    )
+  },
+  {
+    title: 'Ngày gửi FCR',
+    key: 'showTime',
+    dataIndex: 'dateOutputFCR',
+    valueType: 'date',
+    sorter: true,
+    hideInSearch: true
+  },
+  {
+    title: 'Ngày gửi FCR',
+    dataIndex: 'dateOutputFCR',
+    valueType: 'dateRange',
+    hideInTable: true,
+    search: {
+      transform: (value) => {
+        return {
+          startTime: value[0],
+          endTime: value[1]
+        }
+      }
+    }
+  },
+  {
+    title: 'Actions',
+    valueType: 'option',
+    key: 'option',
+    render: (text, record, _, action) => [
+      <a
+        key='editable'
+        onClick={() => {
+          action?.startEditable?.(record.productID)
+        }}
+      >
+        Edit
+      </a>,
+      <a href={''} target='_blank' rel='noopener noreferrer' key='view'>
+        Check
+      </a>,
+      <TableDropdown
+        key='actionGroup'
+        onSelect={() => action?.reload()}
+        menus={[
+          { key: 'copy', name: 'Copy' },
+          { key: 'delete', name: 'Delete' }
+        ]}
+      />
+    ]
+  }
+]
+
+const ProductPage: React.FC = () => {
+  const actionRef = useRef<ActionType>()
+
+  console.log('Product page loading...')
+
+  return (
+    <ProTable<API.ProductInfoItem>
+      columns={columns}
+      actionRef={actionRef}
+      cardBordered
+      request={async (params, sort, filter) => {
+        console.log(sort, filter)
+        // await waitTime(2000)
+        return request<{
+          data: API.ProductInfoItem[]
+        }>(`${appConfig.baseUrl}/products/find`, {
+          params
+        })
+      }}
+      editable={{
+        type: 'multiple'
+      }}
+      columnsState={{
+        persistenceKey: 'pro-table-singe-demos',
+        persistenceType: 'localStorage',
+        onChange(value) {
+          console.log('value: ', value)
+        }
+      }}
+      rowKey='productID'
+      search={{
+        defaultCollapsed: false,
+        optionRender: (searchConfig, formProps, dom) => [
+          ...dom.reverse(),
+          <Button
+            key='out'
+            onClick={() => {
+              const values = searchConfig?.form?.getFieldsValue()
+              console.log(values)
+            }}
+          >
+            导出
+          </Button>
+        ]
+      }}
+      options={{
+        setting: {
+          listsHeight: 400
+        }
+      }}
+      form={{
+        // 由于配置了 transform，提交的参与与定义的不同这里需要转化一下
+        syncToUrl: (values, type) => {
+          if (type === 'get') {
+            return {
+              ...values,
+              created_at: [values.startTime, values.endTime]
+            }
+          }
+          return values
+        }
+      }}
+      pagination={{
+        pageSize: 5,
+        onChange: (page) => console.log(page)
+      }}
+      dateFormatter='string'
+      headerTitle='Thông tin mã hàng'
+      toolBarRender={() => [
+        <Button
+          key='button'
+          icon={<PlusOutlined />}
+          onClick={() => {
+            actionRef.current?.reload()
+          }}
+          type='primary'
+        >
+          New
+        </Button>,
+        <Dropdown
+          key='menu'
+          menu={{
+            items: [
+              {
+                label: '1st item',
+                key: '1'
+              },
+              {
+                label: '2nd item',
+                key: '2'
+              },
+              {
+                label: '3rd item',
+                key: '3'
+              }
+            ]
+          }}
+        >
+          <Button>
+            <EllipsisOutlined />
+          </Button>
+        </Dropdown>
+      ]}
+    />
+  )
+}
+
+export default ProductPage

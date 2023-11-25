@@ -1,3 +1,10 @@
+export type StatusType = 'normal' | 'warn' | 'error' | 'success'
+
+export type StepRound = {
+  name: string
+  type: StatusType
+}
+
 export type Product = {
   productID?: number
   productCode?: string
