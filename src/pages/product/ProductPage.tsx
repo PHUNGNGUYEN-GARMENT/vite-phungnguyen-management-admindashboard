@@ -38,30 +38,29 @@ type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>
 
 const ProductPage: React.FC = () => {
   const {
-    products,
-    setProducts,
-    printablePlaces,
-    setPrintablePlaces,
     openModal,
     setOpenModal,
-    getNameOfPrints,
+    products,
+    setProducts,
     loading,
     setLoading,
+    printablePlaces,
+    setPrintablePlaces,
     expandedDate,
     setExpandedDate
   } = useProduct()
   const {
     form,
+    isEditing,
+    editingKey,
     dataSource,
     setDataSource,
-    editingKey,
-    handleSaveEditing,
-    isEditing,
-    handleCancelConfirmDelete,
     handleEdit,
     handleDelete,
+    handleDeleteRow,
+    handleSaveEditing,
     handleCancelEditing,
-    handleDeleteRow
+    handleCancelConfirmDelete
   } = useProductTable()
 
   useEffect(() => {
@@ -85,27 +84,26 @@ const ProductPage: React.FC = () => {
   }, [])
 
   useEffect(() => {
+    const isChecked = products.length > 0 && printablePlaces.length > 0
     setDataSource(
-      products.length > 0 && printablePlaces.length > 0
+      isChecked
         ? products.map((item) => {
-            const prints = printablePlaces.filter(
+            const productPrints = printablePlaces.filter(
               (print) => print.productID === item.productID
             )
             return {
               ...item,
               key: item.productID,
-              prints: prints.map((print) => {
-                return `${print.printID}`
-              }),
-              productID: item.productID
+              prints: productPrints.map((print) => {
+                return `${print.name}`
+              })
             } as ProductTableDataType
           })
         : products.map((item) => {
             return {
               ...item,
               key: item.productID,
-              prints: [],
-              productID: item.productID
+              prints: []
             } as ProductTableDataType
           })
     )
@@ -113,140 +111,65 @@ const ProductPage: React.FC = () => {
 
   console.log('Load ProductPage...')
 
-  const fixedColumns: (ColumnTypes[number] & {
+  const rowActionsCol: ColumnTypes[number] & {
     editable?: boolean
     dataIndex: string
-  })[] = [
-    {
-      title: 'ID',
-      dataIndex: 'productID',
-      width: '5%',
-      editable: true,
-      responsive: ['lg']
-    },
-    {
-      title: 'Code',
-      dataIndex: 'productCode',
-      width: '15%',
-      editable: true
-    },
-    {
-      title: 'Quantity PO',
-      dataIndex: 'quantityPO',
-      width: '15%',
-      editable: true
-    },
-    {
-      title: 'Date Input NPL',
-      dataIndex: 'dateInputNPL',
-      width: '15%',
-      editable: true
-    },
-    {
-      title: 'Date Output FCR',
-      dataIndex: 'dateOutputFCR',
-      width: '15%',
-      editable: true
-    },
-    {
-      title: 'Nơi in - Thêu',
-      dataIndex: 'prints',
-      width: '20%',
-      editable: true,
-      render: (_prints: string[]) => (
-        <>
-          {getNameOfPrints(_prints, printablePlaces).map((item, index) => {
-            return <Tag key={index}>{item}</Tag>
-          })}
-        </>
-      )
-    },
-    {
-      title: 'Created date',
-      dataIndex: 'createdAt',
-      width: '15%',
-      editable: true,
-      render(value) {
-        return (
-          <Typography.Text className='text-sm'>
-            {firstLetterUppercase(dateDistance(value))}
-          </Typography.Text>
-        )
-      }
-    },
-    {
-      title: 'Updated date',
-      dataIndex: 'updatedAt',
-      width: '15%',
-      editable: true,
-      responsive: ['md'],
-      render(value) {
-        return (
-          <Typography.Text className='text-sm'>
-            {firstLetterUppercase(dateDistance(value))}
-          </Typography.Text>
-        )
-      }
-    },
-    {
-      title: 'Operation',
-      dataIndex: 'operation',
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      render: (_: any, record: AnyObject) => {
-        const editable = isEditing(record as ProductTableDataType)
-        // const deletable = isDelete(record as ColorTableDataType)
-        return editable ? (
-          <Flex className='flex flex-col gap-3 lg:flex-row'>
-            <Typography.Link
-              onClick={() => handleSaveEditing(record.key, setLoading)}
-            >
-              Save
-            </Typography.Link>
-            <Popconfirm
-              title={`Sure to cancel?`}
-              onConfirm={handleCancelEditing}
-            >
-              <a>Cancel</a>
-            </Popconfirm>
-          </Flex>
-        ) : (
-          <Flex gap={30}>
-            {/* <Typography.Link disabled={editingKey !== ''} onClick={() => handleEdit(record as Item)}>
-                Edit
-                </Typography.Link> */}
+  } = {
+    title: 'Operation',
+    dataIndex: 'operation',
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    render: (_: any, record: AnyObject) => {
+      const editable = isEditing(record as ProductTableDataType)
+      // const deletable = isDelete(record as ColorTableDataType)
+      return editable ? (
+        <Flex gap={30}>
+          <Typography.Link
+            onClick={() => handleSaveEditing(record.key, setLoading)}
+          >
+            Save
+          </Typography.Link>
+          <Popconfirm title={`Sure to cancel?`} onConfirm={handleCancelEditing}>
+            <a>Cancel</a>
+          </Popconfirm>
+        </Flex>
+      ) : (
+        <Flex className='flex flex-col gap-3 lg:flex-row'>
+          <Button
+            type='dashed'
+            disabled={editingKey !== ''}
+            onClick={() => {
+              form.setFieldsValue({
+                nameColor: '',
+                hexColor: '',
+                createdAt: '',
+                updatedAt: '',
+                ...record
+              })
+              handleEdit(record as ProductTableDataType)
+            }}
+          >
+            Edit
+          </Button>
+
+          <Popconfirm
+            title={`Sure to delete?`}
+            onCancel={handleCancelConfirmDelete}
+            onConfirm={() => handleDeleteRow(record.key)}
+          >
             <Button
-              type='dashed'
               disabled={editingKey !== ''}
-              onClick={() => {
-                form.setFieldsValue({
-                  productCode: '',
-                  productID: '',
-                  createdAt: '',
-                  updatedAt: '',
-                  ...record
-                })
-                handleEdit(record as ProductTableDataType)
-              }}
+              danger
+              onClick={() => handleDelete(record.key)}
             >
-              Edit
+              Delete
             </Button>
-
-            <Popconfirm
-              title={`Sure to delete?`}
-              onCancel={handleCancelConfirmDelete}
-              onConfirm={() => handleDeleteRow(record.key)}
-            >
-              <Button danger onClick={() => handleDelete(record.key)}>
-                Delete
-              </Button>
-            </Popconfirm>
-          </Flex>
-        )
-      }
+          </Popconfirm>
+        </Flex>
+      )
     }
-  ]
+  }
 
-  const columns: (ColumnTypes[number] & {
+  const commonCols: (ColumnTypes[number] & {
     editable?: boolean
     dataIndex: string
   })[] = [
@@ -287,70 +210,58 @@ const ProductPage: React.FC = () => {
       width: '20%',
       editable: true,
       render: (prints: string[]) => (
-        <>
+        <div className='flex flex-row flex-wrap gap-1'>
           {prints.map((print, index) => {
-            return <Tag key={index}>{print}</Tag>
+            return (
+              <Tag className='m-0' key={index}>
+                {print}
+              </Tag>
+            )
           })}
-        </>
+        </div>
       )
-    },
-    {
-      title: 'Operation',
-      dataIndex: 'operation',
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      render: (_: any, record: AnyObject) => {
-        const editable = isEditing(record as ProductTableDataType)
-        // const deletable = isDelete(record as ColorTableDataType)
-        return editable ? (
-          <Flex gap={30}>
-            <Typography.Link
-              onClick={() => handleSaveEditing(record.key, setLoading)}
-            >
-              Save
-            </Typography.Link>
-            <Popconfirm
-              title={`Sure to cancel?`}
-              onConfirm={handleCancelEditing}
-            >
-              <a>Cancel</a>
-            </Popconfirm>
-          </Flex>
-        ) : (
-          <Flex className='flex flex-col gap-3 lg:flex-row'>
-            {/* <Typography.Link disabled={editingKey !== ''} onClick={() => handleEdit(record as Item)}>
-                  Edit
-                  </Typography.Link> */}
-            <Button
-              type='dashed'
-              disabled={editingKey !== ''}
-              onClick={() => {
-                form.setFieldsValue({
-                  nameColor: '',
-                  hexColor: '',
-                  createdAt: '',
-                  updatedAt: '',
-                  ...record
-                })
-                handleEdit(record as ProductTableDataType)
-              }}
-            >
-              Edit
-            </Button>
-
-            <Popconfirm
-              title={`Sure to delete?`}
-              onCancel={handleCancelConfirmDelete}
-              onConfirm={() => handleDeleteRow(record.key)}
-            >
-              <Button danger onClick={() => handleDelete(record.key)}>
-                Delete
-              </Button>
-            </Popconfirm>
-          </Flex>
-        )
-      }
     }
   ]
+
+  const fixedColumns: (ColumnTypes[number] & {
+    editable?: boolean
+    dataIndex: string
+  })[] = [
+    ...commonCols,
+    {
+      title: 'Created date',
+      dataIndex: 'createdAt',
+      width: '15%',
+      editable: true,
+      render(value) {
+        return (
+          <Typography.Text className='text-sm'>
+            {firstLetterUppercase(dateDistance(value))}
+          </Typography.Text>
+        )
+      }
+    },
+    {
+      title: 'Updated date',
+      dataIndex: 'updatedAt',
+      width: '15%',
+      editable: true,
+      responsive: ['md'],
+      render(value) {
+        return (
+          <Typography.Text className='text-sm'>
+            {firstLetterUppercase(dateDistance(value))}
+          </Typography.Text>
+        )
+      }
+    },
+    rowActionsCol
+  ]
+
+  const columns: (ColumnTypes[number] & {
+    editable?: boolean
+    dataIndex: string
+  })[] = [...commonCols, rowActionsCol]
 
   const mergedColumns = (
     cols: (ColumnTypes[number] & {
@@ -429,11 +340,13 @@ const ProductPage: React.FC = () => {
           />
         </Form>
       </Flex>
-      <AddNewProduct
-        setLoading={setLoading}
-        openModal={openModal}
-        setOpenModal={setOpenModal}
-      />
+      {openModal && (
+        <AddNewProduct
+          setLoading={setLoading}
+          openModal={openModal}
+          setOpenModal={setOpenModal}
+        />
+      )}
     </>
   )
 }
