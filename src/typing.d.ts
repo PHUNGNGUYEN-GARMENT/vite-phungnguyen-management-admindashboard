@@ -5,6 +5,11 @@ export type StepRound = {
   type: StatusType
 }
 
+export type StepRound = {
+  name: string
+  type: StatusType
+}
+
 export type Product = {
   productID?: number
   productCode?: string

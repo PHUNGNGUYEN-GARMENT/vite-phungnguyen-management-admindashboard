@@ -12,6 +12,10 @@ module.exports = {
         border: 'var(--border)',
         input: 'var(--input)',
         ring: 'var(--ring)',
+        normal: 'var(--normal)',
+        warn: 'var(--warn)',
+        error: 'var(--error)',
+        success: 'var(--success)',
         primary: {
           DEFAULT: 'var(--primary)',
           foreground: 'var(--primary-foreground)'

@@ -3,7 +3,7 @@
 import { DatePicker, Input, InputNumber, Select, Table } from 'antd'
 import dayjs from 'dayjs'
 import { memo, useEffect } from 'react'
-import { ProductTableDataType } from '../ProductPage'
+import { ProductInfoItem } from '../ProductPage'
 
 type InputType = 'select' | 'text' | 'number' | 'datepicker' | 'view'
 
@@ -12,7 +12,7 @@ interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
   dataIndex: string
   title: any
   inputType: InputType
-  record: ProductTableDataType
+  record: ProductInfoItem
   index: number
   children: React.ReactNode
 }

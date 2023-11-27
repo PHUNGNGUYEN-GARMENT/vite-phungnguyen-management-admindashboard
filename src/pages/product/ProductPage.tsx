@@ -2,10 +2,28 @@
 import { EllipsisOutlined, PlusOutlined } from '@ant-design/icons'
 import type { ActionType, ProColumns } from '@ant-design/pro-components'
 import { ProTable, TableDropdown } from '@ant-design/pro-components'
-import { Button, Dropdown, Input, Select, Space, Tag } from 'antd'
-import { useEffect, useRef, useState } from 'react'
+import { Button, Dropdown } from 'antd'
+import { ChevronDown, ChevronUp } from 'lucide-react'
+import { useRef } from 'react'
 import request from 'umi-request'
+import Status from '~/components/ui/Status'
 import appConfig from '~/config/app.config'
+import { StatusType, StepRound } from '~/typing'
+import { firstLetterUppercase } from '~/utils/text'
+
+// Basic user information
+export type ProductInfoItem = {
+  productID: number
+  productCode: string
+  quantityPO: number
+  progress: StepRound[]
+  state: StatusType
+  dateInputNPL: string
+  dateOutputFCR: string
+  createdAt: string
+  updatedAt: string
+}
+
 export const waitTimePromise = async (time: number = 100) => {
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -18,227 +36,187 @@ export const waitTime = async (time: number = 100) => {
   await waitTimePromise(time)
 }
 
-const MySelect: React.FC<{
-  state: {
-    type: number
-  }
-  value?: string
-  onChange?: (value: string) => void
-}> = (props) => {
-  const { state } = props
-
-  const [innerOptions, setOptions] = useState<
-    {
-      label: React.ReactNode
-      value: number
-    }[]
-  >([])
-
-  useEffect(() => {
-    const { type } = state || {}
-    if (type === 2) {
-      setOptions([
-        {
-          label: '星期一',
-          value: 1
-        },
-        {
-          label: '星期二',
-          value: 2
-        }
-      ])
-    } else {
-      setOptions([
-        {
-          label: '一月',
-          value: 1
-        },
-        {
-          label: '二月',
-          value: 2
-        }
-      ])
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(state)])
-
-  return (
-    <Select
-      options={innerOptions}
-      value={props.value}
-      onChange={props.onChange}
-    />
-  )
-}
-
-const columns: ProColumns<API.ProductInfoItem>[] = [
-  {
-    title: 'ID',
-    dataIndex: 'productID',
-    width: 48
-  },
-  {
-    title: '动态表单',
-    key: 'direction',
-    hideInTable: true,
-    dataIndex: 'direction',
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    renderFormItem: (item, { type, defaultRender, ...rest }, form) => {
-      if (type === 'form') {
-        return null
-      }
-      const stateType = form.getFieldValue('state')
-      if (stateType === 3) {
-        return <Input />
-      }
-      if (stateType === 4) {
-        return null
-      }
-      return (
-        <MySelect
-          {...rest}
-          state={{
-            type: stateType
-          }}
-        />
-      )
-    }
-  },
-  {
-    title: 'Code',
-    dataIndex: 'productCode',
-    copyable: true,
-    ellipsis: true,
-    formItemProps: {
-      rules: [
-        {
-          required: true,
-          message: 'Can not empty'
-        }
-      ]
-    }
-  },
-  {
-    title: 'Số lượng PO',
-    dataIndex: 'quantityPO',
-    copyable: false,
-    ellipsis: true,
-    formItemProps: {
-      rules: [
-        {
-          required: true,
-          message: 'Can not empty'
-        }
-      ]
-    }
-  },
-  {
-    disable: true,
-    title: 'Trạng thái',
-    dataIndex: 'state',
-    filters: true,
-    onFilter: true,
-    ellipsis: true,
-    valueType: 'select',
-    valueEnum: {
-      todo: {
-        text: 'To do',
-        status: 'normal'
-      },
-      progressing: {
-        text: 'Progressing',
-        status: 'warning'
-      },
-      error: {
-        text: 'Error',
-        status: 'error'
-      },
-      processing: {
-        text: 'Done',
-        status: 'success',
-        disabled: true
-      }
-    }
-  },
-  {
-    disable: true,
-    title: 'Progressing',
-    dataIndex: 'progress',
-    search: false,
-    renderFormItem: (_, { defaultRender }) => {
-      return defaultRender(_)
-    },
-    render: (_, record) => (
-      <Space>
-        <Tag>{record.progress.length}</Tag>
-      </Space>
-    )
-  },
-  {
-    title: 'Ngày gửi FCR',
-    key: 'showTime',
-    dataIndex: 'dateOutputFCR',
-    valueType: 'date',
-    sorter: true,
-    hideInSearch: true
-  },
-  {
-    title: 'Ngày gửi FCR',
-    dataIndex: 'dateOutputFCR',
-    valueType: 'dateRange',
-    hideInTable: true,
-    search: {
-      transform: (value) => {
-        return {
-          startTime: value[0],
-          endTime: value[1]
-        }
-      }
-    }
-  },
-  {
-    title: 'Actions',
-    valueType: 'option',
-    key: 'option',
-    render: (text, record, _, action) => [
-      <a
-        key='editable'
-        onClick={() => {
-          action?.startEditable?.(record.productID)
-        }}
-      >
-        Edit
-      </a>,
-      <a href={''} target='_blank' rel='noopener noreferrer' key='view'>
-        Check
-      </a>,
-      <TableDropdown
-        key='actionGroup'
-        onSelect={() => action?.reload()}
-        menus={[
-          { key: 'copy', name: 'Copy' },
-          { key: 'delete', name: 'Delete' }
-        ]}
-      />
-    ]
-  }
-]
-
 const ProductPage: React.FC = () => {
   const actionRef = useRef<ActionType>()
 
   console.log('Product page loading...')
 
+  const selectEnumValue = {
+    normal: {
+      text: 'To do',
+      status: 'normal'
+    },
+    progress: {
+      text: 'Progressing',
+      status: 'warning'
+    },
+    warn: {
+      text: 'Error',
+      status: 'error'
+    },
+    error: {
+      text: 'Done',
+      status: 'success'
+    }
+  }
+
+  const columns: ProColumns<ProductInfoItem>[] = [
+    {
+      key: 'ID',
+      dataIndex: 'productID',
+      title: 'ID',
+      width: 48,
+      editable: false,
+      hideInSearch: true
+    },
+    {
+      key: 'productCode',
+      dataIndex: 'productCode',
+      title: 'Code',
+      copyable: false,
+      ellipsis: true,
+      filters: true,
+      formItemProps: {
+        rules: [
+          {
+            required: true,
+            message: 'Can not empty'
+          }
+        ]
+      }
+    },
+    {
+      key: 'quantityPO',
+      dataIndex: 'quantityPO',
+      title: 'Số lượng PO',
+      copyable: false,
+      ellipsis: true,
+      search: false,
+      formItemProps: {
+        rules: [
+          {
+            required: true,
+            message: 'Can not empty'
+          }
+        ]
+      }
+    },
+    {
+      title: 'Progress',
+      children: [
+        {
+          key: 'sewing',
+          dataIndex: 'sewing',
+          disable: true,
+          title: 'May',
+          onFilter: true,
+          ellipsis: true,
+          valueType: 'select',
+          valueEnum: selectEnumValue,
+          render: (_dom, entity) => {
+            return (
+              <Status type={entity.progress[0].type}>
+                {firstLetterUppercase(entity.progress[0].type)}
+              </Status>
+            )
+          }
+        },
+        {
+          key: 'iron',
+          dataIndex: 'iron',
+          disable: true,
+          title: 'Ủi',
+          search: false,
+          onFilter: true,
+          valueEnum: selectEnumValue,
+          render: (_, record) => (
+            <Status type={record.progress[1].type}>
+              {firstLetterUppercase(record.progress[1].type)}
+            </Status>
+          )
+        },
+        {
+          key: 'check',
+          dataIndex: 'check',
+          disable: true,
+          title: 'Kiểm tra',
+          search: false,
+          onFilter: true,
+          valueEnum: selectEnumValue,
+          render: (_, record) => (
+            <Status type={record.progress[2].type}>
+              {firstLetterUppercase(record.progress[2].type)}
+            </Status>
+          )
+        },
+        {
+          key: 'pack',
+          dataIndex: 'pack',
+          disable: true,
+          title: 'Đóng gói',
+          search: false,
+          onFilter: true,
+          valueEnum: selectEnumValue,
+          render: (_, record) => (
+            <Status type={record.progress[3].type}>
+              {firstLetterUppercase(record.progress[3].type)}
+            </Status>
+          )
+        }
+      ]
+    },
+    {
+      key: 'dateOutputFCR',
+      dataIndex: 'dateOutputFCR',
+      title: 'FCR',
+      valueType: 'date',
+      sorter: true,
+      hideInSearch: true
+    },
+    {
+      title: 'FCR',
+      dataIndex: 'dateOutputFCR',
+      valueType: 'dateRange',
+      hideInTable: true
+    },
+    {
+      title: 'Actions',
+      valueType: 'option',
+      key: 'option',
+      render: (dom, record, index, action, { isEditable, type }) => [
+        <a
+          key='editable'
+          onClick={() => {
+            action?.startEditable?.(record.productID)
+          }}
+        >
+          {type}
+        </a>,
+        <a href={''} target='_blank' rel='noopener noreferrer' key='view'>
+          Check
+        </a>,
+        <TableDropdown
+          key='actionGroup'
+          onSelect={() => action?.reload()}
+          menus={[
+            { key: 'copy', name: 'Copy' },
+            { key: 'delete', name: 'Delete' }
+          ]}
+        />
+      ]
+    }
+  ]
+
   return (
-    <ProTable<API.ProductInfoItem>
+    <ProTable<ProductInfoItem>
       columns={columns}
       actionRef={actionRef}
       cardBordered
       request={async (params, sort, filter) => {
-        console.log(sort, filter)
+        console.log(params)
         // await waitTime(2000)
         return request<{
-          data: API.ProductInfoItem[]
+          data: ProductInfoItem[]
         }>(`${appConfig.baseUrl}/products/find`, {
           params
         })
@@ -246,28 +224,71 @@ const ProductPage: React.FC = () => {
       editable={{
         type: 'multiple'
       }}
-      columnsState={{
-        persistenceKey: 'pro-table-singe-demos',
-        persistenceType: 'localStorage',
-        onChange(value) {
-          console.log('value: ', value)
-        }
-      }}
+      // columnsState={{
+      //   persistenceKey: 'pro-table-singe-demos',
+      //   persistenceType: 'localStorage',
+      //   onChange(value) {
+      //     console.log('value: ', value)
+      //   }
+      // }}
       rowKey='productID'
       search={{
         defaultCollapsed: false,
-        optionRender: (searchConfig, formProps, dom) => [
-          ...dom.reverse(),
-          <Button
-            key='out'
-            onClick={() => {
-              const values = searchConfig?.form?.getFieldsValue()
-              console.log(values)
-            }}
-          >
-            导出
-          </Button>
-        ]
+        collapseRender: (collapsed) => {
+          return (
+            <Button
+              type='link'
+              icon={collapsed ? <ChevronDown /> : <ChevronUp />}
+              className='flex-items flex flex-row-reverse justify-center'
+              onClick={() => {
+                console.log()
+              }}
+            >
+              Expand
+            </Button>
+          )
+        },
+        searchText: 'Search',
+        resetText: 'Reset'
+        // optionRender: (searchConfig, formProps, dom) => [
+        //   <Button
+        //     key='search'
+        //     type='primary'
+        //     onClick={() => {
+        //       console.log('Searching...')
+        //       formProps.form?.submit()
+        //     }}
+        //   >
+        //     Search
+        //   </Button>,
+        //   // <Button
+        //   //   key='reset'
+        //   //   onClick={() => {
+        //   //     searchConfig.form?.resetFields([
+        //   //       'productID',
+        //   //       'productCode',
+        //   //       'state',
+        //   //       'quantityPO',
+        //   //       'progress'
+        //   //     ])
+        //   //     // const values = searchConfig?.form?.getFieldsValue()
+        //   //     // console.log(formProps)
+        //   //   }}
+        //   // >
+        //   //   Reset
+        //   // </Button>,
+        //   ...dom,
+        //   <Button
+        //     key='out'
+        //     onClick={() => {
+        //       searchConfig.form?.resetFields(['productID', 'productCode'])
+        //       const values = searchConfig?.form?.getFieldsValue()
+        //       console.log(values)
+        //     }}
+        //   >
+        //     Return
+        //   </Button>
+        // ]
       }}
       options={{
         setting: {
