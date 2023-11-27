@@ -4,6 +4,7 @@ import { cn } from '~/utils/helpers'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
   type: StatusType
+  label?: string
 }
 
 const Status: React.FC<Props> = ({ ...props }) => {
@@ -20,7 +21,7 @@ const Status: React.FC<Props> = ({ ...props }) => {
           'bg-normal': props.type === 'normal'
         })}
       />
-      <span>{props.children}</span>
+      {props.label ? <span>{props.label}</span> : <span>{props.children}</span>}
     </div>
   )
 }

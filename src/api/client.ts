@@ -9,10 +9,12 @@ import axios, { AxiosInstance } from 'axios'
 import appConfig from '~/config/app.config'
 
 export type ResponseDataType = {
-  isSuccess?: boolean
+  success?: boolean
   message: string
   data?: any
   meta?: any
+  page?: number
+  total?: number
 }
 
 const client: AxiosInstance = axios.create({

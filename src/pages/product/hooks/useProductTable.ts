@@ -2,7 +2,6 @@ import { useForm } from 'antd/es/form/Form'
 import React, { useState } from 'react'
 import { Product } from '~/typing'
 import ProductAPI from '../../../api/services/ProductAPI'
-import { ProductTableDataType } from '../ProductPage'
 
 export default function useProductTable() {
   const [form] = useForm()

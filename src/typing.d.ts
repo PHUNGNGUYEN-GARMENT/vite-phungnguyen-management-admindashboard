@@ -11,11 +11,15 @@ export type StepRound = {
 }
 
 export type Product = {
-  productID?: number
+  id?: number
   productCode?: string
   quantityPO?: number
   dateInputNPL?: string
   dateOutputFCR?: string
+  status?: {
+    name: string
+    type: StatusType
+  }[]
   createdAt?: string
   updatedAt?: string
 }

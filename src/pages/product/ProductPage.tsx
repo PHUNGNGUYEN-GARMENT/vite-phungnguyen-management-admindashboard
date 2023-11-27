@@ -1,354 +1,421 @@
-/* eslint-disable react-refresh/only-export-components */
-import { EllipsisOutlined, PlusOutlined } from '@ant-design/icons'
-import type { ActionType, ProColumns } from '@ant-design/pro-components'
-import { ProTable, TableDropdown } from '@ant-design/pro-components'
-import { Button, Dropdown } from 'antd'
-import { ChevronDown, ChevronUp } from 'lucide-react'
-import { useRef } from 'react'
-import request from 'umi-request'
+import { Button, Flex, Form, Popconfirm, Switch, Table, Typography } from 'antd'
+import { Plus } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import ProductAPI from '~/api/services/ProductAPI'
 import Status from '~/components/ui/Status'
-import appConfig from '~/config/app.config'
-import { StatusType, StepRound } from '~/typing'
+import useTable from '~/hooks/useTable'
+import { Product, StatusType } from '~/typing'
+import { dateDistance, dateFormatter } from '~/utils/date-formatter'
 import { firstLetterUppercase } from '~/utils/text'
+import EditableCell, { EditableTableProps } from './components/EditableCell'
 
-// Basic user information
-export type ProductInfoItem = {
-  productID: number
-  productCode: string
-  quantityPO: number
-  progress: StepRound[]
-  state: StatusType
-  dateInputNPL: string
-  dateOutputFCR: string
-  createdAt: string
-  updatedAt: string
-}
+type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>
 
-export const waitTimePromise = async (time: number = 100) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(true)
-    }, time)
-  })
-}
-
-export const waitTime = async (time: number = 100) => {
-  await waitTimePromise(time)
+export type ProductTableDataType = {
+  key?: string | number
+  id?: number
+  productCode?: string
+  quantityPO?: number
+  dateInputNPL?: string
+  dateOutputFCR?: string
+  status?: {
+    name: string
+    type: StatusType
+  }[]
+  createdAt?: string
+  updatedAt?: string
 }
 
 const ProductPage: React.FC = () => {
-  const actionRef = useRef<ActionType>()
-
+  const [loading, setLoading] = useState<boolean>(false)
+  const [isAdmin, setIsAdmin] = useState<boolean>(false)
+  const {
+    form,
+    isEditing,
+    editingKey,
+    deleteKey,
+    dataSource,
+    setDataSource,
+    handleStartEditingRow,
+    handleSaveEditingRow,
+    handleCancelEditingRow,
+    handleStartDeleteRow,
+    handleDeleteRow,
+    handleCancelDeleteRow
+  } = useTable<ProductTableDataType>([])
   console.log('Product page loading...')
 
-  const selectEnumValue = {
-    normal: {
-      text: 'To do',
-      status: 'normal'
-    },
-    progress: {
-      text: 'Progressing',
-      status: 'warning'
-    },
-    warn: {
-      text: 'Error',
-      status: 'error'
-    },
-    error: {
-      text: 'Done',
-      status: 'success'
-    }
-  }
+  useEffect(() => {
+    ProductAPI.getAlls().then((data) => {
+      if (data?.success) {
+        console.log(data)
+        setDataSource(
+          data.data.map((item: Product) => {
+            return { ...item, key: item.id } as ProductTableDataType
+          })
+        )
+      }
+    })
+  }, [])
 
-  const columns: ProColumns<ProductInfoItem>[] = [
+  const commonActionsCol: (ColumnTypes[number] & {
+    editable?: boolean
+    dataIndex: string
+  })[] = [
     {
-      key: 'ID',
-      dataIndex: 'productID',
+      title: 'Operation',
+      dataIndex: 'operation',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      render: (_: any, record: ProductTableDataType) => {
+        // const deletable = isDelete(record as ColorTableDataType)
+        return isEditing(record.key!) ? (
+          <Flex className='flex flex-col gap-3 lg:flex-row'>
+            <Typography.Link onClick={() => handleSaveEditingRow(record.id!)}>
+              Save
+            </Typography.Link>
+            <Popconfirm
+              title={`Sure to cancel?`}
+              onConfirm={() => {
+                handleCancelEditingRow()
+              }}
+            >
+              <a>Cancel</a>
+            </Popconfirm>
+          </Flex>
+        ) : (
+          <Flex gap={30}>
+            <Button
+              type='dashed'
+              disabled={editingKey !== ''}
+              onClick={() => {
+                form.setFieldsValue({
+                  productCode: '',
+                  productID: '',
+                  createdAt: '',
+                  updatedAt: '',
+                  ...record
+                })
+                handleStartEditingRow(record)
+              }}
+            >
+              Edit
+            </Button>
+            <Popconfirm
+              title={`Sure to delete?`}
+              onCancel={() => handleCancelDeleteRow()}
+              onConfirm={() => handleDeleteRow(record.key!)}
+            >
+              <Button danger onClick={() => handleStartDeleteRow(record.key!)}>
+                Delete
+              </Button>
+            </Popconfirm>
+          </Flex>
+        )
+      }
+    }
+  ]
+
+  const adminColumns: (ColumnTypes[number] & {
+    editable?: boolean
+    dataIndex: string
+  })[] = [
+    {
       title: 'ID',
-      width: 48,
-      editable: false,
-      hideInSearch: true
+      dataIndex: 'id',
+      width: '5%',
+      editable: true,
+      responsive: ['lg']
     },
     {
-      key: 'productCode',
-      dataIndex: 'productCode',
       title: 'Code',
-      copyable: false,
-      ellipsis: true,
-      filters: true,
-      formItemProps: {
-        rules: [
-          {
-            required: true,
-            message: 'Can not empty'
-          }
-        ]
-      }
+      dataIndex: 'productCode',
+      editable: true
     },
     {
-      key: 'quantityPO',
+      title: 'Quantity PO',
       dataIndex: 'quantityPO',
-      title: 'Số lượng PO',
-      copyable: false,
-      ellipsis: true,
-      search: false,
-      formItemProps: {
-        rules: [
-          {
-            required: true,
-            message: 'Can not empty'
-          }
-        ]
-      }
+      editable: true
+    },
+    {
+      title: 'Date Input NPL',
+      dataIndex: 'dateInputNPL',
+      editable: true
+    },
+    {
+      title: 'Date Output FCR',
+      dataIndex: 'dateOutputFCR',
+      editable: true
     },
     {
       title: 'Progress',
+      dataIndex: 'state',
+      editable: true,
       children: [
         {
-          key: 'sewing',
-          dataIndex: 'sewing',
-          disable: true,
           title: 'May',
-          onFilter: true,
-          ellipsis: true,
-          valueType: 'select',
-          valueEnum: selectEnumValue,
-          render: (_dom, entity) => {
+          dataIndex: 'sewing',
+          render: (value, record: ProductTableDataType) => {
+            const validData = record.status ? record.status : []
             return (
-              <Status type={entity.progress[0].type}>
-                {firstLetterUppercase(entity.progress[0].type)}
-              </Status>
+              <>
+                <Status
+                  type={validData[0].type}
+                  label={firstLetterUppercase(validData[0].type)}
+                />
+              </>
             )
           }
         },
         {
-          key: 'iron',
-          dataIndex: 'iron',
-          disable: true,
           title: 'Ủi',
-          search: false,
-          onFilter: true,
-          valueEnum: selectEnumValue,
-          render: (_, record) => (
-            <Status type={record.progress[1].type}>
-              {firstLetterUppercase(record.progress[1].type)}
-            </Status>
-          )
+          dataIndex: 'iron',
+          render: (value, record: ProductTableDataType) => {
+            const validData = record.status ? record.status : []
+            return (
+              <>
+                <Status
+                  type={validData[1].type}
+                  label={firstLetterUppercase(validData[1].type)}
+                />
+              </>
+            )
+          }
         },
         {
-          key: 'check',
-          dataIndex: 'check',
-          disable: true,
           title: 'Kiểm tra',
-          search: false,
-          onFilter: true,
-          valueEnum: selectEnumValue,
-          render: (_, record) => (
-            <Status type={record.progress[2].type}>
-              {firstLetterUppercase(record.progress[2].type)}
-            </Status>
-          )
+          dataIndex: 'check',
+          render: (value, record: ProductTableDataType) => {
+            const validData = record.status ? record.status : []
+            return (
+              <>
+                <Status
+                  type={validData[2].type}
+                  label={firstLetterUppercase(validData[2].type)}
+                />
+              </>
+            )
+          }
         },
         {
-          key: 'pack',
-          dataIndex: 'pack',
-          disable: true,
           title: 'Đóng gói',
-          search: false,
-          onFilter: true,
-          valueEnum: selectEnumValue,
-          render: (_, record) => (
-            <Status type={record.progress[3].type}>
-              {firstLetterUppercase(record.progress[3].type)}
-            </Status>
-          )
+          dataIndex: 'pack',
+          render: (value, record: ProductTableDataType) => {
+            const validData = record.status ? record.status : []
+            return (
+              <>
+                <Status
+                  type={validData[3].type}
+                  label={firstLetterUppercase(validData[3].type)}
+                />
+              </>
+            )
+          }
         }
       ]
     },
     {
-      key: 'dateOutputFCR',
-      dataIndex: 'dateOutputFCR',
-      title: 'FCR',
-      valueType: 'date',
-      sorter: true,
-      hideInSearch: true
+      title: 'Created date',
+      dataIndex: 'createdAt',
+      editable: true,
+      render: (value, record: ProductTableDataType) => {
+        return <>{record.updatedAt}</>
+      }
     },
     {
-      title: 'FCR',
-      dataIndex: 'dateOutputFCR',
-      valueType: 'dateRange',
-      hideInTable: true
+      title: 'Updated date',
+      dataIndex: 'updatedAt',
+      width: '15%',
+      editable: true,
+      responsive: ['md'],
+      render: (value, record: ProductTableDataType) => {
+        return <>{record.updatedAt}</>
+      }
     },
-    {
-      title: 'Actions',
-      valueType: 'option',
-      key: 'option',
-      render: (dom, record, index, action, { isEditable, type }) => [
-        <a
-          key='editable'
-          onClick={() => {
-            action?.startEditable?.(record.productID)
-          }}
-        >
-          {type}
-        </a>,
-        <a href={''} target='_blank' rel='noopener noreferrer' key='view'>
-          Check
-        </a>,
-        <TableDropdown
-          key='actionGroup'
-          onSelect={() => action?.reload()}
-          menus={[
-            { key: 'copy', name: 'Copy' },
-            { key: 'delete', name: 'Delete' }
-          ]}
-        />
-      ]
-    }
+    ...commonActionsCol
   ]
 
-  return (
-    <ProTable<ProductInfoItem>
-      columns={columns}
-      actionRef={actionRef}
-      cardBordered
-      request={async (params, sort, filter) => {
-        console.log(params)
-        // await waitTime(2000)
-        return request<{
-          data: ProductInfoItem[]
-        }>(`${appConfig.baseUrl}/products/find`, {
-          params
-        })
-      }}
-      editable={{
-        type: 'multiple'
-      }}
-      // columnsState={{
-      //   persistenceKey: 'pro-table-singe-demos',
-      //   persistenceType: 'localStorage',
-      //   onChange(value) {
-      //     console.log('value: ', value)
-      //   }
-      // }}
-      rowKey='productID'
-      search={{
-        defaultCollapsed: false,
-        collapseRender: (collapsed) => {
-          return (
-            <Button
-              type='link'
-              icon={collapsed ? <ChevronDown /> : <ChevronUp />}
-              className='flex-items flex flex-row-reverse justify-center'
-              onClick={() => {
-                console.log()
-              }}
-            >
-              Expand
-            </Button>
-          )
-        },
-        searchText: 'Search',
-        resetText: 'Reset'
-        // optionRender: (searchConfig, formProps, dom) => [
-        //   <Button
-        //     key='search'
-        //     type='primary'
-        //     onClick={() => {
-        //       console.log('Searching...')
-        //       formProps.form?.submit()
-        //     }}
-        //   >
-        //     Search
-        //   </Button>,
-        //   // <Button
-        //   //   key='reset'
-        //   //   onClick={() => {
-        //   //     searchConfig.form?.resetFields([
-        //   //       'productID',
-        //   //       'productCode',
-        //   //       'state',
-        //   //       'quantityPO',
-        //   //       'progress'
-        //   //     ])
-        //   //     // const values = searchConfig?.form?.getFieldsValue()
-        //   //     // console.log(formProps)
-        //   //   }}
-        //   // >
-        //   //   Reset
-        //   // </Button>,
-        //   ...dom,
-        //   <Button
-        //     key='out'
-        //     onClick={() => {
-        //       searchConfig.form?.resetFields(['productID', 'productCode'])
-        //       const values = searchConfig?.form?.getFieldsValue()
-        //       console.log(values)
-        //     }}
-        //   >
-        //     Return
-        //   </Button>
-        // ]
-      }}
-      options={{
-        setting: {
-          listsHeight: 400
-        }
-      }}
-      form={{
-        // 由于配置了 transform，提交的参与与定义的不同这里需要转化一下
-        syncToUrl: (values, type) => {
-          if (type === 'get') {
-            return {
-              ...values,
-              created_at: [values.startTime, values.endTime]
-            }
+  const staffColumns: (ColumnTypes[number] & {
+    editable?: boolean
+    dataIndex: string
+  })[] = [
+    {
+      title: 'ID',
+      dataIndex: 'id',
+      width: '5%',
+      editable: true,
+      responsive: ['lg']
+    },
+    {
+      title: 'Code',
+      dataIndex: 'productCode',
+      editable: true
+    },
+    {
+      title: 'Quantity PO',
+      dataIndex: 'quantityPO',
+      editable: true
+    },
+    {
+      title: 'Progress',
+      dataIndex: 'state',
+      children: [
+        {
+          title: 'May',
+          dataIndex: 'sewing',
+          render: (value, record: ProductTableDataType) => {
+            const validData = record.status ? record.status : []
+            return (
+              <>
+                <Status
+                  type={validData[0].type}
+                  label={firstLetterUppercase(validData[0].type)}
+                />
+              </>
+            )
           }
-          return values
+        },
+        {
+          title: 'Ủi',
+          dataIndex: 'iron',
+          render: (value, record: ProductTableDataType) => {
+            const validData = record.status ? record.status : []
+            return (
+              <>
+                <Status
+                  type={validData[1].type}
+                  label={firstLetterUppercase(validData[1].type)}
+                />
+              </>
+            )
+          }
+        },
+        {
+          title: 'Kiểm tra',
+          dataIndex: 'check',
+          render: (value, record: ProductTableDataType) => {
+            const validData = record.status ? record.status : []
+            return (
+              <>
+                <Status
+                  type={validData[2].type}
+                  label={firstLetterUppercase(validData[2].type)}
+                />
+              </>
+            )
+          }
+        },
+        {
+          title: 'Đóng gói',
+          dataIndex: 'pack',
+          render: (value, record: ProductTableDataType) => {
+            const validData = record.status ? record.status : []
+            return (
+              <>
+                <Status
+                  type={validData[3].type}
+                  label={firstLetterUppercase(validData[3].type)}
+                />
+              </>
+            )
+          }
         }
-      }}
-      pagination={{
-        pageSize: 5,
-        onChange: (page) => console.log(page)
-      }}
-      dateFormatter='string'
-      headerTitle='Thông tin mã hàng'
-      toolBarRender={() => [
-        <Button
-          key='button'
-          icon={<PlusOutlined />}
-          onClick={() => {
-            actionRef.current?.reload()
-          }}
-          type='primary'
-        >
-          New
-        </Button>,
-        <Dropdown
-          key='menu'
-          menu={{
-            items: [
-              {
-                label: '1st item',
-                key: '1'
-              },
-              {
-                label: '2nd item',
-                key: '2'
-              },
-              {
-                label: '3rd item',
-                key: '3'
-              }
-            ]
-          }}
-        >
-          <Button>
-            <EllipsisOutlined />
+      ]
+    },
+    {
+      title: 'Ngày xuất FCR',
+      dataIndex: 'dateOutputFCR',
+      editable: true,
+      render: (value, record: ProductTableDataType) => {
+        const validData = record.dateOutputFCR ? record.dateOutputFCR : ''
+        return (
+          <div>
+            <span>{dateFormatter(validData)}</span>
+            <span className='absolute bottom-0 right-0 p-1 text-[10px]'>
+              {dateDistance(new Date(validData))}
+            </span>
+          </div>
+        )
+      }
+    },
+    ...commonActionsCol
+  ]
+
+  const mergedColumns = (
+    cols: (ColumnTypes[number] & {
+      editable?: boolean
+      dataIndex: string
+    })[]
+  ): ColumnTypes => {
+    return cols.map((col) => {
+      if (!col.editable) {
+        return col
+      }
+      return {
+        ...col,
+        responsive: col.responsive,
+        onCell: (record: ProductTableDataType) => ({
+          record,
+          inputType:
+            col.dataIndex === 'productCode'
+              ? 'text'
+              : col.dataIndex === 'quantityPO'
+                ? 'number'
+                : col.dataIndex === 'dateInputNPL'
+                  ? 'datepicker'
+                  : col.dataIndex === 'dateOutputFCR'
+                    ? 'datepicker'
+                    : 'select',
+          dataIndex: col.dataIndex,
+          title: col.title,
+          editing: isEditing(record.key!),
+          responsive: col.responsive
+        })
+      }
+    }) as ColumnTypes
+  }
+
+  return (
+    <>
+      <Flex vertical>
+        <Flex justify='space-between' align='end'>
+          <Switch
+            checkedChildren='Admin'
+            unCheckedChildren='Admin'
+            defaultChecked={false}
+            checked={isAdmin}
+            onChange={setIsAdmin}
+          />
+          <Button
+            onClick={() => {}}
+            className='flex items-center'
+            type='primary'
+            icon={<Plus size={20} />}
+          >
+            New
           </Button>
-        </Dropdown>
-      ]}
-    />
+        </Flex>
+        <Form form={form} component={false}>
+          <Table
+            components={{
+              body: {
+                cell: EditableCell
+              }
+            }}
+            loading={loading}
+            bordered
+            dataSource={dataSource}
+            columns={mergedColumns(isAdmin ? adminColumns : staffColumns)}
+            rowClassName='editable-row'
+            pagination={{
+              onChange: () => {
+                handleCancelEditingRow()
+                handleCancelDeleteRow()
+              }
+            }}
+          />
+        </Form>
+      </Flex>
+    </>
   )
 }
 

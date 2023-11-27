@@ -3,7 +3,7 @@
 import { DatePicker, Input, InputNumber, Select, Table } from 'antd'
 import dayjs from 'dayjs'
 import { memo, useEffect } from 'react'
-import { ProductInfoItem } from '../ProductPage'
+import { ProductTableDataType } from '../ProductPage'
 
 type InputType = 'select' | 'text' | 'number' | 'datepicker' | 'view'
 
@@ -12,7 +12,7 @@ interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
   dataIndex: string
   title: any
   inputType: InputType
-  record: ProductInfoItem
+  record: ProductTableDataType
   index: number
   children: React.ReactNode
 }
@@ -27,11 +27,6 @@ const EditableCell: React.FC<EditableCellProps> = ({
   children,
   ...restProps
 }) => {
-  useEffect(() => {
-    if (record && record.prints.length > 0) {
-      console.log(record)
-    }
-  }, [record])
 
   const inputTypeComponentMap: Record<string, React.ReactNode> = {
     number: (
@@ -48,7 +43,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
         allowClear
         placeholder='Please select'
         optionLabelProp='label'
-        defaultValue={record ? record.prints : ['']}
+        defaultValue={record ? record.status : ['']}
         className='w-full'
         style={{
           width: '100%'
@@ -68,7 +63,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
         )}
       />
     ),
-    view: <>{record ? record.productID : ''}</>
+    view: <>{record ? record.key : ''}</>
   }
 
   const inputNode: React.ReactNode =

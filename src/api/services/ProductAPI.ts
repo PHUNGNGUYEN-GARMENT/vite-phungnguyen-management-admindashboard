@@ -5,9 +5,17 @@ import { errorFormatter } from '~/utils/promise-formatter'
 const PATH_API = 'products'
 
 export default {
-  getAlls: async (): Promise<ResponseDataType | undefined> => {
+  getAlls: async (
+    current: number = 1,
+    pageSize: number = 5
+  ): Promise<ResponseDataType | undefined> => {
     return await client
-      .post(`${PATH_API}/find`)
+      .get(`${PATH_API}/find`, {
+        params: {
+          current: current,
+          pageSize: pageSize
+        }
+      })
       .then((res) => {
         if (res.data) {
           return res.data as ResponseDataType
