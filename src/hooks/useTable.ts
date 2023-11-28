@@ -60,9 +60,14 @@ export default function useTable<T>(initData: TableDataType<T>[]) {
   }
 
   // Save editing row
-  async function handleSaveEditingRow(key: React.Key) {
+  async function handleSaveEditingRow(
+    key: React.Key,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onSave?: (row: any) => void
+  ) {
     try {
       const row = await form.validateFields()
+
       const newData = [...dataSource]
       const index = newData.findIndex((item) => key === item.key)
       if (index > -1) {
@@ -71,9 +76,8 @@ export default function useTable<T>(initData: TableDataType<T>[]) {
           ...item,
           ...row
         })
-        // setDataSource(newData)
-        // setEditingKey('')
-        console.log(row)
+        setDataSource(newData)
+        setEditingKey('')
         // After updated local data
         // We need to update on database
       } else {
@@ -81,6 +85,7 @@ export default function useTable<T>(initData: TableDataType<T>[]) {
         setDataSource(newData)
         setEditingKey('')
       }
+      onSave?.(row)
     } catch (errInfo) {
       console.log('Validate Failed:', errInfo)
     }

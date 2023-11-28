@@ -1,13 +1,18 @@
 import { Button, Flex, Form, Popconfirm, Switch, Table, Typography } from 'antd'
-import dayjs from 'dayjs'
 import { Plus } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import ProductAPI from '~/api/services/ProductAPI'
 import Status from '~/components/ui/Status'
 import useTable from '~/hooks/useTable'
 import { Product, StatusType } from '~/typing'
+import {
+  DatePattern,
+  default as DayJS,
+  default as dayjs
+} from '~/utils/date-formatter'
 import { firstLetterUppercase } from '~/utils/text'
 import EditableCell, { EditableTableProps } from './components/EditableCell'
+import useProduct from './hooks/useProduct'
 
 type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>
 
@@ -30,10 +35,10 @@ const ProductPage: React.FC = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [loading, setLoading] = useState<boolean>(false)
   const [isAdmin, setIsAdmin] = useState<boolean>(false)
+  const { convertToProduct } = useProduct()
   const {
     form,
     isEditing,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     isDisableEditing,
     dataSource,
     setDataSource,
@@ -86,7 +91,21 @@ const ProductPage: React.FC = () => {
             </Typography.Link> */}
             <Button
               type='primary'
-              onClick={() => handleSaveEditingRow(record.id!)}
+              size='small'
+              onClick={() =>
+                handleSaveEditingRow(record.id!, (row) => {
+                  ProductAPI.updateItem(
+                    convertToProduct({ ...row, id: record.id! })
+                  )
+                    .then((data) => {
+                      setLoading(true)
+                      console.log(data)
+                    })
+                    .finally(() => {
+                      setLoading(false)
+                    })
+                })
+              }
             >
               Save
             </Button>
@@ -97,7 +116,9 @@ const ProductPage: React.FC = () => {
               }}
             >
               {/* <Typography.Link>Cancel</Typography.Link> */}
-              <Button type='dashed'>Cancel</Button>
+              <Button size='small' type='dashed'>
+                Cancel
+              </Button>
             </Popconfirm>
           </Flex>
         ) : (
@@ -105,6 +126,7 @@ const ProductPage: React.FC = () => {
             <Button
               type='dashed'
               disabled={isDisableEditing}
+              size='small'
               onClick={() => {
                 form.setFields([
                   { name: 'productCode', value: record.productCode },
@@ -123,8 +145,6 @@ const ProductPage: React.FC = () => {
                     name: 'dateOutputFCR',
                     value: record.dateOutputFCR
                       ? dayjs(record.dateOutputFCR)
-                          .toISOString()
-                          .format('DD/MM/YYYY')
                       : ''
                   }
                 ])
@@ -168,7 +188,6 @@ const ProductPage: React.FC = () => {
       width: '15%',
       editable: true
     },
-
     {
       title: 'May',
       dataIndex: 'sewing',
@@ -241,7 +260,11 @@ const ProductPage: React.FC = () => {
       title: 'Date Output FCR',
       dataIndex: 'dateOutputFCR',
       width: '15%',
-      editable: true
+      editable: true,
+      render: (_, record: ProductTableDataType) => {
+        const validData = record.dateOutputFCR ? record.dateOutputFCR : ''
+        return <span>{DayJS(validData).format(DatePattern.display)}</span>
+      }
     }
   ]
 
@@ -255,7 +278,8 @@ const ProductPage: React.FC = () => {
       dataIndex: 'createdAt',
       editable: true,
       render: (_, record: ProductTableDataType) => {
-        return <>{record.updatedAt}</>
+        const validData = record.createdAt ? record.createdAt : ''
+        return <span>{DayJS(validData).format(DatePattern.display)}</span>
       }
     },
     {
@@ -265,7 +289,8 @@ const ProductPage: React.FC = () => {
       editable: true,
       responsive: ['md'],
       render: (_, record: ProductTableDataType) => {
-        return <>{record.updatedAt}</>
+        const validData = record.updatedAt ? record.updatedAt : ''
+        return <span>{DayJS(validData).format(DatePattern.display)}</span>
       }
     },
     ...commonActionsCol
@@ -288,14 +313,12 @@ const ProductPage: React.FC = () => {
       }
       return {
         ...col,
-        responsive: col.responsive,
         onCell: (record: ProductTableDataType) => ({
           record,
           inputType: onCellColumnType(col.dataIndex),
           dataIndex: col.dataIndex,
           title: col.title,
-          editing: isEditing(record.key!),
-          responsive: col.responsive
+          editing: isEditing(record.key!)
         })
       }
     }) as ColumnTypes

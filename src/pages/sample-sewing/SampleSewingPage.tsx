@@ -2,7 +2,7 @@ import { Button, Flex, Form, Modal, Popconfirm, Table, Typography } from 'antd'
 import { AnyObject } from 'antd/es/_util/type'
 import { Plus } from 'lucide-react'
 import React from 'react'
-import { dateDistance } from '~/utils/date-formatter'
+import DayJS from '~/utils/date-formatter'
 import { firstLetterUppercase } from '~/utils/text'
 import AddNewSampleSewing from './components/AddNewSampleSewing'
 import EditableCell, { EditableTableProps } from './components/EditableCell'
@@ -70,7 +70,7 @@ const SampleSewingPage = () => {
       render(value) {
         return (
           <Typography.Text className='text-sm'>
-            {firstLetterUppercase(dateDistance(value))}
+            {firstLetterUppercase(DayJS(value).toNow())}
           </Typography.Text>
         )
       }
@@ -83,7 +83,7 @@ const SampleSewingPage = () => {
       render(value) {
         return (
           <Typography.Text className='text-sm'>
-            {firstLetterUppercase(dateDistance(value))}
+            {firstLetterUppercase(DayJS(value).toNow())}
           </Typography.Text>
         )
       }
@@ -197,7 +197,7 @@ const SampleSewingPage = () => {
         title='Basic Modal'
         open={openModal}
         onOk={() => {
-          handleAddNewItemData(product!.productID!, dateSewingNPL)
+          handleAddNewItemData(product!.id!, dateSewingNPL)
           setOpenModal(false)
         }}
         onCancel={() => setOpenModal(false)}

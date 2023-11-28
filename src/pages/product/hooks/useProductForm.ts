@@ -30,8 +30,8 @@ export default function useProductForm() {
 
   useEffect(() => {
     PrintAPI.getAlls().then((res) => {
-      if (res?.isSuccess) {
-        if (res?.isSuccess) {
+      if (res?.success) {
+        if (res?.success) {
           setPrints(res.data as Print[])
         }
       }
@@ -94,17 +94,17 @@ export default function useProductForm() {
     ProductAPI.createNew(product)
       .then((res) => {
         setLoading(true)
-        if (res?.isSuccess) {
+        if (res?.success) {
           const parseProduct = res.data as Product
           const dataRequest = printableSelected.map((printable) => {
             return {
               printID: printable.printID,
-              productID: parseProduct.productID!,
+              productID: parseProduct.id!,
               name: printable.name
             }
           })
           PrintablePlaceAPI.createNew(dataRequest).then((res2) => {
-            if (res2?.isSuccess) {
+            if (res2?.success) {
               console.log(res2)
             }
           })
