@@ -63,7 +63,7 @@ export default {
     product: Product
   ): Promise<ResponseDataType | undefined> => {
     return client
-      .put(`${PATH_API}/${product.productID}`, {
+      .put(`${PATH_API}/${product.id}`, {
         productCode: product.productCode,
         quantityPO: product.quantityPO,
         dateInputNPL: product.dateInputNPL,

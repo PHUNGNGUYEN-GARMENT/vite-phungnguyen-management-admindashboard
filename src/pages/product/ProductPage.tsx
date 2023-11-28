@@ -27,13 +27,14 @@ export type ProductTableDataType = {
 }
 
 const ProductPage: React.FC = () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [loading, setLoading] = useState<boolean>(false)
   const [isAdmin, setIsAdmin] = useState<boolean>(false)
   const {
     form,
     isEditing,
-    editingKey,
-    deleteKey,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    isDisableEditing,
     dataSource,
     setDataSource,
     handleStartEditingRow,
@@ -86,15 +87,8 @@ const ProductPage: React.FC = () => {
           <Flex gap={30}>
             <Button
               type='dashed'
-              disabled={editingKey !== ''}
+              disabled={isDisableEditing}
               onClick={() => {
-                form.setFieldsValue({
-                  productCode: '',
-                  productID: '',
-                  createdAt: '',
-                  updatedAt: '',
-                  ...record
-                })
                 handleStartEditingRow(record)
               }}
             >
@@ -123,7 +117,7 @@ const ProductPage: React.FC = () => {
       title: 'ID',
       dataIndex: 'id',
       width: '5%',
-      editable: true,
+      editable: false,
       responsive: ['lg']
     },
     {
@@ -154,6 +148,7 @@ const ProductPage: React.FC = () => {
         {
           title: 'May',
           dataIndex: 'sewing',
+          editable: true,
           render: (value, record: ProductTableDataType) => {
             const validData = record.status ? record.status : []
             return (
@@ -165,10 +160,14 @@ const ProductPage: React.FC = () => {
               </>
             )
           }
+        } as ColumnTypes[number] & {
+          editable?: boolean
+          dataIndex: string
         },
         {
           title: 'Ủi',
           dataIndex: 'iron',
+          editable: true,
           render: (value, record: ProductTableDataType) => {
             const validData = record.status ? record.status : []
             return (
@@ -180,10 +179,14 @@ const ProductPage: React.FC = () => {
               </>
             )
           }
+        } as ColumnTypes[number] & {
+          editable?: boolean
+          dataIndex: string
         },
         {
           title: 'Kiểm tra',
           dataIndex: 'check',
+          editable: true,
           render: (value, record: ProductTableDataType) => {
             const validData = record.status ? record.status : []
             return (
@@ -195,10 +198,14 @@ const ProductPage: React.FC = () => {
               </>
             )
           }
+        } as ColumnTypes[number] & {
+          editable?: boolean
+          dataIndex: string
         },
         {
           title: 'Đóng gói',
           dataIndex: 'pack',
+          editable: true,
           render: (value, record: ProductTableDataType) => {
             const validData = record.status ? record.status : []
             return (
@@ -210,6 +217,9 @@ const ProductPage: React.FC = () => {
               </>
             )
           }
+        } as ColumnTypes[number] & {
+          editable?: boolean
+          dataIndex: string
         }
       ]
     },
@@ -242,7 +252,7 @@ const ProductPage: React.FC = () => {
       title: 'ID',
       dataIndex: 'id',
       width: '5%',
-      editable: true,
+      editable: false,
       responsive: ['lg']
     },
     {
@@ -258,10 +268,12 @@ const ProductPage: React.FC = () => {
     {
       title: 'Progress',
       dataIndex: 'state',
+      editable: true,
       children: [
         {
           title: 'May',
           dataIndex: 'sewing',
+          editable: true,
           render: (value, record: ProductTableDataType) => {
             const validData = record.status ? record.status : []
             return (
@@ -273,10 +285,14 @@ const ProductPage: React.FC = () => {
               </>
             )
           }
+        } as ColumnTypes[number] & {
+          editable?: boolean
+          dataIndex: string
         },
         {
           title: 'Ủi',
           dataIndex: 'iron',
+          editable: true,
           render: (value, record: ProductTableDataType) => {
             const validData = record.status ? record.status : []
             return (
@@ -288,9 +304,13 @@ const ProductPage: React.FC = () => {
               </>
             )
           }
+        } as ColumnTypes[number] & {
+          editable?: boolean
+          dataIndex: string
         },
         {
           title: 'Kiểm tra',
+          editable: true,
           dataIndex: 'check',
           render: (value, record: ProductTableDataType) => {
             const validData = record.status ? record.status : []
@@ -303,9 +323,13 @@ const ProductPage: React.FC = () => {
               </>
             )
           }
+        } as ColumnTypes[number] & {
+          editable?: boolean
+          dataIndex: string
         },
         {
           title: 'Đóng gói',
+          editable: true,
           dataIndex: 'pack',
           render: (value, record: ProductTableDataType) => {
             const validData = record.status ? record.status : []
@@ -318,6 +342,9 @@ const ProductPage: React.FC = () => {
               </>
             )
           }
+        } as ColumnTypes[number] & {
+          editable?: boolean
+          dataIndex: string
         }
       ]
     },
@@ -355,16 +382,7 @@ const ProductPage: React.FC = () => {
         responsive: col.responsive,
         onCell: (record: ProductTableDataType) => ({
           record,
-          inputType:
-            col.dataIndex === 'productCode'
-              ? 'text'
-              : col.dataIndex === 'quantityPO'
-                ? 'number'
-                : col.dataIndex === 'dateInputNPL'
-                  ? 'datepicker'
-                  : col.dataIndex === 'dateOutputFCR'
-                    ? 'datepicker'
-                    : 'select',
+          inputType: onCellColumnType(col.dataIndex),
           dataIndex: col.dataIndex,
           title: col.title,
           editing: isEditing(record.key!),
@@ -372,6 +390,21 @@ const ProductPage: React.FC = () => {
         })
       }
     }) as ColumnTypes
+  }
+
+  const onCellColumnType = (dataIndex: string): string => {
+    switch (dataIndex) {
+      case 'productCode':
+        return 'text'
+      case 'quantityPO':
+        return 'number'
+      case 'dateInputNPL' && 'dateInputFCR':
+        return 'datepicker'
+      case 'status':
+        return 'select'
+      default:
+        return 'text'
+    }
   }
 
   return (

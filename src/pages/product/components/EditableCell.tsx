@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DatePicker, Input, InputNumber, Select, Table } from 'antd'
 import dayjs from 'dayjs'
-import { memo, useEffect } from 'react'
+import { memo } from 'react'
 import { ProductTableDataType } from '../ProductPage'
 
 type InputType = 'select' | 'text' | 'number' | 'datepicker' | 'view'
@@ -27,23 +27,23 @@ const EditableCell: React.FC<EditableCellProps> = ({
   children,
   ...restProps
 }) => {
-
+  const validRecord = record ? (record as ProductTableDataType) : {}
   const inputTypeComponentMap: Record<string, React.ReactNode> = {
     number: (
       <InputNumber
         className='w-full'
-        value={record ? record.quantityPO : '0'}
+        value={validRecord.quantityPO}
         placeholder='Quantity po..'
       />
     ),
-    text: <Input value={record ? record.productCode : ''} />,
+    text: <Input value={validRecord.productCode} />,
     select: (
       <Select
         mode='multiple'
         allowClear
         placeholder='Please select'
         optionLabelProp='label'
-        defaultValue={record ? record.status : ['']}
+        defaultValue={validRecord.status}
         className='w-full'
         style={{
           width: '100%'
@@ -63,7 +63,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
         )}
       />
     ),
-    view: <>{record ? record.key : ''}</>
+    view: <>{validRecord.key}</>
   }
 
   const inputNode: React.ReactNode =

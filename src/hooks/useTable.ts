@@ -14,6 +14,10 @@ export default function useTable<T>(initData: TableDataType<T>[]) {
 
   const isEditing = (key: React.Key) => key === editingKey
 
+  const isDisableEditing: boolean = editingKey !== ''
+
+  const isDisableDeleting: boolean = deleteKey !== ''
+
   const isDelete = (key: React.Key) => key === deleteKey
 
   // Add row
@@ -46,7 +50,17 @@ export default function useTable<T>(initData: TableDataType<T>[]) {
 
   // Edit row
   function handleStartEditingRow(record: Partial<T> & { key?: React.Key }) {
-    form.setFieldsValue({ name: '', createdAt: '', updatedAt: '', ...record })
+    form.setFieldsValue({
+      productCode: '',
+      quantityPO: '',
+      status: '',
+      dateInputNPL: '',
+      dateOutputFCR: '',
+      createdAt: '',
+      updatedAt: '',
+      ...record
+    })
+    // form.resetFields(['productCode', 'quantityPO', 'status', 'dateOutputFCR'])
     setEditingKey(record.key!)
   }
 
@@ -84,6 +98,8 @@ export default function useTable<T>(initData: TableDataType<T>[]) {
   return {
     form,
     isEditing,
+    isDisableEditing,
+    isDisableDeleting,
     isDelete,
     editingKey,
     deleteKey,
