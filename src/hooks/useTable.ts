@@ -50,17 +50,7 @@ export default function useTable<T>(initData: TableDataType<T>[]) {
 
   // Edit row
   function handleStartEditingRow(record: Partial<T> & { key?: React.Key }) {
-    form.setFieldsValue({
-      productCode: '',
-      quantityPO: '',
-      status: '',
-      dateInputNPL: '',
-      dateOutputFCR: '',
-      createdAt: '',
-      updatedAt: '',
-      ...record
-    })
-    // form.resetFields(['productCode', 'quantityPO', 'status', 'dateOutputFCR'])
+    // Can using record to set default value form editing..
     setEditingKey(record.key!)
   }
 
@@ -81,8 +71,9 @@ export default function useTable<T>(initData: TableDataType<T>[]) {
           ...item,
           ...row
         })
-        setDataSource(newData)
-        setEditingKey('')
+        // setDataSource(newData)
+        // setEditingKey('')
+        console.log(row)
         // After updated local data
         // We need to update on database
       } else {

@@ -1,11 +1,11 @@
 import { Button, Flex, Form, Popconfirm, Switch, Table, Typography } from 'antd'
+import dayjs from 'dayjs'
 import { Plus } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import ProductAPI from '~/api/services/ProductAPI'
 import Status from '~/components/ui/Status'
 import useTable from '~/hooks/useTable'
 import { Product, StatusType } from '~/typing'
-import { dateDistance, dateFormatter } from '~/utils/date-formatter'
 import { firstLetterUppercase } from '~/utils/text'
 import EditableCell, { EditableTableProps } from './components/EditableCell'
 
@@ -59,6 +59,17 @@ const ProductPage: React.FC = () => {
     })
   }, [])
 
+  const matchedStatusType = (
+    record: ProductTableDataType,
+    nameField: string
+  ): string => {
+    if (record.status) {
+      const itemFind = record.status.find((item) => item.name === nameField)
+      return itemFind?.type || ''
+    }
+    return ''
+  }
+
   const commonActionsCol: (ColumnTypes[number] & {
     editable?: boolean
     dataIndex: string
@@ -67,45 +78,170 @@ const ProductPage: React.FC = () => {
       title: 'Operation',
       dataIndex: 'operation',
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      render: (_: any, record: ProductTableDataType) => {
-        // const deletable = isDelete(record as ColorTableDataType)
+      render: (_, record: ProductTableDataType) => {
         return isEditing(record.key!) ? (
           <Flex className='flex flex-col gap-3 lg:flex-row'>
-            <Typography.Link onClick={() => handleSaveEditingRow(record.id!)}>
+            {/* <Typography.Link onClick={() => handleSaveEditingRow(record.id!)}>
               Save
-            </Typography.Link>
+            </Typography.Link> */}
+            <Button
+              type='primary'
+              onClick={() => handleSaveEditingRow(record.id!)}
+            >
+              Save
+            </Button>
             <Popconfirm
               title={`Sure to cancel?`}
               onConfirm={() => {
                 handleCancelEditingRow()
               }}
             >
-              <a>Cancel</a>
+              {/* <Typography.Link>Cancel</Typography.Link> */}
+              <Button type='dashed'>Cancel</Button>
             </Popconfirm>
           </Flex>
         ) : (
-          <Flex gap={30}>
+          <Flex gap={10}>
             <Button
               type='dashed'
               disabled={isDisableEditing}
               onClick={() => {
+                form.setFields([
+                  { name: 'productCode', value: record.productCode },
+                  { name: 'quantityPO', value: record.quantityPO },
+                  {
+                    name: 'sewing',
+                    value: record.status
+                      ? record.status.find((item) => item.name === 'sewing')
+                          ?.type
+                      : ''
+                  },
+                  { name: 'iron', value: matchedStatusType(record, 'iron') },
+                  { name: 'check', value: matchedStatusType(record, 'check') },
+                  { name: 'pack', value: matchedStatusType(record, 'pack') },
+                  {
+                    name: 'dateOutputFCR',
+                    value: record.dateOutputFCR
+                      ? dayjs(record.dateOutputFCR)
+                          .toISOString()
+                          .format('DD/MM/YYYY')
+                      : ''
+                  }
+                ])
                 handleStartEditingRow(record)
               }}
             >
               Edit
             </Button>
-            <Popconfirm
-              title={`Sure to delete?`}
-              onCancel={() => handleCancelDeleteRow()}
-              onConfirm={() => handleDeleteRow(record.key!)}
-            >
-              <Button danger onClick={() => handleStartDeleteRow(record.key!)}>
-                Delete
-              </Button>
-            </Popconfirm>
+            {isAdmin && (
+              <Popconfirm
+                title={`Sure to delete?`}
+                onCancel={() => handleCancelDeleteRow()}
+                onConfirm={() => handleDeleteRow(record.key!)}
+              >
+                <Typography.Link
+                  onClick={() => handleStartDeleteRow(record.key!)}
+                >
+                  Delete
+                </Typography.Link>
+              </Popconfirm>
+            )}
           </Flex>
         )
       }
+    }
+  ]
+
+  const commonCols: (ColumnTypes[number] & {
+    editable?: boolean
+    dataIndex: string
+  })[] = [
+    {
+      title: 'Code',
+      dataIndex: 'productCode',
+      width: '12%',
+      editable: true
+    },
+    {
+      title: 'Quantity PO',
+      dataIndex: 'quantityPO',
+      width: '15%',
+      editable: true
+    },
+
+    {
+      title: 'May',
+      dataIndex: 'sewing',
+      width: '12%',
+      editable: true,
+      render: (_, record: ProductTableDataType) => {
+        const validData = record.status ? record.status : []
+        return (
+          <>
+            <Status
+              type={validData[0].type}
+              label={firstLetterUppercase(validData[0].type)}
+            />
+          </>
+        )
+      }
+    },
+    {
+      title: 'Ủi',
+      dataIndex: 'iron',
+      editable: true,
+      width: '12%',
+      render: (_, record: ProductTableDataType) => {
+        const validData = record.status ? record.status : []
+        return (
+          <>
+            <Status
+              type={validData[1].type}
+              label={firstLetterUppercase(validData[1].type)}
+            />
+          </>
+        )
+      }
+    },
+    {
+      title: 'Kiểm tra',
+      dataIndex: 'check',
+      editable: true,
+      width: '12%',
+      render: (_, record: ProductTableDataType) => {
+        const validData = record.status ? record.status : []
+        return (
+          <>
+            <Status
+              type={validData[2].type}
+              label={firstLetterUppercase(validData[2].type)}
+            />
+          </>
+        )
+      }
+    },
+    {
+      title: 'Đóng gói',
+      dataIndex: 'pack',
+      editable: true,
+      width: '12%',
+      render: (_, record: ProductTableDataType) => {
+        const validData = record.status ? record.status : []
+        return (
+          <>
+            <Status
+              type={validData[3].type}
+              label={firstLetterUppercase(validData[3].type)}
+            />
+          </>
+        )
+      }
+    },
+    {
+      title: 'Date Output FCR',
+      dataIndex: 'dateOutputFCR',
+      width: '15%',
+      editable: true
     }
   ]
 
@@ -113,121 +249,12 @@ const ProductPage: React.FC = () => {
     editable?: boolean
     dataIndex: string
   })[] = [
-    {
-      title: 'ID',
-      dataIndex: 'id',
-      width: '5%',
-      editable: false,
-      responsive: ['lg']
-    },
-    {
-      title: 'Code',
-      dataIndex: 'productCode',
-      editable: true
-    },
-    {
-      title: 'Quantity PO',
-      dataIndex: 'quantityPO',
-      editable: true
-    },
-    {
-      title: 'Date Input NPL',
-      dataIndex: 'dateInputNPL',
-      editable: true
-    },
-    {
-      title: 'Date Output FCR',
-      dataIndex: 'dateOutputFCR',
-      editable: true
-    },
-    {
-      title: 'Progress',
-      dataIndex: 'state',
-      editable: true,
-      children: [
-        {
-          title: 'May',
-          dataIndex: 'sewing',
-          editable: true,
-          render: (value, record: ProductTableDataType) => {
-            const validData = record.status ? record.status : []
-            return (
-              <>
-                <Status
-                  type={validData[0].type}
-                  label={firstLetterUppercase(validData[0].type)}
-                />
-              </>
-            )
-          }
-        } as ColumnTypes[number] & {
-          editable?: boolean
-          dataIndex: string
-        },
-        {
-          title: 'Ủi',
-          dataIndex: 'iron',
-          editable: true,
-          render: (value, record: ProductTableDataType) => {
-            const validData = record.status ? record.status : []
-            return (
-              <>
-                <Status
-                  type={validData[1].type}
-                  label={firstLetterUppercase(validData[1].type)}
-                />
-              </>
-            )
-          }
-        } as ColumnTypes[number] & {
-          editable?: boolean
-          dataIndex: string
-        },
-        {
-          title: 'Kiểm tra',
-          dataIndex: 'check',
-          editable: true,
-          render: (value, record: ProductTableDataType) => {
-            const validData = record.status ? record.status : []
-            return (
-              <>
-                <Status
-                  type={validData[2].type}
-                  label={firstLetterUppercase(validData[2].type)}
-                />
-              </>
-            )
-          }
-        } as ColumnTypes[number] & {
-          editable?: boolean
-          dataIndex: string
-        },
-        {
-          title: 'Đóng gói',
-          dataIndex: 'pack',
-          editable: true,
-          render: (value, record: ProductTableDataType) => {
-            const validData = record.status ? record.status : []
-            return (
-              <>
-                <Status
-                  type={validData[3].type}
-                  label={firstLetterUppercase(validData[3].type)}
-                />
-              </>
-            )
-          }
-        } as ColumnTypes[number] & {
-          editable?: boolean
-          dataIndex: string
-        }
-      ]
-    },
+    ...commonCols,
     {
       title: 'Created date',
       dataIndex: 'createdAt',
       editable: true,
-      render: (value, record: ProductTableDataType) => {
+      render: (_, record: ProductTableDataType) => {
         return <>{record.updatedAt}</>
       }
     },
@@ -237,7 +264,7 @@ const ProductPage: React.FC = () => {
       width: '15%',
       editable: true,
       responsive: ['md'],
-      render: (value, record: ProductTableDataType) => {
+      render: (_, record: ProductTableDataType) => {
         return <>{record.updatedAt}</>
       }
     },
@@ -247,125 +274,7 @@ const ProductPage: React.FC = () => {
   const staffColumns: (ColumnTypes[number] & {
     editable?: boolean
     dataIndex: string
-  })[] = [
-    {
-      title: 'ID',
-      dataIndex: 'id',
-      width: '5%',
-      editable: false,
-      responsive: ['lg']
-    },
-    {
-      title: 'Code',
-      dataIndex: 'productCode',
-      editable: true
-    },
-    {
-      title: 'Quantity PO',
-      dataIndex: 'quantityPO',
-      editable: true
-    },
-    {
-      title: 'Progress',
-      dataIndex: 'state',
-      editable: true,
-      children: [
-        {
-          title: 'May',
-          dataIndex: 'sewing',
-          editable: true,
-          render: (value, record: ProductTableDataType) => {
-            const validData = record.status ? record.status : []
-            return (
-              <>
-                <Status
-                  type={validData[0].type}
-                  label={firstLetterUppercase(validData[0].type)}
-                />
-              </>
-            )
-          }
-        } as ColumnTypes[number] & {
-          editable?: boolean
-          dataIndex: string
-        },
-        {
-          title: 'Ủi',
-          dataIndex: 'iron',
-          editable: true,
-          render: (value, record: ProductTableDataType) => {
-            const validData = record.status ? record.status : []
-            return (
-              <>
-                <Status
-                  type={validData[1].type}
-                  label={firstLetterUppercase(validData[1].type)}
-                />
-              </>
-            )
-          }
-        } as ColumnTypes[number] & {
-          editable?: boolean
-          dataIndex: string
-        },
-        {
-          title: 'Kiểm tra',
-          editable: true,
-          dataIndex: 'check',
-          render: (value, record: ProductTableDataType) => {
-            const validData = record.status ? record.status : []
-            return (
-              <>
-                <Status
-                  type={validData[2].type}
-                  label={firstLetterUppercase(validData[2].type)}
-                />
-              </>
-            )
-          }
-        } as ColumnTypes[number] & {
-          editable?: boolean
-          dataIndex: string
-        },
-        {
-          title: 'Đóng gói',
-          editable: true,
-          dataIndex: 'pack',
-          render: (value, record: ProductTableDataType) => {
-            const validData = record.status ? record.status : []
-            return (
-              <>
-                <Status
-                  type={validData[3].type}
-                  label={firstLetterUppercase(validData[3].type)}
-                />
-              </>
-            )
-          }
-        } as ColumnTypes[number] & {
-          editable?: boolean
-          dataIndex: string
-        }
-      ]
-    },
-    {
-      title: 'Ngày xuất FCR',
-      dataIndex: 'dateOutputFCR',
-      editable: true,
-      render: (value, record: ProductTableDataType) => {
-        const validData = record.dateOutputFCR ? record.dateOutputFCR : ''
-        return (
-          <div>
-            <span>{dateFormatter(validData)}</span>
-            <span className='absolute bottom-0 right-0 p-1 text-[10px]'>
-              {dateDistance(new Date(validData))}
-            </span>
-          </div>
-        )
-      }
-    },
-    ...commonActionsCol
-  ]
+  })[] = [...commonCols, ...commonActionsCol]
 
   const mergedColumns = (
     cols: (ColumnTypes[number] & {
