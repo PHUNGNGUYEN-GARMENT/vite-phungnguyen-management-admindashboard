@@ -68,7 +68,10 @@ export default {
         quantityPO: product.quantityPO,
         dateInputNPL: product.dateInputNPL,
         dateOutputFCR: product.dateOutputFCR,
-        status: product.status,
+        sewing: product.sewing,
+        iron: product.iron,
+        check: product.check,
+        pack: product.pack,
         createdAt: product.createdAt,
         updatedAt: product.updatedAt
       })

@@ -144,7 +144,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
                 ]}
               >
                 <Select
-                  value={record.status ? record.status[0].type : ''}
+                  value={record.sewing ?? 'normal'}
                   className='w-full'
                   options={statusOptions}
                   optionRender={(option) => {

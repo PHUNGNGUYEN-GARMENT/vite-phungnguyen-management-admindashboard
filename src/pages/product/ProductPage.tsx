@@ -23,10 +23,10 @@ export type ProductTableDataType = {
   quantityPO?: number
   dateInputNPL?: string
   dateOutputFCR?: string
-  status?: {
-    name: string
-    type: StatusType
-  }[]
+  sewing?: StatusType
+  iron?: StatusType
+  check?: StatusType
+  pack?: StatusType
   createdAt?: string
   updatedAt?: string
 }
@@ -64,17 +64,6 @@ const ProductPage: React.FC = () => {
     })
   }, [])
 
-  const matchedStatusType = (
-    record: ProductTableDataType,
-    nameField: string
-  ): string => {
-    if (record.status) {
-      const itemFind = record.status.find((item) => item.name === nameField)
-      return itemFind?.type || ''
-    }
-    return ''
-  }
-
   const commonActionsCol: (ColumnTypes[number] & {
     editable?: boolean
     dataIndex: string
@@ -94,6 +83,7 @@ const ProductPage: React.FC = () => {
               size='small'
               onClick={() =>
                 handleSaveEditingRow(record.id!, (row) => {
+                  console.log(row)
                   ProductAPI.updateItem(
                     convertToProduct({ ...row, id: record.id! })
                   )
@@ -133,14 +123,11 @@ const ProductPage: React.FC = () => {
                   { name: 'quantityPO', value: record.quantityPO },
                   {
                     name: 'sewing',
-                    value: record.status
-                      ? record.status.find((item) => item.name === 'sewing')
-                          ?.type
-                      : ''
+                    value: record.sewing
                   },
-                  { name: 'iron', value: matchedStatusType(record, 'iron') },
-                  { name: 'check', value: matchedStatusType(record, 'check') },
-                  { name: 'pack', value: matchedStatusType(record, 'pack') },
+                  { name: 'iron', value: record.iron },
+                  { name: 'check', value: record.check },
+                  { name: 'pack', value: record.pack },
                   {
                     name: 'dateOutputFCR',
                     value: record.dateOutputFCR
@@ -194,14 +181,11 @@ const ProductPage: React.FC = () => {
       width: '12%',
       editable: true,
       render: (_, record: ProductTableDataType) => {
-        const validData = record.status ? record.status : []
         return (
-          <>
-            <Status
-              type={validData[0].type}
-              label={firstLetterUppercase(validData[0].type)}
-            />
-          </>
+          <Status
+            type={record.sewing ?? 'normal'}
+            label={firstLetterUppercase(record.sewing ?? 'normal')}
+          />
         )
       }
     },
@@ -211,14 +195,11 @@ const ProductPage: React.FC = () => {
       editable: true,
       width: '12%',
       render: (_, record: ProductTableDataType) => {
-        const validData = record.status ? record.status : []
         return (
-          <>
-            <Status
-              type={validData[1].type}
-              label={firstLetterUppercase(validData[1].type)}
-            />
-          </>
+          <Status
+            type={record.iron ?? 'normal'}
+            label={firstLetterUppercase(record.iron ?? 'normal')}
+          />
         )
       }
     },
@@ -228,14 +209,11 @@ const ProductPage: React.FC = () => {
       editable: true,
       width: '12%',
       render: (_, record: ProductTableDataType) => {
-        const validData = record.status ? record.status : []
         return (
-          <>
-            <Status
-              type={validData[2].type}
-              label={firstLetterUppercase(validData[2].type)}
-            />
-          </>
+          <Status
+            type={record.check ?? 'normal'}
+            label={firstLetterUppercase(record.check ?? 'normal')}
+          />
         )
       }
     },
@@ -245,14 +223,11 @@ const ProductPage: React.FC = () => {
       editable: true,
       width: '12%',
       render: (_, record: ProductTableDataType) => {
-        const validData = record.status ? record.status : []
         return (
-          <>
-            <Status
-              type={validData[3].type}
-              label={firstLetterUppercase(validData[3].type)}
-            />
-          </>
+          <Status
+            type={record.pack ?? 'normal'}
+            label={firstLetterUppercase(record.pack ?? 'normal')}
+          />
         )
       }
     },
