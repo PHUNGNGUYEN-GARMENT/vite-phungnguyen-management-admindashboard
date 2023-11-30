@@ -18,7 +18,7 @@ interface Props extends React.HTMLAttributes<HTMLElement> {
 }
 
 export type ProductTableDataType = {
-  key?: string | number
+  key?: React.Key
   id?: number
   productCode?: string
   quantityPO?: number
@@ -52,9 +52,9 @@ const ProductTable: React.FC<Props> = ({
     handleDeleteRow,
     handleCancelDeleteRow
   } = useTable<ProductTableDataType>([])
-  console.log('Product table loading...')
 
   useEffect(() => {
+    console.log('Product table loading...')
     ProductAPI.getAlls().then((data) => {
       if (data?.success) {
         console.log(data)

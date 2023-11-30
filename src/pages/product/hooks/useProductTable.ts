@@ -2,6 +2,7 @@ import { useForm } from 'antd/es/form/Form'
 import React, { useState } from 'react'
 import { Product } from '~/typing'
 import ProductAPI from '../../../api/services/ProductAPI'
+import { ProductTableDataType } from '../components/ProductTable'
 
 export default function useProductTable() {
   const [form] = useForm()
@@ -20,7 +21,7 @@ export default function useProductTable() {
   }
 
   const handleDelete = (record: ProductTableDataType) => {
-    setDeleteKey(record.key)
+    setDeleteKey(record.key ?? '')
   }
 
   const handleCancelEditing = () => {
@@ -75,9 +76,9 @@ export default function useProductTable() {
   const handleDeleteRow = (key: React.Key) => {
     const itemFound = dataSource.find((item) => item.key === key)
     if (itemFound) {
-      ProductAPI.deleteItem(itemFound.productID).then(() => {
+      ProductAPI.deleteItem(itemFound.id ?? -1).then(() => {
         const dataSourceRemovedItem = dataSource.filter(
-          (item) => item.productID !== key
+          (item) => item.id !== key
         )
         setDataSource(dataSourceRemovedItem)
       })

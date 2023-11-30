@@ -46,9 +46,32 @@ export default {
         errorFormatter(error)
       })
   },
-  getItem: async (id: number): Promise<ResponseDataType | undefined> => {
+  getItemByID: async (id: number): Promise<ResponseDataType | undefined> => {
     return client
-      .get(`${PATH_API}/${id}`)
+      .get(`${PATH_API}`, {
+        params: {
+          id: id
+        }
+      })
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  getItemByCode: async (
+    code: string
+  ): Promise<ResponseDataType | undefined> => {
+    return client
+      .get(`${PATH_API}`, {
+        params: {
+          code: code
+        }
+      })
       .then((res) => {
         if (res.data) {
           return res.data as ResponseDataType

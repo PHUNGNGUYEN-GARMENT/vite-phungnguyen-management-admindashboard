@@ -8,26 +8,32 @@ import {
   Progress,
   Typography
 } from 'antd'
-import React, { memo, useState } from 'react'
+import React, { memo } from 'react'
 import { Product } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import { cn } from '~/utils/helpers'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
   data: Product
+  editingID: number | undefined
+  deleteID: number | undefined
+  isAdmin: boolean
+  setEditingID: (id: number | undefined) => void
+  setDeleteID: (id: number | undefined) => void
 }
 
-const ProductListItem: React.FC<Props> = ({ data, ...props }) => {
-  const [editingKey, setEditingKey] = useState<number | string | undefined>(
-    undefined
-  )
-  const [deleteKey, setDeleteKey] = useState<number | string | undefined>(
-    undefined
-  )
+const ProductListItem: React.FC<Props> = ({
+  data,
+  editingID,
+  setEditingID,
+  deleteID,
+  setDeleteID,
+  isAdmin,
+  ...props
+}) => {
+  const isEditing: boolean = editingID === data.id
 
-  const isEditing: boolean = editingKey !== data.id
-
-  const isAdmin = true
+  // const isDelete: boolean = deleteID === data.id
 
   return (
     <Flex vertical className={cn('w-full bg-white', props.className)} gap={5}>
@@ -36,10 +42,7 @@ const ProductListItem: React.FC<Props> = ({ data, ...props }) => {
           {data.productCode}
         </Typography.Title>
         {isEditing ? (
-          <Flex className='flex flex-col gap-3 lg:flex-row'>
-            {/* <Typography.Link onClick={() => handleSaveEditingRow(record.id!)}>
-              Save
-            </Typography.Link> */}
+          <Flex gap={5}>
             <Button
               type='primary'
               size='small'
@@ -51,6 +54,7 @@ const ProductListItem: React.FC<Props> = ({ data, ...props }) => {
               title={`Sure to cancel?`}
               onConfirm={() => {
                 console.log('Cancel editing...')
+                setEditingID(undefined)
               }}
             >
               {/* <Typography.Link>Cancel</Typography.Link> */}
@@ -63,10 +67,10 @@ const ProductListItem: React.FC<Props> = ({ data, ...props }) => {
           <Flex gap={10}>
             <Button
               type='dashed'
-              disabled={deleteKey !== ''}
+              disabled={deleteID !== undefined}
               size='small'
               onClick={() => {
-                setEditingKey(data.id)
+                setEditingID(data.id)
               }}
             >
               Edit
@@ -74,10 +78,10 @@ const ProductListItem: React.FC<Props> = ({ data, ...props }) => {
             {isAdmin && (
               <Popconfirm
                 title={`Sure to delete?`}
-                onCancel={() => setDeleteKey('')}
+                onCancel={() => setDeleteID(undefined)}
                 onConfirm={() => console.log('Deleting...')}
               >
-                <Typography.Link onClick={() => setDeleteKey(data.id)}>
+                <Typography.Link onClick={() => setDeleteID(data.id)}>
                   Delete
                 </Typography.Link>
               </Popconfirm>
@@ -92,14 +96,14 @@ const ProductListItem: React.FC<Props> = ({ data, ...props }) => {
         <InputNumber
           value={data.quantityPO}
           className='w-full text-center'
-          readOnly={editingKey !== data.id}
+          readOnly={editingID !== data.id}
         />
       </Flex>
       <Flex align='center' justify='start' gap={5}>
         <Typography.Text type='secondary' className='w-40 font-medium'>
           Ngày xuất FCR
         </Typography.Text>
-        {editingKey === data.id ? (
+        {isEditing ? (
           <DatePicker
             className='w-full'
             format={DatePattern.display}

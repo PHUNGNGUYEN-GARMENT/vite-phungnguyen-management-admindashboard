@@ -1,41 +1,28 @@
-import { Button, Flex, Switch } from 'antd'
-import { Plus } from 'lucide-react'
+import { Flex } from 'antd'
 import { useState } from 'react'
+import useDevice from '~/hooks/useDevice'
 import ProductList from './components/ProductList'
 import ProductTable from './components/ProductTable'
 
 const ProductPage: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState<boolean>(false)
   const [loading, setLoading] = useState<boolean>(false)
+  const { width } = useDevice()
 
   return (
     <>
-      <Flex vertical>
-        <Flex justify='space-between' align='end'>
-          <Switch
-            checkedChildren='Admin'
-            unCheckedChildren='Admin'
-            defaultChecked={false}
-            checked={isAdmin}
-            onChange={setIsAdmin}
+      <Flex vertical gap={20}>
+        {width >= 640 && (
+          <ProductTable
+            isAdmin={isAdmin}
+            loading={loading}
+            setLoading={setLoading}
+            className='hidden md:block'
           />
-          <Button
-            onClick={() => {}}
-            className='flex items-center'
-            type='primary'
-            icon={<Plus size={20} />}
-          >
-            New
-          </Button>
-        </Flex>
-        <ProductTable
-          isAdmin={isAdmin}
-          loading={loading}
-          setLoading={setLoading}
-          className='hidden md:block'
-        />
+        )}
         <ProductList
           isAdmin={isAdmin}
+          setIsAdmin={setIsAdmin}
           loading={loading}
           setLoading={setLoading}
           className='block md:hidden'
