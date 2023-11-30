@@ -1,6 +1,5 @@
 import { List } from 'antd'
 import { useEffect } from 'react'
-import { StatusType } from '~/typing'
 import useProductList from '../hooks/useProductList'
 import ProductListItem from './ProductListItem'
 
@@ -8,21 +7,6 @@ interface Props extends React.HTMLAttributes<HTMLElement> {
   isAdmin: boolean
   loading: boolean
   setLoading: (enable: boolean) => void
-}
-
-export type ProductTableDataType = {
-  key?: string | number
-  id?: number
-  productCode?: string
-  quantityPO?: number
-  dateInputNPL?: string
-  dateOutputFCR?: string
-  sewing?: StatusType
-  iron?: StatusType
-  check?: StatusType
-  pack?: StatusType
-  createdAt?: string
-  updatedAt?: string
 }
 
 const ProductList: React.FC<Props> = ({

@@ -4,11 +4,7 @@ import ProductAPI from '~/api/services/ProductAPI'
 import Status from '~/components/ui/Status'
 import useTable from '~/hooks/useTable'
 import { Product, StatusType } from '~/typing'
-import {
-  DatePattern,
-  default as DayJS,
-  default as dayjs
-} from '~/utils/date-formatter'
+import DayJS, { DatePattern } from '~/utils/date-formatter'
 import { firstLetterUppercase } from '~/utils/text'
 import useProduct from '../hooks/useProduct'
 import EditableCell, { EditableTableProps } from './EditableCell'
@@ -138,7 +134,7 @@ const ProductTable: React.FC<Props> = ({
                   {
                     name: 'dateOutputFCR',
                     value: record.dateOutputFCR
-                      ? dayjs(record.dateOutputFCR)
+                      ? DayJS(record.dateOutputFCR)
                       : ''
                   }
                 ])

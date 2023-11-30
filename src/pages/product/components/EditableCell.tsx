@@ -3,8 +3,7 @@ import { DatePicker, Form, Input, InputNumber, Select, Table } from 'antd'
 import { memo } from 'react'
 import Status from '~/components/ui/Status'
 import { StatusType } from '~/typing'
-import { DatePattern } from '~/utils/date-formatter'
-import { ProductTableDataType } from '../ProductPage'
+import { ProductTableDataType } from './ProductTable'
 
 type InputType = 'select' | 'text' | 'number' | 'datepicker' | 'view'
 
@@ -126,7 +125,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
               }
             ]}
           >
-            <DatePicker className='w-full' format={DatePattern.display} />
+            <DatePicker className='w-full' format='DD/MM/YYYY' />
           </Form.Item>
         )
       default: // Default là trạng thái mặc định
