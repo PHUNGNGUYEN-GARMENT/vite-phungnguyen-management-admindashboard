@@ -1,8 +1,8 @@
 import { Drawer, Layout } from 'antd'
 import React, { useState } from 'react'
 import { Outlet } from 'react-router-dom'
-import { cn } from '~/utils/helpers'
 import Footer from './Footer'
+import Header from './Header'
 import SideNav from './sidenav/SideNav'
 
 const { Sider, Header: AntHeader, Content } = Layout
@@ -10,7 +10,7 @@ const { Sider, Header: AntHeader, Content } = Layout
 const Main: React.FC = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [openDrawer, setOpenDrawer] = useState(false)
-  const [collapsed, setCollapsed] = useState(false)
+  // const [collapsed, setCollapsed] = useState(false)
 
   return (
     <Layout className='w-full bg-background' hasSider>
@@ -25,17 +25,18 @@ const Main: React.FC = () => {
       >
         <Layout>
           <Sider trigger={null}>
-            <SideNav onSelectedItem={() => setOpenDrawer(false)} />
+            <SideNav />
           </Sider>
         </Layout>
       </Drawer>
       <Sider
         breakpoint='lg'
         onBreakpoint={(state) => {
-          setCollapsed(state)
+          console.log(state)
         }}
+        collapsedWidth={0}
         collapsible
-        collapsed={collapsed}
+        // collapsed={collapsed}
         trigger={null}
         width={250}
         style={{
@@ -49,25 +50,16 @@ const Main: React.FC = () => {
       >
         <SideNav />
       </Sider>
-      <Layout
-        className={cn('ml-[250px]', {
-          'ml-[80px]': collapsed
-        })}
-      >
+      <Layout className='lg:ml-[250px]'>
         <AntHeader className='h-fit p-0'>
-          {/* <Header
-            className='hidden'
-            collapsed={collapsed}
+          <Header
+            // collapsed={collapsed}
             onMenuClick={() => {
-              if (breakpoint) {
-                setOpenDrawer(true)
-              } else {
-                setCollapsed(!collapsed)
-              }
+              setOpenDrawer(!openDrawer)
             }}
-          /> */}
+          />
         </AntHeader>
-        <Content className='p-5'>
+        <Content className='min-h-screen bg-background p-5'>
           <Outlet />
         </Content>
         <Footer className=''>Ant Design ©2023 Created by Ant UED</Footer>

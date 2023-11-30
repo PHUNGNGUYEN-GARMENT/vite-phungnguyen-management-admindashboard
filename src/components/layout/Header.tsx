@@ -3,15 +3,15 @@ import { BellRing, ChevronDown, Menu } from 'lucide-react'
 import React from 'react'
 import { cn } from '~/utils/helpers'
 
-interface HeaderProps extends React.HTMLAttributes<HTMLElement> {
-  collapsed: boolean
+interface Props extends React.HTMLAttributes<HTMLElement> {
+  collapsed?: boolean
   onMenuClick: (
     event: React.MouseEvent<HTMLElement, globalThis.MouseEvent>
   ) => void
 }
 
 // eslint-disable-next-line no-empty-pattern
-const Header = ({ onMenuClick, ...props }: HeaderProps) => {
+const Header: React.FC<Props> = ({ onMenuClick, ...props }) => {
   const url =
     'https://www.elle.vn/wp-content/uploads/2014/07/08/Justin-Bieber-0.jpg'
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -26,7 +26,10 @@ const Header = ({ onMenuClick, ...props }: HeaderProps) => {
         )}
       >
         <div className='flex flex-row items-center justify-start gap-5'>
-          <Button className='flex-shrink-0' onClick={onMenuClick}>
+          <Button
+            className='flex flex-shrink-0 lg:hidden'
+            onClick={onMenuClick}
+          >
             <Menu size={20} />
           </Button>
           {/* <SearchInput /> */}

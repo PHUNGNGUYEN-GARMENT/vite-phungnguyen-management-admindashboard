@@ -6,14 +6,14 @@ const PATH_API = 'products'
 
 export default {
   getAlls: async (
-    current: number = 1,
-    pageSize: number = 5
+    current?: number,
+    pageSize?: number
   ): Promise<ResponseDataType | undefined> => {
     return await client
       .get(`${PATH_API}/find`, {
         params: {
-          current: current,
-          pageSize: pageSize
+          current: current ?? 1,
+          pageSize: pageSize ?? 5
         }
       })
       .then((res) => {

@@ -13,6 +13,7 @@ export type ResponseDataType = {
   message: string
   data?: any
   meta?: any
+  count?: number
   page?: number
   total?: number
 }

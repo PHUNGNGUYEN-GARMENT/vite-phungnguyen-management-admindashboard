@@ -8,9 +8,7 @@ import { appRoutes } from '~/utils/route'
 import SideIcon from './SideIcon'
 import SideItem from './SideItem'
 
-export interface SideNavProps extends React.HTMLAttributes<HTMLElement> {
-  onSelectedItem?: () => void
-}
+export interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 type MenuItem = Required<MenuProps>['items'][number]
 
@@ -37,7 +35,7 @@ const items: MenuProps['items'] = appRoutes.map((route) => {
 })
 
 // eslint-disable-next-line no-empty-pattern
-const SideNav = ({ ...props }: SideNavProps) => {
+const SideNav: React.FC<Props> = ({ ...props }) => {
   const { pathname } = useLocation()
   const [selectedKey, setSelectedKey] = useState<string>(appRoutes[0].key)
 
