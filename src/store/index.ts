@@ -1,9 +1,10 @@
-import { legacy_createStore as createStore } from 'redux'
-import { composeWithDevTools } from 'redux-devtools-extension'
-import rootReducer from './reducer'
+import { configureStore } from '@reduxjs/toolkit'
 
-const composeEnhancers = composeWithDevTools()
+export const store = configureStore({
+  reducer: {}
+})
 
-const store = createStore(rootReducer, composeEnhancers)
+// Lấy RootState và AppDispatch từ store chung
+export type RootState = ReturnType<typeof store.getState>
 
-export default store
+export type AppDispatch = typeof store.dispatch
