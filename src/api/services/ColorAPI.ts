@@ -2,11 +2,33 @@ import client, { ResponseDataType } from '~/api/client'
 import { Color } from '~/typing'
 import { errorFormatter } from '~/utils/promise-formatter'
 
+const PATH_API = 'colors'
+
 export default {
   getAllColors: async (): Promise<ResponseDataType | undefined> => {
     return await client
-      .post('colors/find')
+      .get(`${PATH_API}/find`)
       .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  getItemByID: async (id: number): Promise<ResponseDataType | undefined> => {
+    return client
+      .get(`${PATH_API}`, {
+        params: {
+          id: id
+        }
+      })
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
         return res.data
       })
       .catch(function (error) {
@@ -18,7 +40,7 @@ export default {
     hexColor: string
   ): Promise<ResponseDataType | undefined> => {
     return client
-      .post('colors', {
+      .post(`${PATH_API}`, {
         nameColor: nameColor,
         hexColor: hexColor
       })
@@ -31,7 +53,7 @@ export default {
   },
   updateItem: async (color: Color): Promise<ResponseDataType | undefined> => {
     return client
-      .put('colors', {
+      .put(`${PATH_API}`, {
         colorID: color.colorID,
         nameColor: color.nameColor,
         hexColor: color.hexColor,
@@ -51,7 +73,7 @@ export default {
     colorID: number
   ): Promise<ResponseDataType | undefined> => {
     return client
-      .delete(`colors/${colorID}`)
+      .delete(`${PATH_API}/${colorID}`)
       .then((res) => {
         // console.log(JSON.stringify(res.data))
         return res.data
