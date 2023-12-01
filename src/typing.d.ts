@@ -16,10 +16,10 @@ export type Product = {
   quantityPO?: number
   dateInputNPL?: string
   dateOutputFCR?: string
-  sewing?: StatusType
-  iron?: StatusType
-  check?: StatusType
-  pack?: StatusType
+  sewing?: number
+  iron?: number
+  check?: number
+  pack?: number
   createdAt?: string
   updatedAt?: string
 }

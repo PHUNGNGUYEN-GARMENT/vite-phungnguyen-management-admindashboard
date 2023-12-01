@@ -7,12 +7,12 @@ import {
   InputNumber,
   List,
   Popconfirm,
-  Progress,
   Switch,
   Typography
 } from 'antd'
 import { Plus } from 'lucide-react'
 import { useEffect } from 'react'
+import ProgressBar from '~/components/ui/ProgressBar'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import useProductList from '../hooks/useProductList'
 
@@ -103,9 +103,19 @@ const ProductList: React.FC<Props> = ({
             <List.Item key={item.id} className='mb-5 rounded-sm bg-white'>
               <Flex vertical className='w-full' gap={20}>
                 <Flex align='center' justify='space-between'>
-                  <Typography.Title className='m-0 h-fit p-0' level={4}>
-                    {item.productCode}
-                  </Typography.Title>
+                  {isEditing(item.id!) && isAdmin ? (
+                    <Form.Item
+                      name='productCode'
+                      initialValue={item.productCode}
+                    >
+                      <Input size='large' />
+                    </Form.Item>
+                  ) : (
+                    <Typography.Title className='m-0 h-fit p-0' level={4}>
+                      {item.productCode}
+                    </Typography.Title>
+                  )}
+
                   {isEditing(item.id!) ? (
                     <Flex gap={5}>
                       <Button
@@ -220,12 +230,16 @@ const ProductList: React.FC<Props> = ({
                       May
                     </Typography.Text>
                     <Flex className='w-full' align='center' vertical>
-                      <Progress percent={70} />
+                      {/* <Progress percent={70} strokeColor='var(--warn)' /> */}
+                      <ProgressBar
+                        count={item.sewing ?? 0}
+                        total={item.quantityPO ?? 0}
+                      />
                       <Typography.Text
                         type='secondary'
                         className='w-24 font-medium'
                       >
-                        1000/2000
+                        {item.sewing ?? 0}/{item.quantityPO ?? 0}
                       </Typography.Text>
                     </Flex>
                   </Flex>
@@ -237,12 +251,15 @@ const ProductList: React.FC<Props> = ({
                       Ủi
                     </Typography.Text>
                     <Flex className='w-full' align='center' vertical>
-                      <Progress percent={70} />
+                      <ProgressBar
+                        count={item.iron ?? 0}
+                        total={item.quantityPO ?? 0}
+                      />
                       <Typography.Text
                         type='secondary'
                         className='w-24 font-medium'
                       >
-                        1000/2000
+                        {item.iron ?? 0}/{item.quantityPO ?? 0}
                       </Typography.Text>
                     </Flex>
                   </Flex>
@@ -254,12 +271,15 @@ const ProductList: React.FC<Props> = ({
                       Kiểm tra
                     </Typography.Text>
                     <Flex className='w-full' align='center' vertical>
-                      <Progress percent={70} />
+                      <ProgressBar
+                        count={item.check ?? 0}
+                        total={item.quantityPO ?? 0}
+                      />
                       <Typography.Text
                         type='secondary'
                         className='w-24 font-medium'
                       >
-                        1000/2000
+                        {item.check ?? 0}/{item.quantityPO ?? 0}
                       </Typography.Text>
                     </Flex>
                   </Flex>
@@ -271,12 +291,15 @@ const ProductList: React.FC<Props> = ({
                       Đóng gói
                     </Typography.Text>
                     <Flex className='w-full' align='center' vertical>
-                      <Progress percent={70} />
+                      <ProgressBar
+                        count={item.pack ?? 0}
+                        total={item.quantityPO ?? 0}
+                      />
                       <Typography.Text
                         type='secondary'
                         className='w-24 font-medium'
                       >
-                        1000/2000
+                        {item.pack ?? 0}/{item.quantityPO ?? 0}
                       </Typography.Text>
                     </Flex>
                   </Flex>

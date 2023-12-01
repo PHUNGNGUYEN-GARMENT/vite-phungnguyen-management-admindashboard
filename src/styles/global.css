@@ -49,6 +49,8 @@
     --warn: #faad14;
     --error: #ff4d4f;
     --success: #52c41a;
+    --incoming-success: #1ac4bc;
+    --blue: #1677ff;
 
     /* Border radius for card, input and buttons */
     --radius: 0.5rem;

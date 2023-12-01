@@ -18,15 +18,11 @@ export default function useProductList() {
   ) => {
     ProductAPI.getAlls(current, pageSize)
       .then((data) => {
-        // setMetaData(data)
         setLoading?.(true)
         if (data?.success) {
+          setMetaData(data)
           console.log(data)
-          setDataSource(
-            data.data.map((item: Product) => {
-              return { ...item, key: item.id } as Product
-            })
-          )
+          setDataSource(data.data)
         }
       })
       .finally(() => {
