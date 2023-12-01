@@ -11,7 +11,7 @@ import {
   Typography
 } from 'antd'
 import { Plus } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import ProgressBar from '~/components/ui/ProgressBar'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import useProductList from '../hooks/useProductList'
@@ -47,7 +47,6 @@ const ProductList: React.FC<Props> = ({
     handleCancelConfirmDelete,
     querySearchData
   } = useProductList()
-  const [searchText, setSearchText] = useState<string>('')
   console.log('Product page loading...')
 
   useEffect(() => {
@@ -59,53 +58,53 @@ const ProductList: React.FC<Props> = ({
   }, [metaData])
 
   return (
-    <Flex vertical gap={20}>
-      <Search
-        name='search'
-        placeholder='Search code...'
-        size='middle'
-        enterButton
-        allowClear
-        value={searchText}
-        onChange={(e) => setSearchText(e.target.value)}
-        onSearch={(value) => {
-          if (value.length > 0) {
-            querySearchData(value)
-          }
-        }}
-      />
-      <Flex justify='space-between' align='end'>
-        <Switch
-          checkedChildren='Admin'
-          unCheckedChildren='Admin'
-          defaultChecked={false}
-          checked={isAdmin}
-          onChange={(val) => {
-            setIsAdmin(val)
-          }}
-        />
-        <Flex gap={10}>
-          <Button
-            onClick={() => {
-              setSearchText('')
-              requestListData()
+    <Form form={form}>
+      <Flex vertical gap={20}>
+        <Form.Item name='search'>
+          <Search
+            placeholder='Search code...'
+            size='middle'
+            enterButton
+            allowClear
+            onSearch={(value) => {
+              if (value.length > 0) {
+                querySearchData(value)
+              }
             }}
-            className='flex items-center'
-            type='default'
-          >
-            Reset
-          </Button>
-          <Button
-            onClick={() => {}}
-            className='flex items-center'
-            type='primary'
-            icon={<Plus size={20} />}
-          >
-            New
-          </Button>
+          />
+        </Form.Item>
+        <Flex justify='space-between' align='end'>
+          <Switch
+            checkedChildren='Admin'
+            unCheckedChildren='Admin'
+            defaultChecked={false}
+            checked={isAdmin}
+            onChange={(val) => {
+              setIsAdmin(val)
+            }}
+          />
+          <Flex gap={10}>
+            <Button
+              onClick={() => {
+                form.setFieldValue('search', '')
+                requestListData()
+              }}
+              className='flex items-center'
+              type='default'
+            >
+              Reset
+            </Button>
+            <Button
+              onClick={() => {}}
+              className='flex items-center'
+              type='primary'
+              icon={<Plus size={20} />}
+            >
+              New
+            </Button>
+          </Flex>
         </Flex>
-      </Flex>
-      <Form form={form}>
+
         <List
           className={props.className}
           itemLayout='vertical'
@@ -331,8 +330,8 @@ const ProductList: React.FC<Props> = ({
             </List.Item>
           )}
         />
-      </Form>
-    </Flex>
+      </Flex>
+    </Form>
   )
 }
 
