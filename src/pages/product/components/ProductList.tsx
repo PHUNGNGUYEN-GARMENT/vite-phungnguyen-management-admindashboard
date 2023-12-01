@@ -11,7 +11,7 @@ import {
   Typography
 } from 'antd'
 import { Plus } from 'lucide-react'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import ProgressBar from '~/components/ui/ProgressBar'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import useProductList from '../hooks/useProductList'
@@ -47,6 +47,7 @@ const ProductList: React.FC<Props> = ({
     handleCancelConfirmDelete,
     querySearchData
   } = useProductList()
+  const [searchText, setSearchText] = useState<string>('')
   console.log('Product page loading...')
 
   useEffect(() => {
@@ -60,10 +61,18 @@ const ProductList: React.FC<Props> = ({
   return (
     <Flex vertical gap={20}>
       <Search
+        name='search'
         placeholder='Search code...'
         size='middle'
         enterButton
-        onSearch={(value) => querySearchData(value)}
+        allowClear
+        value={searchText}
+        onChange={(e) => setSearchText(e.target.value)}
+        onSearch={(value) => {
+          if (value.length > 0) {
+            querySearchData(value)
+          }
+        }}
       />
       <Flex justify='space-between' align='end'>
         <Switch
@@ -75,14 +84,26 @@ const ProductList: React.FC<Props> = ({
             setIsAdmin(val)
           }}
         />
-        <Button
-          onClick={() => {}}
-          className='flex items-center'
-          type='primary'
-          icon={<Plus size={20} />}
-        >
-          New
-        </Button>
+        <Flex gap={10}>
+          <Button
+            onClick={() => {
+              setSearchText('')
+              requestListData()
+            }}
+            className='flex items-center'
+            type='default'
+          >
+            Reset
+          </Button>
+          <Button
+            onClick={() => {}}
+            className='flex items-center'
+            type='primary'
+            icon={<Plus size={20} />}
+          >
+            New
+          </Button>
+        </Flex>
       </Flex>
       <Form form={form}>
         <List
@@ -189,6 +210,7 @@ const ProductList: React.FC<Props> = ({
                     </Form.Item>
                   ) : (
                     <Input
+                      name='quantityPo'
                       className='w-full'
                       defaultValue={item.quantityPO}
                       readOnly
@@ -215,6 +237,7 @@ const ProductList: React.FC<Props> = ({
                     </Form.Item>
                   ) : (
                     <Input
+                      name='dateOutputFCR'
                       readOnly
                       className='zoom-in-0'
                       value={DayJS(item.dateOutputFCR).format('DD/MM/YYYY')}

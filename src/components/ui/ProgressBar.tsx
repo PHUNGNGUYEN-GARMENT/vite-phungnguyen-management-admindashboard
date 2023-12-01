@@ -1,5 +1,6 @@
 import { Progress } from 'antd'
 import React from 'react'
+import { formatAsPercentage } from '~/utils/number-formatter'
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   count: number
@@ -30,9 +31,10 @@ const ProgressBar: React.FC<Props> = ({ count, total, ...props }) => {
         className={props.className}
         percent={per}
         strokeColor={genColor(per)}
-        // format={(percent, successPer) => {
-        //   return <>{(count * 100) / total}%</>
-        // }}
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        format={(percent, _successPer) => {
+          return <>{formatAsPercentage(percent ?? 0)}</>
+        }}
       />
     </>
   )
