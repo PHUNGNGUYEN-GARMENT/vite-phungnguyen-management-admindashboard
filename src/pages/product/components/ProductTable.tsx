@@ -87,9 +87,7 @@ const ProductTable: React.FC<Props> = ({
               onClick={() =>
                 handleSaveEditingRow(record.id!, (row) => {
                   console.log(row)
-                  ProductAPI.updateItem(
-                    convertToProduct({ ...row, id: record.id! })
-                  )
+                  ProductAPI.updateItem(record.id!, convertToProduct(row))
                     .then((data) => {
                       setLoading(true)
                       console.log(data)

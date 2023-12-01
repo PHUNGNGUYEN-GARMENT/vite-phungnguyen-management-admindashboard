@@ -56,7 +56,7 @@ export default function useProductTable() {
 
         // After updated local data
         // We need to update on database
-        await ProductAPI.updateItem(row)
+        await ProductAPI.updateItem(Number(key), row)
           .then(() => {
             setLoading(true)
           })

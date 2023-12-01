@@ -83,20 +83,15 @@ export default {
       })
   },
   updateItem: async (
+    id: number,
     product: Product
   ): Promise<ResponseDataType | undefined> => {
     return client
-      .put(`${PATH_API}/${product.id}`, {
+      .put(`${PATH_API}/${id}`, {
         productCode: product.productCode,
         quantityPO: product.quantityPO,
         dateInputNPL: product.dateInputNPL,
-        dateOutputFCR: product.dateOutputFCR,
-        sewing: product.sewing,
-        iron: product.iron,
-        check: product.check,
-        pack: product.pack,
-        createdAt: product.createdAt,
-        updatedAt: product.updatedAt
+        dateOutputFCR: product.dateOutputFCR
       })
       .then((res) => {
         if (res.data) {

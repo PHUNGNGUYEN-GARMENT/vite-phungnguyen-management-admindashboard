@@ -1,88 +1,12 @@
+import { Form } from 'antd'
 import { useEffect, useState } from 'react'
 import { ResponseDataType } from '~/api/client'
 import ProductAPI from '~/api/services/ProductAPI'
 import { Product } from '~/typing'
 
 export default function useProductList() {
-  const [metaData, setMetaData] = useState<ResponseDataType>({
-    success: true,
-    message: 'Ok',
-    data: [
-      {
-        id: 25,
-        productCode: 'FFSO-1',
-        quantityPO: 2000,
-        dateInputNPL: '2023-11-08T09:15:12.000Z',
-        dateOutputFCR: '2023-11-08T09:15:12.000Z',
-        orderNumber: 3,
-        createdAt: '2023-11-25T08:26:52.000Z',
-        updatedAt: '2023-11-25T08:26:52.000Z',
-        sewing: 'normal',
-        iron: 'warn',
-        check: 'error',
-        pack: 'success'
-      },
-      {
-        id: 26,
-        productCode: 'FFSO-3',
-        quantityPO: 3000,
-        dateInputNPL: '2023-11-08T09:15:12.000Z',
-        dateOutputFCR: '2023-11-08T09:15:12.000Z',
-        orderNumber: 4,
-        createdAt: '2023-11-25T08:26:58.000Z',
-        updatedAt: '2023-11-25T08:26:58.000Z',
-        sewing: 'normal',
-        iron: 'warn',
-        check: 'error',
-        pack: 'success'
-      },
-      {
-        id: 27,
-        productCode: 'FFSO-4',
-        quantityPO: 3100,
-        dateInputNPL: '2023-11-08T09:15:12.000Z',
-        dateOutputFCR: '2023-11-08T09:15:12.000Z',
-        orderNumber: 5,
-        createdAt: '2023-11-25T08:32:48.000Z',
-        updatedAt: '2023-11-25T08:32:48.000Z',
-        sewing: 'normal',
-        iron: 'warn',
-        check: 'error',
-        pack: 'success'
-      },
-      {
-        id: 28,
-        productCode: 'FFSO-5',
-        quantityPO: 3100,
-        dateInputNPL: '2023-11-08T09:15:12.000Z',
-        dateOutputFCR: '2023-11-08T09:15:12.000Z',
-        orderNumber: 6,
-        createdAt: '2023-11-25T08:32:50.000Z',
-        updatedAt: '2023-11-25T08:32:50.000Z',
-        sewing: 'normal',
-        iron: 'warn',
-        check: 'error',
-        pack: 'success'
-      },
-      {
-        id: 29,
-        productCode: 'FFSO-6',
-        quantityPO: 3100,
-        dateInputNPL: '2023-11-08T09:15:12.000Z',
-        dateOutputFCR: '2023-11-08T09:15:12.000Z',
-        orderNumber: 7,
-        createdAt: '2023-11-25T08:32:52.000Z',
-        updatedAt: '2023-11-25T08:32:52.000Z',
-        sewing: 'normal',
-        iron: 'warn',
-        check: 'error',
-        pack: 'success'
-      }
-    ],
-    count: 5,
-    page: 1,
-    total: 29
-  })
+  const [form] = Form.useForm()
+  const [metaData, setMetaData] = useState<ResponseDataType>()
   const [dataSource, setDataSource] = useState<Product[]>([])
   const [editingKey, setEditingKey] = useState<React.Key>('')
   const [deleteKey, setDeleteKey] = useState<React.Key>('')
@@ -178,32 +102,33 @@ export default function useProductList() {
 
   const handleSaveEditing = async (
     key: React.Key,
-    productToUpdate: Product,
     setLoading: (enable: boolean) => void
   ) => {
     try {
+      const row = (await form.validateFields()) as Product
       const newData = [...dataSource]
       const index = newData.findIndex((item) => key === item.id)
       if (index > -1) {
         const item = newData[index]
         newData.splice(index, 1, {
           ...item,
-          ...productToUpdate
+          ...row
         })
-        setDataSource(newData)
-        setEditingKey('')
-
-        // After updated local data
-        // We need to update on database
-        await ProductAPI.updateItem(productToUpdate)
-          .then(() => {
+        await ProductAPI.updateItem(Number(key), row)
+          .then((data) => {
+            console.log(data)
             setLoading(true)
           })
           .finally(() => {
             setLoading(false)
           })
+        setDataSource(newData)
+        setEditingKey('')
+
+        // After updated local data
+        // We need to update on database
       } else {
-        newData.push(productToUpdate)
+        newData.push(row)
         setDataSource(newData)
         setEditingKey('')
       }
@@ -227,6 +152,7 @@ export default function useProductList() {
   }
 
   return {
+    form,
     requestListData,
     metaData,
     setMetaData,
