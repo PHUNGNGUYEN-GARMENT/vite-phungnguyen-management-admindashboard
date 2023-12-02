@@ -11,15 +11,19 @@ import {
   Typography
 } from 'antd'
 import { Plus } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
+import { useSelector } from 'react-redux'
 import ProductAPI from '~/api/services/ProductAPI'
 import ProgressBar from '~/components/ui/ProgressBar'
 import useTable from '~/hooks/useTable'
+import { RootState } from '~/store/store'
 import { Product } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import useProduct from '../hooks/useProduct'
 import AddNewProduct from './AddNewProduct'
 import EditableCell, { EditableTableProps } from './EditableCell'
+import { useDispatch } from 'react-redux'
+import { setUser } from '~/store/reducers/user.reducer'
 
 const { Search } = Input
 
@@ -43,6 +47,8 @@ export type ProductTableDataType = {
 }
 
 const ProductTable: React.FC<Props> = ({ ...props }) => {
+  const user = useSelector((state: RootState) => state.user)
+  const dispatch = useDispatch()
   const {
     metaData,
     querySearchData,
@@ -68,7 +74,6 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
     handleDeleteRow,
     handleCancelDeleteRow
   } = useTable<ProductTableDataType>([])
-  const [admin, setAdmin] = useState<boolean>(false)
 
   useEffect(() => {
     fetchDataList(undefined, undefined, undefined, (data) => {
@@ -146,7 +151,7 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
             >
               Edit
             </Button>
-            {admin && (
+            {user.isAdmin && (
               <Popconfirm
                 title={`Sure to delete?`}
                 onCancel={() => handleCancelDeleteRow()}
@@ -174,7 +179,7 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
       title: 'Code',
       dataIndex: 'productCode',
       width: '10%',
-      editable: admin,
+      editable: user.isAdmin,
       render: (_, record: ProductTableDataType) => {
         return (
           <Typography.Text copyable className='text-md flex-shrink-0 font-bold'>
@@ -340,7 +345,7 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
                 unCheckedChildren='Admin'
                 defaultChecked={false}
                 onChange={(val) => {
-                  setAdmin(val)
+                  dispatch(setUser({ isAdmin: val }))
                 }}
               />
               <Form.Item name='search' className='m-0 w-1/2'>
@@ -372,7 +377,7 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
                   Reset
                 </Button>
               )}
-              {admin && (
+              {user.isAdmin && (
                 <Button
                   onClick={() => {
                     setOpenModal(true)
@@ -395,7 +400,7 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
             loading={loading}
             bordered
             dataSource={dataSource}
-            columns={mergedColumns(admin ? adminColumns : staffColumns)}
+            columns={mergedColumns(user.isAdmin ? adminColumns : staffColumns)}
             rowClassName='editable-row'
             pagination={{
               onChange: (page) => {

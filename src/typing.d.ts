@@ -1,4 +1,4 @@
-export type WorkPosition =
+export type Role =
   | 'importation' // Xuất nhập khẩu
   | 'sample_sewing' // May mẫu
   | 'fabric_warehouse' // Kho vải
@@ -22,7 +22,7 @@ export type User = {
   id?: number
   email?: string
   fullName?: string
-  workPosition?: WorkPosition
+  role?: Role
   isAdmin?: boolean
   createdAt?: string
   updatedAt?: string
