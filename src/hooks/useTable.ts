@@ -76,6 +76,7 @@ export default function useTable<T>(initData: TableDataType<T>[]) {
           ...item,
           ...row
         })
+        onSave?.(row)
         setDataSource(newData)
         setEditingKey('')
         // After updated local data
@@ -85,7 +86,6 @@ export default function useTable<T>(initData: TableDataType<T>[]) {
         setDataSource(newData)
         setEditingKey('')
       }
-      onSave?.(row)
     } catch (errInfo) {
       console.log('Validate Failed:', errInfo)
     }

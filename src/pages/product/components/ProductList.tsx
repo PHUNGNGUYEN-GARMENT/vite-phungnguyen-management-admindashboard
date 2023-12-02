@@ -12,12 +12,14 @@ import {
   Typography
 } from 'antd'
 import { Plus } from 'lucide-react'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import ProgressBar from '~/components/ui/ProgressBar'
+import { Product } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import useProduct from '../hooks/useProduct'
 import useProductList from '../hooks/useProductList'
 import AddNewProduct from './AddNewProduct'
+import { ProductTableDataType } from './ProductTable'
 
 const { Search } = Input
 
@@ -25,35 +27,41 @@ interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 const ProductList: React.FC<Props> = ({ ...props }) => {
   const {
-    admin,
-    setAdmin,
+    metaData,
+    querySearchData,
     loading,
     setLoading,
     openModal,
     setOpenModal,
     searchText,
     setSearchText,
-    handleAddNew
+    handleAddNew,
+    fetchDataList
   } = useProduct()
   const {
     form,
-    requestListData,
-    metaData,
     editingKey,
     setDeleteKey,
     dataSource,
+    setDataSource,
     isEditing,
     handleDelete,
     handleStartEditing,
     handleCancelEditing,
     handleSaveEditing,
-    handleCancelConfirmDelete,
-    querySearchData
+    handleCancelConfirmDelete
   } = useProductList()
+  const [admin, setAdmin] = useState<boolean>(false)
   console.log('Product page loading...')
 
   useEffect(() => {
-    requestListData()
+    fetchDataList(undefined, undefined, undefined, (data) => {
+      setDataSource(
+        data.data.map((item: Product) => {
+          return { ...item, key: item.id } as ProductTableDataType
+        })
+      )
+    })
   }, [])
 
   useEffect(() => {
@@ -95,7 +103,7 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
                 <Button
                   onClick={() => {
                     form.setFieldValue('search', '')
-                    requestListData()
+                    fetchDataList()
                   }}
                   className='flex items-center'
                   type='default'
@@ -103,16 +111,18 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
                   Reset
                 </Button>
               )}
-              <Button
-                onClick={() => {
-                  setOpenModal(true)
-                }}
-                className='flex items-center'
-                type='primary'
-                icon={<Plus size={20} />}
-              >
-                New
-              </Button>
+              {admin && (
+                <Button
+                  onClick={() => {
+                    setOpenModal(true)
+                  }}
+                  className='flex items-center'
+                  type='primary'
+                  icon={<Plus size={20} />}
+                >
+                  New
+                </Button>
+              )}
             </Flex>
           </Flex>
 
@@ -123,7 +133,13 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
             pagination={{
               onChange: (page) => {
                 console.log(page)
-                requestListData(page, 5, setLoading)
+                fetchDataList(page, 5, setLoading, (data) => {
+                  setDataSource(
+                    data.data.map((item: Product) => {
+                      return { ...item, key: item.id } as ProductTableDataType
+                    })
+                  )
+                })
               },
               pageSize: 5,
               total: metaData?.total

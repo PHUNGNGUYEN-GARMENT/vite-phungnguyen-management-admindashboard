@@ -3,6 +3,7 @@ import {
   Flex,
   Form,
   Input,
+  List,
   Modal,
   Popconfirm,
   Switch,
@@ -10,7 +11,7 @@ import {
   Typography
 } from 'antd'
 import { Plus } from 'lucide-react'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import ProductAPI from '~/api/services/ProductAPI'
 import ProgressBar from '~/components/ui/ProgressBar'
 import useTable from '~/hooks/useTable'
@@ -43,15 +44,16 @@ export type ProductTableDataType = {
 
 const ProductTable: React.FC<Props> = ({ ...props }) => {
   const {
-    admin,
-    setAdmin,
+    metaData,
+    querySearchData,
     loading,
-    // setLoading,
+    setLoading,
     openModal,
     setOpenModal,
     searchText,
     setSearchText,
-    handleAddNew
+    handleAddNew,
+    fetchDataList
   } = useProduct()
   const {
     form,
@@ -66,17 +68,15 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
     handleDeleteRow,
     handleCancelDeleteRow
   } = useTable<ProductTableDataType>([])
+  const [admin, setAdmin] = useState<boolean>(false)
+
   useEffect(() => {
-    console.log('Product table loading...')
-    ProductAPI.getAlls().then((data) => {
-      if (data?.success) {
-        console.log(data)
-        setDataSource(
-          data.data.map((item: Product) => {
-            return { ...item, key: item.id } as ProductTableDataType
-          })
-        )
-      }
+    fetchDataList(undefined, undefined, undefined, (data) => {
+      setDataSource(
+        data.data.map((item: Product) => {
+          return { ...item, key: item.id } as ProductTableDataType
+        })
+      )
     })
   }, [])
 
@@ -86,28 +86,24 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
   })[] = [
     {
       title: 'Operation',
-      width: 'auto',
+      width: '15%',
       dataIndex: 'operation',
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       render: (_, record: ProductTableDataType) => {
         return isEditing(record.key!) ? (
           <Flex className='flex flex-col gap-3 lg:flex-row'>
-            {/* <Typography.Link onClick={() => handleSaveEditingRow(record.id!)}>
-              Save
-            </Typography.Link> */}
             <Button
               type='primary'
               onClick={() =>
                 handleSaveEditingRow(record.id!, (row) => {
                   console.log(row)
-                  // ProductAPI.updateItem(record.id!, convertToProduct(row))
-                  //   .then((data) => {
-                  //     setLoading(true)
-                  //     console.log(data)
-                  //   })
-                  //   .finally(() => {
-                  //     setLoading(false)
-                  //   })
+                  ProductAPI.updateItem(record.id!, row)
+                    .then((data) => {
+                      setLoading(true)
+                      console.log(data)
+                    })
+                    .finally(() => {
+                      setLoading(false)
+                    })
                 })
               }
             >
@@ -119,7 +115,6 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
                 handleCancelEditingRow()
               }}
             >
-              {/* <Typography.Link>Cancel</Typography.Link> */}
               <Button type='dashed'>Cancel</Button>
             </Popconfirm>
           </Flex>
@@ -157,11 +152,12 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
                 onCancel={() => handleCancelDeleteRow()}
                 onConfirm={() => handleDeleteRow(record.key!)}
               >
-                <Typography.Link
+                <Button
+                  type='dashed'
                   onClick={() => handleStartDeleteRow(record.key!)}
                 >
                   Delete
-                </Typography.Link>
+                </Button>
               </Popconfirm>
             )}
           </Flex>
@@ -178,102 +174,79 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
       title: 'Code',
       dataIndex: 'productCode',
       width: '10%',
-      editable: true
+      editable: admin,
+      render: (_, record: ProductTableDataType) => {
+        return (
+          <Typography.Text copyable className='text-md flex-shrink-0 font-bold'>
+            {record.productCode}
+          </Typography.Text>
+        )
+      }
     },
     {
-      title: 'Quantity PO',
+      title: 'Quantity',
       dataIndex: 'quantityPO',
-      width: '10%',
+      width: '12%',
       editable: true
     },
     {
-      title: 'May',
-      dataIndex: 'sewing',
-      width: '15%',
-      editable: true,
+      title: 'Progress',
+      dataIndex: 'progress',
+      width: '25%',
       render: (_, record: ProductTableDataType) => {
+        const progressArr: { task: string; quantity: number }[] = [
+          {
+            task: 'Sewing',
+            quantity: record.sewing ?? 0
+          },
+          {
+            task: 'Iron',
+            quantity: record.iron ?? 0
+          },
+          {
+            task: 'Check',
+            quantity: record.check ?? 0
+          },
+          {
+            task: 'Pack',
+            quantity: record.pack ?? 0
+          }
+        ]
         return (
-          <>
-            <Flex className='w-full' align='center' vertical>
-              <ProgressBar
-                count={record.sewing ?? 0}
-                total={record.quantityPO ?? 0}
-              />
-              <Typography.Text type='secondary' className='w-24 font-medium'>
-                {record.sewing ?? 0}/{record.quantityPO ?? 0}
-              </Typography.Text>
-            </Flex>
-          </>
-        )
-      }
-    },
-    {
-      title: 'Ủi',
-      dataIndex: 'iron',
-      editable: true,
-      width: '15%',
-      render: (_, record: ProductTableDataType) => {
-        return (
-          <>
-            <Flex className='w-full' align='center' vertical>
-              <ProgressBar
-                count={record.iron ?? 0}
-                total={record.quantityPO ?? 0}
-              />
-              <Typography.Text type='secondary' className='w-24 font-medium'>
-                {record.iron ?? 0}/{record.quantityPO ?? 0}
-              </Typography.Text>
-            </Flex>
-          </>
-        )
-      }
-    },
-    {
-      title: 'Kiểm tra',
-      dataIndex: 'check',
-      editable: true,
-      width: '15%',
-      render: (_, record: ProductTableDataType) => {
-        return (
-          <>
-            <Flex className='w-full' align='center' vertical>
-              <ProgressBar
-                count={record.check ?? 0}
-                total={record.quantityPO ?? 0}
-              />
-              <Typography.Text type='secondary' className='w-24 font-medium'>
-                {record.check ?? 0}/{record.quantityPO ?? 0}
-              </Typography.Text>
-            </Flex>
-          </>
-        )
-      }
-    },
-    {
-      title: 'Đóng gói',
-      dataIndex: 'pack',
-      editable: true,
-      width: '15%',
-      render: (_, record: ProductTableDataType) => {
-        return (
-          <>
-            <Flex className='w-full' align='center' vertical>
-              <ProgressBar
-                count={record.pack ?? 0}
-                total={record.quantityPO ?? 0}
-              />
-              <Typography.Text type='secondary' className='w-24 font-medium'>
-                {record.pack ?? 0}/{record.quantityPO ?? 0}
-              </Typography.Text>
-            </Flex>
-          </>
+          <Flex vertical>
+            <List className='list-none'>
+              {progressArr.map((item, index) => {
+                return (
+                  <List.Item key={index} className='m-0 p-0'>
+                    <Flex className='m-0 w-full p-0'>
+                      <Typography.Text className='m-0 w-16 flex-shrink-0 p-0'>
+                        {item.task}
+                      </Typography.Text>
+                      <Flex className='w-full' align='center' vertical>
+                        <ProgressBar
+                          count={item.quantity ?? 0}
+                          total={record.quantityPO ?? 0}
+                        />
+                        <Typography.Text
+                          type='secondary'
+                          className='w-24 font-medium'
+                        >
+                          {item.quantity ?? 0}/{record.quantityPO ?? 0}
+                        </Typography.Text>
+                      </Flex>
+                    </Flex>
+                  </List.Item>
+                )
+              })}
+            </List>
+          </Flex>
         )
       }
     },
     {
       title: 'FCR',
       dataIndex: 'dateOutputFCR',
-      width: '15%',
+      width: '10%',
       editable: true,
       render: (_, record: ProductTableDataType) => {
         const validData = record.dateOutputFCR ? record.dateOutputFCR : ''
@@ -290,7 +263,7 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
     {
       title: 'Created date',
       dataIndex: 'createdAt',
-      editable: true,
+      width: '10%',
       render: (_, record: ProductTableDataType) => {
         const validData = record.createdAt ? record.createdAt : ''
         return <span>{DayJS(validData).format(DatePattern.display)}</span>
@@ -299,8 +272,7 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
     {
       title: 'Updated date',
       dataIndex: 'updatedAt',
-      width: '15%',
-      editable: true,
+      width: '10%',
       responsive: ['md'],
       render: (_, record: ProductTableDataType) => {
         const validData = record.updatedAt ? record.updatedAt : ''
@@ -379,7 +351,7 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
                   allowClear
                   onSearch={(value) => {
                     if (value.length > 0) {
-                      // querySearchData(value)
+                      querySearchData(value)
                     }
                   }}
                   value={searchText}
@@ -388,11 +360,11 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
               </Form.Item>
             </Flex>
             <Flex gap={10}>
-              {searchText.length !== 0 && (
+              {searchText.length > 0 && (
                 <Button
                   onClick={() => {
                     form.setFieldValue('search', '')
-                    // requestListData()
+                    fetchDataList()
                   }}
                   className='flex items-center'
                   type='default'
@@ -400,16 +372,18 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
                   Reset
                 </Button>
               )}
-              <Button
-                onClick={() => {
-                  setOpenModal(true)
-                }}
-                className='flex items-center'
-                type='primary'
-                icon={<Plus size={20} />}
-              >
-                New
-              </Button>
+              {admin && (
+                <Button
+                  onClick={() => {
+                    setOpenModal(true)
+                  }}
+                  className='flex items-center'
+                  type='primary'
+                  icon={<Plus size={20} />}
+                >
+                  New
+                </Button>
+              )}
             </Flex>
           </Flex>
           <Table
@@ -424,10 +398,19 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
             columns={mergedColumns(admin ? adminColumns : staffColumns)}
             rowClassName='editable-row'
             pagination={{
-              onChange: () => {
+              onChange: (page) => {
+                fetchDataList(page, 5, setLoading, (data) => {
+                  setDataSource(
+                    data.data.map((item: Product) => {
+                      return { ...item, key: item.id } as ProductTableDataType
+                    })
+                  )
+                })
                 handleCancelEditingRow()
                 handleCancelDeleteRow()
-              }
+              },
+              pageSize: 5,
+              total: metaData?.total
             }}
           />
         </Flex>

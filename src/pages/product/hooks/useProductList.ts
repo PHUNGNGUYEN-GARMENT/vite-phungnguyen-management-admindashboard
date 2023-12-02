@@ -1,56 +1,13 @@
 import { Form } from 'antd'
-import { useEffect, useState } from 'react'
-import { ResponseDataType } from '~/api/client'
+import { useState } from 'react'
 import ProductAPI from '~/api/services/ProductAPI'
 import { Product } from '~/typing'
 
 export default function useProductList() {
   const [form] = Form.useForm()
-  const [metaData, setMetaData] = useState<ResponseDataType>()
   const [dataSource, setDataSource] = useState<Product[]>([])
   const [editingKey, setEditingKey] = useState<React.Key>('')
   const [deleteKey, setDeleteKey] = useState<React.Key>('')
-
-  const requestListData = (
-    current?: number,
-    pageSize?: number,
-    setLoading?: (enable: boolean) => void
-  ) => {
-    ProductAPI.getAlls(current, pageSize)
-      .then((data) => {
-        setLoading?.(true)
-        if (data?.success) {
-          setMetaData(data)
-          console.log(data)
-          setDataSource(data.data)
-        }
-      })
-      .finally(() => {
-        setLoading?.(false)
-      })
-  }
-
-  const querySearchData = (searchText: string) => {
-    if (searchText.length !== 0) {
-      ProductAPI.getItemByCode(searchText).then((data) => {
-        console.log(data)
-        if (data?.success) {
-          setDataSource([data?.data])
-        }
-      })
-    }
-  }
-
-  useEffect(() => {
-    if (metaData) {
-      setDataSource(
-        metaData.data.map((item: Product) => {
-          return { ...item, key: item.id } as Product
-        })
-      )
-    }
-  }, [metaData])
-
   const isEditing = (key: React.Key) => key === editingKey
   const isDelete = (key: React.Key) => key === deleteKey
 
@@ -149,9 +106,6 @@ export default function useProductList() {
 
   return {
     form,
-    requestListData,
-    metaData,
-    setMetaData,
     editingKey,
     setEditingKey,
     deleteKey,
@@ -159,7 +113,6 @@ export default function useProductList() {
     dataSource,
     setDataSource,
     isEditing,
-    querySearchData,
     isDelete,
     handleEdit,
     handleDelete,
