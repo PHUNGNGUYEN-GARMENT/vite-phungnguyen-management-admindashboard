@@ -1,3 +1,11 @@
+export type WorkPosition =
+  | 'importation' // Xuất nhập khẩu
+  | 'sample_sewing' // May mẫu
+  | 'fabric_warehouse' // Kho vải
+  | 'accessories_warehouse' // Kho phụ liệu
+  | 'cutting' // Tổ cắt
+  | 'embroidered_delivery' // Chuyền may
+
 export type StatusType = 'normal' | 'warn' | 'error' | 'success'
 
 export type StepRound = {
@@ -8,6 +16,16 @@ export type StepRound = {
 export type StepRound = {
   name: string
   type: StatusType
+}
+
+export type User = {
+  id?: number
+  email?: string
+  fullName?: string
+  workPosition?: WorkPosition
+  isAdmin?: boolean
+  createdAt?: string
+  updatedAt?: string
 }
 
 export type Product = {
