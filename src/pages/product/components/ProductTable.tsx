@@ -1,21 +1,30 @@
-import { Button, Flex, Form, Popconfirm, Table, Typography } from 'antd'
+import {
+  Button,
+  Flex,
+  Form,
+  Input,
+  Modal,
+  Popconfirm,
+  Switch,
+  Table,
+  Typography
+} from 'antd'
+import { Plus } from 'lucide-react'
 import { useEffect } from 'react'
 import ProductAPI from '~/api/services/ProductAPI'
-import Status from '~/components/ui/Status'
+import ProgressBar from '~/components/ui/ProgressBar'
 import useTable from '~/hooks/useTable'
-import { Product, StatusType } from '~/typing'
+import { Product } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
-import { firstLetterUppercase } from '~/utils/text'
 import useProduct from '../hooks/useProduct'
+import AddNewProduct from './AddNewProduct'
 import EditableCell, { EditableTableProps } from './EditableCell'
+
+const { Search } = Input
 
 type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>
 
-interface Props extends React.HTMLAttributes<HTMLElement> {
-  isAdmin: boolean
-  loading: boolean
-  setLoading: (enable: boolean) => void
-}
+interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 export type ProductTableDataType = {
   key?: React.Key
@@ -24,21 +33,26 @@ export type ProductTableDataType = {
   quantityPO?: number
   dateInputNPL?: string
   dateOutputFCR?: string
-  sewing?: StatusType
-  iron?: StatusType
-  check?: StatusType
-  pack?: StatusType
+  sewing?: number
+  iron?: number
+  check?: number
+  pack?: number
   createdAt?: string
   updatedAt?: string
 }
 
-const ProductTable: React.FC<Props> = ({
-  isAdmin,
-  loading,
-  setLoading,
-  ...props
-}) => {
-  const { convertToProduct } = useProduct()
+const ProductTable: React.FC<Props> = ({ ...props }) => {
+  const {
+    admin,
+    setAdmin,
+    loading,
+    // setLoading,
+    openModal,
+    setOpenModal,
+    searchText,
+    setSearchText,
+    handleAddNew
+  } = useProduct()
   const {
     form,
     isEditing,
@@ -52,7 +66,6 @@ const ProductTable: React.FC<Props> = ({
     handleDeleteRow,
     handleCancelDeleteRow
   } = useTable<ProductTableDataType>([])
-
   useEffect(() => {
     console.log('Product table loading...')
     ProductAPI.getAlls().then((data) => {
@@ -73,6 +86,7 @@ const ProductTable: React.FC<Props> = ({
   })[] = [
     {
       title: 'Operation',
+      width: 'auto',
       dataIndex: 'operation',
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       render: (_, record: ProductTableDataType) => {
@@ -83,18 +97,17 @@ const ProductTable: React.FC<Props> = ({
             </Typography.Link> */}
             <Button
               type='primary'
-              size='small'
               onClick={() =>
                 handleSaveEditingRow(record.id!, (row) => {
                   console.log(row)
-                  ProductAPI.updateItem(record.id!, convertToProduct(row))
-                    .then((data) => {
-                      setLoading(true)
-                      console.log(data)
-                    })
-                    .finally(() => {
-                      setLoading(false)
-                    })
+                  // ProductAPI.updateItem(record.id!, convertToProduct(row))
+                  //   .then((data) => {
+                  //     setLoading(true)
+                  //     console.log(data)
+                  //   })
+                  //   .finally(() => {
+                  //     setLoading(false)
+                  //   })
                 })
               }
             >
@@ -107,17 +120,14 @@ const ProductTable: React.FC<Props> = ({
               }}
             >
               {/* <Typography.Link>Cancel</Typography.Link> */}
-              <Button size='small' type='dashed'>
-                Cancel
-              </Button>
+              <Button type='dashed'>Cancel</Button>
             </Popconfirm>
           </Flex>
         ) : (
           <Flex gap={10}>
             <Button
-              type='dashed'
+              type='primary'
               disabled={isDisableEditing}
-              size='small'
               onClick={() => {
                 form.setFields([
                   { name: 'productCode', value: record.productCode },
@@ -141,7 +151,7 @@ const ProductTable: React.FC<Props> = ({
             >
               Edit
             </Button>
-            {isAdmin && (
+            {admin && (
               <Popconfirm
                 title={`Sure to delete?`}
                 onCancel={() => handleCancelDeleteRow()}
@@ -167,26 +177,33 @@ const ProductTable: React.FC<Props> = ({
     {
       title: 'Code',
       dataIndex: 'productCode',
-      width: '12%',
+      width: '10%',
       editable: true
     },
     {
       title: 'Quantity PO',
       dataIndex: 'quantityPO',
-      width: '15%',
+      width: '10%',
       editable: true
     },
     {
       title: 'May',
       dataIndex: 'sewing',
-      width: '12%',
+      width: '15%',
       editable: true,
       render: (_, record: ProductTableDataType) => {
         return (
-          <Status
-            type={record.sewing ?? 'normal'}
-            label={firstLetterUppercase(record.sewing ?? 'normal')}
-          />
+          <>
+            <Flex className='w-full' align='center' vertical>
+              <ProgressBar
+                count={record.sewing ?? 0}
+                total={record.quantityPO ?? 0}
+              />
+              <Typography.Text type='secondary' className='w-24 font-medium'>
+                {record.sewing ?? 0}/{record.quantityPO ?? 0}
+              </Typography.Text>
+            </Flex>
+          </>
         )
       }
     },
@@ -194,13 +211,20 @@ const ProductTable: React.FC<Props> = ({
       title: 'Ủi',
       dataIndex: 'iron',
       editable: true,
-      width: '12%',
+      width: '15%',
       render: (_, record: ProductTableDataType) => {
         return (
-          <Status
-            type={record.iron ?? 'normal'}
-            label={firstLetterUppercase(record.iron ?? 'normal')}
-          />
+          <>
+            <Flex className='w-full' align='center' vertical>
+              <ProgressBar
+                count={record.iron ?? 0}
+                total={record.quantityPO ?? 0}
+              />
+              <Typography.Text type='secondary' className='w-24 font-medium'>
+                {record.iron ?? 0}/{record.quantityPO ?? 0}
+              </Typography.Text>
+            </Flex>
+          </>
         )
       }
     },
@@ -208,13 +232,20 @@ const ProductTable: React.FC<Props> = ({
       title: 'Kiểm tra',
       dataIndex: 'check',
       editable: true,
-      width: '12%',
+      width: '15%',
       render: (_, record: ProductTableDataType) => {
         return (
-          <Status
-            type={record.check ?? 'normal'}
-            label={firstLetterUppercase(record.check ?? 'normal')}
-          />
+          <>
+            <Flex className='w-full' align='center' vertical>
+              <ProgressBar
+                count={record.check ?? 0}
+                total={record.quantityPO ?? 0}
+              />
+              <Typography.Text type='secondary' className='w-24 font-medium'>
+                {record.check ?? 0}/{record.quantityPO ?? 0}
+              </Typography.Text>
+            </Flex>
+          </>
         )
       }
     },
@@ -222,18 +253,25 @@ const ProductTable: React.FC<Props> = ({
       title: 'Đóng gói',
       dataIndex: 'pack',
       editable: true,
-      width: '12%',
+      width: '15%',
       render: (_, record: ProductTableDataType) => {
         return (
-          <Status
-            type={record.pack ?? 'normal'}
-            label={firstLetterUppercase(record.pack ?? 'normal')}
-          />
+          <>
+            <Flex className='w-full' align='center' vertical>
+              <ProgressBar
+                count={record.pack ?? 0}
+                total={record.quantityPO ?? 0}
+              />
+              <Typography.Text type='secondary' className='w-24 font-medium'>
+                {record.pack ?? 0}/{record.quantityPO ?? 0}
+              </Typography.Text>
+            </Flex>
+          </>
         )
       }
     },
     {
-      title: 'Date Output FCR',
+      title: 'FCR',
       dataIndex: 'dateOutputFCR',
       width: '15%',
       editable: true,
@@ -317,8 +355,63 @@ const ProductTable: React.FC<Props> = ({
 
   return (
     <>
-      <div className={props.className}>
-        <Form {...props} form={form} component={false}>
+      <Form {...props} form={form} component={false}>
+        <Flex vertical gap={20}>
+          <Flex
+            justify='space-between'
+            align='center'
+            className='rounded-sm bg-white px-5 py-3'
+          >
+            <Flex gap={10} className='m-0 w-full' align='center'>
+              <Switch
+                checkedChildren='Admin'
+                unCheckedChildren='Admin'
+                defaultChecked={false}
+                onChange={(val) => {
+                  setAdmin(val)
+                }}
+              />
+              <Form.Item name='search' className='m-0 w-1/2'>
+                <Search
+                  placeholder='Search code...'
+                  size='middle'
+                  enterButton
+                  allowClear
+                  onSearch={(value) => {
+                    if (value.length > 0) {
+                      // querySearchData(value)
+                    }
+                  }}
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
+                />
+              </Form.Item>
+            </Flex>
+            <Flex gap={10}>
+              {searchText.length !== 0 && (
+                <Button
+                  onClick={() => {
+                    form.setFieldValue('search', '')
+                    // requestListData()
+                  }}
+                  className='flex items-center'
+                  type='default'
+                >
+                  Reset
+                </Button>
+              )}
+              <Button
+                onClick={() => {
+                  setOpenModal(true)
+                }}
+                className='flex items-center'
+                type='primary'
+                icon={<Plus size={20} />}
+              >
+                New
+              </Button>
+            </Flex>
+          </Flex>
           <Table
             components={{
               body: {
@@ -328,7 +421,7 @@ const ProductTable: React.FC<Props> = ({
             loading={loading}
             bordered
             dataSource={dataSource}
-            columns={mergedColumns(isAdmin ? adminColumns : staffColumns)}
+            columns={mergedColumns(admin ? adminColumns : staffColumns)}
             rowClassName='editable-row'
             pagination={{
               onChange: () => {
@@ -337,8 +430,19 @@ const ProductTable: React.FC<Props> = ({
               }
             }}
           />
-        </Form>
-      </div>
+        </Flex>
+      </Form>
+      <Modal
+        open={openModal}
+        onOk={() => handleAddNew(form)}
+        centered
+        width='auto'
+        onCancel={() => {
+          setOpenModal(false)
+        }}
+      >
+        <AddNewProduct />
+      </Modal>
     </>
   )
 }

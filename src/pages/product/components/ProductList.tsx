@@ -6,33 +6,35 @@ import {
   Input,
   InputNumber,
   List,
+  Modal,
   Popconfirm,
   Switch,
   Typography
 } from 'antd'
 import { Plus } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import ProgressBar from '~/components/ui/ProgressBar'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
+import useProduct from '../hooks/useProduct'
 import useProductList from '../hooks/useProductList'
 import AddNewProduct from './AddNewProduct'
 
 const { Search } = Input
 
-interface Props extends React.HTMLAttributes<HTMLElement> {
-  isAdmin: boolean
-  setIsAdmin: (state: boolean) => void
-  loading: boolean
-  setLoading: (enable: boolean) => void
-}
+interface Props extends React.HTMLAttributes<HTMLElement> {}
 
-const ProductList: React.FC<Props> = ({
-  isAdmin,
-  setIsAdmin,
-  loading,
-  setLoading,
-  ...props
-}) => {
+const ProductList: React.FC<Props> = ({ ...props }) => {
+  const {
+    admin,
+    setAdmin,
+    loading,
+    setLoading,
+    openModal,
+    setOpenModal,
+    searchText,
+    setSearchText,
+    handleAddNew
+  } = useProduct()
   const {
     form,
     requestListData,
@@ -48,8 +50,6 @@ const ProductList: React.FC<Props> = ({
     handleCancelConfirmDelete,
     querySearchData
   } = useProductList()
-  const [openAddNewModal, setOpenAddNewModal] = useState<boolean>(false)
-  const [searchText, setSearchText] = useState<string>('')
   console.log('Product page loading...')
 
   useEffect(() => {
@@ -84,9 +84,9 @@ const ProductList: React.FC<Props> = ({
               checkedChildren='Admin'
               unCheckedChildren='Admin'
               defaultChecked={false}
-              checked={isAdmin}
+              checked={admin}
               onChange={(val) => {
-                setIsAdmin(val)
+                setAdmin(val)
               }}
             />
 
@@ -105,7 +105,7 @@ const ProductList: React.FC<Props> = ({
               )}
               <Button
                 onClick={() => {
-                  setOpenAddNewModal(true)
+                  setOpenModal(true)
                 }}
                 className='flex items-center'
                 type='primary'
@@ -134,7 +134,7 @@ const ProductList: React.FC<Props> = ({
               <List.Item key={item.id} className='mb-5 rounded-sm bg-white'>
                 <Flex vertical className='w-full' gap={20}>
                   <Flex align='center' justify='space-between'>
-                    {isEditing(item.id!) && isAdmin ? (
+                    {isEditing(item.id!) && admin ? (
                       <Form.Item
                         name='productCode'
                         initialValue={item.productCode}
@@ -185,7 +185,7 @@ const ProductList: React.FC<Props> = ({
                         >
                           Edit
                         </Button>
-                        {isAdmin && (
+                        {admin && (
                           <Popconfirm
                             title={`Sure to delete?`}
                             onCancel={() => handleCancelConfirmDelete()}
@@ -345,11 +345,17 @@ const ProductList: React.FC<Props> = ({
           />
         </Flex>
       </Form>
-      <AddNewProduct
-        openModal={openAddNewModal}
-        setLoading={setLoading}
-        setOpenModal={setOpenAddNewModal}
-      />
+      <Modal
+        open={openModal}
+        onOk={() => handleAddNew(form)}
+        centered
+        width='auto'
+        onCancel={() => {
+          setOpenModal(false)
+        }}
+      >
+        <AddNewProduct />
+      </Modal>
     </>
   )
 }
