@@ -9,8 +9,8 @@ const ProductPage: React.FC = () => {
   return (
     <>
       <Flex vertical gap={20}>
-        {width >= 640 && <ProductTable className='hidden md:block' />}
-        <ProductList className='block md:hidden' />
+        {width >= 768 && <ProductTable className='' />}
+        {width <= 768 && <ProductList className='' />}
       </Flex>
     </>
   )

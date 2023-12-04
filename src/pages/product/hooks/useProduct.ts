@@ -33,7 +33,6 @@ export default function useProduct() {
         setLoading(true)
         if (meta?.success) {
           onSuccess?.(meta)
-          setMetaData(meta)
           setOpenModal(false)
         }
       })

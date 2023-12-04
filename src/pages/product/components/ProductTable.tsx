@@ -15,7 +15,7 @@ import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { RequestBodyType, defaultRequestBody } from '~/api/client'
 import ProgressBar from '~/components/ui/ProgressBar'
-import useTable from '~/hooks/useTable'
+import useTable, { TableDataType } from '~/hooks/useTable'
 import { setAdminAction } from '~/store/actions-creator'
 import { RootState } from '~/store/store'
 import { Product } from '~/typing'
@@ -520,7 +520,13 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
             handleAddNew(_form, (meta) => {
               if (meta.success) {
                 const data = meta?.data as Product
-                setDataSource([...dataSource, { key: data.id!, data: data }])
+                const newDataSource = [...dataSource]
+                const itemNew = {
+                  key: data.id!,
+                  ...data
+                } as TableDataType<ProductTableDataType>
+                newDataSource.unshift(itemNew)
+                setDataSource(newDataSource)
                 message.success('Success!', 1)
               }
             })

@@ -111,8 +111,8 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
               onChange={(e) => setSearchText(e.target.value)}
             />
           </Form.Item>
-          <Flex justify='space-between' align='end'>
-            <Flex gap={10}>
+          <Flex justify='space-between' align='center'>
+            <Flex gap={10} align='center'>
               <Switch
                 checkedChildren='Admin'
                 unCheckedChildren='Admin'
@@ -142,7 +142,7 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
                 }}
               />
             </Flex>
-            <Flex gap={10}>
+            <Flex gap={10} align='center'>
               <Button
                 onClick={() => {
                   form.setFieldValue('search', '')
@@ -466,9 +466,12 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
           openModal={openModal}
           setOpenModal={setOpenModal}
           onAddNew={(_form) => {
-            handleAddNew(_form, (data) => {
-              if (data.success) {
-                console.log(data)
+            handleAddNew(_form, (meta) => {
+              if (meta.success) {
+                const data = meta?.data as Product
+                const newDataSource = [...dataSource]
+                newDataSource.unshift(data)
+                setDataSource(newDataSource)
                 message.success('Success!', 1)
               }
             })
