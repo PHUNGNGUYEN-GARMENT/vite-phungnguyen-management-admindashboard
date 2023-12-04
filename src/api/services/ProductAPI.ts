@@ -1,4 +1,4 @@
-import client, { ResponseDataType } from '~/api/client'
+import client, { RequestBodyType, ResponseDataType } from '~/api/client'
 import { Product } from '~/typing'
 import { errorFormatter } from '~/utils/promise-formatter'
 
@@ -6,15 +6,11 @@ const PATH_API = 'products'
 
 export default {
   getAlls: async (
-    current?: number,
-    pageSize?: number
+    bodyRequest: RequestBodyType
   ): Promise<ResponseDataType | undefined> => {
     return await client
-      .get(`${PATH_API}/find`, {
-        params: {
-          current: current ?? 1,
-          pageSize: pageSize ?? 5
-        }
+      .post(`${PATH_API}/find`, {
+        ...bodyRequest
       })
       .then((res) => {
         if (res.data) {

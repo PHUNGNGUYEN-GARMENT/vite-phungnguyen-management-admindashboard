@@ -8,6 +8,13 @@ export type Role =
 
 export type StatusType = 'normal' | 'warn' | 'error' | 'success'
 
+export type ItemStatusType =
+  | 'draft'
+  | 'active'
+  | 'closed'
+  | 'archived'
+  | 'deleted'
+
 export type StepRound = {
   name: string
   type: StatusType
@@ -34,10 +41,13 @@ export type Product = {
   quantityPO?: number
   dateInputNPL?: string
   dateOutputFCR?: string
-  sewing?: number
-  iron?: number
-  check?: number
-  pack?: number
+  progress: {
+    sewing?: number
+    iron?: number
+    check?: number
+    pack?: number
+  }
+  status?: ItemStatusType
   createdAt?: string
   updatedAt?: string
 }

@@ -1,29 +1,28 @@
 import {
+  App as AntApp,
   Button,
   Flex,
   Form,
   Input,
   List,
-  Modal,
   Popconfirm,
   Switch,
   Table,
   Typography
 } from 'antd'
-import { Plus } from 'lucide-react'
-import { useEffect } from 'react'
-import { useSelector } from 'react-redux'
+import { ArrowDownUp, Plus } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import ProductAPI from '~/api/services/ProductAPI'
 import ProgressBar from '~/components/ui/ProgressBar'
 import useTable from '~/hooks/useTable'
+import { setAdminAction } from '~/store/actions-creator'
 import { RootState } from '~/store/store'
 import { Product } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import useProduct from '../hooks/useProduct'
-import AddNewProduct from './AddNewProduct'
 import EditableCell, { EditableTableProps } from './EditableCell'
-import { useDispatch } from 'react-redux'
-import { setUser } from '~/store/reducers/user.reducer'
+import ModalAddNewProduct from './ModalAddNewProduct'
 
 const { Search } = Input
 
@@ -38,17 +37,21 @@ export type ProductTableDataType = {
   quantityPO?: number
   dateInputNPL?: string
   dateOutputFCR?: string
-  sewing?: number
-  iron?: number
-  check?: number
-  pack?: number
+  progress?: {
+    sewing?: number
+    iron?: number
+    check?: number
+    pack?: number
+  }
   createdAt?: string
   updatedAt?: string
 }
 
 const ProductTable: React.FC<Props> = ({ ...props }) => {
   const user = useSelector((state: RootState) => state.user)
+  const [dateCreation, setDateCreation] = useState<boolean>(false)
   const dispatch = useDispatch()
+  const { message } = AntApp.useApp()
   const {
     metaData,
     querySearchData,
@@ -85,7 +88,7 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
     })
   }, [])
 
-  const commonActionsCol: (ColumnTypes[number] & {
+  const actionsCols: (ColumnTypes[number] & {
     editable?: boolean
     dataIndex: string
   })[] = [
@@ -134,11 +137,11 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
                   { name: 'quantityPO', value: record.quantityPO },
                   {
                     name: 'sewing',
-                    value: record.sewing
+                    value: record.progress?.sewing
                   },
-                  { name: 'iron', value: record.iron },
-                  { name: 'check', value: record.check },
-                  { name: 'pack', value: record.pack },
+                  { name: 'iron', value: record.progress?.iron },
+                  { name: 'check', value: record.progress?.check },
+                  { name: 'pack', value: record.progress?.pack },
                   {
                     name: 'dateOutputFCR',
                     value: record.dateOutputFCR
@@ -202,19 +205,19 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
         const progressArr: { task: string; quantity: number }[] = [
           {
             task: 'Sewing',
-            quantity: record.sewing ?? 0
+            quantity: record.progress?.sewing ?? 0
           },
           {
             task: 'Iron',
-            quantity: record.iron ?? 0
+            quantity: record.progress?.iron ?? 0
           },
           {
             task: 'Check',
-            quantity: record.check ?? 0
+            quantity: record.progress?.check ?? 0
           },
           {
             task: 'Pack',
-            quantity: record.pack ?? 0
+            quantity: record.progress?.pack ?? 0
           }
         ]
         return (
@@ -260,11 +263,10 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
     }
   ]
 
-  const adminColumns: (ColumnTypes[number] & {
+  const dateCreationColumns: (ColumnTypes[number] & {
     editable?: boolean
     dataIndex: string
   })[] = [
-    ...commonCols,
     {
       title: 'Created date',
       dataIndex: 'createdAt',
@@ -283,14 +285,18 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
         const validData = record.updatedAt ? record.updatedAt : ''
         return <span>{DayJS(validData).format(DatePattern.display)}</span>
       }
-    },
-    ...commonActionsCol
+    }
   ]
+
+  const adminColumns: (ColumnTypes[number] & {
+    editable?: boolean
+    dataIndex: string
+  })[] = [...commonCols, ...actionsCols]
 
   const staffColumns: (ColumnTypes[number] & {
     editable?: boolean
     dataIndex: string
-  })[] = [...commonCols, ...commonActionsCol]
+  })[] = [...commonCols]
 
   const mergedColumns = (
     cols: (ColumnTypes[number] & {
@@ -343,26 +349,55 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
               <Switch
                 checkedChildren='Admin'
                 unCheckedChildren='Admin'
-                defaultChecked={false}
+                defaultChecked={user.isAdmin}
                 onChange={(val) => {
-                  dispatch(setUser({ isAdmin: val }))
+                  dispatch(setAdminAction(val))
                 }}
               />
-              <Form.Item name='search' className='m-0 w-1/2'>
-                <Search
-                  placeholder='Search code...'
-                  size='middle'
-                  enterButton
-                  allowClear
-                  onSearch={(value) => {
-                    if (value.length > 0) {
-                      querySearchData(value)
-                    }
-                  }}
-                  value={searchText}
-                  onChange={(e) => setSearchText(e.target.value)}
-                />
-              </Form.Item>
+              <Switch
+                checkedChildren='Date'
+                unCheckedChildren='Date'
+                defaultChecked={dateCreation}
+                onChange={(val) => {
+                  setDateCreation(val)
+                }}
+              />
+              <Search
+                placeholder='Search code...'
+                size='middle'
+                enterButton
+                allowClear
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                onSearch={(value, _event, info) => {
+                  if (value.length > 0) {
+                    querySearchData(value, (meta) => {
+                      setDataSource(
+                        meta.data.map((item: Product) => {
+                          return {
+                            ...item,
+                            key: item.id
+                          } as ProductTableDataType
+                        })
+                      )
+                    })
+                  }
+                  if (info?.source === 'clear') {
+                    fetchDataList(1, 5, setLoading, (meta) => {
+                      setDataSource(
+                        meta.data.map((item: Product) => {
+                          return {
+                            ...item,
+                            key: item.id
+                          } as ProductTableDataType
+                        })
+                      )
+                    })
+                  }
+                }}
+                className='w-1/2'
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+              />
             </Flex>
             <Flex gap={10}>
               {searchText.length > 0 && (
@@ -377,17 +412,35 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
                   Reset
                 </Button>
               )}
+              <Button
+                onClick={() => {
+                  fetchDataList(1, 5, setLoading, (data) => {
+                    setDataSource(
+                      data.data.map((item: Product) => {
+                        return { ...item, key: item.id } as ProductTableDataType
+                      })
+                    )
+                  })
+                }}
+                className='flex items-center'
+                type='dashed'
+                icon={<ArrowDownUp size={20} />}
+              >
+                Sort
+              </Button>
               {user.isAdmin && (
-                <Button
-                  onClick={() => {
-                    setOpenModal(true)
-                  }}
-                  className='flex items-center'
-                  type='primary'
-                  icon={<Plus size={20} />}
-                >
-                  New
-                </Button>
+                <Flex gap={10} align='center'>
+                  <Button
+                    onClick={() => {
+                      setOpenModal(true)
+                    }}
+                    className='flex items-center'
+                    type='primary'
+                    icon={<Plus size={20} />}
+                  >
+                    New
+                  </Button>
+                </Flex>
               )}
             </Flex>
           </Flex>
@@ -400,7 +453,13 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
             loading={loading}
             bordered
             dataSource={dataSource}
-            columns={mergedColumns(user.isAdmin ? adminColumns : staffColumns)}
+            columns={mergedColumns(
+              user.isAdmin
+                ? dateCreation
+                  ? [...commonCols, ...dateCreationColumns, ...actionsCols]
+                  : adminColumns
+                : staffColumns
+            )}
             rowClassName='editable-row'
             pagination={{
               onChange: (page) => {
@@ -420,17 +479,32 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
           />
         </Flex>
       </Form>
-      <Modal
-        open={openModal}
-        onOk={() => handleAddNew(form)}
-        centered
-        width='auto'
-        onCancel={() => {
-          setOpenModal(false)
+      <ModalAddNewProduct
+        openModal={openModal}
+        setOpenModal={setOpenModal}
+        onAddNew={(_form) => {
+          handleAddNew(_form, (data) => {
+            if (data.success) {
+              console.log(data)
+              message.success('Success!', 1)
+              // const productNew: Product = data.data
+              // const newData = [...dataSource]
+              // const item = {
+              //   ...productNew,
+              //   key: productNew.id
+              // } as ProductTableDataType
+              // const itemTable: TableDataType<ProductTableDataType> = {
+              //   data: { ...item },
+              //   key: productNew.id!
+              // }
+              // newData.push(itemTable)
+              // console.log(newData)
+              // setDataSource(newData)
+              // showMessage()
+            }
+          })
         }}
-      >
-        <AddNewProduct />
-      </Modal>
+      />
     </>
   )
 }

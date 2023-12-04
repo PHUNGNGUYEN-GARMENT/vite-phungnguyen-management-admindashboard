@@ -18,7 +18,7 @@ import { Product } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import useProduct from '../hooks/useProduct'
 import useProductList from '../hooks/useProductList'
-import AddNewProduct from './AddNewProduct'
+import AddNewProduct from './ModalAddNewProduct'
 import { ProductTableDataType } from './ProductTable'
 
 const { Search } = Input

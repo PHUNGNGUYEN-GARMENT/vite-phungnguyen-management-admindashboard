@@ -11,8 +11,11 @@ export default function useProduct() {
   const [searchText, setSearchText] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(false)
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleAddNew = async (form: FormInstance<any>) => {
+  const handleAddNew = async (
+    form: FormInstance<Product>,
+    onSuccess?: (data: ResponseDataType) => void
+  ) => {
+    setLoading(true)
     const row = await form.validateFields()
     // setLoading(true)
     const productConverted = {
@@ -20,27 +23,38 @@ export default function useProduct() {
       dateOutputFCR: DayJS(row.dateOutputFCR).format(DatePattern.iso8601),
       dateInputNPL: DayJS(row.dateOutputFCR).format(DatePattern.iso8601)
     } as Product
-    console.log(row)
-    ProductAPI.createNew(productConverted)
-      .then((data) => {
-        setLoading(true)
-        if (data?.success) {
-          setOpenModal(false)
-        }
-      })
-      .finally(() => {
-        setLoading(false)
-      })
+    await ProductAPI.createNew(productConverted).then((data) => {
+      if (data?.success) {
+        onSuccess?.(data)
+        setOpenModal(false)
+        console.log(data)
+      }
+    })
+    setLoading(false)
   }
 
-  const fetchDataList = (
+  const fetchDataList = async (
     current?: number,
     pageSize?: number,
     setLoading?: (enable: boolean) => void,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onSuccess?: (data: any) => void
   ) => {
-    ProductAPI.getAlls(current, pageSize)
+    await ProductAPI.getAlls({
+      filter: {
+        status: 'active',
+        items: [-1]
+      },
+      paginator: {
+        page: current ?? 1,
+        pageSize: pageSize ?? 5
+      },
+      searchTerm: '',
+      sorting: {
+        column: 'id',
+        direction: 'asc'
+      }
+    })
       .then((data) => {
         setLoading?.(true)
         if (data?.success) {
@@ -54,12 +68,15 @@ export default function useProduct() {
       })
   }
 
-  const querySearchData = (searchText: string) => {
+  const querySearchData = async (
+    searchText: string,
+    onSuccess?: (data: ResponseDataType) => void
+  ) => {
     if (searchText.length !== 0) {
-      ProductAPI.getItemByCode(searchText).then((data) => {
-        console.log(data)
+      await ProductAPI.getItemByCode(searchText).then((data) => {
         if (data?.success) {
           console.log(data)
+          onSuccess?.(data)
           setMetaData(data)
         }
       })

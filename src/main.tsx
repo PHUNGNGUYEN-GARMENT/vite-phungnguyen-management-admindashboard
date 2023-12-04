@@ -1,4 +1,4 @@
-import { ConfigProvider } from 'antd'
+import { App as AntApp, ConfigProvider } from 'antd'
 import ReactDOM from 'react-dom/client'
 import { Provider } from 'react-redux'
 import { BrowserRouter as Router } from 'react-router-dom'
@@ -12,7 +12,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <Provider store={store}>
     <Router>
       <ConfigProvider theme={theme}>
-        <App />
+        <AntApp>
+          <App />
+        </AntApp>
       </ConfigProvider>
     </Router>
   </Provider>
