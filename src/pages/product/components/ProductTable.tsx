@@ -360,6 +360,7 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
                 defaultChecked={dateCreation}
                 onChange={(val) => {
                   setDateCreation(val)
+                  ProductAPI.getItemByID(4)
                 }}
               />
               <Search

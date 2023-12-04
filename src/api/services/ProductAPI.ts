@@ -2,14 +2,14 @@ import client, { RequestBodyType, ResponseDataType } from '~/api/client'
 import { Product } from '~/typing'
 import { errorFormatter } from '~/utils/promise-formatter'
 
-const PATH_API = 'products'
+const NAMESPACE = 'products'
 
 export default {
-  getAlls: async (
+  getItems: async (
     bodyRequest: RequestBodyType
   ): Promise<ResponseDataType | undefined> => {
     return await client
-      .post(`${PATH_API}/find`, {
+      .post(`${NAMESPACE}/find`, {
         ...bodyRequest
       })
       .then((res) => {
@@ -22,13 +22,14 @@ export default {
         errorFormatter(error)
       })
   },
-  createNew: async (
+  createNewItem: async (
     product: Product
   ): Promise<ResponseDataType | undefined> => {
     return await client
-      .post(`${PATH_API}`, {
+      .post(`${NAMESPACE}`, {
         productCode: product.productCode,
         quantityPO: product.quantityPO,
+        status: product.status,
         dateInputNPL: product.dateInputNPL,
         dateOutputFCR: product.dateOutputFCR
       })
@@ -44,7 +45,7 @@ export default {
   },
   getItemByID: async (id: number): Promise<ResponseDataType | undefined> => {
     return client
-      .get(`${PATH_API}`, {
+      .get(`${NAMESPACE}`, {
         params: {
           id: id
         }
@@ -63,7 +64,7 @@ export default {
     code: string
   ): Promise<ResponseDataType | undefined> => {
     return client
-      .get(`${PATH_API}`, {
+      .get(`${NAMESPACE}`, {
         params: {
           code: code
         }
@@ -78,14 +79,15 @@ export default {
         errorFormatter(error)
       })
   },
-  updateItem: async (
+  updateItemByID: async (
     id: number,
     product: Product
   ): Promise<ResponseDataType | undefined> => {
     return client
-      .put(`${PATH_API}/${id}`, {
+      .put(`${NAMESPACE}/${id}`, {
         productCode: product.productCode,
         quantityPO: product.quantityPO,
+        status: product.status,
         dateInputNPL: product.dateInputNPL,
         dateOutputFCR: product.dateOutputFCR
       })
@@ -99,11 +101,10 @@ export default {
         errorFormatter(error)
       })
   },
-  deleteItem: async (id: number): Promise<ResponseDataType | undefined> => {
+  deleteItemByID: async (id: number): Promise<ResponseDataType | undefined> => {
     return client
-      .delete(`${PATH_API}/${id}`)
+      .delete(`${NAMESPACE}/${id}`)
       .then((res) => {
-        // console.log(JSON.stringify(res.data))
         if (res.data) {
           return res.data as ResponseDataType
         }
