@@ -1,8 +1,9 @@
 import { useForm } from 'antd/es/form/Form'
 import React, { useEffect, useState } from 'react'
+import { defaultRequestBody } from '~/api/client'
 import { Color } from '~/typing'
-import { ColorTableDataType } from '../ColorPage'
 import ColorAPI from '../../../api/services/ColorAPI'
+import { ColorTableDataType } from '../ColorPage'
 
 export default function useColorTable() {
   const [form] = useForm()
@@ -12,10 +13,10 @@ export default function useColorTable() {
   const [loading, setLoading] = useState<boolean>(false)
 
   useEffect(() => {
-    ColorAPI.getAllColors().then((meta) => {
+    ColorAPI.getItems(defaultRequestBody).then((meta) => {
       const data = meta?.data as Color[]
       const items: ColorTableDataType[] = data.map((item) => {
-        return { ...item, key: item.colorID }
+        return { ...item, key: item.id }
       })
       console.log(items)
       setDataSource(items)

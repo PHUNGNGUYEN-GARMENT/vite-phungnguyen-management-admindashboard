@@ -91,7 +91,10 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
                 if (value.length > 0) {
                   const body: RequestBodyType = {
                     ...defaultRequestBody,
-                    searchTerm: value
+                    search: {
+                      field: 'productCode',
+                      term: value
+                    }
                   }
                   getProductList(body, (meta) => {
                     if (meta?.success) {
@@ -194,7 +197,10 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
                     page: page,
                     pageSize: 5
                   },
-                  searchTerm: searchText
+                  search: {
+                    field: 'productCode',
+                    term: searchText
+                  }
                 }
                 getProductList(body, (meta) => {
                   if (meta?.success) {

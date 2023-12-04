@@ -1,3 +1,3 @@
 export default {
-  baseUrl: 'http://0.0.0.0:5001/api'
+  baseUrl: 'http://localhost:5001/api'
 }

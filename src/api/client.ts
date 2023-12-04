@@ -28,7 +28,10 @@ export type RequestBodyType = {
     page?: number // trang hiện tại : default = 1
     pageSize?: number // số lượng post cần lấy : default = 10
   }
-  searchTerm?: string // searchTerm: chỉ lấy những product có productCode chứa từ được truyền vào.
+  search?: {
+    field?: string
+    term?: string // searchTerm: chỉ lấy những product có productCode chứa từ được truyền vào.
+  }
   sorting?: {
     column?: string // id
     direction?: SortDirection // direction: asc|desc sắp xếp trước sau
@@ -41,7 +44,10 @@ export const defaultRequestBody: RequestBodyType = {
     status: 'active'
   },
   paginator: { page: 1, pageSize: 5 },
-  searchTerm: '',
+  search: {
+    field: 'id',
+    term: ''
+  },
   sorting: {
     column: 'id', // id
     direction: 'desc' // direction: asc|desc sắp xếp trước sau

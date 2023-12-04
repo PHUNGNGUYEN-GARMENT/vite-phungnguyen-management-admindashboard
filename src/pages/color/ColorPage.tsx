@@ -11,13 +11,13 @@ import {
 import { AnyObject } from 'antd/es/_util/type'
 import { Plus } from 'lucide-react'
 import React from 'react'
+import DayJS from '~/utils/date-formatter'
 import { cn } from '~/utils/helpers'
 import { firstLetterUppercase } from '~/utils/text'
 import AddNewColor from './components/AddNewColor'
 import EditableCell, { EditableTableProps } from './components/EditableCell'
 import useColor from './hooks/useColor'
 import useColorTable from './hooks/useColorTable'
-import DayJS from '~/utils/date-formatter'
 
 export interface ColorTableDataType {
   key: React.Key
@@ -62,7 +62,7 @@ const ColorPage = () => {
   })[] = [
     {
       title: 'ID',
-      dataIndex: 'colorID',
+      dataIndex: 'id',
       width: '5%',
       editable: true
     },

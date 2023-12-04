@@ -1,13 +1,34 @@
-import client, { ResponseDataType } from '~/api/client'
+import client, { RequestBodyType, ResponseDataType } from '~/api/client'
 import { Color } from '~/typing'
 import { errorFormatter } from '~/utils/promise-formatter'
 
-const PATH_API = 'colors'
+const NAMESPACE = 'colors'
 
 export default {
-  getAllColors: async (): Promise<ResponseDataType | undefined> => {
+  getItems: async (
+    bodyRequest: RequestBodyType
+  ): Promise<ResponseDataType | undefined> => {
     return await client
-      .get(`${PATH_API}/find`)
+      .post(`${NAMESPACE}/find`, {
+        ...bodyRequest
+      })
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  createNewItem: async (item: Color): Promise<ResponseDataType | undefined> => {
+    return await client
+      .post(`${NAMESPACE}`, {
+        nameColor: item.nameColor,
+        hexColor: item.hexColor,
+        status: item.status
+      })
       .then((res) => {
         if (res.data) {
           return res.data as ResponseDataType
@@ -20,7 +41,7 @@ export default {
   },
   getItemByID: async (id: number): Promise<ResponseDataType | undefined> => {
     return client
-      .get(`${PATH_API}`, {
+      .get(`${NAMESPACE}/id`, {
         params: {
           id: id
         }
@@ -35,47 +56,52 @@ export default {
         errorFormatter(error)
       })
   },
-  createNew: async (
-    nameColor: string,
-    hexColor: string
+  getItemByCode: async (
+    code: string
   ): Promise<ResponseDataType | undefined> => {
     return client
-      .post(`${PATH_API}`, {
-        nameColor: nameColor,
-        hexColor: hexColor
+      .get(`${NAMESPACE}/code`, {
+        params: {
+          code: code
+        }
       })
       .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
         return res.data
       })
       .catch(function (error) {
         errorFormatter(error)
       })
   },
-  updateItem: async (color: Color): Promise<ResponseDataType | undefined> => {
+  updateItemByID: async (
+    id: number,
+    product: Color
+  ): Promise<ResponseDataType | undefined> => {
     return client
-      .put(`${PATH_API}`, {
-        colorID: color.colorID,
-        nameColor: color.nameColor,
-        hexColor: color.hexColor,
-        createdAt: color.createdAt,
-        updatedAt: color.updatedAt,
-        orderNumber: color.orderNumber
+      .put(`${NAMESPACE}/${id}`, {
+        nameColor: product.nameColor,
+        hexColor: product.hexColor,
+        status: product.status
       })
       .then((res) => {
-        console.log(res.data)
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
         return res.data
       })
       .catch(function (error) {
         errorFormatter(error)
       })
   },
-  deleteItem: async (
-    colorID: number
-  ): Promise<ResponseDataType | undefined> => {
+  deleteItemByID: async (id: number): Promise<ResponseDataType | undefined> => {
     return client
-      .delete(`${PATH_API}/${colorID}`)
+      .delete(`${NAMESPACE}/${id}`)
       .then((res) => {
-        // console.log(JSON.stringify(res.data))
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
         return res.data
       })
       .catch(function (error) {
