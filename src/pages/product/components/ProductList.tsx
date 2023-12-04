@@ -51,10 +51,10 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
     dataSource,
     setDataSource,
     isEditing,
-    handleDelete,
+    handleStartDelete,
+    handleStartSaveEditing,
     handleStartEditing,
     handleCancelEditing,
-    handleSaveEditing,
     handleCancelConfirmDelete
   } = useProductList()
   const user = useSelector((state: RootState) => state.user)
@@ -127,7 +127,7 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
                 unCheckedChildren='Sorted'
                 defaultChecked={false}
                 onChange={(val) => {
-                  handleSorted(val ? 'desc' : 'asc', (meta) => {
+                  handleSorted(val ? 'asc' : 'desc', (meta) => {
                     if (meta.success) {
                       setDataSource(
                         meta.data.map((item: Product) => {
@@ -241,7 +241,20 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
                         <Button
                           type='primary'
                           onClick={() =>
-                            handleSaveEditing(item.id!, setLoading)
+                            handleStartSaveEditing(
+                              item.id!,
+                              (productToSave) => {
+                                handleUpdateItem(
+                                  Number(item.id),
+                                  productToSave,
+                                  (meta) => {
+                                    if (meta.success) {
+                                      message.success('Updated!')
+                                    }
+                                  }
+                                )
+                              }
+                            )
                           }
                         >
                           Save
@@ -279,7 +292,20 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
                           <Popconfirm
                             title={`Sure to delete?`}
                             onCancel={() => handleCancelConfirmDelete()}
-                            onConfirm={() => handleDelete(item.id!, setLoading)}
+                            onConfirm={() => {
+                              setLoading(true)
+                              handleStartDelete(item.id!, (productToDelete) => {
+                                handleDeleteItem(
+                                  productToDelete.id!,
+                                  (meta) => {
+                                    if (meta.success) {
+                                      setLoading(false)
+                                      message.success('Deleted!')
+                                    }
+                                  }
+                                )
+                              })
+                            }}
                           >
                             <Button
                               type='dashed'

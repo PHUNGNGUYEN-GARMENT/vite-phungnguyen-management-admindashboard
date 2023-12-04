@@ -44,7 +44,7 @@ export const defaultRequestBody: RequestBodyType = {
   searchTerm: '',
   sorting: {
     column: 'id', // id
-    direction: 'asc' // direction: asc|desc sắp xếp trước sau
+    direction: 'desc' // direction: asc|desc sắp xếp trước sau
   }
 }
 

@@ -409,7 +409,7 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
                 checkedChildren='Sorted'
                 unCheckedChildren='Sorted'
                 onChange={async (val) => {
-                  await handleSorted(val ? 'desc' : 'asc', (meta) => {
+                  await handleSorted(val ? 'asc' : 'desc', (meta) => {
                     if (meta.success) {
                       setDataSource(
                         meta.data.map((item: Product) => {

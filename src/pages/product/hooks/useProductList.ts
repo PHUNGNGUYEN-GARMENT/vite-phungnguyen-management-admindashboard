@@ -1,6 +1,5 @@
 import { Form } from 'antd'
 import { useState } from 'react'
-import ProductAPI from '~/api/services/ProductAPI'
 import { Product } from '~/typing'
 
 export default function useProductList() {
@@ -19,25 +18,15 @@ export default function useProductList() {
     setEditingKey(key)
   }
 
-  const handleDelete = (
+  const handleStartDelete = (
     key: React.Key,
-    setLoading: (enable: boolean) => void
+    onSuccess: (data: Product) => void
   ) => {
-    setLoading(true)
     const itemFound = dataSource.find((item) => item.id === key)
     if (itemFound) {
-      ProductAPI.deleteItemByID(itemFound.id ?? -1)
-        .then((meta) => {
-          if (meta?.success) {
-            const dataSourceRemovedItem = dataSource.filter(
-              (item) => item.id !== key
-            )
-            setDataSource(dataSourceRemovedItem)
-          }
-        })
-        .finally(() => {
-          setLoading(false)
-        })
+      const dataSourceRemovedItem = dataSource.filter((item) => item.id !== key)
+      setDataSource(dataSourceRemovedItem)
+      onSuccess(itemFound)
     }
   }
 
@@ -53,9 +42,9 @@ export default function useProductList() {
     setDeleteKey('')
   }
 
-  const handleSaveEditing = async (
+  const handleStartSaveEditing = async (
     key: React.Key,
-    setLoading: (enable: boolean) => void
+    onSuccess: (data: Product) => void
   ) => {
     try {
       const row = (await form.validateFields()) as Product
@@ -67,14 +56,7 @@ export default function useProductList() {
           ...item,
           ...row
         })
-        await ProductAPI.updateItemByID(Number(key), row)
-          .then((meta) => {
-            console.log(meta)
-            setLoading(true)
-          })
-          .finally(() => {
-            setLoading(false)
-          })
+        onSuccess(row)
         setDataSource(newData)
         setEditingKey('')
 
@@ -115,10 +97,10 @@ export default function useProductList() {
     isEditing,
     isDelete,
     handleEdit,
-    handleDelete,
+    handleStartDelete,
     handleStartEditing,
     handleCancelEditing,
-    handleSaveEditing,
+    handleStartSaveEditing,
     handleCancelConfirmEditing,
     handleCancelConfirmDelete,
     handleAddNewItemData
