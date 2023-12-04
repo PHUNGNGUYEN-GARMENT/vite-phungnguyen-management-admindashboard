@@ -143,7 +143,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
                 ]}
               >
                 <Select
-                  value={record.sewing ?? 'normal'}
+                  value={record.progress?.sewing ?? 'normal'}
                   className='w-full'
                   options={statusOptions}
                   optionRender={(option) => {

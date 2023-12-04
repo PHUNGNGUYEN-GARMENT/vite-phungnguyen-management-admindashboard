@@ -1,8 +1,12 @@
 import { FormInstance } from 'antd'
 import { useState } from 'react'
-import { ResponseDataType } from '~/api/client'
+import {
+  RequestBodyType,
+  ResponseDataType,
+  defaultRequestBody
+} from '~/api/client'
 import ProductAPI from '~/api/services/ProductAPI'
-import { Product } from '~/typing'
+import { Product, SortDirection } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 
 export default function useProduct() {
@@ -20,71 +24,105 @@ export default function useProduct() {
     // setLoading(true)
     const productConverted = {
       ...row,
+      status: 'active',
       dateOutputFCR: DayJS(row.dateOutputFCR).format(DatePattern.iso8601),
       dateInputNPL: DayJS(row.dateOutputFCR).format(DatePattern.iso8601)
     } as Product
-    await ProductAPI.createNew(productConverted).then((data) => {
-      if (data?.success) {
-        onSuccess?.(data)
-        setOpenModal(false)
-        console.log(data)
-      }
-    })
-    setLoading(false)
-  }
-
-  const fetchDataList = async (
-    current?: number,
-    pageSize?: number,
-    setLoading?: (enable: boolean) => void,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onSuccess?: (data: any) => void
-  ) => {
-    await ProductAPI.getAlls({
-      filter: {
-        status: 'active',
-        items: [-1]
-      },
-      paginator: {
-        page: current ?? 1,
-        pageSize: pageSize ?? 5
-      },
-      searchTerm: '',
-      sorting: {
-        column: 'id',
-        direction: 'asc'
-      }
-    })
-      .then((data) => {
-        setLoading?.(true)
-        if (data?.success) {
-          setMetaData(data)
-          onSuccess?.(data)
-          // console.log(data)
+    await ProductAPI.createNewItem(productConverted)
+      .then((meta) => {
+        setLoading(true)
+        if (meta?.success) {
+          onSuccess?.(meta)
+          setMetaData(meta)
+          setOpenModal(false)
         }
       })
       .finally(() => {
-        setLoading?.(false)
+        setLoading(false)
       })
+    setLoading(false)
   }
 
-  const querySearchData = async (
-    searchText: string,
+  const getProductList = async (
+    params: RequestBodyType,
     onSuccess?: (data: ResponseDataType) => void
   ) => {
-    if (searchText.length !== 0) {
-      await ProductAPI.getItemByCode(searchText).then((data) => {
+    setLoading(true)
+    const body: RequestBodyType = {
+      ...defaultRequestBody,
+      ...params
+    }
+    await ProductAPI.getItems(body)
+      .then((data) => {
         if (data?.success) {
-          console.log(data)
-          onSuccess?.(data)
           setMetaData(data)
+          onSuccess?.(data)
         }
       })
+      .finally(() => {
+        setLoading(false)
+      })
+    setLoading(false)
+  }
+
+  const handleSorted = async (
+    direction: SortDirection,
+    onSuccess?: (meta: ResponseDataType) => void
+  ) => {
+    const body: RequestBodyType = {
+      ...defaultRequestBody,
+      sorting: {
+        column: 'id',
+        direction: direction
+      }
     }
+    await getProductList(body, (meta) => {
+      if (meta?.success) {
+        onSuccess?.(meta)
+      }
+    })
+  }
+
+  const handleUpdateItem = async (
+    id: number,
+    productToUpdate: Product,
+    onSuccess?: (data: ResponseDataType) => void
+  ) => {
+    setLoading(true)
+    await ProductAPI.updateItemByID(id, productToUpdate)
+      .then((meta) => {
+        if (meta?.success) {
+          setLoading(true)
+          onSuccess?.(meta)
+        }
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+    setLoading(false)
+  }
+
+  const handleDeleteItem = async (
+    id: number,
+    onSuccess?: (meta: ResponseDataType) => void
+  ) => {
+    setLoading(true)
+    await ProductAPI.updateItemByID(id, { status: 'deleted' })
+      .then((meta) => {
+        if (meta?.success) {
+          setLoading(true)
+          onSuccess?.(meta)
+        }
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+    setLoading(false)
   }
 
   return {
     metaData,
+    setMetaData,
     loading,
     setLoading,
     handleAddNew,
@@ -92,7 +130,9 @@ export default function useProduct() {
     setOpenModal,
     searchText,
     setSearchText,
-    fetchDataList,
-    querySearchData
+    getProductList,
+    handleUpdateItem,
+    handleDeleteItem,
+    handleSorted
   }
 }

@@ -33,13 +33,17 @@ export default function useTable<T>(initData: TableDataType<T>[]) {
   }
 
   // Delete row
-  function handleDeleteRow(key: React.Key) {
+  function handleDeleteRow(
+    key: React.Key,
+    onDelete?: (key: React.Key) => void
+  ) {
     const itemFound = dataSource.find((item) => item.key === key)
     if (itemFound) {
       const dataSourceRemovedItem = dataSource.filter(
         (item) => item.key !== key
       )
       setDataSource(dataSourceRemovedItem)
+      onDelete?.(key)
     }
   }
 

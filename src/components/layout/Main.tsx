@@ -31,9 +31,6 @@ const Main: React.FC = () => {
       </Drawer>
       <Sider
         breakpoint='lg'
-        onBreakpoint={(state) => {
-          console.log(state)
-        }}
         collapsedWidth={0}
         collapsible
         // collapsed={collapsed}

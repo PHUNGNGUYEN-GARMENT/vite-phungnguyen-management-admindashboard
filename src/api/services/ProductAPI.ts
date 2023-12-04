@@ -45,7 +45,7 @@ export default {
   },
   getItemByID: async (id: number): Promise<ResponseDataType | undefined> => {
     return client
-      .get(`${NAMESPACE}`, {
+      .get(`${NAMESPACE}/id`, {
         params: {
           id: id
         }
@@ -64,7 +64,7 @@ export default {
     code: string
   ): Promise<ResponseDataType | undefined> => {
     return client
-      .get(`${NAMESPACE}`, {
+      .get(`${NAMESPACE}/code`, {
         params: {
           code: code
         }

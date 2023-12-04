@@ -26,9 +26,9 @@ export default function useProductList() {
     setLoading(true)
     const itemFound = dataSource.find((item) => item.id === key)
     if (itemFound) {
-      ProductAPI.deleteItem(itemFound.id ?? -1)
-        .then((data) => {
-          if (data?.success) {
+      ProductAPI.deleteItemByID(itemFound.id ?? -1)
+        .then((meta) => {
+          if (meta?.success) {
             const dataSourceRemovedItem = dataSource.filter(
               (item) => item.id !== key
             )
@@ -67,9 +67,9 @@ export default function useProductList() {
           ...item,
           ...row
         })
-        await ProductAPI.updateItem(Number(key), row)
-          .then((data) => {
-            console.log(data)
+        await ProductAPI.updateItemByID(Number(key), row)
+          .then((meta) => {
+            console.log(meta)
             setLoading(true)
           })
           .finally(() => {

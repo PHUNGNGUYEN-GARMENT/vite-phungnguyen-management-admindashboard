@@ -8,6 +8,8 @@ export type Role =
 
 export type StatusType = 'normal' | 'warn' | 'error' | 'success'
 
+export type SortDirection = 'asc' | 'desc'
+
 export type ItemStatusType =
   | 'draft'
   | 'active'
@@ -41,7 +43,7 @@ export type Product = {
   quantityPO?: number
   dateInputNPL?: string
   dateOutputFCR?: string
-  progress: {
+  progress?: {
     sewing?: number
     iron?: number
     check?: number
