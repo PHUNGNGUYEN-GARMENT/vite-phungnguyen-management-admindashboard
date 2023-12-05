@@ -82,11 +82,12 @@ export type Group = {
 }
 
 export type Print = {
-  printID: number
-  name: string
-  createdAt: string
-  updatedAt: string
-  orderNumber: number
+  id?: number
+  name?: string
+  status?: ItemStatusType
+  createdAt?: string
+  updatedAt?: string
+  orderNumber?: number
 }
 
 export type PrintablePlace = {

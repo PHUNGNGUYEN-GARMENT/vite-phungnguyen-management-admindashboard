@@ -1,7 +1,7 @@
 import { Flex } from 'antd'
 import useDevice from '~/hooks/useDevice'
-import GroupList from './components/SewingLineDeliveryList'
-import GroupTable from './components/SewingLineDeliveryTable'
+import SewingLineDeliveryList from './components/SewingLineDeliveryList'
+import SewingLineDeliveryTable from './components/SewingLineDeliveryTable'
 
 const SewingLineDeliveryPage = () => {
   const { width } = useDevice()
@@ -9,8 +9,8 @@ const SewingLineDeliveryPage = () => {
   return (
     <>
       <Flex vertical gap={20}>
-        {width >= 768 && <GroupTable className='' />}
-        {width <= 768 && <GroupList className='' />}
+        {width >= 768 && <SewingLineDeliveryTable className='' />}
+        {width <= 768 && <SewingLineDeliveryList className='' />}
       </Flex>
     </>
   )
