@@ -33,7 +33,13 @@ const ModalAddNewProduct: React.FC<Props> = ({
   console.log('Load AddNewProduct...')
 
   useEffect(() => {
-    ColorAPI.getItems(defaultRequestBody).then((data) => {
+    ColorAPI.getItems({
+      ...defaultRequestBody,
+      paginator: {
+        page: 1,
+        pageSize: 1000
+      }
+    }).then((data) => {
       if (data?.success) {
         const _colors = data.data as Product[]
         setColors(_colors)
