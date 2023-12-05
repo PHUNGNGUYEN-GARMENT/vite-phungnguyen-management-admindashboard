@@ -32,7 +32,7 @@ import SampleSewingPage from '~/pages/sample-sewing/SampleSewingPage'
 const Dashboard = lazy(() => import('~/pages/dashboard/Dashboard'))
 const Cutting = lazy(() => import('~/pages/cutting/Cutting'))
 const ColorPage = lazy(() => import('~/pages/color/ColorPage'))
-const GroupPage = lazy(() => import('~/pages/group/Group'))
+const GroupPage = lazy(() => import('~/pages/group/GroupPage'))
 const ImportationPage = lazy(() => import('~/pages/importation/Importation'))
 const NotePage = lazy(() => import('~/pages/note/Note'))
 const PrintPage = lazy(() => import('~/pages/print/PrintPage'))
