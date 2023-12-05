@@ -1,4 +1,5 @@
 import { FormInstance } from 'antd'
+import { Color as AntColor } from 'antd/es/color-picker'
 import { useState } from 'react'
 import {
   RequestBodyType,
@@ -20,13 +21,14 @@ export default function useColor() {
     onSuccess?: (data: ResponseDataType) => void
   ) => {
     setLoading(true)
+    const hexColor: AntColor = await form.getFieldValue(`hexColor`)
     const row = await form.validateFields()
-    // setLoading(true)
-    const colorConverted = {
+    const newRow: Color = {
       ...row,
-      status: 'active'
-    } as Color
-    await ColorAPI.createNewItem(colorConverted)
+      status: 'active',
+      hexColor: typeof hexColor === 'string' ? hexColor : hexColor.toHexString()
+    }
+    await ColorAPI.createNewItem(newRow)
       .then((meta) => {
         setLoading(true)
         if (meta?.success) {

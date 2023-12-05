@@ -1,14 +1,15 @@
-import { Form, Input, InputNumber, Table } from 'antd'
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-refresh/only-export-components */
+import { ColorPicker, Form, Input, Table } from 'antd'
 import { memo } from 'react'
-import { ColorTableDataType } from '../ColorPage'
+import { ColorTableDataType } from './ColorTable'
 
 type InputType = 'number' | 'text'
 
 interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
   editing: boolean
   dataIndex: string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  title: any
+  title: string | undefined
   inputType: InputType
   record: ColorTableDataType
   index: number
@@ -17,42 +18,52 @@ interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
 
 export type EditableTableProps = Parameters<typeof Table>[0]
 
-// eslint-disable-next-line react-refresh/only-export-components
 const EditableCell: React.FC<EditableCellProps> = ({
   editing,
   dataIndex,
+  record,
   title,
   inputType,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  record,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  index,
   children,
   ...restProps
 }) => {
-  const inputNode = inputType === 'number' ? <InputNumber /> : <Input />
+  const inputNode = ((): React.ReactNode => {
+    switch (dataIndex) {
+      case 'nameColor':
+        return (
+          <Form.Item
+            name='nameColor'
+            initialValue={record.nameColor}
+            style={{ margin: 0 }}
+            rules={[
+              {
+                required: true,
+                message: `Please Input ${title}!`
+              }
+            ]}
+          >
+            <Input className='w-full' />
+          </Form.Item>
+        )
+      default: // Default là trạng thái mặc định
+        return (
+          <Form.Item
+            name='hexColor'
+            style={{ margin: 0 }}
+            rules={[
+              {
+                required: true,
+                message: `Please Input ${title}!`
+              }
+            ]}
+          >
+            <ColorPicker showText className='w-full' format='hex' />
+          </Form.Item>
+        )
+    }
+  })()
 
-  return (
-    <td {...restProps}>
-      {editing ? (
-        <Form.Item
-          name={dataIndex}
-          style={{ margin: 0 }}
-          rules={[
-            {
-              required: true,
-              message: `Please Input ${title}!`
-            }
-          ]}
-        >
-          {inputNode}
-        </Form.Item>
-      ) : (
-        children
-      )}
-    </td>
-  )
+  return <td {...restProps}>{editing ? inputNode : children}</td>
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
 export default memo(EditableCell)

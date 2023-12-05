@@ -1,6 +1,7 @@
 import {
   App as AntApp,
   Button,
+  ColorPicker,
   Flex,
   Form,
   Input,
@@ -13,13 +14,14 @@ import { Plus } from 'lucide-react'
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { RequestBodyType, defaultRequestBody } from '~/api/client'
-import useTable from '~/hooks/useTable'
+import useTable, { TableDataType } from '~/hooks/useTable'
 import { setAdminAction } from '~/store/actions-creator'
 import { RootState } from '~/store/store'
 import { Color, ItemStatusType } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import useColor from '../hooks/useColor'
 import EditableCell, { EditableTableProps } from './EditableCell'
+import ModalAddNewColor from './ModalAddNewColor'
 
 const { Search } = Input
 
@@ -30,7 +32,7 @@ interface Props extends React.HTMLAttributes<HTMLElement> {}
 export type ColorTableDataType = {
   key?: React.Key
   id?: number
-  colorName?: string
+  nameColor?: string
   hexColor?: string
   status?: ItemStatusType
   createdAt?: string
@@ -45,14 +47,13 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
   const {
     metaData,
     loading,
-    // openModal,
+    openModal,
     setOpenModal,
     searchText,
     setSearchText,
     dateCreation,
     setDateCreation,
-
-    // handleAddNew,
+    handleAddNew,
     getColorList,
     handleUpdateItem,
     handleDeleteItem,
@@ -60,12 +61,13 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
   } = useColor()
   const {
     form,
+    editingKey,
     isEditing,
     isDisableEditing,
     dataSource,
     setDataSource,
     handleStartEditingRow,
-    handleSaveEditingRow,
+    handleStartSaveEditingRow,
     handleCancelEditingRow,
     handleStartDeleteRow,
     handleDeleteRow,
@@ -103,7 +105,7 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
             <Button
               type='primary'
               onClick={() =>
-                handleSaveEditingRow(record.id!, (row: Color) => {
+                handleStartSaveEditingRow(record.id!, (row: Color) => {
                   handleUpdateItem(record.id!, row, (meta) => {
                     if (meta.success) {
                       message.success('Updated!')
@@ -130,7 +132,7 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
               disabled={isDisableEditing}
               onClick={() => {
                 form.setFields([
-                  { name: 'colorName', value: record.colorName },
+                  { name: 'colorName', value: record.nameColor },
                   { name: 'hexColor', value: record.hexColor }
                 ])
                 handleStartEditingRow(record)
@@ -153,6 +155,7 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
                 }
               >
                 <Button
+                  disabled={editingKey !== ''}
                   type='dashed'
                   onClick={() => handleStartDeleteRow(record.key!)}
                 >
@@ -172,13 +175,13 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
   })[] = [
     {
       title: 'Color Name',
-      dataIndex: 'colorName',
+      dataIndex: 'nameColor',
       width: '15%',
       editable: user.isAdmin,
       render: (_, record: ColorTableDataType) => {
         return (
           <Typography.Text copyable className='text-md flex-shrink-0 font-bold'>
-            {record.colorName}
+            {record.nameColor}
           </Typography.Text>
         )
       }
@@ -187,7 +190,17 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
       title: 'Mã màu',
       dataIndex: 'hexColor',
       width: '15%',
-      editable: true
+      editable: true,
+      render: (_, record: ColorTableDataType) => {
+        return (
+          <ColorPicker
+            defaultValue={record.hexColor}
+            showText
+            disabled
+            defaultFormat='hex'
+          />
+        )
+      }
     }
   ]
 
@@ -208,7 +221,6 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
       title: 'Updated date',
       dataIndex: 'updatedAt',
       width: '10%',
-      responsive: ['md'],
       render: (_, record: ColorTableDataType) => {
         const validData = record.updatedAt ? record.updatedAt : ''
         return <span>{DayJS(validData).format(DatePattern.display)}</span>
@@ -219,7 +231,9 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
   const adminColumns: (ColumnTypes[number] & {
     editable?: boolean
     dataIndex: string
-  })[] = [...commonCols, ...actionsCols]
+  })[] = dateCreation
+    ? [...commonCols, ...dateCreationColumns, ...actionsCols]
+    : [...commonCols, ...actionsCols]
 
   const staffColumns: (ColumnTypes[number] & {
     editable?: boolean
@@ -251,16 +265,10 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
 
   const onCellColumnType = (dataIndex: string): string => {
     switch (dataIndex) {
-      case 'productCode':
+      case 'nameColor':
         return 'text'
-      case 'quantityPO':
-        return 'number'
-      case 'dateInputNPL' && 'dateInputFCR':
-        return 'datepicker'
-      case 'status':
-        return 'select'
       default:
-        return 'text'
+        return 'colorpicker'
     }
   }
 
@@ -291,6 +299,7 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
                 }}
               />
               <Search
+                name='search'
                 placeholder='Search code...'
                 size='middle'
                 enterButton
@@ -301,7 +310,7 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
                     const body: RequestBodyType = {
                       ...defaultRequestBody,
                       search: {
-                        field: 'productCode',
+                        field: 'nameColor',
                         term: value
                       }
                     }
@@ -391,13 +400,7 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
             loading={loading}
             bordered
             dataSource={dataSource}
-            columns={mergedColumns(
-              user.isAdmin
-                ? dateCreation
-                  ? [...commonCols, ...dateCreationColumns, ...actionsCols]
-                  : adminColumns
-                : staffColumns
-            )}
+            columns={mergedColumns(user.isAdmin ? adminColumns : staffColumns)}
             rowClassName='editable-row'
             pagination={{
               onChange: (page) => {
@@ -434,6 +437,27 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
           />
         </Flex>
       </Form>
+      {openModal && (
+        <ModalAddNewColor
+          openModal={openModal}
+          setOpenModal={setOpenModal}
+          onAddNew={(_form) => {
+            handleAddNew(_form, (meta) => {
+              if (meta.success) {
+                const data = meta?.data as Color
+                const newDataSource = [...dataSource]
+                const itemNew = {
+                  key: data.id!,
+                  ...data
+                } as TableDataType<ColorTableDataType>
+                newDataSource.unshift(itemNew)
+                setDataSource(newDataSource)
+                message.success('Success!', 1)
+              }
+            })
+          }}
+        />
+      )}
     </>
   )
 }

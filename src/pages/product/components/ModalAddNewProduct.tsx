@@ -10,6 +10,7 @@ import {
   Typography
 } from 'antd'
 import React, { memo, useEffect, useState } from 'react'
+import { defaultRequestBody } from '~/api/client'
 import ColorAPI from '~/api/services/ColorAPI'
 import { Color, Product } from '~/typing'
 import DayJS from '~/utils/date-formatter'
@@ -32,9 +33,9 @@ const ModalAddNewProduct: React.FC<Props> = ({
   console.log('Load AddNewProduct...')
 
   useEffect(() => {
-    ColorAPI.getAllColors().then((data) => {
+    ColorAPI.getItems(defaultRequestBody).then((data) => {
       if (data?.success) {
-        const _colors = data.data as Color[]
+        const _colors = data.data as Product[]
         setColors(_colors)
       }
     })
@@ -114,7 +115,7 @@ const ModalAddNewProduct: React.FC<Props> = ({
                 options={colors.map((item) => {
                   return {
                     label: item.nameColor,
-                    value: item.colorID,
+                    value: item.id,
                     key: item.hexColor
                   }
                 })}

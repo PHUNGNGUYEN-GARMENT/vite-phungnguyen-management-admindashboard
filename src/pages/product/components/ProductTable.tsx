@@ -72,7 +72,7 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
     dataSource,
     setDataSource,
     handleStartEditingRow,
-    handleSaveEditingRow,
+    handleStartSaveEditingRow,
     handleCancelEditingRow,
     handleStartDeleteRow,
     handleDeleteRow,
@@ -110,7 +110,7 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
             <Button
               type='primary'
               onClick={() =>
-                handleSaveEditingRow(record.id!, (row: Product) => {
+                handleStartSaveEditingRow(record.id!, (row: Product) => {
                   handleUpdateItem(record.id!, row, (meta) => {
                     if (meta.success) {
                       message.success('Updated!')

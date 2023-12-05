@@ -1,4 +1,5 @@
 import { Form } from 'antd'
+import { Color as AntColor } from 'antd/es/color-picker'
 import { useState } from 'react'
 import { Color } from '~/typing'
 
@@ -47,7 +48,9 @@ export default function useColorList() {
     onSuccess: (data: Color) => void
   ) => {
     try {
-      const row = (await form.validateFields()) as Color
+      const hexColor: AntColor = await form.getFieldValue(`hexColor/${key}`)
+      const nameColor: string = await form.getFieldValue(`nameColor/${key}`)
+      const row: Color = { nameColor, hexColor: hexColor.toHexString() }
       const newData = [...dataSource]
       const index = newData.findIndex((item) => key === item.id)
       if (index > -1) {

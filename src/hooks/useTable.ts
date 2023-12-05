@@ -64,7 +64,7 @@ export default function useTable<T>(initData: TableDataType<T>[]) {
   }
 
   // Save editing row
-  async function handleSaveEditingRow(
+  async function handleStartSaveEditingRow(
     key: React.Key,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onSave?: (row: any) => void
@@ -111,6 +111,6 @@ export default function useTable<T>(initData: TableDataType<T>[]) {
     handleDeleteRow,
     handleStartDeleteRow,
     handleCancelDeleteRow,
-    handleSaveEditingRow
+    handleStartSaveEditingRow
   }
 }
