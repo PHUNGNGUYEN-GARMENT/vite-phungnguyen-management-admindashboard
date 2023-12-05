@@ -1,66 +1,106 @@
-import client, { ResponseDataType } from '~/api/client'
+import client, { RequestBodyType, ResponseDataType } from '~/api/client'
 import { SewingLineDelivery } from '~/typing'
 import { errorFormatter } from '~/utils/promise-formatter'
 
-const PATH_API = 'sewing-line-deliveries'
+const NAMESPACE = 'sewing-line-deliveries'
 
 export default {
-  getAlls: async (): Promise<ResponseDataType | undefined> => {
+  getItems: async (
+    bodyRequest: RequestBodyType
+  ): Promise<ResponseDataType | undefined> => {
     return await client
-      .post(`${PATH_API}/find`)
+      .post(`${NAMESPACE}/find`, {
+        ...bodyRequest
+      })
       .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
         return res.data
       })
       .catch(function (error) {
         errorFormatter(error)
       })
   },
-  createNew: async (
-    sewingLine: string
+  createNewItem: async (
+    item: SewingLineDelivery
+  ): Promise<ResponseDataType | undefined> => {
+    return await client
+      .post(`${NAMESPACE}`, {
+        name: item.name,
+        status: item.status
+      })
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  getItemByID: async (id: number): Promise<ResponseDataType | undefined> => {
+    return client
+      .get(`${NAMESPACE}/id`, {
+        params: {
+          id: id
+        }
+      })
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  getItemByCode: async (
+    name: string
   ): Promise<ResponseDataType | undefined> => {
     return client
-      .post(`${PATH_API}`, {
-        sewingLine: sewingLine
+      .get(`${NAMESPACE}/name`, {
+        params: {
+          name: name
+        }
       })
       .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
         return res.data
       })
       .catch(function (error) {
         errorFormatter(error)
       })
   },
-  getItem: async (id: number): Promise<ResponseDataType | undefined> => {
-    return client
-      .get(`${PATH_API}/${id}`)
-      .then((res) => {
-        return res.data
-      })
-      .catch(function (error) {
-        errorFormatter(error)
-      })
-  },
-  updateItem: async (
+  updateItemByID: async (
+    id: number,
     item: SewingLineDelivery
   ): Promise<ResponseDataType | undefined> => {
     return client
-      .put(`${PATH_API}/${item.sewingLineDeliveryID}`, {
-        sewingLine: item.sewingLine,
-        createdAt: item.createdAt,
-        updatedAt: item.updatedAt,
-        orderNumber: item.orderNumber
+      .put(`${NAMESPACE}/${id}`, {
+        ...item
       })
       .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
         return res.data
       })
       .catch(function (error) {
         errorFormatter(error)
       })
   },
-  deleteItem: async (id: number): Promise<ResponseDataType | undefined> => {
+  deleteItemByID: async (id: number): Promise<ResponseDataType | undefined> => {
     return client
-      .delete(`${PATH_API}/${id}`)
+      .delete(`${NAMESPACE}/${id}`)
       .then((res) => {
-        // console.log(JSON.stringify(res.data))
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
         return res.data
       })
       .catch(function (error) {

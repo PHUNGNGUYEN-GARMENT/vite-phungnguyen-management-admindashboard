@@ -47,10 +47,10 @@ export type SideType = {
   key: string
   name: string
   path: string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   component:
     | React.LazyExoticComponent<() => JSX.Element>
     | React.ReactNode
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     | any
   isGroup?: boolean
   icon: string
