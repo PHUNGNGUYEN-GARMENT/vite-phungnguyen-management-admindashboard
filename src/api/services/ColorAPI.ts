@@ -77,13 +77,13 @@ export default {
   },
   updateItemByID: async (
     id: number,
-    product: Color
+    item: Color
   ): Promise<ResponseDataType | undefined> => {
     return client
       .put(`${NAMESPACE}/${id}`, {
-        nameColor: product.nameColor,
-        hexColor: product.hexColor,
-        status: product.status
+        nameColor: item.nameColor,
+        hexColor: item.hexColor,
+        status: item.status
       })
       .then((res) => {
         if (res.data) {
