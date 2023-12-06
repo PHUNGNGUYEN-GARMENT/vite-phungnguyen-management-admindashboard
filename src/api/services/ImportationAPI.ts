@@ -63,11 +63,7 @@ export default {
     productID: number
   ): Promise<ResponseDataType | undefined> => {
     return client
-      .get(`${NAMESPACE}/productID`, {
-        params: {
-          productID: productID
-        }
-      })
+      .get(`${NAMESPACE}/productID/${productID}`)
       .then((res) => {
         if (res.data) {
           return res.data as ResponseDataType
@@ -83,7 +79,25 @@ export default {
     item: Importation
   ): Promise<ResponseDataType | undefined> => {
     return client
-      .put(`${NAMESPACE}/${id}`, {
+      .put(`${NAMESPACE}/id/${id}`, {
+        ...item
+      })
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  updateItemByProductID: async (
+    productID: number,
+    item: Importation
+  ): Promise<ResponseDataType | undefined> => {
+    return client
+      .put(`${NAMESPACE}/productID/${productID}`, {
         ...item
       })
       .then((res) => {

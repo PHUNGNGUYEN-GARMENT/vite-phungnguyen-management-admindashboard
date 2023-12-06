@@ -133,7 +133,6 @@ const ImportationTable: React.FC<Props> = ({ ...props }) => {
               type='primary'
               disabled={isDisableEditing}
               onClick={() => {
-                form.setFields([{ name: 'name', value: record.name }])
                 handleStartEditingRow(record)
               }}
             >

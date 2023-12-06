@@ -87,12 +87,15 @@ export default function useImportation() {
     onSuccess?: (data: ResponseDataType) => void
   ) => {
     setLoading(true)
-    await ImportationAPI.updateItemByID(id, itemToUpdate)
+    ImportationAPI.updateItemByID(id, itemToUpdate)
       .then((meta) => {
         if (meta?.success) {
           setLoading(true)
           onSuccess?.(meta)
         }
+      })
+      .catch((err) => {
+        console.log('>>>', err)
       })
       .finally(() => {
         setLoading(false)

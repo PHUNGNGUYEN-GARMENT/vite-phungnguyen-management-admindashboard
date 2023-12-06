@@ -15,14 +15,14 @@ import {
 import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { RequestBodyType, defaultRequestBody } from '~/api/client'
+import ImportationAPI from '~/api/services/ImportationAPI'
+import ProductAPI from '~/api/services/ProductAPI'
+import useList, { ListDataType } from '~/hooks/useList'
 import { setAdminAction, setRoleAction } from '~/store/actions-creator'
 import { RootState } from '~/store/store'
-import { Importation } from '~/typing'
+import { Importation, Product } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import useImportation from '../hooks/useImportation'
-import useImportationList from '../hooks/useImportationList'
-import { ImportationTableDataType } from './ImportationTable'
-import useProduct from '~/pages/product/hooks/useProduct'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
@@ -42,7 +42,6 @@ const ImportationList: React.FC<Props> = ({ ...props }) => {
     handleDeleteItem,
     handleSorted
   } = useImportation()
-  const { getProductList } = useProduct()
   const {
     form,
     editingKey,
@@ -51,28 +50,58 @@ const ImportationList: React.FC<Props> = ({ ...props }) => {
     dataSource,
     setDataSource,
     isEditing,
-    handleStartDelete,
+    handleStartDeleteItem,
     handleStartSaveEditing
-  } = useImportationList()
+  } = useList<Importation>([])
   const user = useSelector((state: RootState) => state.user)
   const dispatch = useDispatch()
   const { message } = AntApp.useApp()
   console.log('Group page loading...')
 
   useEffect(() => {
-    getDataList(defaultRequestBody, (meta) => {
-      if (meta?.success) {
-        setDataSource(
-          meta.data.map((item: Importation) => {
-            return {
-              ...item,
-              key: item.id
-            } as ImportationTableDataType
-          })
-        )
+    dispatch(setRoleAction('importation'))
+
+    ProductAPI.getItems(defaultRequestBody).then((metaProduct) => {
+      if (metaProduct?.success) {
+        const products: Product[] = metaProduct.data
+        ImportationAPI.getItems(defaultRequestBody).then((metaImportation) => {
+          if (metaImportation?.success) {
+            const importations: Importation[] = metaImportation.data
+            if (importations.length > 0) {
+              setDataSource(
+                products.map((i) => {
+                  const productImportation: Importation | undefined =
+                    importations.find((j) => j.productID === i.id)
+
+                  let newImportation: Importation = {}
+                  if (productImportation) {
+                    newImportation = productImportation
+                  }
+                  return {
+                    data: {
+                      ...newImportation,
+                      product: i
+                    },
+                    key: i.id!
+                  }
+                })
+              )
+            } else {
+              setDataSource(
+                products.map((i) => {
+                  return {
+                    data: {
+                      product: i
+                    } as Importation,
+                    key: i.id!
+                  }
+                })
+              )
+            }
+          }
+        })
       }
     })
-    dispatch(setRoleAction('importation'))
   }, [])
 
   return (
@@ -101,7 +130,7 @@ const ImportationList: React.FC<Props> = ({ ...props }) => {
                         return {
                           ...item,
                           key: item.id
-                        } as ImportationTableDataType
+                        } as ListDataType<Importation>
                       })
                     )
                   }
@@ -153,7 +182,7 @@ const ImportationList: React.FC<Props> = ({ ...props }) => {
                           return {
                             ...item,
                             key: item.id
-                          } as ImportationTableDataType
+                          } as ListDataType<Importation>
                         })
                       )
                     }
@@ -173,7 +202,7 @@ const ImportationList: React.FC<Props> = ({ ...props }) => {
                           return {
                             ...item,
                             key: item.id
-                          } as ImportationTableDataType
+                          } as ListDataType<Importation>
                         })
                       )
                       message.success('Reloaded!')
@@ -187,7 +216,6 @@ const ImportationList: React.FC<Props> = ({ ...props }) => {
               </Button>
             </Flex>
           </Flex>
-
           <List
             className={props.className}
             itemLayout='vertical'
@@ -212,7 +240,7 @@ const ImportationList: React.FC<Props> = ({ ...props }) => {
                         return {
                           ...item,
                           key: item.id
-                        } as ImportationTableDataType
+                        } as ListDataType<Importation>
                       })
                     )
                   }
@@ -225,7 +253,7 @@ const ImportationList: React.FC<Props> = ({ ...props }) => {
             loading={loading}
             dataSource={dataSource}
             renderItem={(item) => (
-              <List.Item key={item.id} className='mb-5 rounded-sm bg-white'>
+              <List.Item key={item.key} className='mb-5 rounded-sm bg-white'>
                 <Flex vertical className='w-full' gap={10}>
                   <Flex align='center' justify='space-between'>
                     <Flex gap={10} align='center' className='relative'>
@@ -234,10 +262,10 @@ const ImportationList: React.FC<Props> = ({ ...props }) => {
                         className='m-0 h-fit p-0'
                         level={4}
                       >
-                        {item.product?.productCode}
+                        {item.data.product?.productCode}
                       </Typography.Title>
 
-                      {item.product?.status === 'deleted' && (
+                      {item.data.product?.status === 'deleted' && (
                         <Typography.Title
                           code
                           className='m-0 p-0'
@@ -249,24 +277,66 @@ const ImportationList: React.FC<Props> = ({ ...props }) => {
                       )}
                     </Flex>
 
-                    {isEditing(item.id!) ? (
+                    {isEditing(item.key!) ? (
                       <Flex gap={5}>
                         <Button
                           type='primary'
-                          onClick={() =>
-                            handleStartSaveEditing(item.id!, (itemToSave) => {
-                              console.log(itemToSave)
-                              handleUpdateItem(
-                                Number(item.id),
-                                itemToSave,
-                                (meta) => {
-                                  if (meta.success) {
-                                    message.success('Updated!')
-                                  }
-                                }
+                          onClick={async () => {
+                            setLoading(true)
+                            const row = await form.validateFields()
+                            console.log({
+                              ...row,
+                              date: DayJS(row.dateImported).format(
+                                DatePattern.display
                               )
                             })
-                          }
+                            const itemFound =
+                              await ImportationAPI.getItemByProductID(
+                                Number(item.key)
+                              )
+                            if (itemFound) {
+                              const importationFound: Importation =
+                                itemFound.data
+                              ImportationAPI.updateItemByID(
+                                importationFound.id!,
+                                {
+                                  quantity: row.quantity,
+                                  dateImported: DayJS(row.dateImported).format(
+                                    DatePattern.iso8601
+                                  )
+                                }
+                              )
+                                .then((meta) => {
+                                  if (meta?.success) {
+                                    message.success('Updated')
+                                  }
+                                })
+                                .finally(() => {
+                                  setLoading(false)
+                                })
+                            } else {
+                              ImportationAPI.createNewItem({
+                                quantity: row.quantity,
+                                dateImported: DayJS(row.dateImported).format(
+                                  DatePattern.iso8601
+                                ),
+                                productID: Number(item.key),
+                                status: 'active'
+                              })
+                                .then((meta) => {
+                                  if (meta?.success) {
+                                    const importationNew: Importation =
+                                      meta.data
+                                    console.log('Importation: ', importationNew)
+                                  }
+                                })
+                                .finally(() => {
+                                  setLoading(false)
+                                  message.success('Created')
+                                })
+                            }
+                            setLoading(false)
+                          }}
                         >
                           Save
                         </Button>
@@ -280,7 +350,7 @@ const ImportationList: React.FC<Props> = ({ ...props }) => {
                           }}
                           placement='topLeft'
                           onConfirm={() => {
-                            form.setFieldValue('quantity', item.quantity)
+                            form.setFieldValue('quantity', item.data.quantity)
                             setEditingKey('')
                           }}
                         >
@@ -294,7 +364,7 @@ const ImportationList: React.FC<Props> = ({ ...props }) => {
                             type='primary'
                             disabled={editingKey !== ''}
                             onClick={() => {
-                              setEditingKey(item.id!)
+                              setEditingKey(item.key!)
                             }}
                           >
                             Edit
@@ -306,23 +376,23 @@ const ImportationList: React.FC<Props> = ({ ...props }) => {
                             onCancel={() => setDeleteKey('')}
                             onConfirm={() => {
                               setLoading(true)
-                              handleStartDelete(item.id!, (productToDelete) => {
-                                handleDeleteItem(
-                                  productToDelete.id!,
-                                  (meta) => {
-                                    if (meta.success) {
-                                      setLoading(false)
-                                      message.success('Deleted!')
-                                    }
-                                  }
-                                )
-                              })
+                              // handleStartDelete(item.id!, (productToDelete) => {
+                              //   handleDeleteItem(
+                              //     productToDelete.id!,
+                              //     (meta) => {
+                              //       if (meta.success) {
+                              //         setLoading(false)
+                              //         message.success('Deleted!')
+                              //       }
+                              //     }
+                              //   )
+                              // })
                             }}
                           >
                             <Button
                               type='dashed'
                               disabled={editingKey !== ''}
-                              onClick={() => setDeleteKey(item.id!)}
+                              onClick={() => setDeleteKey(item.key!)}
                             >
                               Delete
                             </Button>
@@ -342,9 +412,9 @@ const ImportationList: React.FC<Props> = ({ ...props }) => {
                     <Flex className='w-full' align='center' justify='start'>
                       <ColorPicker
                         className='w-full'
-                        defaultValue={item.product?.productCode}
+                        defaultValue={item.data.product?.productColor?.hexColor}
                         size='middle'
-                        disabled={editingKey !== item.id}
+                        disabled
                         showText
                       />
                     </Flex>
@@ -357,19 +427,47 @@ const ImportationList: React.FC<Props> = ({ ...props }) => {
                     >
                       Lô nhập
                     </Typography.Text>
-                    <Flex className='w-full' align='center' justify='start'>
-                      <Form.Item
-                        name={`quantity/${item.id}`}
-                        initialValue={item.quantity}
-                        className='m-0 w-full'
-                      >
-                        <InputNumber
-                          className='w-full pr-12'
+                    <Flex
+                      className='w-full gap-2'
+                      align='center'
+                      justify='start'
+                    >
+                      {isEditing(item.key) ? (
+                        <Form.Item
+                          name='quantity'
+                          initialValue={item.data.quantity}
+                          className='m-0 w-full'
+                          rules={[
+                            {
+                              required: true,
+                              message: `Please Input this field!`
+                            }
+                          ]}
+                        >
+                          <InputNumber
+                            className='relative w-full'
+                            size='middle'
+                            placeholder='Số lượng'
+                            readOnly={editingKey !== item.key}
+                          />
+                        </Form.Item>
+                      ) : (
+                        <Input
+                          name='quantity'
+                          defaultValue={item.data.quantity}
+                          className='relative w-full'
                           size='middle'
-                          readOnly={editingKey !== item.id}
-                          suffix={<span>Kiện</span>}
+                          placeholder='Số lượng'
+                          readOnly
                         />
-                      </Form.Item>
+                      )}
+                      <Input
+                        name='quantity-placeholder'
+                        className='w-16'
+                        size='middle'
+                        disabled
+                        defaultValue='Kiện'
+                      />
                     </Flex>
                   </Flex>
 
@@ -380,11 +478,11 @@ const ImportationList: React.FC<Props> = ({ ...props }) => {
                     >
                       Ngày nhập
                     </Typography.Text>
-                    {isEditing(item.id!) ? (
+                    {isEditing(item.key!) ? (
                       <Form.Item
                         className='m-0 w-full'
-                        name='dateOutputFCR'
-                        initialValue={DayJS(item.dateImported)}
+                        initialValue={DayJS(item.data.dateImported)}
+                        name='dateImported'
                       >
                         <DatePicker
                           className='w-full'
@@ -393,12 +491,16 @@ const ImportationList: React.FC<Props> = ({ ...props }) => {
                       </Form.Item>
                     ) : (
                       <Input
-                        name='dateOutputFCR'
+                        name='dateImported'
                         readOnly
                         className='zoom-in-0'
-                        value={DayJS(item.dateImported).format(
-                          DatePattern.display
-                        )}
+                        placeholder='Ngày nhập khẩu'
+                        defaultValue={
+                          item.data.dateImported &&
+                          DayJS(item.data.dateImported).format(
+                            DatePattern.display
+                          )
+                        }
                       />
                     )}
                   </Flex>
@@ -416,7 +518,7 @@ const ImportationList: React.FC<Props> = ({ ...props }) => {
                         <Input
                           name='createdAt'
                           className='w-full'
-                          defaultValue={DayJS(item.createdAt).format(
+                          defaultValue={DayJS(item.data.createdAt).format(
                             DatePattern.display
                           )}
                           readOnly
@@ -433,7 +535,7 @@ const ImportationList: React.FC<Props> = ({ ...props }) => {
                         <Input
                           name='updatedAt'
                           className='w-full'
-                          defaultValue={DayJS(item.updatedAt).format(
+                          defaultValue={DayJS(item.data.updatedAt).format(
                             DatePattern.display
                           )}
                           readOnly
