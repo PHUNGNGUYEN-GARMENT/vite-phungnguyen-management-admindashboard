@@ -66,7 +66,6 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
   useEffect(() => {
     getProductList(defaultRequestBody, (meta) => {
       if (meta?.success) {
-        console.log(meta)
         setDataSource(
           meta.data.map((item: Product) => {
             return {
