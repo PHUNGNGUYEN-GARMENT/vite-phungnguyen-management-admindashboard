@@ -1,48 +1,46 @@
 import {
   App as AntApp,
   Button,
+  ColorPicker,
+  DatePicker,
   Flex,
   Form,
   Input,
+  InputNumber,
   List,
   Popconfirm,
   Switch,
   Typography
 } from 'antd'
-import { Plus } from 'lucide-react'
 import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { RequestBodyType, defaultRequestBody } from '~/api/client'
-import { setAdminAction } from '~/store/actions-creator'
+import { setAdminAction, setRoleAction } from '~/store/actions-creator'
 import { RootState } from '~/store/store'
-import { SewingLineDelivery } from '~/typing'
+import { Importation } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
-import useSewingLineDelivery from '../hooks/useImportation'
-import useSewingLineDeliveryList from '../hooks/useImportationList'
-import { SewingLineDeliveryTableDataType } from './ImportationTable'
-import ModalAddNewSewingLineDelivery from './ModalAddNew'
+import useImportation from '../hooks/useImportation'
+import useImportationList from '../hooks/useImportationList'
+import { ImportationTableDataType } from './ImportationTable'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 const { Search } = Input
 
-const SewingLineDeliveryList: React.FC<Props> = ({ ...props }) => {
+const ImportationList: React.FC<Props> = ({ ...props }) => {
   const {
     metaData,
     loading,
     setLoading,
-    openModal,
-    setOpenModal,
     searchText,
     setSearchText,
     dateCreation,
     setDateCreation,
-    handleAddNew,
     getDataList,
     handleUpdateItem,
     handleDeleteItem,
     handleSorted
-  } = useSewingLineDelivery()
+  } = useImportation()
   const {
     form,
     editingKey,
@@ -53,7 +51,7 @@ const SewingLineDeliveryList: React.FC<Props> = ({ ...props }) => {
     isEditing,
     handleStartDelete,
     handleStartSaveEditing
-  } = useSewingLineDeliveryList()
+  } = useImportationList()
   const user = useSelector((state: RootState) => state.user)
   const dispatch = useDispatch()
   const { message } = AntApp.useApp()
@@ -63,15 +61,16 @@ const SewingLineDeliveryList: React.FC<Props> = ({ ...props }) => {
     getDataList(defaultRequestBody, (meta) => {
       if (meta?.success) {
         setDataSource(
-          meta.data.map((item: SewingLineDelivery) => {
+          meta.data.map((item: Importation) => {
             return {
               ...item,
               key: item.id
-            } as SewingLineDeliveryTableDataType
+            } as ImportationTableDataType
           })
         )
       }
     })
+    dispatch(setRoleAction('importation'))
   }, [])
 
   return (
@@ -96,11 +95,11 @@ const SewingLineDeliveryList: React.FC<Props> = ({ ...props }) => {
                 getDataList(body, (meta) => {
                   if (meta?.success) {
                     setDataSource(
-                      meta.data.map((item: SewingLineDelivery) => {
+                      meta.data.map((item: Importation) => {
                         return {
                           ...item,
                           key: item.id
-                        } as SewingLineDeliveryTableDataType
+                        } as ImportationTableDataType
                       })
                     )
                   }
@@ -112,15 +111,26 @@ const SewingLineDeliveryList: React.FC<Props> = ({ ...props }) => {
           />
           <Flex justify='space-between' align='center'>
             <Flex gap={10} align='center'>
-              <Switch
-                checkedChildren='Admin'
-                unCheckedChildren='Admin'
-                defaultChecked={false}
-                checked={user.isAdmin}
-                onChange={(val) => {
-                  dispatch(setAdminAction(val))
-                }}
-              />
+              <Flex vertical gap={10}>
+                <Switch
+                  checkedChildren='Admin'
+                  unCheckedChildren='Admin'
+                  defaultChecked={false}
+                  checked={user.isAdmin}
+                  onChange={(val) => {
+                    dispatch(setAdminAction(val))
+                  }}
+                />
+                <Switch
+                  checkedChildren='Access'
+                  unCheckedChildren='Access'
+                  defaultChecked={false}
+                  checked={user.role === 'importation'}
+                  onChange={(val) => {
+                    dispatch(setRoleAction(val ? 'importation' : 'admin'))
+                  }}
+                />
+              </Flex>
               <Switch
                 checkedChildren='Date Creation'
                 unCheckedChildren='Date Creation'
@@ -137,11 +147,11 @@ const SewingLineDeliveryList: React.FC<Props> = ({ ...props }) => {
                   handleSorted(val ? 'asc' : 'desc', (meta) => {
                     if (meta.success) {
                       setDataSource(
-                        meta.data.map((item: SewingLineDelivery) => {
+                        meta.data.map((item: Importation) => {
                           return {
                             ...item,
                             key: item.id
-                          } as SewingLineDeliveryTableDataType
+                          } as ImportationTableDataType
                         })
                       )
                     }
@@ -157,11 +167,11 @@ const SewingLineDeliveryList: React.FC<Props> = ({ ...props }) => {
                   getDataList(defaultRequestBody, (meta) => {
                     if (meta?.success) {
                       setDataSource(
-                        meta.data.map((item: SewingLineDelivery) => {
+                        meta.data.map((item: Importation) => {
                           return {
                             ...item,
                             key: item.id
-                          } as SewingLineDeliveryTableDataType
+                          } as ImportationTableDataType
                         })
                       )
                       message.success('Reloaded!')
@@ -173,19 +183,6 @@ const SewingLineDeliveryList: React.FC<Props> = ({ ...props }) => {
               >
                 Reset
               </Button>
-
-              {user.isAdmin && (
-                <Button
-                  onClick={() => {
-                    setOpenModal(true)
-                  }}
-                  className='flex items-center'
-                  type='primary'
-                  icon={<Plus size={20} />}
-                >
-                  New
-                </Button>
-              )}
             </Flex>
           </Flex>
 
@@ -202,18 +199,18 @@ const SewingLineDeliveryList: React.FC<Props> = ({ ...props }) => {
                     pageSize: 5
                   },
                   search: {
-                    field: 'name',
+                    field: 'id',
                     term: searchText
                   }
                 }
                 getDataList(body, (meta) => {
                   if (meta?.success) {
                     setDataSource(
-                      meta.data.map((item: SewingLineDelivery) => {
+                      meta.data.map((item: Importation) => {
                         return {
                           ...item,
                           key: item.id
-                        } as SewingLineDeliveryTableDataType
+                        } as ImportationTableDataType
                       })
                     )
                   }
@@ -229,19 +226,26 @@ const SewingLineDeliveryList: React.FC<Props> = ({ ...props }) => {
               <List.Item key={item.id} className='mb-5 rounded-sm bg-white'>
                 <Flex vertical className='w-full' gap={10}>
                   <Flex align='center' justify='space-between'>
-                    {isEditing(item.id!) && user.isAdmin ? (
-                      <Form.Item name='name' initialValue={item.name}>
-                        <Input size='large' />
-                      </Form.Item>
-                    ) : (
+                    <Flex gap={10} align='center' className='relative'>
                       <Typography.Title
                         copyable
                         className='m-0 h-fit p-0'
                         level={4}
                       >
-                        {item.name}
+                        {item.product?.productCode}
                       </Typography.Title>
-                    )}
+
+                      {item.product?.status === 'deleted' && (
+                        <Typography.Title
+                          code
+                          className='m-0 p-0'
+                          type='danger'
+                          level={5}
+                        >
+                          Deleted
+                        </Typography.Title>
+                      )}
+                    </Flex>
 
                     {isEditing(item.id!) ? (
                       <Flex gap={5}>
@@ -274,6 +278,7 @@ const SewingLineDeliveryList: React.FC<Props> = ({ ...props }) => {
                           }}
                           placement='topLeft'
                           onConfirm={() => {
+                            form.setFieldValue('quantity', item.quantity)
                             setEditingKey('')
                           }}
                         >
@@ -282,7 +287,7 @@ const SewingLineDeliveryList: React.FC<Props> = ({ ...props }) => {
                       </Flex>
                     ) : (
                       <Flex gap={10}>
-                        {user.isAdmin && (
+                        {(user.isAdmin || user.role === 'importation') && (
                           <Button
                             type='primary'
                             disabled={editingKey !== ''}
@@ -324,39 +329,78 @@ const SewingLineDeliveryList: React.FC<Props> = ({ ...props }) => {
                       </Flex>
                     )}
                   </Flex>
-                  {/* <Flex align='center' justify='start' gap={5}>
+
+                  <Flex align='center' justify='start' gap={5}>
                     <Typography.Text
                       type='secondary'
                       className='w-40 font-medium'
                     >
                       Mã màu
                     </Typography.Text>
-                    {isEditing(item.id!) ? (
+                    <Flex className='w-full' align='center' justify='start'>
+                      <ColorPicker
+                        className='w-full'
+                        defaultValue={item.product?.productCode}
+                        size='middle'
+                        disabled={editingKey !== item.id}
+                        showText
+                      />
+                    </Flex>
+                  </Flex>
+
+                  <Flex align='center' justify='start' gap={5}>
+                    <Typography.Text
+                      type='secondary'
+                      className='w-40 font-medium'
+                    >
+                      Lô nhập
+                    </Typography.Text>
+                    <Flex className='w-full' align='center' justify='start'>
                       <Form.Item
-                        name={`hexColor/${item.id!}`}
-                        initialValue={item.hexColor}
+                        name={`quantity/${item.id}`}
+                        initialValue={item.quantity}
                         className='m-0 w-full'
                       >
-                        <ColorPicker
+                        <InputNumber
+                          className='w-full pr-12'
                           size='middle'
+                          readOnly={editingKey !== item.id}
+                          suffix={<span>Kiện</span>}
+                        />
+                      </Form.Item>
+                    </Flex>
+                  </Flex>
+
+                  <Flex align='center' justify='start' gap={5}>
+                    <Typography.Text
+                      type='secondary'
+                      className='w-40 font-medium'
+                    >
+                      Ngày nhập
+                    </Typography.Text>
+                    {isEditing(item.id!) ? (
+                      <Form.Item
+                        className='m-0 w-full'
+                        name='dateOutputFCR'
+                        initialValue={DayJS(item.dateImported)}
+                      >
+                        <DatePicker
                           className='w-full'
-                          defaultFormat='hex'
-                          disabled={editingKey !== item.id}
-                          showText
+                          format={DatePattern.display}
                         />
                       </Form.Item>
                     ) : (
-                      <Flex className='w-full' align='center' justify='start'>
-                        <ColorPicker
-                          className='w-full'
-                          defaultValue={item.hexColor}
-                          size='middle'
-                          disabled={editingKey !== item.id}
-                          showText
-                        />
-                      </Flex>
+                      <Input
+                        name='dateOutputFCR'
+                        readOnly
+                        className='zoom-in-0'
+                        value={DayJS(item.dateImported).format(
+                          DatePattern.display
+                        )}
+                      />
                     )}
-                  </Flex> */}
+                  </Flex>
+
                   {dateCreation && (
                     <Flex vertical gap={10}>
                       <Flex align='center' justify='start' gap={5}>
@@ -401,26 +445,8 @@ const SewingLineDeliveryList: React.FC<Props> = ({ ...props }) => {
           />
         </Flex>
       </Form>
-      {openModal && (
-        <ModalAddNewSewingLineDelivery
-          openModal={openModal}
-          setOpenModal={setOpenModal}
-          onAddNew={(_form) => {
-            handleAddNew(_form, (meta) => {
-              if (meta.success) {
-                const data = meta?.data as SewingLineDelivery
-                console.log(data)
-                const newDataSource = [...dataSource]
-                newDataSource.unshift(data)
-                setDataSource(newDataSource)
-                message.success('Success!', 1)
-              }
-            })
-          }}
-        />
-      )}
     </>
   )
 }
 
-export default SewingLineDeliveryList
+export default ImportationList

@@ -1,4 +1,5 @@
 export type Role =
+  | 'admin'
   | 'importation' // Xuất nhập khẩu
   | 'sample_sewing' // May mẫu
   | 'fabric_warehouse' // Kho vải
@@ -138,22 +139,15 @@ export type NotionAccessory = {
 }
 
 export type Importation = {
-  importationID: number
-  productID: number
-  dateImported: string
-  createdAt: string
-  updatedAt: string
-  orderNumber: number
-}
-
-export type ImportedLot = {
-  productID: number
-  importationID: number
-  quantity: number
-  unit: string
-  createdAt: string
-  updatedAt: string
-  orderNumber: number
+  id?: number
+  productID?: number
+  dateImported?: string
+  quantity?: number
+  status?: ItemStatusType
+  product?: Product
+  createdAt?: string
+  updatedAt?: string
+  orderNumber?: number
 }
 
 export type SampleSewing = {

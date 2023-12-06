@@ -1,10 +1,10 @@
 import { Form } from 'antd'
 import { useState } from 'react'
-import { SewingLineDelivery } from '~/typing'
+import { Importation } from '~/typing'
 
-export default function useSewingLineDeliveryList() {
+export default function useImportationList() {
   const [form] = Form.useForm()
-  const [dataSource, setDataSource] = useState<SewingLineDelivery[]>([])
+  const [dataSource, setDataSource] = useState<Importation[]>([])
   const [editingKey, setEditingKey] = useState<React.Key>('')
   const [deleteKey, setDeleteKey] = useState<React.Key>('')
   const isEditing = (key: React.Key) => key === editingKey
@@ -20,7 +20,7 @@ export default function useSewingLineDeliveryList() {
 
   const handleStartDelete = (
     key: React.Key,
-    onSuccess: (data: SewingLineDelivery) => void
+    onSuccess: (data: Importation) => void
   ) => {
     const itemFound = dataSource.find((item) => item.id === key)
     if (itemFound) {
@@ -44,10 +44,10 @@ export default function useSewingLineDeliveryList() {
 
   const handleStartSaveEditing = async (
     key: React.Key,
-    onSuccess: (data: SewingLineDelivery) => void
+    onSuccess: (data: Importation) => void
   ) => {
     try {
-      const row: SewingLineDelivery = await form.validateFields()
+      const row: Importation = await form.validateFields()
       const newData = [...dataSource]
       const index = newData.findIndex((item) => key === item.id)
       if (index > -1) {
@@ -72,7 +72,7 @@ export default function useSewingLineDeliveryList() {
     }
   }
 
-  const handleAddNewItemData = (item: SewingLineDelivery) => {
+  const handleAddNewItemData = (item: Importation) => {
     console.log('Handle AddNewItem, ', item)
   }
 

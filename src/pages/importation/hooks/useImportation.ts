@@ -5,10 +5,10 @@ import {
   ResponseDataType,
   defaultRequestBody
 } from '~/api/client'
-import SewingLineDeliveryAPI from '~/api/services/SewingLineDeliveryAPI'
-import { SewingLineDelivery, SortDirection } from '~/typing'
+import ImportationAPI from '~/api/services/ImportationAPI'
+import { Importation, SortDirection } from '~/typing'
 
-export default function useSewingLineDelivery() {
+export default function useImportation() {
   const [metaData, setMetaData] = useState<ResponseDataType>()
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [searchText, setSearchText] = useState<string>('')
@@ -16,17 +16,17 @@ export default function useSewingLineDelivery() {
   const [dateCreation, setDateCreation] = useState<boolean>(true)
 
   const handleAddNew = async (
-    form: FormInstance<SewingLineDelivery>,
+    form: FormInstance<Importation>,
     onSuccess?: (data: ResponseDataType) => void
   ) => {
     setLoading(true)
     const row = await form.validateFields()
-    const newRow: SewingLineDelivery = {
+    const newRow: Importation = {
       ...row,
       status: 'active'
     }
     console.log(row)
-    await SewingLineDeliveryAPI.createNewItem(newRow)
+    await ImportationAPI.createNewItem(newRow)
       .then((meta) => {
         setLoading(true)
         if (meta?.success) {
@@ -49,7 +49,7 @@ export default function useSewingLineDelivery() {
       ...defaultRequestBody,
       ...params
     }
-    await SewingLineDeliveryAPI.getItems(body)
+    await ImportationAPI.getItems(body)
       .then((data) => {
         console.log(data)
         if (data?.success) {
@@ -83,11 +83,11 @@ export default function useSewingLineDelivery() {
 
   const handleUpdateItem = async (
     id: number,
-    itemToUpdate: SewingLineDelivery,
+    itemToUpdate: Importation,
     onSuccess?: (data: ResponseDataType) => void
   ) => {
     setLoading(true)
-    await SewingLineDeliveryAPI.updateItemByID(id, itemToUpdate)
+    await ImportationAPI.updateItemByID(id, itemToUpdate)
       .then((meta) => {
         if (meta?.success) {
           setLoading(true)
@@ -105,7 +105,7 @@ export default function useSewingLineDelivery() {
     onSuccess?: (meta: ResponseDataType) => void
   ) => {
     setLoading(true)
-    await SewingLineDeliveryAPI.updateItemByID(id, { status: 'deleted' })
+    await ImportationAPI.updateItemByID(id, { status: 'deleted' })
       .then((meta) => {
         if (meta?.success) {
           setLoading(true)
