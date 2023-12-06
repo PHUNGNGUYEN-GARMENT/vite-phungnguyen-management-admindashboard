@@ -16,7 +16,7 @@ import { RequestBodyType, defaultRequestBody } from '~/api/client'
 import useTable from '~/hooks/useTable'
 import { setAdminAction } from '~/store/actions-creator'
 import { RootState } from '~/store/store'
-import { ItemStatusType, SewingLineDelivery } from '~/typing'
+import { ItemStatusType, Product, SewingLineDelivery } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import useImportation from '../hooks/useImportation'
 import EditableCell, { EditableTableProps } from './EditableCell'
@@ -27,13 +27,17 @@ type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>
 
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
-export type ImportationTableDataType = {
+export interface ImportationTableDataType {
   key?: React.Key
   id?: number
-  name?: string
+  productID?: number
+  dateImported?: string
+  quantity?: number
   status?: ItemStatusType
+  product?: Product
   createdAt?: string
   updatedAt?: string
+  orderNumber?: number
 }
 
 const ImportationTable: React.FC<Props> = ({ ...props }) => {

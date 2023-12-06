@@ -22,6 +22,7 @@ import DayJS, { DatePattern } from '~/utils/date-formatter'
 import useImportation from '../hooks/useImportation'
 import useImportationList from '../hooks/useImportationList'
 import { ImportationTableDataType } from './ImportationTable'
+import useProduct from '~/pages/product/hooks/useProduct'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
@@ -41,6 +42,7 @@ const ImportationList: React.FC<Props> = ({ ...props }) => {
     handleDeleteItem,
     handleSorted
   } = useImportation()
+  const { getProductList } = useProduct()
   const {
     form,
     editingKey,
