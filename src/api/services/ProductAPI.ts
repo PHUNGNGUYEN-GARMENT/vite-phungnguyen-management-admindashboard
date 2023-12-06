@@ -13,6 +13,7 @@ export default {
         ...bodyRequest
       })
       .then((res) => {
+        console.log(res)
         if (res.data) {
           return res.data as ResponseDataType
         }

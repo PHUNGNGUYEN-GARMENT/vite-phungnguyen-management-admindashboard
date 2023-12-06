@@ -18,7 +18,7 @@ import ProgressBar from '~/components/ui/ProgressBar'
 import useTable, { TableDataType } from '~/hooks/useTable'
 import { setAdminAction } from '~/store/actions-creator'
 import { RootState } from '~/store/store'
-import { Product } from '~/typing'
+import { Color, Product } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import useProduct from '../hooks/useProduct'
 import EditableCell, { EditableTableProps } from './EditableCell'
@@ -37,6 +37,7 @@ export type ProductTableDataType = {
   quantityPO?: number
   dateInputNPL?: string
   dateOutputFCR?: string
+  productColor?: Color
   progress?: {
     sewing?: number
     iron?: number

@@ -1,6 +1,7 @@
 import {
   App as AntApp,
   Button,
+  ColorPicker,
   DatePicker,
   Flex,
   Form,
@@ -65,6 +66,7 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
   useEffect(() => {
     getProductList(defaultRequestBody, (meta) => {
       if (meta?.success) {
+        console.log(meta)
         setDataSource(
           meta.data.map((item: Product) => {
             return {
@@ -323,6 +325,23 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
                         )}
                       </Flex>
                     )}
+                  </Flex>
+                  <Flex align='center' justify='start' gap={5}>
+                    <Typography.Text
+                      type='secondary'
+                      className='w-40 font-medium'
+                    >
+                      Mã màu
+                    </Typography.Text>
+                    <Flex className='w-full' align='center' justify='start'>
+                      <ColorPicker
+                        className='w-full'
+                        defaultValue={item.productColor?.hexColor}
+                        size='middle'
+                        disabled={editingKey !== item.id}
+                        showText
+                      />
+                    </Flex>
                   </Flex>
                   <Flex align='center' justify='start' gap={5}>
                     <Typography.Text

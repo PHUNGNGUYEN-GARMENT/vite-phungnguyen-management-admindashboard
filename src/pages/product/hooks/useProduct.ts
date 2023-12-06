@@ -53,6 +53,7 @@ export default function useProduct() {
     }
     await ProductAPI.getItems(body)
       .then((data) => {
+        console.log(data)
         if (data?.success) {
           setMetaData(data)
           onSuccess?.(data)

@@ -44,6 +44,8 @@ export type Product = {
   quantityPO?: number
   dateInputNPL?: string
   dateOutputFCR?: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  productColor?: any
   progress?: {
     sewing?: number
     iron?: number
