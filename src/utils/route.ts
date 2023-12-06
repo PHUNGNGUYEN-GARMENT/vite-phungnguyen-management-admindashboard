@@ -11,36 +11,23 @@ import {
   PackageSearchIcon,
   PackageSuccessIcon,
   PrintIcon,
-  SewingMachineIcon,
-  UnitIcon
+  SewingMachineIcon
 } from '~/assets/icons'
 import SampleSewingPage from '~/pages/sample-sewing/SampleSewingPage'
-// import Finish from '~/pages/Finish/Finish'
-// import ColorPage from '~/pages/color/ColorPage'
-// import Cutting from '~/pages/cutting/Cutting'
-// import Dashboard from '~/pages/dashboard/Dashboard'
-// import Delivery from '~/pages/delivery/Delivery'
-// import Group from '~/pages/group/Group'
-// import Importation from '~/pages/importation/Importation'
-// import Note from '~/pages/note/Note'
-// import Print from '~/pages/print/Print'
-// import Product from '~/pages/product/ProductPage'
-// import Sewing from '~/pages/sewing/Sewing'
-// import Unit from '~/pages/unit/Unit'
-// import ProductApi from '~/services/api/services/Product.api'
-
 const Dashboard = lazy(() => import('~/pages/dashboard/Dashboard'))
 const Cutting = lazy(() => import('~/pages/cutting/Cutting'))
 const ColorPage = lazy(() => import('~/pages/color/ColorPage'))
 const GroupPage = lazy(() => import('~/pages/group/GroupPage'))
-const ImportationPage = lazy(() => import('~/pages/importation/Importation'))
+const ImportationPage = lazy(
+  () => import('~/pages/importation/ImportationPage')
+)
 const NotePage = lazy(() => import('~/pages/note/Note'))
+const AccessoryPage = lazy(() => import('~/pages/accessory/AccessoryPage'))
 const PrintPage = lazy(() => import('~/pages/print/PrintPage'))
 const ProductPage = lazy(() => import('~/pages/product/ProductPage'))
 const SewingLineDeliveryPage = lazy(
   () => import('~/pages/sewing-line-delivery/SewingLineDeliveryPage')
 )
-const UnitPage = lazy(() => import('~/pages/unit/Unit'))
 const FinishPage = lazy(() => import('~/pages/Finish/Finish'))
 
 export type SideType = {
@@ -86,6 +73,14 @@ export const appRoutes: SideType[] = [
     name: 'May mẫu',
     path: 'sewing',
     component: SampleSewingPage,
+    isGroup: false,
+    icon: SewingMachineIcon
+  },
+  {
+    key: '14',
+    name: 'Phụ liệu',
+    path: 'accessory',
+    component: AccessoryPage,
     isGroup: false,
     icon: SewingMachineIcon
   },
@@ -144,14 +139,7 @@ export const appRoutes: SideType[] = [
   },
   {
     key: '12',
-    name: 'Đơn vị',
-    path: 'units',
-    component: UnitPage,
-    icon: UnitIcon
-  },
-  {
-    key: '13',
-    name: 'Ghi chú',
+    name: 'Ghi chú phụ liệu',
     path: 'notes',
     component: NotePage,
     icon: NoteIcon
