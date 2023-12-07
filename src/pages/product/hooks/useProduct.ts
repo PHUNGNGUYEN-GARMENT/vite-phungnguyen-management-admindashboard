@@ -20,28 +20,31 @@ export default function useProduct() {
     onSuccess?: (data: ResponseDataType) => void
   ) => {
     setLoading(true)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const row: any = await form.validateFields()
-    // setLoading(true)
-    const productConverted = {
-      ...row,
-      status: 'active',
-      dateOutputFCR: DayJS(row.dateOutputFCR).format(DatePattern.iso8601),
-      dateInputNPL: DayJS(row.dateOutputFCR).format(DatePattern.iso8601)
-    } as Product
-    console.log(productConverted)
-    await ProductAPI.createNewItem(productConverted, row.colorID)
-      .then((meta) => {
-        setLoading(true)
-        if (meta?.success) {
-          onSuccess?.(meta)
-          setOpenModal(false)
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const row: any = await form.validateFields()
+      // setLoading(true)
+      const productConverted = {
+        ...row,
+        status: 'active',
+        dateOutputFCR: DayJS(row.dateOutputFCR).format(DatePattern.iso8601),
+        dateInputNPL: DayJS(row.dateOutputFCR).format(DatePattern.iso8601)
+      } as Product
+      console.log(productConverted)
+      await ProductAPI.createNewItem(productConverted, row.colorID).then(
+        (meta) => {
+          setLoading(true)
+          if (meta?.success) {
+            onSuccess?.(meta)
+            setOpenModal(false)
+          }
         }
-      })
-      .finally(() => {
-        setLoading(false)
-      })
-    setLoading(false)
+      )
+    } catch (error) {
+      console.log('HandleAddNew with error: ', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const getProductList = async (

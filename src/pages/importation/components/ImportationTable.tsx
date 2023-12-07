@@ -54,7 +54,7 @@ const ImportationTable: React.FC<Props> = ({ ...props }) => {
     dateCreation,
     setDateCreation,
     getDataList,
-    handleUpdateItem,
+    handleSaveUpdateItem,
     handleDeleteItem,
     handleSorted
   } = useImportation()
@@ -107,8 +107,8 @@ const ImportationTable: React.FC<Props> = ({ ...props }) => {
                 handleStartSaveEditingRow(
                   record.id!,
                   (row: SewingLineDelivery) => {
-                    handleUpdateItem(record.id!, row, (meta) => {
-                      if (meta.success) {
+                    handleSaveUpdateItem(record.id!, row, (meta) => {
+                      if (meta?.success) {
                         message.success('Updated!')
                       }
                     })
@@ -145,7 +145,7 @@ const ImportationTable: React.FC<Props> = ({ ...props }) => {
                 onConfirm={() =>
                   handleDeleteRow(record.key!, (key) => {
                     handleDeleteItem(Number(key), (meta) => {
-                      if (meta.success) {
+                      if (meta?.success) {
                         message.success('Deleted!')
                       }
                     })
@@ -179,7 +179,7 @@ const ImportationTable: React.FC<Props> = ({ ...props }) => {
       render: (_, record: ImportationTableDataType) => {
         return (
           <Typography.Text copyable className='text-md flex-shrink-0 font-bold'>
-            {record.name}
+            {record.quantity}
           </Typography.Text>
         )
       }
