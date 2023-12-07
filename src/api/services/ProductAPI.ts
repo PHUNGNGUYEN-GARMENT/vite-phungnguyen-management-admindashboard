@@ -5,6 +5,55 @@ import { errorFormatter } from '~/utils/promise-formatter'
 const NAMESPACE = 'products'
 
 export default {
+  createNewItem: async (
+    product: Product
+  ): Promise<ResponseDataType | undefined> => {
+    return await client
+      .post(`${NAMESPACE}`, {
+        productCode: product.productCode,
+        quantityPO: product.quantityPO,
+        status: product.status,
+        dateInputNPL: product.dateInputNPL,
+        dateOutputFCR: product.dateOutputFCR
+      })
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  getItemByPk: async (id: number): Promise<ResponseDataType | undefined> => {
+    return client
+      .get(`${NAMESPACE}/${id}`)
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  getItemByProductCode: async (
+    productCode: string
+  ): Promise<ResponseDataType | undefined> => {
+    return client
+      .get(`${NAMESPACE}/productCode/${productCode}`)
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
   getItems: async (
     bodyRequest: RequestBodyType
   ): Promise<ResponseDataType | undefined> => {
@@ -22,76 +71,14 @@ export default {
         errorFormatter(error)
       })
   },
-  createNewItem: async (
-    product: Product,
-    colorID: number
-  ): Promise<ResponseDataType | undefined> => {
-    return await client
-      .post(`${NAMESPACE}`, {
-        productCode: product.productCode,
-        quantityPO: product.quantityPO,
-        status: product.status,
-        dateInputNPL: product.dateInputNPL,
-        dateOutputFCR: product.dateOutputFCR,
-        colorID: colorID
-      })
-      .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
-      })
-      .catch(function (error) {
-        errorFormatter(error)
-      })
-  },
-  getItemByID: async (id: number): Promise<ResponseDataType | undefined> => {
-    return client
-      .get(`${NAMESPACE}/id`, {
-        params: {
-          id: id
-        }
-      })
-      .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
-      })
-      .catch(function (error) {
-        errorFormatter(error)
-      })
-  },
-  getItemByCode: async (
-    code: string
-  ): Promise<ResponseDataType | undefined> => {
-    return client
-      .get(`${NAMESPACE}/code`, {
-        params: {
-          code: code
-        }
-      })
-      .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
-      })
-      .catch(function (error) {
-        errorFormatter(error)
-      })
-  },
-  updateItemByID: async (
+
+  updateItemByPk: async (
     id: number,
     product: Product
   ): Promise<ResponseDataType | undefined> => {
     return client
       .put(`${NAMESPACE}/${id}`, {
-        productCode: product.productCode,
-        quantityPO: product.quantityPO,
-        status: product.status,
-        dateInputNPL: product.dateInputNPL,
-        dateOutputFCR: product.dateOutputFCR
+        ...product
       })
       .then((res) => {
         if (res.data) {
@@ -103,7 +90,7 @@ export default {
         errorFormatter(error)
       })
   },
-  deleteItemByID: async (id: number): Promise<ResponseDataType | undefined> => {
+  deleteItemByPk: async (id: number): Promise<ResponseDataType | undefined> => {
     return client
       .delete(`${NAMESPACE}/${id}`)
       .then((res) => {

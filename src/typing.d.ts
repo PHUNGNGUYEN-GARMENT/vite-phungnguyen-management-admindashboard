@@ -44,7 +44,7 @@ export type Product = {
   quantityPO?: number
   dateInputNPL?: string
   dateOutputFCR?: string
-  productColor?: Color
+  productColor?: ProductColor
   progress?: {
     sewing?: number
     iron?: number
@@ -68,7 +68,11 @@ export type Color = {
 
 export type ProductColor = {
   colorID: number
+  nameColor?: string
+  hexColor?: string
   productID: number
+  productCode?: string
+  status?: ItemStatusType
   createdAt: string
   updatedAt: string
   orderNumber: number

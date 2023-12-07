@@ -18,9 +18,10 @@ import ProgressBar from '~/components/ui/ProgressBar'
 import useTable, { TableDataType } from '~/hooks/useTable'
 import { setAdminAction } from '~/store/actions-creator'
 import { RootState } from '~/store/store'
-import { Color, Product } from '~/typing'
+import { Product } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import useProduct from '../hooks/useProduct'
+import { ProductTableDataType } from '../type'
 import EditableCell, { EditableTableProps } from './EditableCell'
 import ModalAddNewProduct from './ModalAddNewProduct'
 
@@ -29,24 +30,6 @@ const { Search } = Input
 type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>
 
 interface Props extends React.HTMLAttributes<HTMLElement> {}
-
-export type ProductTableDataType = {
-  key?: React.Key
-  id?: number
-  productCode?: string
-  quantityPO?: number
-  dateInputNPL?: string
-  dateOutputFCR?: string
-  productColor?: Color
-  progress?: {
-    sewing?: number
-    iron?: number
-    check?: number
-    pack?: number
-  }
-  createdAt?: string
-  updatedAt?: string
-}
 
 const ProductTable: React.FC<Props> = ({ ...props }) => {
   const user = useSelector((state: RootState) => state.user)
@@ -111,8 +94,8 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
             <Button
               type='primary'
               onClick={() =>
-                handleStartSaveEditingRow(record.id!, (row: Product) => {
-                  handleUpdateItem(record.id!, row, (meta) => {
+                handleStartSaveEditingRow(record.key!, (row: Product) => {
+                  handleUpdateItem(Number(record.key)!, row, (meta) => {
                     if (meta.success) {
                       message.success('Updated!')
                     }

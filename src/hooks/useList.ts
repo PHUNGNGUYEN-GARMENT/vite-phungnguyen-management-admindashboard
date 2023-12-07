@@ -14,11 +14,11 @@ const useList = <T>(initValue: ListDataType<T>[]) => {
   const isEditing = (key: React.Key) => key === editingKey
   const isDelete = (key: React.Key) => key === deleteKey
 
-  const handleStartEditItem = (key: React.Key) => {
+  const handleStartEditing = (key: React.Key) => {
     setEditingKey(key)
   }
 
-  const handleStartDeleteItem = (
+  const handleStartDeleting = (
     key: React.Key,
     onSuccess: (data: ListDataType<T>) => void
   ) => {
@@ -40,11 +40,15 @@ const useList = <T>(initValue: ListDataType<T>[]) => {
     setEditingKey('')
   }
 
-  const handleConfirmCancelDelete = () => {
+  const handleConfirmCancelDeleting = () => {
     setDeleteKey('')
   }
 
-  const handleStartSaveEditing = async (key: React.Key) => {
+  const handleStartSaveEditing = async (
+    key: React.Key,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onSuccess?: (row: any) => void
+  ) => {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const row: any = await form.validateFields()
@@ -58,7 +62,7 @@ const useList = <T>(initValue: ListDataType<T>[]) => {
         })
         setDataSource(newData)
         setEditingKey('')
-
+        onSuccess?.(row)
         // After updated local data
         // We need to update on database
       } else {
@@ -85,12 +89,12 @@ const useList = <T>(initValue: ListDataType<T>[]) => {
     setDataSource,
     isEditing,
     isDelete,
-    handleStartDeleteItem,
-    handleStartEditItem,
+    handleStartDeleting,
+    handleStartEditing,
     handleCancelEditing,
     handleStartSaveEditing,
     handleConfirmCancelEditing,
-    handleConfirmCancelDelete,
+    handleConfirmCancelDeleting,
     handleAddNewItemData
   }
 }

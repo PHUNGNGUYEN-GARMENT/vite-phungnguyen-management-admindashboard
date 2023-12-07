@@ -15,7 +15,7 @@ export default function useProduct() {
   const [searchText, setSearchText] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(false)
 
-  const handleAddNew = async (
+  const handleAddNewProduct = async (
     form: FormInstance<Product>,
     onSuccess?: (data: ResponseDataType) => void
   ) => {
@@ -88,11 +88,15 @@ export default function useProduct() {
     })
   }
 
-  const handleUpdateItem = async (
+  const handleUpdateProductItem = async (
     id: number,
     productToUpdate: Product,
     onSuccess?: (data: ResponseDataType) => void
   ) => {
+    console.log({
+      id: id,
+      productToUpdate
+    })
     setLoading(true)
     await ProductAPI.updateItemByID(id, productToUpdate)
       .then((meta) => {
@@ -107,7 +111,7 @@ export default function useProduct() {
     setLoading(false)
   }
 
-  const handleDeleteItem = async (
+  const handleDeleteProductItem = async (
     id: number,
     onSuccess?: (meta: ResponseDataType) => void
   ) => {
@@ -130,14 +134,14 @@ export default function useProduct() {
     setMetaData,
     loading,
     setLoading,
-    handleAddNew,
+    handleAddNewProduct,
     openModal,
     setOpenModal,
     searchText,
     setSearchText,
     getProductList,
-    handleUpdateItem,
-    handleDeleteItem,
+    handleUpdateProductItem,
+    handleDeleteProductItem,
     handleSorted
   }
 }

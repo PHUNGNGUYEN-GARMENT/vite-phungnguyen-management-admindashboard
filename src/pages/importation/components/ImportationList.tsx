@@ -50,7 +50,7 @@ const ImportationList: React.FC<Props> = ({ ...props }) => {
     dataSource,
     setDataSource,
     isEditing,
-    handleStartDeleteItem,
+    handleStartDeleting,
     handleStartSaveEditing
   } = useList<Importation>([])
   const user = useSelector((state: RootState) => state.user)
