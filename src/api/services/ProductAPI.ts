@@ -23,7 +23,8 @@ export default {
       })
   },
   createNewItem: async (
-    product: Product
+    product: Product,
+    colorID: number
   ): Promise<ResponseDataType | undefined> => {
     return await client
       .post(`${NAMESPACE}`, {
@@ -31,7 +32,8 @@ export default {
         quantityPO: product.quantityPO,
         status: product.status,
         dateInputNPL: product.dateInputNPL,
-        dateOutputFCR: product.dateOutputFCR
+        dateOutputFCR: product.dateOutputFCR,
+        colorID: colorID
       })
       .then((res) => {
         if (res.data) {

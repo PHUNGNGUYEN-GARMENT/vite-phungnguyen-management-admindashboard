@@ -20,7 +20,8 @@ export default function useProduct() {
     onSuccess?: (data: ResponseDataType) => void
   ) => {
     setLoading(true)
-    const row = await form.validateFields()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const row: any = await form.validateFields()
     // setLoading(true)
     const productConverted = {
       ...row,
@@ -28,7 +29,8 @@ export default function useProduct() {
       dateOutputFCR: DayJS(row.dateOutputFCR).format(DatePattern.iso8601),
       dateInputNPL: DayJS(row.dateOutputFCR).format(DatePattern.iso8601)
     } as Product
-    await ProductAPI.createNewItem(productConverted)
+    console.log(productConverted)
+    await ProductAPI.createNewItem(productConverted, row.colorID)
       .then((meta) => {
         setLoading(true)
         if (meta?.success) {

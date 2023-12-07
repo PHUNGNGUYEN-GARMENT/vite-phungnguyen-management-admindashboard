@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import {
   Calendar,
   Flex,
@@ -21,7 +22,6 @@ interface Props extends React.HTMLAttributes<HTMLElement> {
   onAddNew: (form: FormInstance<Product>) => void
 }
 
-// eslint-disable-next-line no-empty-pattern, react-refresh/only-export-components
 const ModalAddNewProduct: React.FC<Props> = ({
   openModal,
   setOpenModal,
@@ -107,7 +107,7 @@ const ModalAddNewProduct: React.FC<Props> = ({
               Màu:
             </Typography.Text>
             <Form.Item
-              name='color'
+              name='colorID'
               className='m-0 w-full'
               rules={[
                 {
@@ -172,5 +172,4 @@ const ModalAddNewProduct: React.FC<Props> = ({
   )
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
 export default memo(ModalAddNewProduct)

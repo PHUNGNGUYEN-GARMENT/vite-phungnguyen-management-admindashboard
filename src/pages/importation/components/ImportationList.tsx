@@ -38,7 +38,7 @@ const ImportationList: React.FC<Props> = ({ ...props }) => {
     dateCreation,
     setDateCreation,
     getDataList,
-    handleUpdateItem,
+    handleSaveUpdateItem,
     handleDeleteItem,
     handleSorted
   } = useImportation()
@@ -61,47 +61,42 @@ const ImportationList: React.FC<Props> = ({ ...props }) => {
   useEffect(() => {
     dispatch(setRoleAction('importation'))
 
-    ProductAPI.getItems(defaultRequestBody).then((metaProduct) => {
-      if (metaProduct?.success) {
-        const products: Product[] = metaProduct.data
-        ImportationAPI.getItems(defaultRequestBody).then((metaImportation) => {
-          if (metaImportation?.success) {
-            const importations: Importation[] = metaImportation.data
-            if (importations.length > 0) {
-              setDataSource(
-                products.map((i) => {
-                  const productImportation: Importation | undefined =
-                    importations.find((j) => j.productID === i.id)
+    Promise.all([
+      ProductAPI.getItems(defaultRequestBody),
+      ImportationAPI.getItems(defaultRequestBody)
+    ])
+      .then(([metaProduct, metaImportation]) => {
+        if (metaProduct?.success && metaImportation?.success) {
+          const products: Product[] = metaProduct.data
+          const importations: Importation[] = metaImportation.data
 
-                  let newImportation: Importation = {}
-                  if (productImportation) {
-                    newImportation = productImportation
-                  }
-                  return {
-                    data: {
-                      ...newImportation,
-                      product: i
-                    },
-                    key: i.id!
-                  }
-                })
-              )
-            } else {
-              setDataSource(
-                products.map((i) => {
-                  return {
-                    data: {
-                      product: i
-                    } as Importation,
-                    key: i.id!
-                  }
-                })
-              )
+          const dataSource = products.map((product) => {
+            const productImportation = importations.find(
+              (importation) => importation.productID === product.id
+            )
+
+            return {
+              data: {
+                ...productImportation,
+                product
+              },
+              key: product.id!
             }
-          }
-        })
-      }
-    })
+          })
+          setDataSource(
+            importations.length > 0
+              ? dataSource
+              : dataSource.map((item) => ({
+                  ...item,
+                  data: { product: item.data.product } as Importation
+                }))
+          )
+        }
+      })
+      .catch((error) => {
+        // Xử lý lỗi nếu cần
+        console.error(error)
+      })
   }, [])
 
   return (
@@ -282,60 +277,16 @@ const ImportationList: React.FC<Props> = ({ ...props }) => {
                         <Button
                           type='primary'
                           onClick={async () => {
-                            setLoading(true)
-                            const row = await form.validateFields()
-                            console.log({
-                              ...row,
-                              date: DayJS(row.dateImported).format(
-                                DatePattern.display
-                              )
-                            })
-                            const itemFound =
-                              await ImportationAPI.getItemByProductID(
-                                Number(item.key)
-                              )
-                            if (itemFound) {
-                              const importationFound: Importation =
-                                itemFound.data
-                              ImportationAPI.updateItemByID(
-                                importationFound.id!,
-                                {
-                                  quantity: row.quantity,
-                                  dateImported: DayJS(row.dateImported).format(
-                                    DatePattern.iso8601
-                                  )
+                            const row: Importation = await form.validateFields()
+                            handleSaveUpdateItem(
+                              Number(item.key!),
+                              row,
+                              (meta) => {
+                                if (meta?.success) {
+                                  message.success('Success')
                                 }
-                              )
-                                .then((meta) => {
-                                  if (meta?.success) {
-                                    message.success('Updated')
-                                  }
-                                })
-                                .finally(() => {
-                                  setLoading(false)
-                                })
-                            } else {
-                              ImportationAPI.createNewItem({
-                                quantity: row.quantity,
-                                dateImported: DayJS(row.dateImported).format(
-                                  DatePattern.iso8601
-                                ),
-                                productID: Number(item.key),
-                                status: 'active'
-                              })
-                                .then((meta) => {
-                                  if (meta?.success) {
-                                    const importationNew: Importation =
-                                      meta.data
-                                    console.log('Importation: ', importationNew)
-                                  }
-                                })
-                                .finally(() => {
-                                  setLoading(false)
-                                  message.success('Created')
-                                })
-                            }
-                            setLoading(false)
+                              }
+                            )
                           }}
                         >
                           Save

@@ -7,6 +7,7 @@ import {
 } from '~/api/client'
 import ImportationAPI from '~/api/services/ImportationAPI'
 import { Importation, SortDirection } from '~/typing'
+import DayJS, { DatePattern } from '~/utils/date-formatter'
 
 export default function useImportation() {
   const [metaData, setMetaData] = useState<ResponseDataType>()
@@ -81,31 +82,48 @@ export default function useImportation() {
     })
   }
 
-  const handleUpdateItem = async (
-    id: number,
-    itemToUpdate: Importation,
-    onSuccess?: (data: ResponseDataType) => void
+  const handleSaveUpdateItem = async (
+    key: number,
+    row: Importation,
+    onSuccess?: (meta: ResponseDataType | undefined) => void
   ) => {
-    setLoading(true)
-    ImportationAPI.updateItemByID(id, itemToUpdate)
-      .then((meta) => {
-        if (meta?.success) {
-          setLoading(true)
-          onSuccess?.(meta)
-        }
+    try {
+      console.log({
+        ...row,
+        date: DayJS(row.dateImported).format(DatePattern.display)
       })
-      .catch((err) => {
-        console.log('>>>', err)
-      })
-      .finally(() => {
-        setLoading(false)
-      })
-    setLoading(false)
+
+      const itemFound = await ImportationAPI.getItemByProductID(key)
+
+      const importationData = {
+        quantity: row.quantity,
+        dateImported: DayJS(row.dateImported).format(DatePattern.iso8601)
+      }
+
+      if (itemFound) {
+        const importationFound: Importation = itemFound.data
+        ImportationAPI.updateItemByID(
+          importationFound.id!,
+          importationData
+        ).then((meta) => onSuccess?.(meta))
+      } else {
+        ImportationAPI.createNewItem({
+          ...importationData,
+          productID: key,
+          status: 'active'
+        }).then((meta) => onSuccess?.(meta))
+      }
+    } catch (error) {
+      // Xử lý lỗi nếu cần
+      console.error(error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleDeleteItem = async (
     id: number,
-    onSuccess?: (meta: ResponseDataType) => void
+    onSuccess?: (meta: ResponseDataType | undefined) => void
   ) => {
     setLoading(true)
     await ImportationAPI.updateItemByID(id, { status: 'deleted' })
@@ -133,7 +151,7 @@ export default function useImportation() {
     searchText,
     setSearchText,
     getDataList,
-    handleUpdateItem,
+    handleSaveUpdateItem,
     handleDeleteItem,
     handleAddNew,
     handleSorted
