@@ -5,23 +5,6 @@ import { errorFormatter } from '~/utils/promise-formatter'
 const NAMESPACE = 'colors'
 
 export default {
-  getItems: async (
-    bodyRequest: RequestBodyType
-  ): Promise<ResponseDataType | undefined> => {
-    return await client
-      .post(`${NAMESPACE}/find`, {
-        ...bodyRequest
-      })
-      .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
-      })
-      .catch(function (error) {
-        errorFormatter(error)
-      })
-  },
   createNewItem: async (item: Color): Promise<ResponseDataType | undefined> => {
     return await client
       .post(`${NAMESPACE}`, {
@@ -39,13 +22,9 @@ export default {
         errorFormatter(error)
       })
   },
-  getItemByID: async (id: number): Promise<ResponseDataType | undefined> => {
+  getItemByPk: async (id: number): Promise<ResponseDataType | undefined> => {
     return client
-      .get(`${NAMESPACE}/id`, {
-        params: {
-          id: id
-        }
-      })
+      .get(`${NAMESPACE}/${id}`)
       .then((res) => {
         if (res.data) {
           return res.data as ResponseDataType
@@ -56,14 +35,27 @@ export default {
         errorFormatter(error)
       })
   },
-  getItemByCode: async (
-    code: string
+  getItemByHexColor: async (
+    hexColor: string
   ): Promise<ResponseDataType | undefined> => {
     return client
-      .get(`${NAMESPACE}/code`, {
-        params: {
-          code: code
+      .get(`${NAMESPACE}/hexColor/${hexColor}`)
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
         }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  getItems: async (
+    bodyRequest: RequestBodyType
+  ): Promise<ResponseDataType | undefined> => {
+    return await client
+      .post(`${NAMESPACE}/find`, {
+        ...bodyRequest
       })
       .then((res) => {
         if (res.data) {
@@ -75,15 +67,15 @@ export default {
         errorFormatter(error)
       })
   },
-  updateItemByID: async (
+  updateItemByPk: async (
     id: number,
-    item: Color
+    itemToUpdate: Color
   ): Promise<ResponseDataType | undefined> => {
     return client
       .put(`${NAMESPACE}/${id}`, {
-        nameColor: item.nameColor,
-        hexColor: item.hexColor,
-        status: item.status
+        nameColor: itemToUpdate.nameColor,
+        hexColor: itemToUpdate.hexColor,
+        status: itemToUpdate.status
       })
       .then((res) => {
         if (res.data) {
@@ -95,7 +87,7 @@ export default {
         errorFormatter(error)
       })
   },
-  deleteItemByID: async (id: number): Promise<ResponseDataType | undefined> => {
+  deleteItemByPk: async (id: number): Promise<ResponseDataType | undefined> => {
     return client
       .delete(`${NAMESPACE}/${id}`)
       .then((res) => {
