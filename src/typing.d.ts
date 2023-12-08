@@ -146,13 +146,12 @@ export type NotionAccessory = {
 export type Importation = {
   id?: number
   productID?: number
-  dateImported?: string
   quantity?: number
   status?: ItemStatusType
+  dateImported?: string
   product?: Product
   createdAt?: string
   updatedAt?: string
-  orderNumber?: number
 }
 
 export type SampleSewing = {

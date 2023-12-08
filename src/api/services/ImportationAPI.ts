@@ -5,23 +5,6 @@ import { errorFormatter } from '~/utils/promise-formatter'
 const NAMESPACE = 'importations'
 
 export default {
-  getItems: async (
-    bodyRequest: RequestBodyType
-  ): Promise<ResponseDataType | undefined> => {
-    return await client
-      .post(`${NAMESPACE}/find`, {
-        ...bodyRequest
-      })
-      .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
-      })
-      .catch(function (error) {
-        errorFormatter(error)
-      })
-  },
   createNewItem: async (
     item: Importation
   ): Promise<ResponseDataType | undefined> => {
@@ -42,13 +25,9 @@ export default {
         errorFormatter(error)
       })
   },
-  getItemByID: async (id: number): Promise<ResponseDataType | undefined> => {
+  getItemByPk: async (id: number): Promise<ResponseDataType | undefined> => {
     return client
-      .get(`${NAMESPACE}/id`, {
-        params: {
-          id: id
-        }
-      })
+      .get(`${NAMESPACE}/${id}`)
       .then((res) => {
         if (res.data) {
           return res.data as ResponseDataType
@@ -74,12 +53,29 @@ export default {
         errorFormatter(error)
       })
   },
-  updateItemByID: async (
+  getItems: async (
+    bodyRequest: RequestBodyType
+  ): Promise<ResponseDataType | undefined> => {
+    return await client
+      .post(`${NAMESPACE}/find`, {
+        ...bodyRequest
+      })
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  updateItemByPk: async (
     id: number,
     item: Importation
   ): Promise<ResponseDataType | undefined> => {
     return client
-      .put(`${NAMESPACE}/id/${id}`, {
+      .put(`${NAMESPACE}/${id}`, {
         ...item
       })
       .then((res) => {
@@ -110,9 +106,24 @@ export default {
         errorFormatter(error)
       })
   },
-  deleteItemByID: async (id: number): Promise<ResponseDataType | undefined> => {
+  deleteItemByPk: async (id: number): Promise<ResponseDataType | undefined> => {
     return client
       .delete(`${NAMESPACE}/${id}`)
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  deleteItemByProductID: async (
+    productID: number
+  ): Promise<ResponseDataType | undefined> => {
+    return client
+      .delete(`${NAMESPACE}/productID/${productID}`)
       .then((res) => {
         if (res.data) {
           return res.data as ResponseDataType
