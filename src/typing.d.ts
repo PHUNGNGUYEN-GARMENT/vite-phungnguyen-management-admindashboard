@@ -136,12 +136,13 @@ export type GarmentAccessory = {
   orderNumber: number
 }
 
-export type NotionAccessory = {
-  accessoryNoteID: number
-  garmentAccessoryID: number
-  createdAt: string
-  updatedAt: string
-  orderNumber: number
+export type AccessoryNote = {
+  id?: number
+  title?: string
+  summary?: string
+  status?: ItemStatusType
+  createdAt?: string
+  updatedAt?: string
 }
 
 export type Importation = {
