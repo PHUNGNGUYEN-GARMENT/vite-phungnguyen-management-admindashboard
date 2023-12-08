@@ -106,11 +106,15 @@ export type PrintablePlace = {
 }
 
 export type ProductGroup = {
-  groupID: number
-  productID: number
-  createdAt: string
-  updatedAt: string
-  orderNumber: number
+  id?: number
+  groupID?: number
+  productID?: number
+  name?: string
+  status?: ItemStatusType
+  createdAt?: string
+  updatedAt?: string
+  product?: Product
+  group?: Group
 }
 
 export type GarmentAccessoryNote = {
