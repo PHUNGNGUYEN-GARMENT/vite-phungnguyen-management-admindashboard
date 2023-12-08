@@ -5,7 +5,7 @@ import {
   ResponseDataType,
   defaultRequestBody
 } from '~/api/client'
-import SewingLineDeliveryAPI from '~/api/services/SewingLineDeliveryAPI'
+import SewingLineDeliveryAPI from '~/api/services/SewingLineAPI'
 import { SewingLineDelivery, SortDirection } from '~/typing'
 
 export default function useSewingLineDelivery() {

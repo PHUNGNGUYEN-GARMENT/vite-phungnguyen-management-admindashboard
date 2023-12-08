@@ -203,11 +203,10 @@ export type EmbroideredSewingLineDelivery = {
   orderNumber: number
 }
 
-export type SewingLineDelivery = {
+export type SewingLine = {
   id?: number
-  name?: string
+  sewingLine?: string
   status?: ItemStatusType
   createdAt?: string
   updatedAt?: string
-  orderNumber?: number
 }
