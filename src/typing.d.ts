@@ -67,15 +67,12 @@ export type Color = {
 }
 
 export type ProductColor = {
-  colorID: number
-  nameColor?: string
-  hexColor?: string
-  productID: number
-  productCode?: string
+  id?: number
+  colorID?: number
+  productID?: number
   status?: ItemStatusType
-  createdAt: string
-  updatedAt: string
-  orderNumber: number
+  createdAt?: string
+  updatedAt?: string
 }
 
 export type Group = {
