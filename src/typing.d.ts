@@ -115,26 +115,15 @@ export type ProductGroup = {
   group?: Group
 }
 
-export type GarmentAccessoryNote = {
-  accessoryNoteID: number
-  title: string
-  summary: string
-  createdAt: string
-  updatedAt: string
-  orderNumber: number
-}
-
 export type GarmentAccessory = {
-  garmentAccessoryID: number
-  productID: number
-  notesOther: string
-  amountCuttingAccessory: string
-  dateDeliveryChain: string
-  syncGarmentAccessoryState: boolean
-  syncPackageAccessoryState: boolean
-  createdAt: string
-  updatedAt: string
-  orderNumber: number
+  id?: number
+  productID?: number
+  accessoryNoteIDs?: number[]
+  cuttingAccessoryDate?: string
+  amountCuttingAccessory?: number
+  status?: ItemStatusType
+  product?: Product
+  accessoryNotes?: AccessoryNote[]
 }
 
 export type AccessoryNote = {
