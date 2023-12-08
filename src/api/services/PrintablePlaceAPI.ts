@@ -1,16 +1,16 @@
-import client, { ResponseDataType } from '~/api/client'
+import client, { RequestBodyType, ResponseDataType } from '~/api/client'
 import { PrintablePlace } from '~/typing'
 import { errorFormatter } from '~/utils/promise-formatter'
 
-const PATH_API = 'printable-places'
+const NAMESPACE = 'printable-places'
 
 export default {
-  createNew: async (
-    items: { printID: number; productID: number; name?: string }[]
+  createNewItem: async (
+    items: PrintablePlace
   ): Promise<ResponseDataType | undefined> => {
     return client
-      .post(`${PATH_API}`, {
-        items
+      .post(`${NAMESPACE}`, {
+        ...items
       })
       .then((res) => {
         if (res.data) {
@@ -22,14 +22,40 @@ export default {
         errorFormatter(error)
       })
   },
-  getAlls: async (
-    printID?: number | null,
-    productID?: number | null
+  getItemByPk: async (id: number): Promise<ResponseDataType | undefined> => {
+    return client
+      .get(`${NAMESPACE}/${id}`)
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  getItemByProductID: async (
+    productID: number
+  ): Promise<ResponseDataType | undefined> => {
+    return client
+      .get(`${NAMESPACE}/productID/${productID}`)
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  getItems: async (
+    bodyRequest: RequestBodyType
   ): Promise<ResponseDataType | undefined> => {
     return await client
-      .post(`${PATH_API}/find`, {
-        printID: printID,
-        productID: productID
+      .post(`${NAMESPACE}/find`, {
+        ...bodyRequest
       })
       .then((res) => {
         if (res.data) {
@@ -41,29 +67,13 @@ export default {
         errorFormatter(error)
       })
   },
-  getItem: async (id: number): Promise<ResponseDataType | undefined> => {
-    return client
-      .get(`${PATH_API}/${id}`)
-      .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
-      })
-      .catch(function (error) {
-        errorFormatter(error)
-      })
-  },
-  updateItem: async (
+  updateItemByPk: async (
+    id: number,
     item: PrintablePlace
   ): Promise<ResponseDataType | undefined> => {
     return client
-      .put(`${PATH_API}`, {
-        printID: item.printID,
-        productID: item.productID,
-        createdAt: item.createdAt,
-        updatedAt: item.updatedAt,
-        orderNumber: item.orderNumber
+      .put(`${NAMESPACE}/${id}`, {
+        ...item
       })
       .then((res) => {
         if (res.data) {
@@ -75,9 +85,75 @@ export default {
         errorFormatter(error)
       })
   },
-  deleteItem: async (id: number): Promise<ResponseDataType | undefined> => {
+  updateItemByProductID: async (
+    productID: number,
+    item: PrintablePlace
+  ): Promise<ResponseDataType | undefined> => {
     return client
-      .delete(`${PATH_API}/${id}`)
+      .put(`${NAMESPACE}/productID/${productID}`, {
+        ...item
+      })
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  updateItemByPrintID: async (
+    printID: number,
+    item: PrintablePlace
+  ): Promise<ResponseDataType | undefined> => {
+    return client
+      .put(`${NAMESPACE}/printID/${printID}`, {
+        ...item
+      })
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  deleteItemByPk: async (id: number): Promise<ResponseDataType | undefined> => {
+    return client
+      .delete(`${NAMESPACE}/${id}`)
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  deleteItemByProductID: async (
+    productID: number
+  ): Promise<ResponseDataType | undefined> => {
+    return client
+      .delete(`${NAMESPACE}/productID/${productID}`)
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  deleteItemByPrintID: async (
+    printID: number
+  ): Promise<ResponseDataType | undefined> => {
+    return client
+      .delete(`${NAMESPACE}/printID/${printID}`)
       .then((res) => {
         if (res.data) {
           return res.data as ResponseDataType
