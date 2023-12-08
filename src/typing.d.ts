@@ -186,12 +186,16 @@ export type EmbroideredDelivery = {
   orderNumber: number
 }
 
-export type EmbroideredSewingLineDelivery = {
-  embroideredDeliveryID: number
-  sewingLineDeliveryID: number
-  createdAt: string
-  updatedAt: string
-  orderNumber: number
+export type SewingLineDelivery = {
+  id?: number
+  productID?: number
+  sewingLineID?: number
+  quantityOrigin?: number
+  quantitySewed?: number
+  expiredDate?: string
+  status?: ItemStatusType
+  product?: Product
+  sewingLine?: SewingLine
 }
 
 export type SewingLine = {
