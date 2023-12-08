@@ -71,7 +71,6 @@ export default {
         errorFormatter(error)
       })
   },
-
   updateItemByPk: async (
     id: number,
     product: Product
