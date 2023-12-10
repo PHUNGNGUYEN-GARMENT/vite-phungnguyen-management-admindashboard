@@ -2,14 +2,14 @@
 import { ColorPicker, Flex, Form, Input, List, Typography } from 'antd'
 import React, { memo } from 'react'
 import { useSelector } from 'react-redux'
+import { TableItemWithKey } from '~/components/hooks/useTable'
 import ItemAction from '~/components/layout/Item/ItemAction'
 import { RootState } from '~/store/store'
-import { TableListDataType } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import { ColorTableDataType } from '../type'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
-  data: TableListDataType<ColorTableDataType>
+  data: TableItemWithKey<ColorTableDataType>
   isEditing: boolean
   editingKey: React.Key
   dateCreation?: boolean
@@ -42,12 +42,12 @@ const ColorListItem: React.FC<Props> = ({
         <Flex vertical className='w-full' gap={10}>
           <Flex align='center' justify='space-between'>
             {isEditing && user.isAdmin ? (
-              <Form.Item name={`nameColor`} initialValue={data.data.nameColor}>
+              <Form.Item name={`nameColor`} initialValue={data.nameColor}>
                 <Input size='large' />
               </Form.Item>
             ) : (
               <Typography.Title copyable className='m-0 h-fit p-0' level={4}>
-                {data.data.nameColor}
+                {data.nameColor}
               </Typography.Title>
             )}
 
@@ -69,7 +69,7 @@ const ColorListItem: React.FC<Props> = ({
             {isEditing ? (
               <Form.Item
                 name={`hexColor`}
-                initialValue={data.data.hexColor}
+                initialValue={data.hexColor}
                 className='m-0 w-full'
               >
                 <ColorPicker
@@ -85,7 +85,7 @@ const ColorListItem: React.FC<Props> = ({
               <Flex className='w-full' align='center' justify='start'>
                 <ColorPicker
                   className='w-full'
-                  defaultValue={data.data.hexColor}
+                  defaultValue={data.hexColor}
                   size='middle'
                   disabled={editingKey !== data.key}
                   showText
@@ -103,7 +103,7 @@ const ColorListItem: React.FC<Props> = ({
                 <Input
                   name='createdAt'
                   className='w-full'
-                  defaultValue={DayJS(data.data.createdAt).format(
+                  defaultValue={DayJS(data.createdAt).format(
                     DatePattern.display
                   )}
                   readOnly
@@ -117,7 +117,7 @@ const ColorListItem: React.FC<Props> = ({
                 <Input
                   name='updatedAt'
                   className='w-full'
-                  defaultValue={DayJS(data.data.updatedAt).format(
+                  defaultValue={DayJS(data.updatedAt).format(
                     DatePattern.display
                   )}
                   readOnly

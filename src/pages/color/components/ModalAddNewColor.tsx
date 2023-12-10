@@ -1,7 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { ColorPicker, Flex, Form, Input, Modal, Typography } from 'antd'
 import type { Color as AntColor } from 'antd/es/color-picker'
-// import type { Color as AntColor } from 'antd/es/color-picker'
 import React, { memo } from 'react'
 import { Color } from '~/typing'
 
@@ -20,16 +19,14 @@ const ModalAddNewColor: React.FC<Props> = ({
   const [form] = Form.useForm()
 
   async function handleOk() {
-    const itemToCreateNew = await form.validateFields()
-    console.log(itemToCreateNew)
-    // // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const hexColor =
-      typeof itemToCreateNew.hexColor === 'string'
-        ? itemToCreateNew.hexColor
-        : // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (itemToCreateNew.hexColor as any as AntColor).toHexString()
+    const row = await form.validateFields()
+    const hexColor = row.hexColor
+      ? typeof row.hexColor === 'string'
+        ? row.hexColor
+        : (row.hexColor as AntColor).toHexString()
+      : ''
     onAddNew({
-      nameColor: itemToCreateNew.nameColor,
+      nameColor: row.nameColor,
       hexColor: hexColor
     })
   }
@@ -71,7 +68,7 @@ const ModalAddNewColor: React.FC<Props> = ({
               <Typography.Text className='w-24 flex-shrink-0'>
                 Pick color:
               </Typography.Text>
-              <Form.Item name='hexColor' className='m-0' initialValue='#ff6b00'>
+              <Form.Item name='hexColor' className='m-0' initialValue='#000000'>
                 <ColorPicker size='middle' showText />
               </Form.Item>
             </Flex>

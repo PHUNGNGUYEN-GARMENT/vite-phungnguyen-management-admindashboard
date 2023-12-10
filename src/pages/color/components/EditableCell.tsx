@@ -2,7 +2,8 @@
 /* eslint-disable react-refresh/only-export-components */
 import { ColorPicker, Form, Input, Table } from 'antd'
 import { memo } from 'react'
-import { ColorTableDataType } from './ColorTable'
+import { TableItemWithKey } from '~/components/hooks/useTable'
+import { ColorTableDataType } from '../type'
 
 type InputType = 'number' | 'text'
 
@@ -11,7 +12,7 @@ interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
   dataIndex: string
   title: string | undefined
   inputType: InputType
-  record: ColorTableDataType
+  record: TableItemWithKey<ColorTableDataType>
   index: number
   children: React.ReactNode
 }
@@ -33,7 +34,6 @@ const EditableCell: React.FC<EditableCellProps> = ({
         return (
           <Form.Item
             name='nameColor'
-            initialValue={record.nameColor}
             style={{ margin: 0 }}
             rules={[
               {
@@ -41,11 +41,12 @@ const EditableCell: React.FC<EditableCellProps> = ({
                 message: `Please Input ${title}!`
               }
             ]}
+            initialValue={record ? record.nameColor : ''}
           >
             <Input className='w-full' />
           </Form.Item>
         )
-      default: // Default là trạng thái mặc định
+      default:
         return (
           <Form.Item
             name='hexColor'
@@ -56,8 +57,9 @@ const EditableCell: React.FC<EditableCellProps> = ({
                 message: `Please Input ${title}!`
               }
             ]}
+            initialValue={record ? record.hexColor : '#000000'}
           >
-            <ColorPicker showText className='w-full' format='hex' />
+            <ColorPicker defaultFormat='hex' showText className='w-full' />
           </Form.Item>
         )
     }

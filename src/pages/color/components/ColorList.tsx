@@ -6,10 +6,10 @@ import {
   ResponseDataType,
   defaultRequestBody
 } from '~/api/client'
-import ColorAPI from '~/api/services/ColorAPI'
 import useList from '~/components/hooks/useList'
+import { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
-import { Color, TableListDataType } from '~/typing'
+import { Color } from '~/typing'
 import useColor from '../hooks/useColor'
 import { ColorTableDataType } from '../type'
 import ColorListItem from './ColorListItem'
@@ -20,16 +20,17 @@ interface Props extends React.HTMLAttributes<HTMLElement> {}
 const ColorList: React.FC<Props> = ({ ...props }) => {
   const {
     metaData,
+    setPage,
     loading,
     dateCreation,
     setDateCreation,
     setLoading,
     openModal,
     setOpenModal,
-    // setSearchText,
     handleAddNewItem,
-    getColorList,
+    getDataList,
     handleDeleteItem,
+    handleUpdateItem,
     handleSorted
   } = useColor()
   const {
@@ -47,10 +48,9 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
     handleConfirmCancelDeleting
   } = useList<ColorTableDataType>([])
   const { message } = AntApp.useApp()
-  console.log('Product page loading...')
 
   useEffect(() => {
-    getColorList(defaultRequestBody, (meta) => {
+    getDataList(defaultRequestBody, (meta) => {
       if (meta?.success) {
         handleProgressDataSource(meta)
       }
@@ -62,10 +62,44 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
     setDataSource(
       colors.map((item: Color) => {
         return {
-          data: { ...item, key: item.id } as ColorTableDataType,
+          ...item,
           key: item.id
-        } as TableListDataType<ColorTableDataType>
+        } as TableItemWithKey<ColorTableDataType>
       })
+    )
+  }
+
+  const selfHandleSaveClick = async (
+    item: TableItemWithKey<ColorTableDataType>
+  ) => {
+    const row = await form.validateFields()
+    handleStartSaveEditing(
+      item.key!,
+      {
+        nameColor: row.nameColor,
+        hexColor: row.hexColor
+      },
+      (itemToSave) => {
+        const hexColor = row.hexColor
+          ? typeof row.hexColor === 'string'
+            ? row.hexColor
+            : (row.hexColor as AntColor).toHexString()
+          : ''
+        handleUpdateItem(
+          item.id ?? Number(item.key),
+          {
+            ...itemToSave,
+            hexColor: hexColor
+          },
+          (success) => {
+            if (success) {
+              message.success('Created!')
+            } else {
+              message.success('Failed!')
+            }
+          }
+        )
+      }
     )
   }
 
@@ -82,28 +116,25 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
                   term: value
                 }
               }
-              getColorList(body, (meta) => {
+              getDataList(body, (meta) => {
                 if (meta?.success) {
                   handleProgressDataSource(meta)
                 }
               })
             }
           }}
-          // onSearchChange={(e) => setSearchText(e.target.value)}
           onSortChange={(val) => {
             handleSorted(val ? 'asc' : 'desc', (meta) => {
-              if (meta.success) {
+              if (meta?.success) {
                 handleProgressDataSource(meta)
               }
             })
           }}
           onResetClick={() => {
             form.setFieldValue('search', '')
-            // setSearchText('')
-            getColorList(defaultRequestBody, (meta) => {
+            getDataList(defaultRequestBody, (meta) => {
               if (meta?.success) {
                 handleProgressDataSource(meta)
-                message.success('Reloaded!')
               }
             })
           }}
@@ -116,11 +147,12 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
             itemLayout='vertical'
             size='large'
             pagination={{
-              onChange: (page) => {
+              onChange: (_page) => {
+                setPage(_page)
                 const body: RequestBodyType = {
                   ...defaultRequestBody,
                   paginator: {
-                    page: page,
+                    page: _page,
                     pageSize: 5
                   },
                   search: {
@@ -128,7 +160,7 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
                     term: form.getFieldValue('search') ?? ''
                   }
                 }
-                getColorList(body, (meta) => {
+                getDataList(body, (meta) => {
                   if (meta?.success) {
                     handleProgressDataSource(meta)
                   }
@@ -146,37 +178,7 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
                 key={item.key}
                 editingKey={editingKey}
                 isEditing={isEditing(item.key!)}
-                onSaveClick={async () => {
-                  const row = await form.validateFields()
-                  handleStartSaveEditing(
-                    item.key!,
-                    {
-                      nameColor: row.nameColor,
-                      hexColor: row.hexColor
-                    },
-                    (itemToSave) => {
-                      const hexColor =
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        itemToSave.hexColor as any as AntColor
-                      ColorAPI.updateItemByPk(item.data.id!, {
-                        hexColor: hexColor.toHexString(),
-                        nameColor: itemToSave.nameColor
-                      })
-                        .then((meta) => {
-                          if (meta?.success) {
-                            setLoading(true)
-                            message.success('Updated!')
-                          }
-                        })
-                        .catch((err) => {
-                          console.log(err)
-                        })
-                        .finally(() => {
-                          setLoading(false)
-                        })
-                    }
-                  )
-                }}
+                onSaveClick={() => selfHandleSaveClick(item)}
                 dateCreation={dateCreation}
                 onClickStartEditing={() => handleStartEditing(item.key!)}
                 onConfirmCancelEditing={() => handleConfirmCancelEditing()}
@@ -184,15 +186,16 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
                 onConfirmDelete={() => {
                   setLoading(true)
                   handleStartDeleting(item.key!, (productToDelete) => {
-                    handleDeleteItem(Number(productToDelete.key), (meta) => {
-                      if (meta.success) {
-                        setLoading(false)
-                        message.success('Deleted!')
+                    handleDeleteItem(Number(productToDelete.key), (success) => {
+                      if (success) {
+                        message.success('Created!')
+                      } else {
+                        message.success('Failed!')
                       }
                     })
                   })
                 }}
-                onStartDeleting={() => setDeleteKey(item.key)}
+                onStartDeleting={() => setDeleteKey(item.key!)}
               />
             )}
           />
@@ -204,10 +207,12 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
           setOpenModal={setOpenModal}
           onAddNew={(addNewForm) => {
             console.log(addNewForm)
-            handleStartAddNew({ key: -1, ...addNewForm })
-            handleAddNewItem(addNewForm, (meta) => {
-              if (meta.success) {
+            handleStartAddNew({ key: dataSource.length + 1, ...addNewForm })
+            handleAddNewItem(addNewForm, (success) => {
+              if (success) {
                 message.success('Created!')
+              } else {
+                message.success('Failed!')
               }
             })
           }}

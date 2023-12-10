@@ -1,11 +1,12 @@
 import { Form } from 'antd'
 import { useState } from 'react'
-import { TableListDataType } from '~/typing'
+import { TableItemWithKey } from './useTable'
 
-const useList = <T>(initValue: TableListDataType<T>[]) => {
+export default function useList<T extends { key?: React.Key }>(
+  initValue: TableItemWithKey<T>[]
+) {
   const [form] = Form.useForm<T>()
-  const [dataSource, setDataSource] =
-    useState<TableListDataType<T>[]>(initValue)
+  const [dataSource, setDataSource] = useState<TableItemWithKey<T>[]>(initValue)
   const [editingKey, setEditingKey] = useState<React.Key>('')
   const [deleteKey, setDeleteKey] = useState<React.Key>('')
   const isEditing = (key: React.Key) => key === editingKey
@@ -17,7 +18,7 @@ const useList = <T>(initValue: TableListDataType<T>[]) => {
 
   const handleStartDeleting = (
     key: React.Key,
-    onSuccess: (data: TableListDataType<T>) => void
+    onSuccess: (row: TableItemWithKey<T>) => void
   ) => {
     const itemFound = dataSource.find((item) => item.key === key)
     if (itemFound) {
@@ -50,7 +51,7 @@ const useList = <T>(initValue: TableListDataType<T>[]) => {
         const item = newData[index]
         newData.splice(index, 1, {
           ...item,
-          ...({ data: itemToUpdate, key: key } as TableListDataType<T>)
+          ...itemToUpdate
         })
         setDataSource(newData)
         setEditingKey('')
@@ -58,7 +59,7 @@ const useList = <T>(initValue: TableListDataType<T>[]) => {
         // After updated local data
         // We need to update on database
       } else {
-        newData.push({ data: itemToUpdate, key: key } as TableListDataType<T>)
+        newData.push(itemToUpdate)
         setDataSource(newData)
         setEditingKey('')
       }
@@ -70,9 +71,9 @@ const useList = <T>(initValue: TableListDataType<T>[]) => {
   const handleStartAddNew = (item: T) => {
     const newDataSource = [...dataSource]
     newDataSource.unshift({
-      data: { key: -1, ...item },
-      key: -1
-    } as TableListDataType<T>)
+      ...item,
+      key: dataSource.length + 1
+    } as TableItemWithKey<T>)
     setDataSource(newDataSource)
   }
 
@@ -94,5 +95,3 @@ const useList = <T>(initValue: TableListDataType<T>[]) => {
     handleConfirmCancelDeleting
   }
 }
-
-export default useList

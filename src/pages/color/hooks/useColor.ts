@@ -10,32 +10,42 @@ import { Color, SortDirection } from '~/typing'
 export default function useColor() {
   const [metaData, setMetaData] = useState<ResponseDataType>()
   const [openModal, setOpenModal] = useState<boolean>(false)
-  // const [searchText, setSearchText] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(false)
+  const [page, setPage] = useState<number>(1)
   const [dateCreation, setDateCreation] = useState<boolean>(true)
 
   const handleAddNewItem = async (
     itemNew: Color,
-    onSuccess?: (data: ResponseDataType) => void
+    onDataSuccess?: (
+      data: ResponseDataType | undefined,
+      status: boolean
+    ) => void
   ) => {
     setLoading(true)
     await ColorAPI.createNewItem(itemNew)
       .then((meta) => {
-        setLoading(true)
         if (meta?.success) {
-          onSuccess?.(meta)
+          onDataSuccess?.(meta, true)
+        } else {
+          onDataSuccess?.(undefined, false)
         }
+      })
+      .catch((err) => {
+        console.log(err)
+        onDataSuccess?.(undefined, false)
       })
       .finally(() => {
         setLoading(false)
         setOpenModal(false)
       })
-    setLoading(false)
   }
 
-  const getColorList = async (
+  const getDataList = async (
     params: RequestBodyType,
-    onSuccess?: (data: ResponseDataType) => void
+    onDataSuccess?: (
+      data: ResponseDataType | undefined,
+      status: boolean
+    ) => void
   ) => {
     setLoading(true)
     const body: RequestBodyType = {
@@ -43,49 +53,62 @@ export default function useColor() {
       ...params
     }
     await ColorAPI.getItems(body)
-      .then((data) => {
-        console.log(data)
-        if (data?.success) {
-          setMetaData(data)
-          onSuccess?.(data)
+      .then((meta) => {
+        if (meta?.success) {
+          console.log(meta)
+          setMetaData(meta)
+          onDataSuccess?.(meta, true)
         }
+      })
+      .catch((err) => {
+        console.log(err)
+        onDataSuccess?.(undefined, false)
       })
       .finally(() => {
         setLoading(false)
       })
-    setLoading(false)
   }
 
   const handleSorted = async (
     direction: SortDirection,
-    onSuccess?: (meta: ResponseDataType) => void
+    onDataSuccess?: (
+      data: ResponseDataType | undefined,
+      status: boolean
+    ) => void
   ) => {
     const body: RequestBodyType = {
       ...defaultRequestBody,
+      paginator: {
+        page: page,
+        pageSize: 5
+      },
       sorting: {
         column: 'id',
         direction: direction
       }
     }
-    await getColorList(body, (meta) => {
-      if (meta?.success) {
-        onSuccess?.(meta)
-      }
-    })
+    await getDataList(body, onDataSuccess)
   }
 
   const handleUpdateItem = async (
     id: number,
     itemToUpdate: Color,
-    onSuccess?: (data: ResponseDataType) => void
+    onDataSuccess?: (
+      data: ResponseDataType | undefined,
+      status: boolean
+    ) => void
   ) => {
     setLoading(true)
-    await ColorAPI.updateItemByPk(id, itemToUpdate)
-      .then((meta) => {
-        if (meta?.success) {
-          setLoading(true)
-          onSuccess?.(meta)
+    ColorAPI.updateItemByPk(id, itemToUpdate)
+      .then((data) => {
+        if (data?.success) {
+          setMetaData(data)
+          onDataSuccess?.(data, true)
         }
+      })
+      .catch((err) => {
+        console.log(err)
+        onDataSuccess?.(undefined, false)
       })
       .finally(() => {
         setLoading(false)
@@ -94,23 +117,31 @@ export default function useColor() {
 
   const handleDeleteItem = async (
     id: number,
-    onSuccess?: (meta: ResponseDataType) => void
+    onDataSuccess?: (
+      data: ResponseDataType | undefined,
+      status: boolean
+    ) => void
   ) => {
     setLoading(true)
     await ColorAPI.updateItemByPk(id, { status: 'deleted' })
-      .then((meta) => {
-        if (meta?.success) {
-          setLoading(true)
-          onSuccess?.(meta)
+      .then((data) => {
+        if (data?.success) {
+          setMetaData(data)
+          onDataSuccess?.(data, true)
         }
+      })
+      .catch((err) => {
+        console.log(err)
+        onDataSuccess?.(undefined, false)
       })
       .finally(() => {
         setLoading(false)
       })
-    setLoading(false)
   }
 
   return {
+    page,
+    setPage,
     metaData,
     setMetaData,
     dateCreation,
@@ -119,9 +150,7 @@ export default function useColor() {
     setLoading,
     openModal,
     setOpenModal,
-    // searchText,
-    // setSearchText,
-    getColorList,
+    getDataList,
     handleUpdateItem,
     handleDeleteItem,
     handleAddNewItem,
