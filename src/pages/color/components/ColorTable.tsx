@@ -17,7 +17,7 @@ import { RequestBodyType, defaultRequestBody } from '~/api/client'
 import useTable, { TableDataType } from '~/hooks/useTable'
 import { setAdminAction } from '~/store/actions-creator'
 import { RootState } from '~/store/store'
-import { Color, ItemStatusType } from '~/typing'
+import { Color } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import useColor from '../hooks/useColor'
 import EditableCell, { EditableTableProps } from './EditableCell'
@@ -28,16 +28,6 @@ const { Search } = Input
 type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>
 
 interface Props extends React.HTMLAttributes<HTMLElement> {}
-
-export type ColorTableDataType = {
-  key?: React.Key
-  id?: number
-  nameColor?: string
-  hexColor?: string
-  status?: ItemStatusType
-  createdAt?: string
-  updatedAt?: string
-}
 
 const ColorTable: React.FC<Props> = ({ ...props }) => {
   const user = useSelector((state: RootState) => state.user)

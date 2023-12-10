@@ -1,43 +1,28 @@
-import {
-  App as AntApp,
-  Button,
-  ColorPicker,
-  Flex,
-  Form,
-  Input,
-  List,
-  Popconfirm,
-  Switch,
-  Typography
-} from 'antd'
-import { Plus } from 'lucide-react'
+import { App as AntApp, Form, List } from 'antd'
+import type { Color as AntColor } from 'antd/es/color-picker'
 import React, { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
 import { RequestBodyType, defaultRequestBody } from '~/api/client'
-import { setAdminAction } from '~/store/actions-creator'
-import { RootState } from '~/store/store'
-import { Color } from '~/typing'
-import DayJS, { DatePattern } from '~/utils/date-formatter'
+import BaseLayout from '~/components/layout/BaseLayout'
+import useList from '~/hooks/useList'
+import { Color, TableListDataType } from '~/typing'
 import useColor from '../hooks/useColor'
-import useColorList from '../hooks/useColorList'
-import { ColorTableDataType } from './ColorTable'
+import { ColorTableDataType } from '../type'
+import ColorListItem from './ColorListItem'
 import ModalAddNewColor from './ModalAddNewColor'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {}
-
-const { Search } = Input
 
 const ColorList: React.FC<Props> = ({ ...props }) => {
   const {
     metaData,
     loading,
+    dateCreation,
+    setDateCreation,
     setLoading,
     openModal,
     setOpenModal,
     searchText,
     setSearchText,
-    dateCreation,
-    setDateCreation,
     handleAddNew,
     getColorList,
     handleUpdateItem,
@@ -47,16 +32,16 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
   const {
     form,
     editingKey,
-    setEditingKey,
     setDeleteKey,
     dataSource,
     setDataSource,
     isEditing,
-    handleStartDelete,
-    handleStartSaveEditing
-  } = useColorList()
-  const user = useSelector((state: RootState) => state.user)
-  const dispatch = useDispatch()
+    handleStartDeleting,
+    handleStartSaveEditing,
+    handleStartEditing,
+    handleConfirmCancelEditing,
+    handleConfirmCancelDeleting
+  } = useList<ColorTableDataType>([])
   const { message } = AntApp.useApp()
   console.log('Product page loading...')
 
@@ -78,118 +63,67 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
   return (
     <>
       <Form form={form}>
-        <Flex vertical gap={20}>
-          <Search
-            name='search'
-            placeholder='Search code...'
-            size='middle'
-            enterButton
-            allowClear
-            onSearch={(value) => {
-              if (value.length > 0) {
-                const body: RequestBodyType = {
-                  ...defaultRequestBody,
-                  search: {
-                    field: 'nameColor',
-                    term: value
-                  }
+        <BaseLayout
+          onSearch={(value) => {
+            if (value.length > 0) {
+              const body: RequestBodyType = {
+                ...defaultRequestBody,
+                search: {
+                  field: 'nameColor',
+                  term: value
                 }
-                getColorList(body, (meta) => {
-                  if (meta?.success) {
-                    setDataSource(
-                      meta.data.map((item: Color) => {
-                        return {
-                          ...item,
-                          key: item.id
-                        } as ColorTableDataType
-                      })
-                    )
-                  }
-                })
               }
-            }}
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-          />
-          <Flex justify='space-between' align='center'>
-            <Flex gap={10} align='center'>
-              <Switch
-                checkedChildren='Admin'
-                unCheckedChildren='Admin'
-                defaultChecked={false}
-                checked={user.isAdmin}
-                onChange={(val) => {
-                  dispatch(setAdminAction(val))
-                }}
-              />
-              <Switch
-                checkedChildren='Date Creation'
-                unCheckedChildren='Date Creation'
-                defaultChecked={dateCreation}
-                onChange={(val) => {
-                  setDateCreation(val)
-                }}
-              />
-              <Switch
-                checkedChildren='Sorted'
-                unCheckedChildren='Sorted'
-                defaultChecked={false}
-                onChange={(val) => {
-                  handleSorted(val ? 'asc' : 'desc', (meta) => {
-                    if (meta.success) {
-                      setDataSource(
-                        meta.data.map((item: Color) => {
-                          return {
-                            ...item,
-                            key: item.id
-                          } as ColorTableDataType
-                        })
-                      )
-                    }
+              getColorList(body, (meta) => {
+                if (meta?.success) {
+                  setDataSource(
+                    meta.data.map((item: Color) => {
+                      return {
+                        ...item,
+                        key: item.id
+                      } as ColorTableDataType
+                    })
+                  )
+                }
+              })
+            }
+          }}
+          searchValue={searchText}
+          onSearchChange={(e) => setSearchText(e.target.value)}
+          onSortChange={(val) => {
+            handleSorted(val ? 'asc' : 'desc', (meta) => {
+              if (meta.success) {
+                setDataSource(
+                  meta.data.map((item: Color) => {
+                    return {
+                      ...item,
+                      key: item.id
+                    } as ColorTableDataType
                   })
-                }}
-              />
-            </Flex>
-            <Flex gap={10} align='center'>
-              <Button
-                onClick={() => {
-                  form.setFieldValue('search', '')
-                  setSearchText('')
-                  getColorList(defaultRequestBody, (meta) => {
-                    if (meta?.success) {
-                      setDataSource(
-                        meta.data.map((item: Color) => {
-                          return {
-                            ...item,
-                            key: item.id
-                          } as ColorTableDataType
-                        })
-                      )
-                      message.success('Reloaded!')
-                    }
+                )
+              }
+            })
+          }}
+          onResetClick={() => {
+            form.setFieldValue('search', '')
+            setSearchText('')
+            getColorList(defaultRequestBody, (meta) => {
+              if (meta?.success) {
+                setDataSource(
+                  meta.data.map((item: Color) => {
+                    return {
+                      ...item,
+                      key: item.id
+                    } as ColorTableDataType
                   })
-                }}
-                className='flex items-center'
-                type='default'
-              >
-                Reset
-              </Button>
-
-              {user.isAdmin && (
-                <Button
-                  onClick={() => {
-                    setOpenModal(true)
-                  }}
-                  className='flex items-center'
-                  type='primary'
-                  icon={<Plus size={20} />}
-                >
-                  New
-                </Button>
-              )}
-            </Flex>
-          </Flex>
-
+                )
+                message.success('Reloaded!')
+              }
+            })
+          }}
+          dateCreation={dateCreation}
+          onDateCreationChange={setDateCreation}
+          onAddNewClick={() => setOpenModal(true)}
+        >
           <List
             className={props.className}
             itemLayout='vertical'
@@ -227,186 +161,48 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
             loading={loading}
             dataSource={dataSource}
             renderItem={(item) => (
-              <List.Item key={item.id} className='mb-5 rounded-sm bg-white'>
-                <Flex vertical className='w-full' gap={10}>
-                  <Flex align='center' justify='space-between'>
-                    {isEditing(item.id!) && user.isAdmin ? (
-                      <Form.Item
-                        name={`nameColor/${item.id!}`}
-                        initialValue={item.nameColor}
-                      >
-                        <Input size='large' />
-                      </Form.Item>
-                    ) : (
-                      <Typography.Title
-                        copyable
-                        className='m-0 h-fit p-0'
-                        level={4}
-                      >
-                        {item.nameColor}
-                      </Typography.Title>
-                    )}
-
-                    {isEditing(item.id!) ? (
-                      <Flex gap={5}>
-                        <Button
-                          type='primary'
-                          onClick={() =>
-                            handleStartSaveEditing(
-                              item.id!,
-                              (productToSave) => {
-                                console.log(productToSave)
-                                handleUpdateItem(
-                                  Number(item.id),
-                                  productToSave,
-                                  (meta) => {
-                                    if (meta.success) {
-                                      message.success('Updated!')
-                                    }
-                                  }
-                                )
-                              }
-                            )
-                          }
-                        >
-                          Save
-                        </Button>
-                        <Popconfirm
-                          title={`Sure to cancel?`}
-                          okButtonProps={{
-                            size: 'middle'
-                          }}
-                          cancelButtonProps={{
-                            size: 'middle'
-                          }}
-                          placement='topLeft'
-                          onConfirm={() => {
-                            setEditingKey('')
-                          }}
-                        >
-                          <Button type='dashed'>Cancel</Button>
-                        </Popconfirm>
-                      </Flex>
-                    ) : (
-                      <Flex gap={10}>
-                        {user.isAdmin && (
-                          <Button
-                            type='primary'
-                            disabled={editingKey !== ''}
-                            onClick={() => {
-                              setEditingKey(item.id!)
-                            }}
-                          >
-                            Edit
-                          </Button>
-                        )}
-                        {user.isAdmin && (
-                          <Popconfirm
-                            title={`Sure to delete?`}
-                            onCancel={() => setDeleteKey('')}
-                            onConfirm={() => {
-                              setLoading(true)
-                              handleStartDelete(item.id!, (productToDelete) => {
-                                handleDeleteItem(
-                                  productToDelete.id!,
-                                  (meta) => {
-                                    if (meta.success) {
-                                      setLoading(false)
-                                      message.success('Deleted!')
-                                    }
-                                  }
-                                )
-                              })
-                            }}
-                          >
-                            <Button
-                              type='dashed'
-                              disabled={editingKey !== ''}
-                              onClick={() => setDeleteKey(item.id!)}
-                            >
-                              Delete
-                            </Button>
-                          </Popconfirm>
-                        )}
-                      </Flex>
-                    )}
-                  </Flex>
-                  <Flex align='center' justify='start' gap={5}>
-                    <Typography.Text
-                      type='secondary'
-                      className='w-40 font-medium'
-                    >
-                      Mã màu
-                    </Typography.Text>
-                    {isEditing(item.id!) ? (
-                      <Form.Item
-                        name={`hexColor/${item.id!}`}
-                        initialValue={item.hexColor}
-                        className='m-0 w-full'
-                      >
-                        <ColorPicker
-                          size='middle'
-                          className='w-full'
-                          defaultFormat='hex'
-                          disabled={editingKey !== item.id}
-                          showText
-                        />
-                      </Form.Item>
-                    ) : (
-                      <Flex className='w-full' align='center' justify='start'>
-                        <ColorPicker
-                          className='w-full'
-                          defaultValue={item.hexColor}
-                          size='middle'
-                          disabled={editingKey !== item.id}
-                          showText
-                        />
-                      </Flex>
-                    )}
-                  </Flex>
-                  {dateCreation && (
-                    <Flex vertical gap={10}>
-                      <Flex align='center' justify='start' gap={5}>
-                        <Typography.Text
-                          type='secondary'
-                          className='w-40 font-medium'
-                        >
-                          Created at
-                        </Typography.Text>
-
-                        <Input
-                          name='createdAt'
-                          className='w-full'
-                          defaultValue={DayJS(item.createdAt).format(
-                            DatePattern.display
-                          )}
-                          readOnly
-                        />
-                      </Flex>
-                      <Flex align='center' justify='start' gap={5}>
-                        <Typography.Text
-                          type='secondary'
-                          className='w-40 font-medium'
-                        >
-                          Updated at
-                        </Typography.Text>
-
-                        <Input
-                          name='updatedAt'
-                          className='w-full'
-                          defaultValue={DayJS(item.updatedAt).format(
-                            DatePattern.display
-                          )}
-                          readOnly
-                        />
-                      </Flex>
-                    </Flex>
-                  )}
-                </Flex>
-              </List.Item>
+              <ColorListItem
+                data={item}
+                editingKey={editingKey}
+                isEditing={isEditing(item.key!)}
+                onSaveClick={() => {
+                  handleStartSaveEditing(item.key!, (itemToSave) => {
+                    console.log(itemToSave)
+                    const hexColor = itemToSave.hexColor as AntColor
+                    handleUpdateItem(
+                      Number(item.key),
+                      {
+                        hexColor: hexColor.toHexString(),
+                        nameColor: itemToSave.nameColor
+                      },
+                      (meta) => {
+                        if (meta.success) {
+                          message.success('Updated!')
+                        }
+                      }
+                    )
+                  })
+                }}
+                dateCreation={dateCreation}
+                onClickStartEditing={() => handleStartEditing(item.key!)}
+                onConfirmCancelEditing={() => handleConfirmCancelEditing()}
+                onConfirmCancelDeleting={() => handleConfirmCancelDeleting()}
+                onConfirmDelete={() => {
+                  setLoading(true)
+                  handleStartDeleting(item.key!, (productToDelete) => {
+                    handleDeleteItem(Number(productToDelete.key), (meta) => {
+                      if (meta.success) {
+                        setLoading(false)
+                        message.success('Deleted!')
+                      }
+                    })
+                  })
+                }}
+                onStartDeleting={() => setDeleteKey(item.key)}
+              />
             )}
           />
-        </Flex>
+        </BaseLayout>
       </Form>
       {openModal && (
         <ModalAddNewColor
@@ -418,8 +214,12 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
                 const data = meta?.data as Color
                 console.log(data)
                 const newDataSource = [...dataSource]
-                newDataSource.unshift(data)
+                newDataSource.unshift({
+                  ...data,
+                  key: data.id
+                } as TableListDataType<ColorTableDataType>)
                 setDataSource(newDataSource)
+                console.log(newDataSource)
                 message.success('Success!', 1)
               }
             })

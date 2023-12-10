@@ -9,6 +9,7 @@ import { RootState } from '~/store/store'
 interface Props extends React.HTMLAttributes<HTMLElement> {
   searchPlaceHolder?: string
   searchValue?: string | undefined
+  dateCreation?: boolean
   onSearch?: (
     value: string,
     event?:
@@ -35,6 +36,7 @@ const BaseLayout: React.FC<Props> = ({
   onSearchChange,
   onSearch,
   onSortChange,
+  dateCreation,
   onDateCreationChange,
   onResetClick,
   onAddNewClick,
@@ -75,12 +77,14 @@ const BaseLayout: React.FC<Props> = ({
               defaultChecked={false}
               onChange={onSortChange}
             />
-            <Switch
-              checkedChildren='DateCreation'
-              unCheckedChildren='DateCreation'
-              defaultChecked={false}
-              onChange={onDateCreationChange}
-            />
+            {user.isAdmin && (
+              <Switch
+                checkedChildren='DateCreation'
+                unCheckedChildren='DateCreation'
+                defaultChecked={dateCreation}
+                onChange={onDateCreationChange}
+              />
+            )}
           </Flex>
           <Flex gap={10} align='center'>
             <Button

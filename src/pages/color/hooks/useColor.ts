@@ -85,11 +85,11 @@ export default function useColor() {
 
   const handleUpdateItem = async (
     id: number,
-    ColorToUpdate: Color,
+    itemToUpdate: Color,
     onSuccess?: (data: ResponseDataType) => void
   ) => {
     setLoading(true)
-    await ColorAPI.updateItemByID(id, ColorToUpdate)
+    await ColorAPI.updateItemByPk(id, itemToUpdate)
       .then((meta) => {
         if (meta?.success) {
           setLoading(true)
@@ -107,7 +107,7 @@ export default function useColor() {
     onSuccess?: (meta: ResponseDataType) => void
   ) => {
     setLoading(true)
-    await ColorAPI.updateItemByID(id, { status: 'deleted' })
+    await ColorAPI.updateItemByPk(id, { status: 'deleted' })
       .then((meta) => {
         if (meta?.success) {
           setLoading(true)
