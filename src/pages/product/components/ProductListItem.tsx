@@ -9,12 +9,16 @@ import {
   InputNumber,
   List,
   Popconfirm,
+  Select,
   Typography
 } from 'antd'
-import React, { memo } from 'react'
+import React, { memo, useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
+import { defaultRequestBody } from '~/api/client'
+import ColorAPI from '~/api/services/ColorAPI'
 import ProgressBar from '~/components/ui/ProgressBar'
 import { RootState } from '~/store/store'
+import { Color } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import { ProductTableDataType } from '../type'
 
@@ -43,6 +47,19 @@ const ProductListItem: React.FC<Props> = ({
   ...props
 }) => {
   const user = useSelector((state: RootState) => state.user)
+  const [colors, setColors] = useState<Color[]>([])
+
+  useEffect(() => {
+    if (isEditing) {
+      ColorAPI.getItems(defaultRequestBody).then((meta) => {
+        if (meta?.success) {
+          const items = meta.data as Color[]
+          console.log(items)
+          setColors(items)
+        }
+      })
+    }
+  }, [isEditing])
 
   return (
     <List.Item {...props} key={data.key} className='mb-5 rounded-sm bg-white'>
@@ -112,23 +129,45 @@ const ProductListItem: React.FC<Props> = ({
           </Typography.Text>
           <Flex className='w-full' align='center' justify='start'>
             {isEditing ? (
-              <Form.Item
-                name='color'
-                className='m-0 w-full'
-                initialValue={data.productColor?.hexColor}
-              >
-                <ColorPicker
+              <Form.Item name='colorID' className='m-0 w-full'>
+                <Select
+                  placeholder='Select color...'
+                  options={colors.map((item) => {
+                    return {
+                      label: item.nameColor,
+                      value: item.id,
+                      key: item.hexColor
+                    }
+                  })}
+                  defaultValue={data.productColor?.color?.id}
+                  optionRender={(ori, info) => {
+                    return (
+                      <>
+                        <Flex
+                          justify='space-between'
+                          align='center'
+                          key={info.index}
+                        >
+                          <Typography.Text>{ori.label}</Typography.Text>
+                          <div
+                            className='h-6 w-6 rounded-sm'
+                            style={{
+                              backgroundColor: `${ori.key}`
+                            }}
+                          />
+                        </Flex>
+                      </>
+                    )
+                  }}
                   className='w-full'
-                  size='middle'
-                  disabled={!isEditing}
-                  showText
                 />
               </Form.Item>
             ) : (
               <ColorPicker
                 className='w-full'
-                defaultValue={data.productColor?.hexColor}
+                defaultValue={data.productColor?.color?.hexColor}
                 size='middle'
+                format='hex'
                 disabled={!isEditing}
                 showText
               />

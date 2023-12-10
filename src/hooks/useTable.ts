@@ -1,39 +1,34 @@
 import { Form } from 'antd'
 import React, { useState } from 'react'
+import { TableListDataType } from '~/typing'
 
-export type TableDataType<T> = {
-  key: React.Key
-  data: T
-}
-
-export default function useTable<T>(initData: TableDataType<T>[]) {
+export default function useTable<T>(initData: TableListDataType<T>[]) {
   const [form] = Form.useForm()
-  const [dataSource, setDataSource] = useState<TableDataType<T>[]>(initData)
+  const [dataSource, setDataSource] = useState<TableListDataType<T>[]>(initData)
   const [editingKey, setEditingKey] = useState<React.Key>('')
   const [deleteKey, setDeleteKey] = useState<React.Key>('')
-
   const isEditing = (key: React.Key) => key === editingKey
-
-  const isDisableEditing: boolean = editingKey !== ''
-
-  const isDisableDeleting: boolean = deleteKey !== ''
-
   const isDelete = (key: React.Key) => key === deleteKey
 
   // Add row
-  async function handleAddRow(item: TableDataType<T>) {
+  async function handleStartAddNew(item: TableListDataType<T>) {
     const newData = [...dataSource]
     newData.push(item)
     setDataSource(newData)
   }
 
-  // Delete row
-  function handleStartDeleteRow(key: React.Key) {
-    setDeleteKey(key)
+  // Edit row
+  function handleStartEditing(record: Partial<T> & { key?: React.Key }) {
+    // Can using record to set default value form editing..
+    setEditingKey(record.key!)
+  }
+
+  const handleConfirmCancelEditing = () => {
+    setEditingKey('')
   }
 
   // Delete row
-  function handleDeleteRow(
+  function handleStartDeleting(
     key: React.Key,
     onDelete?: (key: React.Key) => void
   ) {
@@ -48,23 +43,12 @@ export default function useTable<T>(initData: TableDataType<T>[]) {
   }
 
   // Cancel delete row
-  function handleCancelDeleteRow() {
+  const handleConfirmCancelDeleting = () => {
     setDeleteKey('')
   }
 
-  // Edit row
-  function handleStartEditingRow(record: Partial<T> & { key?: React.Key }) {
-    // Can using record to set default value form editing..
-    setEditingKey(record.key!)
-  }
-
-  // Confirm cancel editing row
-  function handleCancelEditingRow() {
-    setEditingKey('')
-  }
-
   // Save editing row
-  async function handleStartSaveEditingRow(
+  async function handleStartSaveEditing(
     key: React.Key,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onSave?: (row: any) => void
@@ -98,19 +82,18 @@ export default function useTable<T>(initData: TableDataType<T>[]) {
   return {
     form,
     isEditing,
-    isDisableEditing,
-    isDisableDeleting,
     isDelete,
     editingKey,
     deleteKey,
     dataSource,
     setDataSource,
-    handleAddRow,
-    handleStartEditingRow,
-    handleCancelEditingRow,
-    handleDeleteRow,
-    handleStartDeleteRow,
-    handleCancelDeleteRow,
-    handleStartSaveEditingRow
+    setEditingKey,
+    setDeleteKey,
+    handleStartDeleting,
+    handleStartEditing,
+    handleStartSaveEditing,
+    handleConfirmCancelEditing,
+    handleConfirmCancelDeleting,
+    handleStartAddNew
   }
 }

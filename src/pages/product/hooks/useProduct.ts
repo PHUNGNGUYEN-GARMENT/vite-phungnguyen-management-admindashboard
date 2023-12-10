@@ -6,6 +6,7 @@ import {
   defaultRequestBody
 } from '~/api/client'
 import ProductAPI from '~/api/services/ProductAPI'
+import ProductColorAPI from '~/api/services/ProductColorAPI'
 import { Product, SortDirection } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 
@@ -17,7 +18,8 @@ export default function useProduct() {
 
   const handleAddNewProduct = async (
     form: FormInstance<Product>,
-    onSuccess?: (data: ResponseDataType) => void
+    onSuccess?: (data: ResponseDataType) => void,
+    onFailed?: (error: Error) => void
   ) => {
     setLoading(true)
     try {
@@ -30,16 +32,41 @@ export default function useProduct() {
         dateOutputFCR: DayJS(row.dateOutputFCR).format(DatePattern.iso8601),
         dateInputNPL: DayJS(row.dateOutputFCR).format(DatePattern.iso8601)
       } as Product
-      console.log(productConverted)
-      await ProductAPI.createNewItem(productConverted, row.colorID).then(
-        (meta) => {
+      console.log(row)
+      ProductAPI.createNewItem(productConverted)
+        .then((meta) => {
+          const productNew: Product = meta?.data
           setLoading(true)
           if (meta?.success) {
-            onSuccess?.(meta)
-            setOpenModal(false)
+            ProductColorAPI.createNewItem({
+              productID: productNew.id,
+              colorID: row.colorID
+            }).then((metaProductColor) => {
+              if (metaProductColor?.success) {
+                onSuccess?.(meta)
+                setOpenModal(false)
+              } else {
+                onFailed?.({
+                  message:
+                    metaProductColor?.message ??
+                    'Failed to create ProductColor',
+                  name: 'ProductColor'
+                })
+              }
+            })
+          } else {
+            onFailed?.({
+              message: meta?.message ?? 'Failed to create Product',
+              name: 'Product'
+            })
           }
-        }
-      )
+        })
+        .catch((err) => {
+          onFailed?.(err)
+        })
+        .finally(() => {
+          setLoading(false)
+        })
     } catch (error) {
       console.log('HandleAddNew with error: ', error)
     } finally {
@@ -98,7 +125,7 @@ export default function useProduct() {
       productToUpdate
     })
     setLoading(true)
-    await ProductAPI.updateItemByID(id, productToUpdate)
+    await ProductAPI.updateItemByPk(id, productToUpdate)
       .then((meta) => {
         if (meta?.success) {
           setLoading(true)
@@ -116,7 +143,7 @@ export default function useProduct() {
     onSuccess?: (meta: ResponseDataType) => void
   ) => {
     setLoading(true)
-    await ProductAPI.updateItemByID(id, { status: 'deleted' })
+    await ProductAPI.updateItemByPk(id, { status: 'deleted' })
       .then((meta) => {
         if (meta?.success) {
           setLoading(true)

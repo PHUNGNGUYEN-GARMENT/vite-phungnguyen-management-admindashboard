@@ -106,16 +106,8 @@ const ModalAddNewProduct: React.FC<Props> = ({
             <Typography.Text className='w-24 flex-shrink-0'>
               Màu:
             </Typography.Text>
-            <Form.Item
-              name='colorID'
-              className='m-0 w-full'
-              rules={[
-                {
-                  required: true,
-                  message: `Please select a color!`
-                }
-              ]}
-            >
+
+            <Form.Item name='colorID'>
               <Select
                 placeholder='Select color...'
                 options={colors.map((item) => {
@@ -127,19 +119,21 @@ const ModalAddNewProduct: React.FC<Props> = ({
                 })}
                 optionRender={(ori, info) => {
                   return (
-                    <Flex
-                      justify='space-between'
-                      align='center'
-                      key={info.index}
-                    >
-                      <Typography.Text>{ori.label}</Typography.Text>
-                      <div
-                        className='h-6 w-6 rounded-sm'
-                        style={{
-                          backgroundColor: `${ori.key}`
-                        }}
-                      />
-                    </Flex>
+                    <>
+                      <Flex
+                        justify='space-between'
+                        align='center'
+                        key={info.index}
+                      >
+                        <Typography.Text>{ori.label}</Typography.Text>
+                        <div
+                          className='h-6 w-6 rounded-sm'
+                          style={{
+                            backgroundColor: `${ori.key}`
+                          }}
+                        />
+                      </Flex>
+                    </>
                   )
                 }}
                 className='w-full'

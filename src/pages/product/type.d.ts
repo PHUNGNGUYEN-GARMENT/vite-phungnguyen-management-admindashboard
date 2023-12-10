@@ -1,4 +1,4 @@
-import { ProductColor } from "~/typing"
+import { ProductColor } from '~/typing'
 
 export type ProductTableDataType = {
   key?: React.Key

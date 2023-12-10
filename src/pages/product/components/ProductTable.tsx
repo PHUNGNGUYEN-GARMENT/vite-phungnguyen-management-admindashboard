@@ -3,20 +3,17 @@ import {
   Button,
   Flex,
   Form,
-  Input,
   List,
   Popconfirm,
-  Switch,
   Table,
   Typography
 } from 'antd'
-import { Plus } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { RequestBodyType, defaultRequestBody } from '~/api/client'
+import BaseLayout from '~/components/layout/BaseLayout'
 import ProgressBar from '~/components/ui/ProgressBar'
-import useTable, { TableDataType } from '~/hooks/useTable'
-import { setAdminAction } from '~/store/actions-creator'
+import useTable from '~/hooks/useTable'
 import { RootState } from '~/store/store'
 import { Product } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
@@ -25,42 +22,39 @@ import { ProductTableDataType } from '../type'
 import EditableCell, { EditableTableProps } from './EditableCell'
 import ModalAddNewProduct from './ModalAddNewProduct'
 
-const { Search } = Input
-
 type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>
 
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 const ProductTable: React.FC<Props> = ({ ...props }) => {
   const user = useSelector((state: RootState) => state.user)
-  const [dateCreation, setDateCreation] = useState<boolean>(false)
-  const dispatch = useDispatch()
+  const [isDateCreation, setIsDateCreation] = useState<boolean>(false)
   const { message } = AntApp.useApp()
   const {
     metaData,
     loading,
+    setLoading,
     openModal,
     setOpenModal,
     searchText,
     setSearchText,
-    handleAddNew,
+    handleAddNewProduct,
     getProductList,
-    handleUpdateItem,
-    handleDeleteItem,
+    handleUpdateProductItem,
+    handleDeleteProductItem,
     handleSorted
   } = useProduct()
   const {
     form,
     isEditing,
-    isDisableEditing,
+    editingKey,
     dataSource,
     setDataSource,
-    handleStartEditingRow,
-    handleStartSaveEditingRow,
-    handleCancelEditingRow,
-    handleStartDeleteRow,
-    handleDeleteRow,
-    handleCancelDeleteRow
+    handleStartDeleting,
+    handleStartEditing,
+    handleStartSaveEditing,
+    handleConfirmCancelEditing,
+    handleConfirmCancelDeleting
   } = useTable<ProductTableDataType>([])
 
   console.log('Load product table...')
@@ -93,23 +87,31 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
           <Flex className='flex flex-col gap-3 lg:flex-row'>
             <Button
               type='primary'
-              onClick={() =>
-                handleStartSaveEditingRow(record.key!, (row: Product) => {
-                  handleUpdateItem(Number(record.key)!, row, (meta) => {
-                    if (meta.success) {
-                      message.success('Updated!')
+              onClick={() => {
+                handleStartSaveEditing(record.key!, (productToSave) => {
+                  console.log(productToSave)
+                  handleUpdateProductItem(
+                    Number(record.key),
+                    {
+                      productCode: productToSave.productCode,
+                      quantityPO: productToSave.quantityPO,
+                      dateOutputFCR: productToSave.dateOutputFCR,
+                      dateInputNPL: productToSave.dateInputNPL
+                    },
+                    (meta) => {
+                      if (meta.success) {
+                        message.success('Updated!')
+                      }
                     }
-                  })
+                  )
                 })
-              }
+              }}
             >
               Save
             </Button>
             <Popconfirm
               title={`Sure to cancel?`}
-              onConfirm={() => {
-                handleCancelEditingRow()
-              }}
+              onConfirm={() => handleConfirmCancelEditing()}
             >
               <Button type='dashed'>Cancel</Button>
             </Popconfirm>
@@ -118,7 +120,7 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
           <Flex gap={10}>
             <Button
               type='primary'
-              disabled={isDisableEditing}
+              disabled={editingKey !== ''}
               onClick={() => {
                 form.setFields([
                   { name: 'productCode', value: record.productCode },
@@ -137,7 +139,7 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
                       : ''
                   }
                 ])
-                handleStartEditingRow(record)
+                handleStartEditing(record)
               }}
             >
               Edit
@@ -145,20 +147,21 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
             {user.isAdmin && (
               <Popconfirm
                 title={`Sure to delete?`}
-                onCancel={() => handleCancelDeleteRow()}
-                onConfirm={() =>
-                  handleDeleteRow(record.key!, (key) => {
-                    handleDeleteItem(Number(key), (meta) => {
-                      if (meta.success) {
-                        message.success('Deleted!')
-                      }
-                    })
+                onCancel={() => handleConfirmCancelDeleting()}
+                onConfirm={() => {
+                  setLoading(true)
+                  handleStartDeleting(record.key!)
+                  handleDeleteProductItem(Number(record.key!), (meta) => {
+                    if (meta.success) {
+                      setLoading(false)
+                      message.success('Deleted!')
+                    }
                   })
-                }
+                }}
               >
                 <Button
                   type='dashed'
-                  onClick={() => handleStartDeleteRow(record.key!)}
+                  onClick={() => handleStartDeleting(record.key!)}
                 >
                   Delete
                 </Button>
@@ -335,121 +338,66 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
   return (
     <>
       <Form {...props} form={form} component={false}>
-        <Flex vertical gap={20}>
-          <Flex
-            justify='space-between'
-            align='center'
-            className='rounded-sm bg-white px-5 py-3'
-          >
-            <Flex gap={10} className='m-0 w-full' align='center'>
-              <Switch
-                checkedChildren='Admin'
-                unCheckedChildren='Admin'
-                defaultChecked={user.isAdmin}
-                onChange={(val) => {
-                  dispatch(setAdminAction(val))
-                }}
-              />
-              <Switch
-                checkedChildren='Date Creation'
-                unCheckedChildren='Date Creation'
-                defaultChecked={dateCreation}
-                onChange={(val) => {
-                  setDateCreation(val)
-                }}
-              />
-              <Search
-                placeholder='Search code...'
-                size='middle'
-                enterButton
-                allowClear
-                className='w-1/2'
-                onSearch={(value) => {
-                  if (value.length > 0) {
-                    const body: RequestBodyType = {
-                      ...defaultRequestBody,
-                      search: {
-                        field: 'productCode',
-                        term: value
-                      }
-                    }
-                    getProductList(body, (meta) => {
-                      if (meta?.success) {
-                        setDataSource(
-                          meta.data.map((item: Product) => {
-                            return {
-                              ...item,
-                              key: item.id
-                            } as ProductTableDataType
-                          })
-                        )
-                      }
+        <BaseLayout
+          onSearch={(value) => {
+            if (value.length > 0) {
+              const body: RequestBodyType = {
+                ...defaultRequestBody,
+                search: {
+                  field: 'productCode',
+                  term: value
+                }
+              }
+              getProductList(body, (meta) => {
+                if (meta?.success) {
+                  setDataSource(
+                    meta.data.map((item: Product) => {
+                      return {
+                        ...item,
+                        key: item.id
+                      } as ProductTableDataType
                     })
-                  }
-                }}
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-              />
-            </Flex>
-            <Flex gap={10} align='center'>
-              <Switch
-                checkedChildren='Sorted'
-                unCheckedChildren='Sorted'
-                onChange={async (val) => {
-                  await handleSorted(val ? 'asc' : 'desc', (meta) => {
-                    if (meta.success) {
-                      setDataSource(
-                        meta.data.map((item: Product) => {
-                          return {
-                            ...item,
-                            key: item.id
-                          } as ProductTableDataType
-                        })
-                      )
-                    }
+                  )
+                }
+              })
+            }
+          }}
+          onDateCreationChange={(val) => setIsDateCreation(val)}
+          searchValue={searchText}
+          onSearchChange={(e) => setSearchText(e.target.value)}
+          onSortChange={(val) => {
+            handleSorted(val ? 'asc' : 'desc', (meta) => {
+              if (meta.success) {
+                setDataSource(
+                  meta.data.map((item: Product) => {
+                    return {
+                      ...item,
+                      key: item.id
+                    } as ProductTableDataType
                   })
-                }}
-              />
-              <Button
-                onClick={() => {
-                  form.setFieldValue('search', '')
-                  setSearchText('')
-                  getProductList(defaultRequestBody, (meta) => {
-                    if (meta?.success) {
-                      setDataSource(
-                        meta.data.map((item: Product) => {
-                          return {
-                            ...item,
-                            key: item.id
-                          } as ProductTableDataType
-                        })
-                      )
-                      message.success('Reloaded!')
-                    }
+                )
+              }
+            })
+          }}
+          onResetClick={() => {
+            form.setFieldValue('search', '')
+            setSearchText('')
+            getProductList(defaultRequestBody, (meta) => {
+              if (meta?.success) {
+                setDataSource(
+                  meta.data.map((item: Product) => {
+                    return {
+                      ...item,
+                      key: item.id
+                    } as ProductTableDataType
                   })
-                }}
-                className='flex items-center'
-                type='default'
-              >
-                Reset
-              </Button>
-
-              {user.isAdmin && (
-                <Flex gap={10} align='center'>
-                  <Button
-                    onClick={() => {
-                      setOpenModal(true)
-                    }}
-                    className='flex items-center'
-                    type='primary'
-                    icon={<Plus size={20} />}
-                  >
-                    New
-                  </Button>
-                </Flex>
-              )}
-            </Flex>
-          </Flex>
+                )
+                message.success('Reloaded!')
+              }
+            })
+          }}
+          onAddNewClick={() => setOpenModal(true)}
+        >
           <Table
             components={{
               body: {
@@ -461,7 +409,7 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
             dataSource={dataSource}
             columns={mergedColumns(
               user.isAdmin
-                ? dateCreation
+                ? isDateCreation
                   ? [...commonCols, ...dateCreationColumns, ...actionsCols]
                   : adminColumns
                 : staffColumns
@@ -492,32 +440,29 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
                     )
                   }
                 })
-                handleCancelEditingRow()
-                handleCancelDeleteRow()
+                handleConfirmCancelEditing()
+                handleConfirmCancelDeleting()
               },
               current: metaData?.page,
               pageSize: 5,
               total: metaData?.total
             }}
           />
-        </Flex>
+        </BaseLayout>
       </Form>
       {openModal && (
         <ModalAddNewProduct
           openModal={openModal}
           setOpenModal={setOpenModal}
           onAddNew={(_form) => {
-            handleAddNew(_form, (meta) => {
+            handleAddNewProduct(_form, (meta) => {
               if (meta.success) {
                 const data = meta?.data as Product
                 const newDataSource = [...dataSource]
-                const itemNew = {
-                  key: data.id!,
-                  ...data
-                } as TableDataType<ProductTableDataType>
-                newDataSource.unshift(itemNew)
-                setDataSource(newDataSource)
-                message.success('Success!', 1)
+                console.log({ newDataSource, data })
+                // newDataSource.unshift(data)
+                // setDataSource(newDataSource)
+                // message.success('Success!', 1)
               }
             })
           }}

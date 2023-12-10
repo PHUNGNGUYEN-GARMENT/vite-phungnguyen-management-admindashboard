@@ -22,6 +22,7 @@ export type ResponseDataType = {
 export type RequestBodyType = {
   filter?: {
     status?: ItemStatusType
+    field?: string
     items?: number[] // items: mảng id : default -1: Lấy tất cả post
   }
   paginator?: {
@@ -41,7 +42,8 @@ export type RequestBodyType = {
 export const defaultRequestBody: RequestBodyType = {
   filter: {
     items: [-1],
-    status: 'active'
+    status: 'active',
+    field: 'id'
   },
   paginator: { page: 1, pageSize: 5 },
   search: {

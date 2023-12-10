@@ -28,6 +28,11 @@ export type StepRound = {
   type: StatusType
 }
 
+export type TableListDataType<T> = {
+  key: React.Key
+  data: T
+}
+
 export type User = {
   id?: number
   email?: string
@@ -44,7 +49,6 @@ export type Product = {
   quantityPO?: number
   dateInputNPL?: string
   dateOutputFCR?: string
-  productColor?: ProductColor
   progress?: {
     sewing?: number
     iron?: number
@@ -71,6 +75,8 @@ export type ProductColor = {
   colorID?: number
   productID?: number
   status?: ItemStatusType
+  color?: Color
+  product?: Product
   createdAt?: string
   updatedAt?: string
 }

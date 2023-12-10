@@ -22,6 +22,7 @@ interface Props extends React.HTMLAttributes<HTMLElement> {
   ) => void
   onSearchChange?: React.ChangeEventHandler<HTMLInputElement> | undefined
   onSortChange?: SwitchChangeEventHandler
+  onDateCreationChange?: SwitchChangeEventHandler
   onResetClick?: React.MouseEventHandler<HTMLElement> | undefined
   onAddNewClick?: React.MouseEventHandler<HTMLElement> | undefined
 }
@@ -34,6 +35,7 @@ const BaseLayout: React.FC<Props> = ({
   onSearchChange,
   onSearch,
   onSortChange,
+  onDateCreationChange,
   onResetClick,
   onAddNewClick,
   children,
@@ -72,6 +74,12 @@ const BaseLayout: React.FC<Props> = ({
               unCheckedChildren='Sorted'
               defaultChecked={false}
               onChange={onSortChange}
+            />
+            <Switch
+              checkedChildren='DateCreation'
+              unCheckedChildren='DateCreation'
+              defaultChecked={false}
+              onChange={onDateCreationChange}
             />
           </Flex>
           <Flex gap={10} align='center'>

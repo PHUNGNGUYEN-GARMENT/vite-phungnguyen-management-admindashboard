@@ -1,9 +1,10 @@
 import { App as AntApp, Form, List } from 'antd'
 import React, { useEffect } from 'react'
 import { RequestBodyType, defaultRequestBody } from '~/api/client'
+import ProductColorAPI from '~/api/services/ProductColorAPI'
 import BaseLayout from '~/components/layout/BaseLayout'
-import useList, { ListDataType } from '~/hooks/useList'
-import { Product } from '~/typing'
+import useList from '~/hooks/useList'
+import { Product, ProductColor } from '~/typing'
 import useProduct from '../hooks/useProduct'
 import { ProductTableDataType } from '../type'
 import ModalAddNewProduct from './ModalAddNewProduct'
@@ -36,153 +37,103 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
     handleStartDeleting,
     handleStartSaveEditing,
     handleStartEditing,
-    handleCancelEditing,
+    handleConfirmCancelEditing,
     handleConfirmCancelDeleting
   } = useList<ProductTableDataType>([])
   const { message } = AntApp.useApp()
   console.log('Product page loading...')
 
   useEffect(() => {
-    getProductList(defaultRequestBody, (meta) => {
+    getProductList(defaultRequestBody, async (meta) => {
       if (meta?.success) {
-        setDataSource(
-          meta.data.map((item: Product) => {
-            return {
-              ...item,
-              key: item.id
-            } as ProductTableDataType
-          })
-        )
+        const products = meta.data as Product[]
+        await ProductColorAPI.getItems({
+          ...defaultRequestBody,
+          filter: {
+            status: 'active',
+            field: 'productID',
+            items: products.map((item) => item.id) as number[]
+          }
+        }).then((productColorMeta) => {
+          if (productColorMeta?.success) {
+            const productColors = productColorMeta.data as ProductColor[]
+            setDataSource(
+              meta.data.map((item: Product) => {
+                return {
+                  ...item,
+                  productColor: productColors.find(
+                    (col) => col.productID === item.id
+                  ),
+                  key: item.id
+                } as ProductTableDataType
+              })
+            )
+          }
+        })
       }
     })
   }, [])
-
-  // Nơi tập hợp function xử lý những case chung
-
-  function handleSearch(value: string) {
-    if (value.length > 0) {
-      const body: RequestBodyType = {
-        ...defaultRequestBody,
-        search: {
-          field: 'productCode',
-          term: value
-        }
-      }
-      getProductList(body, (meta) => {
-        if (meta?.success) {
-          setDataSource(
-            meta.data.map((item: Product) => {
-              return {
-                ...item,
-                key: item.id
-              } as ProductTableDataType
-            })
-          )
-        }
-      })
-    }
-  }
-
-  function handleSortChange(value: boolean) {
-    handleSorted(value ? 'asc' : 'desc', (meta) => {
-      if (meta.success) {
-        setDataSource(
-          meta.data.map((item: Product) => {
-            return {
-              ...item,
-              key: item.id
-            } as ProductTableDataType
-          })
-        )
-      }
-    })
-  }
-
-  function handleReset() {
-    form.setFieldValue('search', '')
-    setSearchText('')
-    getProductList(defaultRequestBody, (meta) => {
-      if (meta?.success) {
-        setDataSource(
-          meta.data.map((item: Product) => {
-            return {
-              ...item,
-              key: item.id
-            } as ProductTableDataType
-          })
-        )
-        message.success('Reloaded!')
-      }
-    })
-  }
-
-  function handlePaginationChange(page: number) {
-    const body: RequestBodyType = {
-      ...defaultRequestBody,
-      paginator: {
-        page: page,
-        pageSize: 5
-      },
-      search: {
-        field: 'productCode',
-        term: searchText
-      }
-    }
-    getProductList(body, (meta) => {
-      if (meta?.success) {
-        setDataSource(
-          meta.data.map((item: Product) => {
-            return {
-              ...item,
-              key: item.id
-            } as ProductTableDataType
-          })
-        )
-      }
-    })
-  }
-
-  function handleSaveClick(item: ListDataType<ProductTableDataType>) {
-    handleStartSaveEditing(item.key!, (productToSave) => {
-      console.log(productToSave)
-      handleUpdateProductItem(
-        Number(item.key),
-        {
-          productCode: productToSave.productCode,
-          quantityPO: productToSave.quantityPO,
-          dateOutputFCR: productToSave.dateOutputFCR,
-          dateInputNPL: productToSave.dateInputNPL
-        },
-        (meta) => {
-          if (meta.success) {
-            message.success('Updated!')
-          }
-        }
-      )
-    })
-  }
-
-  function handleConfirmDelete(item: ListDataType<ProductTableDataType>) {
-    setLoading(true)
-    handleStartDeleting(item.key!, (productToDelete) => {
-      handleDeleteProductItem(Number(productToDelete.key), (meta) => {
-        if (meta.success) {
-          setLoading(false)
-          message.success('Deleted!')
-        }
-      })
-    })
-  }
 
   return (
     <>
       <Form form={form} {...props}>
         <BaseLayout
-          onSearch={(value) => handleSearch(value)}
+          onSearch={(value) => {
+            if (value.length > 0) {
+              const body: RequestBodyType = {
+                ...defaultRequestBody,
+                search: {
+                  field: 'productCode',
+                  term: value
+                }
+              }
+              getProductList(body, (meta) => {
+                if (meta?.success) {
+                  setDataSource(
+                    meta.data.map((item: Product) => {
+                      return {
+                        ...item,
+                        key: item.id
+                      } as ProductTableDataType
+                    })
+                  )
+                }
+              })
+            }
+          }}
           searchValue={searchText}
           onSearchChange={(e) => setSearchText(e.target.value)}
-          onSortChange={(val) => handleSortChange(val)}
-          onResetClick={() => handleReset()}
+          onSortChange={(val) => {
+            handleSorted(val ? 'asc' : 'desc', (meta) => {
+              if (meta.success) {
+                setDataSource(
+                  meta.data.map((item: Product) => {
+                    return {
+                      ...item,
+                      key: item.id
+                    } as ProductTableDataType
+                  })
+                )
+              }
+            })
+          }}
+          onResetClick={() => {
+            form.setFieldValue('search', '')
+            setSearchText('')
+            getProductList(defaultRequestBody, (meta) => {
+              if (meta?.success) {
+                setDataSource(
+                  meta.data.map((item: Product) => {
+                    return {
+                      ...item,
+                      key: item.id
+                    } as ProductTableDataType
+                  })
+                )
+                message.success('Reloaded!')
+              }
+            })
+          }}
           onAddNewClick={() => setOpenModal(true)}
         >
           <List
@@ -190,7 +141,31 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
             itemLayout='vertical'
             size='large'
             pagination={{
-              onChange: (page) => handlePaginationChange(page),
+              onChange: (page) => {
+                const body: RequestBodyType = {
+                  ...defaultRequestBody,
+                  paginator: {
+                    page: page,
+                    pageSize: 5
+                  },
+                  search: {
+                    field: 'productCode',
+                    term: searchText
+                  }
+                }
+                getProductList(body, (meta) => {
+                  if (meta?.success) {
+                    setDataSource(
+                      meta.data.map((item: Product) => {
+                        return {
+                          ...item,
+                          key: item.id
+                        } as ProductTableDataType
+                      })
+                    )
+                  }
+                })
+              },
               current: metaData?.page,
               pageSize: 5,
               total: metaData?.total
@@ -202,11 +177,48 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
                 data={item}
                 editingKey={editingKey}
                 isEditing={isEditing(item.key!)}
-                onSaveClick={() => handleSaveClick(item)}
+                onSaveClick={() => {
+                  handleStartSaveEditing(item.key!, (productToSave) => {
+                    console.log(productToSave)
+                    handleUpdateProductItem(
+                      Number(item.key),
+                      {
+                        productCode: productToSave.productCode,
+                        quantityPO: productToSave.quantityPO,
+                        dateOutputFCR: productToSave.dateOutputFCR,
+                        dateInputNPL: productToSave.dateInputNPL
+                      },
+                      (meta) => {
+                        if (meta.success) {
+                          // ProductColorAPI.updateItemByProductID(
+                          //   Number(item.data.key),
+                          //   {
+                          //     : hexColor
+                          //   }
+                          // )
+                          message.success('Updated!')
+                        }
+                      }
+                    )
+                  })
+                }}
                 onClickStartEditing={() => handleStartEditing(item.key!)}
-                onConfirmCancelEditing={() => handleCancelEditing()}
+                onConfirmCancelEditing={() => handleConfirmCancelEditing()}
                 onConfirmCancelDeleting={() => handleConfirmCancelDeleting()}
-                onConfirmDelete={() => handleConfirmDelete(item)}
+                onConfirmDelete={() => {
+                  setLoading(true)
+                  handleStartDeleting(item.key!, (productToDelete) => {
+                    handleDeleteProductItem(
+                      Number(productToDelete.key),
+                      (meta) => {
+                        if (meta.success) {
+                          setLoading(false)
+                          message.success('Deleted!')
+                        }
+                      }
+                    )
+                  })
+                }}
                 onStartDeleting={() => setDeleteKey(item.key)}
               />
             )}

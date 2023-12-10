@@ -1,14 +1,11 @@
 import { Form } from 'antd'
 import { useState } from 'react'
+import { TableListDataType } from '~/typing'
 
-export type ListDataType<T> = {
-  key: React.Key
-  data: T
-}
-
-const useList = <T>(initValue: ListDataType<T>[]) => {
+const useList = <T>(initValue: TableListDataType<T>[]) => {
   const [form] = Form.useForm<T>()
-  const [dataSource, setDataSource] = useState<ListDataType<T>[]>(initValue)
+  const [dataSource, setDataSource] =
+    useState<TableListDataType<T>[]>(initValue)
   const [editingKey, setEditingKey] = useState<React.Key>('')
   const [deleteKey, setDeleteKey] = useState<React.Key>('')
   const isEditing = (key: React.Key) => key === editingKey
@@ -20,7 +17,7 @@ const useList = <T>(initValue: ListDataType<T>[]) => {
 
   const handleStartDeleting = (
     key: React.Key,
-    onSuccess: (data: ListDataType<T>) => void
+    onSuccess: (data: TableListDataType<T>) => void
   ) => {
     const itemFound = dataSource.find((item) => item.key === key)
     if (itemFound) {
@@ -30,10 +27,6 @@ const useList = <T>(initValue: ListDataType<T>[]) => {
       setDataSource(dataSourceRemovedItem)
       onSuccess(itemFound)
     }
-  }
-
-  const handleCancelEditing = () => {
-    setEditingKey('')
   }
 
   const handleConfirmCancelEditing = () => {
@@ -75,27 +68,26 @@ const useList = <T>(initValue: ListDataType<T>[]) => {
     }
   }
 
-  const handleAddNewItemData = (item: ListDataType<T>) => {
+  const handleStartAddNew = (item: TableListDataType<T>) => {
     console.log('Handle AddNewItem, ', item)
   }
 
   return {
     form,
+    isDelete,
+    isEditing,
     editingKey,
-    setEditingKey,
     deleteKey,
-    setDeleteKey,
     dataSource,
     setDataSource,
-    isEditing,
-    isDelete,
+    setEditingKey,
+    setDeleteKey,
     handleStartDeleting,
     handleStartEditing,
-    handleCancelEditing,
     handleStartSaveEditing,
     handleConfirmCancelEditing,
     handleConfirmCancelDeleting,
-    handleAddNewItemData
+    handleStartAddNew
   }
 }
 
