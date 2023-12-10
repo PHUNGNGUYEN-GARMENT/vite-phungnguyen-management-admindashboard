@@ -8,8 +8,8 @@ import { RootState } from '~/store/store'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
   searchPlaceHolder?: string
+  defaultSearchValue?: string | number | readonly string[] | undefined
   searchValue?: string | undefined
-  dateCreation?: boolean
   onSearch?: (
     value: string,
     event?:
@@ -22,6 +22,7 @@ interface Props extends React.HTMLAttributes<HTMLElement> {
     }
   ) => void
   onSearchChange?: React.ChangeEventHandler<HTMLInputElement> | undefined
+  dateCreation?: boolean
   onSortChange?: SwitchChangeEventHandler
   onDateCreationChange?: SwitchChangeEventHandler
   onResetClick?: React.MouseEventHandler<HTMLElement> | undefined
@@ -31,9 +32,10 @@ interface Props extends React.HTMLAttributes<HTMLElement> {
 const { Search } = Input
 
 const BaseLayout: React.FC<Props> = ({
-  // searchValue,
   searchPlaceHolder,
-  // onSearchChange,
+  onSearchChange,
+  searchValue,
+  defaultSearchValue,
   onSearch,
   onSortChange,
   dateCreation,
@@ -49,15 +51,15 @@ const BaseLayout: React.FC<Props> = ({
   return (
     <div {...props}>
       <Flex vertical gap={20}>
-        <Form.Item name='search'>
+        <Form.Item name='search' initialValue={defaultSearchValue}>
           <Search
             placeholder={searchPlaceHolder ? searchPlaceHolder : 'Search...'}
             size='middle'
             enterButton
             allowClear
+            value={searchValue}
             onSearch={onSearch}
-            // value={searchValue}
-            // onChange={onSearchChange}
+            onChange={onSearchChange}
           />
         </Form.Item>
         <Flex justify='space-between' align='center'>
