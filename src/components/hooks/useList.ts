@@ -67,26 +67,31 @@ const useList = <T>(initValue: TableListDataType<T>[]) => {
     }
   }
 
-  const handleStartAddNew = (item: TableListDataType<T>) => {
-    console.log('Handle AddNewItem, ', item)
+  const handleStartAddNew = (item: T) => {
+    const newDataSource = [...dataSource]
+    newDataSource.unshift({
+      data: { key: -1, ...item },
+      key: -1
+    } as TableListDataType<T>)
+    setDataSource(newDataSource)
   }
 
   return {
     form,
     isDelete,
     isEditing,
-    editingKey,
     deleteKey,
+    setDeleteKey,
+    editingKey,
+    setEditingKey,
     dataSource,
     setDataSource,
-    setEditingKey,
-    setDeleteKey,
-    handleStartDeleting,
+    handleStartAddNew,
     handleStartEditing,
+    handleStartDeleting,
     handleStartSaveEditing,
     handleConfirmCancelEditing,
-    handleConfirmCancelDeleting,
-    handleStartAddNew
+    handleConfirmCancelDeleting
   }
 }
 

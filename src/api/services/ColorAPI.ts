@@ -10,7 +10,7 @@ export default {
       .post(`${NAMESPACE}`, {
         nameColor: item.nameColor,
         hexColor: item.hexColor,
-        status: item.status
+        status: item.status ?? 'active'
       })
       .then((res) => {
         if (res.data) {
@@ -75,7 +75,7 @@ export default {
       .put(`${NAMESPACE}/${id}`, {
         nameColor: itemToUpdate.nameColor,
         hexColor: itemToUpdate.hexColor,
-        status: itemToUpdate.status
+        status: itemToUpdate.status ?? 'active'
       })
       .then((res) => {
         if (res.data) {

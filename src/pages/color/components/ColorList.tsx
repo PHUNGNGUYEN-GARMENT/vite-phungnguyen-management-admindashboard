@@ -26,9 +26,8 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
     setLoading,
     openModal,
     setOpenModal,
-    searchText,
-    setSearchText,
-    handleAddNew,
+    // setSearchText,
+    handleAddNewItem,
     getColorList,
     handleDeleteItem,
     handleSorted
@@ -40,9 +39,10 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
     dataSource,
     setDataSource,
     isEditing,
+    handleStartAddNew,
+    handleStartEditing,
     handleStartDeleting,
     handleStartSaveEditing,
-    handleStartEditing,
     handleConfirmCancelEditing,
     handleConfirmCancelDeleting
   } = useList<ColorTableDataType>([])
@@ -89,8 +89,7 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
               })
             }
           }}
-          searchValue={searchText}
-          onSearchChange={(e) => setSearchText(e.target.value)}
+          // onSearchChange={(e) => setSearchText(e.target.value)}
           onSortChange={(val) => {
             handleSorted(val ? 'asc' : 'desc', (meta) => {
               if (meta.success) {
@@ -100,7 +99,7 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
           }}
           onResetClick={() => {
             form.setFieldValue('search', '')
-            setSearchText('')
+            // setSearchText('')
             getColorList(defaultRequestBody, (meta) => {
               if (meta?.success) {
                 handleProgressDataSource(meta)
@@ -126,7 +125,7 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
                   },
                   search: {
                     field: 'nameColor',
-                    term: searchText
+                    term: form.getFieldValue('search') ?? ''
                   }
                 }
                 getColorList(body, (meta) => {
@@ -203,19 +202,12 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
         <ModalAddNewColor
           openModal={openModal}
           setOpenModal={setOpenModal}
-          onAddNew={(_form) => {
-            handleAddNew(_form, (meta) => {
+          onAddNew={(addNewForm) => {
+            console.log(addNewForm)
+            handleStartAddNew({ key: -1, ...addNewForm })
+            handleAddNewItem(addNewForm, (meta) => {
               if (meta.success) {
-                const data = meta?.data as Color
-                console.log(data)
-                const newDataSource = [...dataSource]
-                newDataSource.unshift({
-                  ...data,
-                  key: data.id
-                } as TableListDataType<ColorTableDataType>)
-                setDataSource(newDataSource)
-                console.log(newDataSource)
-                message.success('Success!', 1)
+                message.success('Created!')
               }
             })
           }}

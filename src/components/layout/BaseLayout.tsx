@@ -31,9 +31,9 @@ interface Props extends React.HTMLAttributes<HTMLElement> {
 const { Search } = Input
 
 const BaseLayout: React.FC<Props> = ({
-  searchValue,
+  // searchValue,
   searchPlaceHolder,
-  onSearchChange,
+  // onSearchChange,
   onSearch,
   onSortChange,
   dateCreation,
@@ -56,8 +56,8 @@ const BaseLayout: React.FC<Props> = ({
             enterButton
             allowClear
             onSearch={onSearch}
-            value={searchValue}
-            onChange={onSearchChange}
+            // value={searchValue}
+            // onChange={onSearchChange}
           />
         </Form.Item>
         <Flex justify='space-between' align='center'>

@@ -1,20 +1,14 @@
 /* eslint-disable react-refresh/only-export-components */
-import {
-  ColorPicker,
-  Flex,
-  Form,
-  FormInstance,
-  Input,
-  Modal,
-  Typography
-} from 'antd'
+import { ColorPicker, Flex, Form, Input, Modal, Typography } from 'antd'
+import type { Color as AntColor } from 'antd/es/color-picker'
+// import type { Color as AntColor } from 'antd/es/color-picker'
 import React, { memo } from 'react'
 import { Color } from '~/typing'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
   openModal: boolean
   setOpenModal: (enable: boolean) => void
-  onAddNew: (form: FormInstance<Color>) => void
+  onAddNew: (itemToAddNew: Color) => void
 }
 
 const ModalAddNewColor: React.FC<Props> = ({
@@ -25,15 +19,32 @@ const ModalAddNewColor: React.FC<Props> = ({
 }) => {
   const [form] = Form.useForm()
 
+  async function handleOk() {
+    const itemToCreateNew = await form.validateFields()
+    console.log(itemToCreateNew)
+    // // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const hexColor =
+      typeof itemToCreateNew.hexColor === 'string'
+        ? itemToCreateNew.hexColor
+        : // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (itemToCreateNew.hexColor as any as AntColor).toHexString()
+    onAddNew({
+      nameColor: itemToCreateNew.nameColor,
+      hexColor: hexColor
+    })
+  }
+
+  function handleCancel() {
+    setOpenModal(false)
+  }
+
   return (
     <Modal
       open={openModal}
-      onOk={() => onAddNew(form)}
+      onOk={handleOk}
+      onCancel={handleCancel}
       centered
       width='auto'
-      onCancel={() => {
-        setOpenModal(false)
-      }}
     >
       <Form form={form} {...props}>
         <Flex vertical gap={20}>

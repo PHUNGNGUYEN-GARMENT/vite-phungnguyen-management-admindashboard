@@ -1,5 +1,3 @@
-import { FormInstance } from 'antd'
-import { Color as AntColor } from 'antd/es/color-picker'
 import { useState } from 'react'
 import {
   RequestBodyType,
@@ -12,32 +10,25 @@ import { Color, SortDirection } from '~/typing'
 export default function useColor() {
   const [metaData, setMetaData] = useState<ResponseDataType>()
   const [openModal, setOpenModal] = useState<boolean>(false)
-  const [searchText, setSearchText] = useState<string>('')
+  // const [searchText, setSearchText] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(false)
   const [dateCreation, setDateCreation] = useState<boolean>(true)
 
-  const handleAddNew = async (
-    form: FormInstance<Color>,
+  const handleAddNewItem = async (
+    itemNew: Color,
     onSuccess?: (data: ResponseDataType) => void
   ) => {
     setLoading(true)
-    const hexColor: AntColor = await form.getFieldValue(`hexColor`)
-    const row = await form.validateFields()
-    const newRow: Color = {
-      ...row,
-      status: 'active',
-      hexColor: typeof hexColor === 'string' ? hexColor : hexColor.toHexString()
-    }
-    await ColorAPI.createNewItem(newRow)
+    await ColorAPI.createNewItem(itemNew)
       .then((meta) => {
         setLoading(true)
         if (meta?.success) {
           onSuccess?.(meta)
-          setOpenModal(false)
         }
       })
       .finally(() => {
         setLoading(false)
+        setOpenModal(false)
       })
     setLoading(false)
   }
@@ -128,12 +119,12 @@ export default function useColor() {
     setLoading,
     openModal,
     setOpenModal,
-    searchText,
-    setSearchText,
+    // searchText,
+    // setSearchText,
     getColorList,
     handleUpdateItem,
     handleDeleteItem,
-    handleAddNew,
+    handleAddNewItem,
     handleSorted
   }
 }
