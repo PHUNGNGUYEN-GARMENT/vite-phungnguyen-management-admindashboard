@@ -1,5 +1,5 @@
 import { Flex } from 'antd'
-import useDevice from '~/hooks/useDevice'
+import useDevice from '~/components/hooks/useDevice'
 import ImportationList from './components/ImportationList'
 import ImportationTable from './components/ImportationTable'
 
