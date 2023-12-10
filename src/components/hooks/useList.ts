@@ -39,27 +39,26 @@ const useList = <T>(initValue: TableListDataType<T>[]) => {
 
   const handleStartSaveEditing = async (
     key: React.Key,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onSuccess?: (row: any) => void
+    itemToUpdate: T,
+    onSuccess?: (row: T) => void
   ) => {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const row: any = await form.validateFields()
       const newData = [...dataSource]
       const index = newData.findIndex((item) => key === item.key)
       if (index > -1) {
         const item = newData[index]
         newData.splice(index, 1, {
           ...item,
-          ...row
+          ...({ data: itemToUpdate, key: key } as TableListDataType<T>)
         })
         setDataSource(newData)
         setEditingKey('')
-        onSuccess?.(row)
+        onSuccess?.(itemToUpdate)
         // After updated local data
         // We need to update on database
       } else {
-        newData.push(row)
+        newData.push({ data: itemToUpdate, key: key } as TableListDataType<T>)
         setDataSource(newData)
         setEditingKey('')
       }

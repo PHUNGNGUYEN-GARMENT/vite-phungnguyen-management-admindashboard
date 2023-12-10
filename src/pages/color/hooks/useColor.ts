@@ -99,7 +99,6 @@ export default function useColor() {
       .finally(() => {
         setLoading(false)
       })
-    setLoading(false)
   }
 
   const handleDeleteItem = async (

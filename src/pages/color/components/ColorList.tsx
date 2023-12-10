@@ -1,7 +1,12 @@
 import { App as AntApp, Form, List } from 'antd'
 import type { Color as AntColor } from 'antd/es/color-picker'
 import React, { useEffect } from 'react'
-import { RequestBodyType, defaultRequestBody } from '~/api/client'
+import {
+  RequestBodyType,
+  ResponseDataType,
+  defaultRequestBody
+} from '~/api/client'
+import ColorAPI from '~/api/services/ColorAPI'
 import useList from '~/components/hooks/useList'
 import BaseLayout from '~/components/layout/BaseLayout'
 import { Color, TableListDataType } from '~/typing'
@@ -25,7 +30,6 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
     setSearchText,
     handleAddNew,
     getColorList,
-    handleUpdateItem,
     handleDeleteItem,
     handleSorted
   } = useColor()
@@ -48,17 +52,22 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
   useEffect(() => {
     getColorList(defaultRequestBody, (meta) => {
       if (meta?.success) {
-        setDataSource(
-          meta.data.map((item: Color) => {
-            return {
-              ...item,
-              key: item.id
-            } as ColorTableDataType
-          })
-        )
+        handleProgressDataSource(meta)
       }
     })
   }, [])
+
+  const handleProgressDataSource = (meta: ResponseDataType) => {
+    const colors = meta.data as Color[]
+    setDataSource(
+      colors.map((item: Color) => {
+        return {
+          data: { ...item, key: item.id } as ColorTableDataType,
+          key: item.id
+        } as TableListDataType<ColorTableDataType>
+      })
+    )
+  }
 
   return (
     <>
@@ -75,14 +84,7 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
               }
               getColorList(body, (meta) => {
                 if (meta?.success) {
-                  setDataSource(
-                    meta.data.map((item: Color) => {
-                      return {
-                        ...item,
-                        key: item.id
-                      } as ColorTableDataType
-                    })
-                  )
+                  handleProgressDataSource(meta)
                 }
               })
             }
@@ -92,14 +94,7 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
           onSortChange={(val) => {
             handleSorted(val ? 'asc' : 'desc', (meta) => {
               if (meta.success) {
-                setDataSource(
-                  meta.data.map((item: Color) => {
-                    return {
-                      ...item,
-                      key: item.id
-                    } as ColorTableDataType
-                  })
-                )
+                handleProgressDataSource(meta)
               }
             })
           }}
@@ -108,14 +103,7 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
             setSearchText('')
             getColorList(defaultRequestBody, (meta) => {
               if (meta?.success) {
-                setDataSource(
-                  meta.data.map((item: Color) => {
-                    return {
-                      ...item,
-                      key: item.id
-                    } as ColorTableDataType
-                  })
-                )
+                handleProgressDataSource(meta)
                 message.success('Reloaded!')
               }
             })
@@ -143,14 +131,7 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
                 }
                 getColorList(body, (meta) => {
                   if (meta?.success) {
-                    setDataSource(
-                      meta.data.map((item: Color) => {
-                        return {
-                          ...item,
-                          key: item.id
-                        } as ColorTableDataType
-                      })
-                    )
+                    handleProgressDataSource(meta)
                   }
                 })
               },
@@ -163,25 +144,39 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
             renderItem={(item) => (
               <ColorListItem
                 data={item}
+                key={item.key}
                 editingKey={editingKey}
                 isEditing={isEditing(item.key!)}
-                onSaveClick={() => {
-                  handleStartSaveEditing(item.key!, (itemToSave) => {
-                    console.log(itemToSave)
-                    const hexColor = itemToSave.hexColor as AntColor
-                    handleUpdateItem(
-                      Number(item.key),
-                      {
+                onSaveClick={async () => {
+                  const row = await form.validateFields()
+                  handleStartSaveEditing(
+                    item.key!,
+                    {
+                      nameColor: row.nameColor,
+                      hexColor: row.hexColor
+                    },
+                    (itemToSave) => {
+                      const hexColor =
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        itemToSave.hexColor as any as AntColor
+                      ColorAPI.updateItemByPk(item.data.id!, {
                         hexColor: hexColor.toHexString(),
                         nameColor: itemToSave.nameColor
-                      },
-                      (meta) => {
-                        if (meta.success) {
-                          message.success('Updated!')
-                        }
-                      }
-                    )
-                  })
+                      })
+                        .then((meta) => {
+                          if (meta?.success) {
+                            setLoading(true)
+                            message.success('Updated!')
+                          }
+                        })
+                        .catch((err) => {
+                          console.log(err)
+                        })
+                        .finally(() => {
+                          setLoading(false)
+                        })
+                    }
+                  )
                 }}
                 dateCreation={dateCreation}
                 onClickStartEditing={() => handleStartEditing(item.key!)}
