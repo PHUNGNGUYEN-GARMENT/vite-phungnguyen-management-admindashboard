@@ -202,10 +202,14 @@ const SewingLineList: React.FC<Props> = ({ ...props }) => {
           openModal={openModal}
           setOpenModal={setOpenModal}
           onAddNew={(addNewForm) => {
-            console.log(addNewForm)
-            handleAddNewItem(addNewForm, (success) => {
-              if (success) {
-                handleStartAddNew({ key: dataSource.length + 1, ...addNewForm })
+            handleAddNewItem(addNewForm, (meta) => {
+              if (meta?.success) {
+                const newItem = meta.data as SewingLine
+                handleStartAddNew({
+                  key: newItem.id,
+                  ...addNewForm
+                })
+                console.log(newItem)
                 message.success('Created!')
               } else {
                 message.error('Failed!')
