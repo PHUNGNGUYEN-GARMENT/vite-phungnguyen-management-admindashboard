@@ -1,15 +1,15 @@
 /* eslint-disable react-refresh/only-export-components */
-import { Flex, Form, FormInstance, Input, Modal, Typography } from 'antd'
+import { Flex, Form, Input, Modal, Typography } from 'antd'
 import React, { memo } from 'react'
 import { Group } from '~/typing'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
   openModal: boolean
   setOpenModal: (enable: boolean) => void
-  onAddNew: (form: FormInstance<Group>) => void
+  onAddNew: (itemToAddNew: Group) => void
 }
 
-const ModalAddNewColor: React.FC<Props> = ({
+const ModalAddNewGroup: React.FC<Props> = ({
   openModal,
   setOpenModal,
   onAddNew,
@@ -17,15 +17,24 @@ const ModalAddNewColor: React.FC<Props> = ({
 }) => {
   const [form] = Form.useForm()
 
+  async function handleOk() {
+    const row = await form.validateFields()
+    onAddNew({
+      name: row.name
+    })
+  }
+
+  function handleCancel() {
+    setOpenModal(false)
+  }
+
   return (
     <Modal
       open={openModal}
-      onOk={() => onAddNew(form)}
+      onOk={handleOk}
+      onCancel={handleCancel}
       centered
       width='auto'
-      onCancel={() => {
-        setOpenModal(false)
-      }}
     >
       <Form form={form} {...props}>
         <Flex vertical gap={20}>
@@ -45,7 +54,7 @@ const ModalAddNewColor: React.FC<Props> = ({
                 name='name'
                 className='m-0'
               >
-                <Input allowClear placeholder='B13+' />
+                <Input allowClear placeholder='Orange' />
               </Form.Item>
             </Flex>
           </Flex>
@@ -55,4 +64,4 @@ const ModalAddNewColor: React.FC<Props> = ({
   )
 }
 
-export default memo(ModalAddNewColor)
+export default memo(ModalAddNewGroup)

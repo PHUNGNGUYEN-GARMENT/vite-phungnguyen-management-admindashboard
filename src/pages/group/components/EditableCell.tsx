@@ -2,7 +2,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { Form, Input, Table } from 'antd'
 import { memo } from 'react'
-import { GroupTableDataType } from './GroupTable'
+import { GroupTableDataType } from '../type'
 
 type InputType = 'number' | 'text'
 
@@ -45,7 +45,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
             <Input className='w-full' />
           </Form.Item>
         )
-      default: // Default là trạng thái mặc định
+      default:
         return <></>
     }
   })()

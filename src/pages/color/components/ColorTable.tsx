@@ -58,12 +58,12 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
   useEffect(() => {
     getDataList(defaultRequestBody, (meta) => {
       if (meta?.success) {
-        handleProgressDataSource(meta)
+        selfHandleProgressDataSource(meta)
       }
     })
   }, [])
 
-  const handleProgressDataSource = (meta: ResponseDataType) => {
+  const selfHandleProgressDataSource = (meta: ResponseDataType) => {
     const colors = meta.data as Color[]
     setDataSource(
       colors.map((item: Color) => {
@@ -285,7 +285,7 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
               }
               getDataList(body, (meta) => {
                 if (meta?.success) {
-                  handleProgressDataSource(meta)
+                  selfHandleProgressDataSource(meta)
                 }
               })
             }
@@ -293,7 +293,7 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
           onSortChange={(val) => {
             handleSorted(val ? 'asc' : 'desc', (meta) => {
               if (meta?.success) {
-                handleProgressDataSource(meta)
+                selfHandleProgressDataSource(meta)
               }
             })
           }}
@@ -301,7 +301,7 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
             form.setFieldValue('search', '')
             getDataList(defaultRequestBody, (meta) => {
               if (meta?.success) {
-                handleProgressDataSource(meta)
+                selfHandleProgressDataSource(meta)
                 message.success('Reloaded!')
               }
             })
@@ -337,7 +337,7 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
                 }
                 getDataList(body, (meta) => {
                   if (meta?.success) {
-                    handleProgressDataSource(meta)
+                    selfHandleProgressDataSource(meta)
                   }
                 })
               },

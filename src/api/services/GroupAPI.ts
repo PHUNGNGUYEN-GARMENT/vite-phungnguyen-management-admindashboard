@@ -9,7 +9,7 @@ export default {
     return await client
       .post(`${NAMESPACE}`, {
         name: item.name,
-        status: item.status
+        status: item.status ?? 'active'
       })
       .then((res) => {
         if (res.data) {
@@ -84,7 +84,7 @@ export default {
         errorFormatter(error)
       })
   },
-  deleteItemByID: async (id: number): Promise<ResponseDataType | undefined> => {
+  deleteItemByPk: async (id: number): Promise<ResponseDataType | undefined> => {
     return client
       .delete(`${NAMESPACE}/${id}`)
       .then((res) => {

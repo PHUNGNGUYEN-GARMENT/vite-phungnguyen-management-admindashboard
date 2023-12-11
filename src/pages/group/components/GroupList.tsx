@@ -1,221 +1,161 @@
-import {
-  App as AntApp,
-  Button,
-  Flex,
-  Form,
-  Input,
-  List,
-  Popconfirm,
-  Switch,
-  Typography
-} from 'antd'
-import { Plus } from 'lucide-react'
+import { App as AntApp, Form, List } from 'antd'
 import React, { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { RequestBodyType, defaultRequestBody } from '~/api/client'
-import { setAdminAction } from '~/store/actions-creator'
-import { RootState } from '~/store/store'
+import {
+  RequestBodyType,
+  ResponseDataType,
+  defaultRequestBody
+} from '~/api/client'
+import useList from '~/components/hooks/useList'
+import { TableItemWithKey } from '~/components/hooks/useTable'
+import BaseLayout from '~/components/layout/BaseLayout'
 import { Group } from '~/typing'
-import DayJS, { DatePattern } from '~/utils/date-formatter'
 import useGroup from '../hooks/useGroup'
-import useGroupList from '../hooks/useGroupList'
-import { GroupTableDataType } from './GroupTable'
+import { GroupTableDataType } from '../type'
+import GroupListItem from './GroupListItem'
 import ModalAddNewGroup from './ModalAddNewGroup'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
-const { Search } = Input
-
 const GroupList: React.FC<Props> = ({ ...props }) => {
   const {
     metaData,
+    setPage,
     loading,
+    dateCreation,
+    setDateCreation,
     setLoading,
     openModal,
     setOpenModal,
-    searchText,
-    setSearchText,
-    dateCreation,
-    setDateCreation,
-    handleAddNew,
-    getGroupList,
-    handleUpdateItem,
+    handleAddNewItem,
+    getDataList,
     handleDeleteItem,
+    handleUpdateItem,
     handleSorted
   } = useGroup()
   const {
     form,
     editingKey,
-    setEditingKey,
     setDeleteKey,
     dataSource,
     setDataSource,
     isEditing,
-    handleStartDelete,
-    handleStartSaveEditing
-  } = useGroupList()
-  const user = useSelector((state: RootState) => state.user)
-  const dispatch = useDispatch()
+    handleStartAddNew,
+    handleStartEditing,
+    handleStartDeleting,
+    handleStartSaveEditing,
+    handleConfirmCancelEditing,
+    handleConfirmCancelDeleting
+  } = useList<GroupTableDataType>([])
   const { message } = AntApp.useApp()
-  console.log('Group page loading...')
 
   useEffect(() => {
-    getGroupList(defaultRequestBody, (meta) => {
+    getDataList(defaultRequestBody, (meta) => {
       if (meta?.success) {
-        setDataSource(
-          meta.data.map((item: Group) => {
-            return {
-              ...item,
-              key: item.id
-            } as GroupTableDataType
-          })
-        )
+        handleProgressDataSource(meta)
       }
     })
   }, [])
 
+  const handleProgressDataSource = (meta: ResponseDataType) => {
+    const groups = meta.data as Group[]
+    setDataSource(
+      groups.map((item: Group) => {
+        return {
+          ...item,
+          key: item.id
+        } as TableItemWithKey<GroupTableDataType>
+      })
+    )
+  }
+
+  const selfHandleSaveClick = async (
+    item: TableItemWithKey<GroupTableDataType>
+  ) => {
+    const row = await form.validateFields()
+    handleStartSaveEditing(
+      item.key!,
+      {
+        name: row.name
+      },
+      (itemToSave) => {
+        handleUpdateItem(
+          item.id ?? Number(item.key),
+          {
+            ...itemToSave,
+            name: row.name
+          },
+          (success) => {
+            if (success) {
+              message.success('Created!')
+            } else {
+              message.success('Failed!')
+            }
+          }
+        )
+      }
+    )
+  }
+
   return (
     <>
       <Form form={form}>
-        <Flex vertical gap={20}>
-          <Search
-            name='search'
-            placeholder='Search code...'
-            size='middle'
-            enterButton
-            allowClear
-            onSearch={(value) => {
-              if (value.length > 0) {
-                const body: RequestBodyType = {
-                  ...defaultRequestBody,
-                  search: {
-                    field: 'name',
-                    term: value
-                  }
+        <BaseLayout
+          onSearch={(value) => {
+            if (value.length > 0) {
+              const body: RequestBodyType = {
+                ...defaultRequestBody,
+                search: {
+                  field: 'name',
+                  term: value
                 }
-                getGroupList(body, (meta) => {
-                  if (meta?.success) {
-                    setDataSource(
-                      meta.data.map((item: Group) => {
-                        return {
-                          ...item,
-                          key: item.id
-                        } as GroupTableDataType
-                      })
-                    )
-                  }
-                })
               }
-            }}
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-          />
-          <Flex justify='space-between' align='center'>
-            <Flex gap={10} align='center'>
-              <Switch
-                checkedChildren='Admin'
-                unCheckedChildren='Admin'
-                defaultChecked={false}
-                checked={user.isAdmin}
-                onChange={(val) => {
-                  dispatch(setAdminAction(val))
-                }}
-              />
-              <Switch
-                checkedChildren='Date Creation'
-                unCheckedChildren='Date Creation'
-                defaultChecked={dateCreation}
-                onChange={(val) => {
-                  setDateCreation(val)
-                }}
-              />
-              <Switch
-                checkedChildren='Sorted'
-                unCheckedChildren='Sorted'
-                defaultChecked={false}
-                onChange={(val) => {
-                  handleSorted(val ? 'asc' : 'desc', (meta) => {
-                    if (meta.success) {
-                      setDataSource(
-                        meta.data.map((item: Group) => {
-                          return {
-                            ...item,
-                            key: item.id
-                          } as GroupTableDataType
-                        })
-                      )
-                    }
-                  })
-                }}
-              />
-            </Flex>
-            <Flex gap={10} align='center'>
-              <Button
-                onClick={() => {
-                  form.setFieldValue('search', '')
-                  setSearchText('')
-                  getGroupList(defaultRequestBody, (meta) => {
-                    if (meta?.success) {
-                      setDataSource(
-                        meta.data.map((item: Group) => {
-                          return {
-                            ...item,
-                            key: item.id
-                          } as GroupTableDataType
-                        })
-                      )
-                      message.success('Reloaded!')
-                    }
-                  })
-                }}
-                className='flex items-center'
-                type='default'
-              >
-                Reset
-              </Button>
-
-              {user.isAdmin && (
-                <Button
-                  onClick={() => {
-                    setOpenModal(true)
-                  }}
-                  className='flex items-center'
-                  type='primary'
-                  icon={<Plus size={20} />}
-                >
-                  New
-                </Button>
-              )}
-            </Flex>
-          </Flex>
-
+              getDataList(body, (meta) => {
+                if (meta?.success) {
+                  handleProgressDataSource(meta)
+                }
+              })
+            }
+          }}
+          onSortChange={(val) => {
+            handleSorted(val ? 'asc' : 'desc', (meta) => {
+              if (meta?.success) {
+                handleProgressDataSource(meta)
+              }
+            })
+          }}
+          onResetClick={() => {
+            form.setFieldValue('search', '')
+            getDataList(defaultRequestBody, (meta) => {
+              if (meta?.success) {
+                handleProgressDataSource(meta)
+              }
+            })
+          }}
+          dateCreation={dateCreation}
+          onDateCreationChange={setDateCreation}
+          onAddNewClick={() => setOpenModal(true)}
+        >
           <List
             className={props.className}
             itemLayout='vertical'
             size='large'
             pagination={{
-              onChange: (page) => {
+              onChange: (_page) => {
+                setPage(_page)
                 const body: RequestBodyType = {
                   ...defaultRequestBody,
                   paginator: {
-                    page: page,
+                    page: _page,
                     pageSize: 5
                   },
                   search: {
                     field: 'name',
-                    term: searchText
+                    term: form.getFieldValue('search') ?? ''
                   }
                 }
-                getGroupList(body, (meta) => {
+                getDataList(body, (meta) => {
                   if (meta?.success) {
-                    setDataSource(
-                      meta.data.map((item: Group) => {
-                        return {
-                          ...item,
-                          key: item.id
-                        } as GroupTableDataType
-                      })
-                    )
+                    handleProgressDataSource(meta)
                   }
                 })
               },
@@ -226,194 +166,46 @@ const GroupList: React.FC<Props> = ({ ...props }) => {
             loading={loading}
             dataSource={dataSource}
             renderItem={(item) => (
-              <List.Item key={item.id} className='mb-5 rounded-sm bg-white'>
-                <Flex vertical className='w-full' gap={10}>
-                  <Flex align='center' justify='space-between'>
-                    {isEditing(item.id!) && user.isAdmin ? (
-                      <Form.Item name='name' initialValue={item.name}>
-                        <Input size='large' />
-                      </Form.Item>
-                    ) : (
-                      <Typography.Title
-                        copyable
-                        className='m-0 h-fit p-0'
-                        level={4}
-                      >
-                        {item.name}
-                      </Typography.Title>
-                    )}
-
-                    {isEditing(item.id!) ? (
-                      <Flex gap={5}>
-                        <Button
-                          type='primary'
-                          onClick={() =>
-                            handleStartSaveEditing(item.id!, (itemToSave) => {
-                              console.log(itemToSave)
-                              handleUpdateItem(
-                                Number(item.id),
-                                itemToSave,
-                                (meta) => {
-                                  if (meta.success) {
-                                    message.success('Updated!')
-                                  }
-                                }
-                              )
-                            })
-                          }
-                        >
-                          Save
-                        </Button>
-                        <Popconfirm
-                          title={`Sure to cancel?`}
-                          okButtonProps={{
-                            size: 'middle'
-                          }}
-                          cancelButtonProps={{
-                            size: 'middle'
-                          }}
-                          placement='topLeft'
-                          onConfirm={() => {
-                            setEditingKey('')
-                          }}
-                        >
-                          <Button type='dashed'>Cancel</Button>
-                        </Popconfirm>
-                      </Flex>
-                    ) : (
-                      <Flex gap={10}>
-                        {user.isAdmin && (
-                          <Button
-                            type='primary'
-                            disabled={editingKey !== ''}
-                            onClick={() => {
-                              setEditingKey(item.id!)
-                            }}
-                          >
-                            Edit
-                          </Button>
-                        )}
-                        {user.isAdmin && (
-                          <Popconfirm
-                            title={`Sure to delete?`}
-                            onCancel={() => setDeleteKey('')}
-                            onConfirm={() => {
-                              setLoading(true)
-                              handleStartDelete(item.id!, (productToDelete) => {
-                                handleDeleteItem(
-                                  productToDelete.id!,
-                                  (meta) => {
-                                    if (meta.success) {
-                                      setLoading(false)
-                                      message.success('Deleted!')
-                                    }
-                                  }
-                                )
-                              })
-                            }}
-                          >
-                            <Button
-                              type='dashed'
-                              disabled={editingKey !== ''}
-                              onClick={() => setDeleteKey(item.id!)}
-                            >
-                              Delete
-                            </Button>
-                          </Popconfirm>
-                        )}
-                      </Flex>
-                    )}
-                  </Flex>
-                  {/* <Flex align='center' justify='start' gap={5}>
-                    <Typography.Text
-                      type='secondary'
-                      className='w-40 font-medium'
-                    >
-                      Mã màu
-                    </Typography.Text>
-                    {isEditing(item.id!) ? (
-                      <Form.Item
-                        name={`hexColor/${item.id!}`}
-                        initialValue={item.hexColor}
-                        className='m-0 w-full'
-                      >
-                        <ColorPicker
-                          size='middle'
-                          className='w-full'
-                          defaultFormat='hex'
-                          disabled={editingKey !== item.id}
-                          showText
-                        />
-                      </Form.Item>
-                    ) : (
-                      <Flex className='w-full' align='center' justify='start'>
-                        <ColorPicker
-                          className='w-full'
-                          defaultValue={item.hexColor}
-                          size='middle'
-                          disabled={editingKey !== item.id}
-                          showText
-                        />
-                      </Flex>
-                    )}
-                  </Flex> */}
-                  {dateCreation && (
-                    <Flex vertical gap={10}>
-                      <Flex align='center' justify='start' gap={5}>
-                        <Typography.Text
-                          type='secondary'
-                          className='w-40 font-medium'
-                        >
-                          Created at
-                        </Typography.Text>
-
-                        <Input
-                          name='createdAt'
-                          className='w-full'
-                          defaultValue={DayJS(item.createdAt).format(
-                            DatePattern.display
-                          )}
-                          readOnly
-                        />
-                      </Flex>
-                      <Flex align='center' justify='start' gap={5}>
-                        <Typography.Text
-                          type='secondary'
-                          className='w-40 font-medium'
-                        >
-                          Updated at
-                        </Typography.Text>
-
-                        <Input
-                          name='updatedAt'
-                          className='w-full'
-                          defaultValue={DayJS(item.updatedAt).format(
-                            DatePattern.display
-                          )}
-                          readOnly
-                        />
-                      </Flex>
-                    </Flex>
-                  )}
-                </Flex>
-              </List.Item>
+              <GroupListItem
+                data={item}
+                key={item.key}
+                editingKey={editingKey}
+                isEditing={isEditing(item.key!)}
+                onSaveClick={() => selfHandleSaveClick(item)}
+                dateCreation={dateCreation}
+                onClickStartEditing={() => handleStartEditing(item.key!)}
+                onConfirmCancelEditing={() => handleConfirmCancelEditing()}
+                onConfirmCancelDeleting={() => handleConfirmCancelDeleting()}
+                onConfirmDelete={() => {
+                  setLoading(true)
+                  handleStartDeleting(item.key!, (productToDelete) => {
+                    handleDeleteItem(Number(productToDelete.key), (success) => {
+                      if (success) {
+                        message.success('Created!')
+                      } else {
+                        message.success('Failed!')
+                      }
+                    })
+                  })
+                }}
+                onStartDeleting={() => setDeleteKey(item.key!)}
+              />
             )}
           />
-        </Flex>
+        </BaseLayout>
       </Form>
       {openModal && (
         <ModalAddNewGroup
           openModal={openModal}
           setOpenModal={setOpenModal}
-          onAddNew={(_form) => {
-            handleAddNew(_form, (meta) => {
-              if (meta.success) {
-                const data = meta?.data as Group
-                console.log(data)
-                const newDataSource = [...dataSource]
-                newDataSource.unshift(data)
-                setDataSource(newDataSource)
-                message.success('Success!', 1)
+          onAddNew={(addNewForm) => {
+            console.log(addNewForm)
+            handleAddNewItem(addNewForm, (success) => {
+              if (success) {
+                handleStartAddNew({ key: dataSource.length + 1, ...addNewForm })
+                message.success('Created!')
+              } else {
+                message.error('Failed!')
               }
             })
           }}
