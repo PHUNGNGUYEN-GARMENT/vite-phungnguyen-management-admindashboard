@@ -22,34 +22,6 @@ export default {
         errorFormatter(error)
       })
   },
-  getItemByPk: async (id: number): Promise<ResponseDataType | undefined> => {
-    return client
-      .get(`${NAMESPACE}/${id}`)
-      .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
-      })
-      .catch(function (error) {
-        errorFormatter(error)
-      })
-  },
-  getItemByHexColor: async (
-    hexColor: string
-  ): Promise<ResponseDataType | undefined> => {
-    return client
-      .get(`${NAMESPACE}/hexColor/${hexColor}`)
-      .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
-      })
-      .catch(function (error) {
-        errorFormatter(error)
-      })
-  },
   getItems: async (
     bodyRequest: RequestBodyType
   ): Promise<ResponseDataType | undefined> => {
@@ -67,15 +39,63 @@ export default {
         errorFormatter(error)
       })
   },
+  getItemByPk: async (id: number): Promise<ResponseDataType | undefined> => {
+    return client
+      .get(`${NAMESPACE}/${id}`)
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  getItemBy: async (query: {
+    field: string
+    key: React.Key
+  }): Promise<ResponseDataType | undefined> => {
+    return client
+      .get(`${NAMESPACE}/${query.field}/${query.key}`)
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
   updateItemByPk: async (
     id: number,
-    itemToUpdate: Color
+    item: Color
   ): Promise<ResponseDataType | undefined> => {
     return client
       .put(`${NAMESPACE}/${id}`, {
-        nameColor: itemToUpdate.nameColor,
-        hexColor: itemToUpdate.hexColor,
-        status: itemToUpdate.status ?? 'active'
+        ...item
+      })
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  updateItemBy: async (
+    query: {
+      field: string
+      key: React.Key
+    },
+    item: Color
+  ): Promise<ResponseDataType | undefined> => {
+    return client
+      .put(`${NAMESPACE}/${query.field}/${query.key}`, {
+        ...item
       })
       .then((res) => {
         if (res.data) {

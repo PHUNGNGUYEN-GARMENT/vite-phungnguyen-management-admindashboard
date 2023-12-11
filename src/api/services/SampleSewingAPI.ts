@@ -1,69 +1,121 @@
-import client, { ResponseDataType } from '~/api/client'
+import client, { RequestBodyType, ResponseDataType } from '~/api/client'
 import { SampleSewing } from '~/typing'
 import { errorFormatter } from '~/utils/promise-formatter'
 
-const PATH_API = 'sample-sewings'
+const NAMESPACE = 'sample-sewings'
 
 export default {
-  getAlls: async (): Promise<ResponseDataType | undefined> => {
-    return await client
-      .post(`${PATH_API}/find`)
-      .then((res) => {
-        return res.data
-      })
-      .catch(function (error) {
-        errorFormatter(error)
-      })
-  },
-  createNew: async (
-    productID: number,
-    dateSewingNPL: string
+  createNewItem: async (
+    item: SampleSewing
   ): Promise<ResponseDataType | undefined> => {
-    return client
-      .post(`${PATH_API}`, {
-        productID: productID,
-        dateSewingNPL: dateSewingNPL
+    return await client
+      .post(`${NAMESPACE}`, {
+        productID: item.productID,
+        dateSewingNPL: item.dateSewingNPL,
+        status: 'active'
       })
       .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
         return res.data
       })
       .catch(function (error) {
         errorFormatter(error)
       })
   },
-  getItem: async (id: number): Promise<ResponseDataType | undefined> => {
+  getItemByPk: async (id: number): Promise<ResponseDataType | undefined> => {
     return client
-      .get(`${PATH_API}/${id}`)
+      .get(`${NAMESPACE}/${id}`)
       .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
         return res.data
       })
       .catch(function (error) {
         errorFormatter(error)
       })
   },
-  updateItem: async (
+  getItemBy: async (query: {
+    field: string
+    key: React.Key
+  }): Promise<ResponseDataType | undefined> => {
+    return client
+      .get(`${NAMESPACE}/${query.field}/${query.key}`)
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  getItems: async (
+    bodyRequest: RequestBodyType
+  ): Promise<ResponseDataType | undefined> => {
+    return await client
+      .post(`${NAMESPACE}/find`, {
+        ...bodyRequest
+      })
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  updateItemByPk: async (
+    id: number,
     item: SampleSewing
   ): Promise<ResponseDataType | undefined> => {
     return client
-      .put(`${PATH_API}/${item.sampleSewingID}`, {
-        productID: item.productID,
-        dateSewingNPL: item.dateSewingNPL,
-        createdAt: item.createdAt,
-        updatedAt: item.updatedAt,
-        orderNumber: item.orderNumber
+      .put(`${NAMESPACE}/${id}`, {
+        ...item
       })
       .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
         return res.data
       })
       .catch(function (error) {
         errorFormatter(error)
       })
   },
-  deleteItem: async (id: number): Promise<ResponseDataType | undefined> => {
+  updateItemBy: async (
+    query: {
+      field: string
+      key: React.Key
+    },
+    item: SampleSewing
+  ): Promise<ResponseDataType | undefined> => {
     return client
-      .delete(`${PATH_API}/${id}`)
+      .put(`${NAMESPACE}/${query.field}/${query.key}`, {
+        ...item
+      })
       .then((res) => {
-        // console.log(JSON.stringify(res.data))
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  deleteItemByPk: async (id: number): Promise<ResponseDataType | undefined> => {
+    return client
+      .delete(`${NAMESPACE}/${id}`)
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
         return res.data
       })
       .catch(function (error) {

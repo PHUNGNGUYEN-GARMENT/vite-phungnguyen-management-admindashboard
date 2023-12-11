@@ -71,7 +71,7 @@ export default {
   },
   updateItemByPk: async (
     id: number,
-    item: Partial<SewingLine>
+    item: SewingLine
   ): Promise<ResponseDataType | undefined> => {
     return client
       .put(`${NAMESPACE}/${id}`, {
@@ -92,7 +92,7 @@ export default {
       field: string
       key: React.Key
     },
-    item: Partial<SewingLine>
+    item: SewingLine
   ): Promise<ResponseDataType | undefined> => {
     return client
       .put(`${NAMESPACE}/${query.field}/${query.key}`, {

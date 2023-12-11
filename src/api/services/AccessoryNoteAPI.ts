@@ -37,6 +37,22 @@ export default {
         errorFormatter(error)
       })
   },
+  getItemBy: async (query: {
+    field: string
+    key: React.Key
+  }): Promise<ResponseDataType | undefined> => {
+    return client
+      .get(`${NAMESPACE}/${query.field}/${query.key}`)
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
   getItems: async (
     bodyRequest: RequestBodyType
   ): Promise<ResponseDataType | undefined> => {
@@ -63,6 +79,27 @@ export default {
         title: itemToUpdate.title,
         summary: itemToUpdate.summary,
         status: itemToUpdate.status
+      })
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  updateItemBy: async (
+    query: {
+      field: string
+      key: React.Key
+    },
+    item: AccessoryNote
+  ): Promise<ResponseDataType | undefined> => {
+    return client
+      .put(`${NAMESPACE}/${query.field}/${query.key}`, {
+        ...item
       })
       .then((res) => {
         if (res.data) {

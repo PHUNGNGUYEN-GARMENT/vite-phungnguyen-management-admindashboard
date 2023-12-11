@@ -35,11 +35,12 @@ export default {
         errorFormatter(error)
       })
   },
-  getItemByProductID: async (
-    productID: number
-  ): Promise<ResponseDataType | undefined> => {
+  getItemBy: async (query: {
+    field: string
+    key: React.Key
+  }): Promise<ResponseDataType | undefined> => {
     return client
-      .get(`${NAMESPACE}/productID/${productID}`)
+      .get(`${NAMESPACE}/${query.field}/${query.key}`)
       .then((res) => {
         if (res.data) {
           return res.data as ResponseDataType
@@ -85,30 +86,15 @@ export default {
         errorFormatter(error)
       })
   },
-  updateItemByProductID: async (
-    productID: number,
+  updateItemBy: async (
+    query: {
+      field: string
+      key: React.Key
+    },
     item: PrintablePlace
   ): Promise<ResponseDataType | undefined> => {
     return client
-      .put(`${NAMESPACE}/productID/${productID}`, {
-        ...item
-      })
-      .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
-      })
-      .catch(function (error) {
-        errorFormatter(error)
-      })
-  },
-  updateItemByPrintID: async (
-    printID: number,
-    item: PrintablePlace
-  ): Promise<ResponseDataType | undefined> => {
-    return client
-      .put(`${NAMESPACE}/printID/${printID}`, {
+      .put(`${NAMESPACE}/${query.field}/${query.key}`, {
         ...item
       })
       .then((res) => {
@@ -124,36 +110,6 @@ export default {
   deleteItemByPk: async (id: number): Promise<ResponseDataType | undefined> => {
     return client
       .delete(`${NAMESPACE}/${id}`)
-      .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
-      })
-      .catch(function (error) {
-        errorFormatter(error)
-      })
-  },
-  deleteItemByProductID: async (
-    productID: number
-  ): Promise<ResponseDataType | undefined> => {
-    return client
-      .delete(`${NAMESPACE}/productID/${productID}`)
-      .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
-      })
-      .catch(function (error) {
-        errorFormatter(error)
-      })
-  },
-  deleteItemByPrintID: async (
-    printID: number
-  ): Promise<ResponseDataType | undefined> => {
-    return client
-      .delete(`${NAMESPACE}/printID/${printID}`)
       .then((res) => {
         if (res.data) {
           return res.data as ResponseDataType

@@ -39,11 +39,12 @@ export default {
         errorFormatter(error)
       })
   },
-  getItemByProductCode: async (
-    productCode: string
-  ): Promise<ResponseDataType | undefined> => {
+  getItemBy: async (query: {
+    field: string
+    key: React.Key
+  }): Promise<ResponseDataType | undefined> => {
     return client
-      .get(`${NAMESPACE}/productCode/${productCode}`)
+      .get(`${NAMESPACE}/${query.field}/${query.key}`)
       .then((res) => {
         if (res.data) {
           return res.data as ResponseDataType
@@ -78,6 +79,27 @@ export default {
     return client
       .put(`${NAMESPACE}/${id}`, {
         ...product
+      })
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  updateItemBy: async (
+    query: {
+      field: string
+      key: React.Key
+    },
+    item: Product
+  ): Promise<ResponseDataType | undefined> => {
+    return client
+      .put(`${NAMESPACE}/${query.field}/${query.key}`, {
+        ...item
       })
       .then((res) => {
         if (res.data) {

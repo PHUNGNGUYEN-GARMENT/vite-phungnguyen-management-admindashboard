@@ -153,12 +153,12 @@ export type Importation = {
 }
 
 export type SampleSewing = {
-  sampleSewingID: number
-  productID: number
-  dateSewingNPL: string
-  createdAt: string
-  updatedAt: string
-  orderNumber: number
+  id?: number
+  productID?: number
+  dateSewingNPL?: string
+  createdAt?: string
+  updatedAt?: string
+  product?: Product
 }
 
 export type DateSendSampleSewing = {

@@ -38,11 +38,12 @@ export default {
         errorFormatter(error)
       })
   },
-  getItemByProductID: async (
-    productID: number
-  ): Promise<ResponseDataType | undefined> => {
+  getItemBy: async (query: {
+    field: string
+    key: React.Key
+  }): Promise<ResponseDataType | undefined> => {
     return client
-      .get(`${NAMESPACE}/productID/${productID}`)
+      .get(`${NAMESPACE}/${query.field}/${query.key}`)
       .then((res) => {
         if (res.data) {
           return res.data as ResponseDataType
@@ -88,12 +89,15 @@ export default {
         errorFormatter(error)
       })
   },
-  updateItemByProductID: async (
-    productID: number,
+  updateItemBy: async (
+    query: {
+      field: string
+      key: React.Key
+    },
     item: Importation
   ): Promise<ResponseDataType | undefined> => {
     return client
-      .put(`${NAMESPACE}/productID/${productID}`, {
+      .put(`${NAMESPACE}/${query.field}/${query.key}`, {
         ...item
       })
       .then((res) => {
@@ -109,21 +113,6 @@ export default {
   deleteItemByPk: async (id: number): Promise<ResponseDataType | undefined> => {
     return client
       .delete(`${NAMESPACE}/${id}`)
-      .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
-      })
-      .catch(function (error) {
-        errorFormatter(error)
-      })
-  },
-  deleteItemByProductID: async (
-    productID: number
-  ): Promise<ResponseDataType | undefined> => {
-    return client
-      .delete(`${NAMESPACE}/productID/${productID}`)
       .then((res) => {
         if (res.data) {
           return res.data as ResponseDataType

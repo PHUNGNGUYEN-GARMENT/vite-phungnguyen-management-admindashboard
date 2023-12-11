@@ -40,36 +40,6 @@ export default {
         errorFormatter(error)
       })
   },
-  getItemBySewingLineID: async (
-    sewingLineID: number
-  ): Promise<ResponseDataType | undefined> => {
-    return client
-      .get(`${NAMESPACE}/sewingLineID/${sewingLineID}`)
-      .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
-      })
-      .catch(function (error) {
-        errorFormatter(error)
-      })
-  },
-  getItemByProductID: async (
-    productID: number
-  ): Promise<ResponseDataType | undefined> => {
-    return client
-      .get(`${NAMESPACE}/productID/${productID}`)
-      .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
-      })
-      .catch(function (error) {
-        errorFormatter(error)
-      })
-  },
   getItems: async (
     bodyRequest: RequestBodyType
   ): Promise<ResponseDataType | undefined> => {
@@ -105,30 +75,15 @@ export default {
         errorFormatter(error)
       })
   },
-  updateItemBySewingLineID: async (
-    sewingLineID: number,
+  updateItemBy: async (
+    query: {
+      field: string
+      key: React.Key
+    },
     item: SewingLineDelivery
   ): Promise<ResponseDataType | undefined> => {
     return client
-      .put(`${NAMESPACE}/sewingLineID/${sewingLineID}`, {
-        ...item
-      })
-      .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
-      })
-      .catch(function (error) {
-        errorFormatter(error)
-      })
-  },
-  updateItemByProductID: async (
-    productID: number,
-    item: SewingLineDelivery
-  ): Promise<ResponseDataType | undefined> => {
-    return client
-      .put(`${NAMESPACE}/productID/${productID}`, {
+      .put(`${NAMESPACE}/${query.field}/${query.key}`, {
         ...item
       })
       .then((res) => {
@@ -144,36 +99,6 @@ export default {
   deleteItemByPk: async (id: number): Promise<ResponseDataType | undefined> => {
     return client
       .delete(`${NAMESPACE}/${id}`)
-      .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
-      })
-      .catch(function (error) {
-        errorFormatter(error)
-      })
-  },
-  deleteItemBySewingLineID: async (
-    sewingLineID: number
-  ): Promise<ResponseDataType | undefined> => {
-    return client
-      .delete(`${NAMESPACE}/sewingLineID/${sewingLineID}`)
-      .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
-      })
-      .catch(function (error) {
-        errorFormatter(error)
-      })
-  },
-  deleteItemByProductID: async (
-    productID: number
-  ): Promise<ResponseDataType | undefined> => {
-    return client
-      .delete(`${NAMESPACE}/productID/${productID}`)
       .then((res) => {
         if (res.data) {
           return res.data as ResponseDataType
