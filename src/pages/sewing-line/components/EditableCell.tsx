@@ -30,10 +30,10 @@ const EditableCell: React.FC<EditableCellProps> = ({
 }) => {
   const inputNode = ((): React.ReactNode => {
     switch (dataIndex) {
-      case 'sewingLineName':
+      case dataIndex:
         return (
           <Form.Item
-            name='sewingLineName'
+            name={dataIndex}
             style={{ margin: 0 }}
             rules={[
               {

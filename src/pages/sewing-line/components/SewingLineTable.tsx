@@ -1,19 +1,19 @@
 import { App as AntApp, Form, Table, Typography } from 'antd'
-import type { Color as AntColor } from 'antd/es/color-picker'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import {
   RequestBodyType,
   ResponseDataType,
   defaultRequestBody
 } from '~/api/client'
+import SewingLineAPI from '~/api/services/SewingLineAPI'
+import useAPICaller from '~/components/hooks/useAPICaller'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import ItemAction from '~/components/layout/Item/ItemAction'
 import { RootState } from '~/store/store'
 import { SewingLine } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
-import useSewingLine from '../hooks/useSewingLine'
 import { SewingLineTableDataType } from '../type'
 import EditableCell, { EditableTableProps } from './EditableCell'
 import ModalAddNewSewingLine from './ModalAddNewSewingLine'
@@ -23,21 +23,15 @@ type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 const SewingLineTable: React.FC<Props> = ({ ...props }) => {
+  const [openModal, setOpenModal] = useState<boolean>(false)
   const {
-    metaData,
     loading,
-    setPage,
-    dateCreation,
-    setDateCreation,
-    setLoading,
-    openModal,
-    setOpenModal,
-    handleAddNewItem,
-    getDataList,
-    handleUpdateItem,
-    handleDeleteItem,
-    handleSorted
-  } = useSewingLine()
+    metaData,
+    createNewItem,
+    getListItems,
+    updateItemByPk,
+    sortedListItems
+  } = useAPICaller<SewingLine>(SewingLineAPI)
   const {
     form,
     editingKey,
@@ -56,7 +50,7 @@ const SewingLineTable: React.FC<Props> = ({ ...props }) => {
   const { message } = AntApp.useApp()
 
   useEffect(() => {
-    getDataList(defaultRequestBody, (meta) => {
+    getListItems(defaultRequestBody, (meta) => {
       if (meta?.success) {
         selfHandleProgressDataSource(meta)
       }
@@ -79,24 +73,17 @@ const SewingLineTable: React.FC<Props> = ({ ...props }) => {
     record: TableItemWithKey<SewingLineTableDataType>
   ) => {
     const row = await form.validateFields()
-    const hexColor = row.hexColor
-      ? typeof row.hexColor === 'string'
-        ? row.hexColor
-        : (row.hexColor as AntColor).toHexString()
-      : ''
     handleStartSaveEditing(
       record.key!,
       {
-        ...row,
-        hexColor: hexColor
+        ...row
       },
       (status) => {
         if (status) {
-          handleUpdateItem(
+          updateItemByPk(
             record.id ?? Number(record.key!),
             {
-              ...row,
-              hexColor: hexColor
+              ...row
             },
             (success) => {
               if (success) {
@@ -114,15 +101,18 @@ const SewingLineTable: React.FC<Props> = ({ ...props }) => {
   const selfHandleConfirmDelete = (
     item: TableItemWithKey<SewingLineTableDataType>
   ) => {
-    setLoading(true)
     handleStartDeleting(item.key!, (productToDelete) => {
-      handleDeleteItem(Number(productToDelete), (success) => {
-        if (success) {
-          message.success('Deleted!')
-        } else {
-          message.error('Failed!')
+      updateItemByPk(
+        Number(productToDelete.key),
+        { status: 'deleted' },
+        (meta) => {
+          if (meta?.success) {
+            message.success('Deleted!')
+          } else {
+            message.error('Failed!')
+          }
         }
-      })
+      )
     })
   }
 
@@ -158,7 +148,7 @@ const SewingLineTable: React.FC<Props> = ({ ...props }) => {
     dataIndex: string
   })[] = [
     {
-      title: 'Name',
+      title: 'Chuyền',
       dataIndex: 'sewingLineName',
       width: '15%',
       editable: user.isAdmin,
@@ -213,9 +203,7 @@ const SewingLineTable: React.FC<Props> = ({ ...props }) => {
   const adminColumns: (ColumnTypes[number] & {
     editable?: boolean
     dataIndex: string
-  })[] = dateCreation
-    ? [...commonCols, ...dateCreationColumns, ...actionsCols]
-    : [...commonCols, ...actionsCols]
+  })[] = [...commonCols, ...dateCreationColumns, ...actionsCols]
 
   const staffColumns: (ColumnTypes[number] & {
     editable?: boolean
@@ -263,11 +251,11 @@ const SewingLineTable: React.FC<Props> = ({ ...props }) => {
               const body: RequestBodyType = {
                 ...defaultRequestBody,
                 search: {
-                  field: 'nameColor',
+                  field: 'sewingLineName',
                   term: value
                 }
               }
-              getDataList(body, (meta) => {
+              getListItems(body, (meta) => {
                 if (meta?.success) {
                   selfHandleProgressDataSource(meta)
                 }
@@ -275,7 +263,7 @@ const SewingLineTable: React.FC<Props> = ({ ...props }) => {
             }
           }}
           onSortChange={(val) => {
-            handleSorted(val ? 'asc' : 'desc', (meta) => {
+            sortedListItems(val ? 'asc' : 'desc', (meta) => {
               if (meta?.success) {
                 selfHandleProgressDataSource(meta)
               }
@@ -283,15 +271,13 @@ const SewingLineTable: React.FC<Props> = ({ ...props }) => {
           }}
           onResetClick={() => {
             form.setFieldValue('search', '')
-            getDataList(defaultRequestBody, (meta) => {
+            getListItems(defaultRequestBody, (meta) => {
               if (meta?.success) {
                 selfHandleProgressDataSource(meta)
                 message.success('Reloaded!')
               }
             })
           }}
-          dateCreation={dateCreation}
-          onDateCreationChange={setDateCreation}
           onAddNewClick={() => setOpenModal(true)}
         >
           <Table
@@ -307,7 +293,6 @@ const SewingLineTable: React.FC<Props> = ({ ...props }) => {
             rowClassName='editable-row'
             pagination={{
               onChange: (_page) => {
-                setPage(_page)
                 const body: RequestBodyType = {
                   ...defaultRequestBody,
                   paginator: {
@@ -315,11 +300,11 @@ const SewingLineTable: React.FC<Props> = ({ ...props }) => {
                     pageSize: 5
                   },
                   search: {
-                    field: 'nameColor',
+                    field: 'sewingLineName',
                     term: form.getFieldValue('search') ?? ''
                   }
                 }
-                getDataList(body, (meta) => {
+                getListItems(body, (meta) => {
                   if (meta?.success) {
                     selfHandleProgressDataSource(meta)
                   }
@@ -337,7 +322,7 @@ const SewingLineTable: React.FC<Props> = ({ ...props }) => {
           openModal={openModal}
           setOpenModal={setOpenModal}
           onAddNew={(addNewForm) => {
-            handleAddNewItem(addNewForm, (meta) => {
+            createNewItem(addNewForm, (meta) => {
               if (meta?.success) {
                 const newItem = meta.data as SewingLine
                 handleStartAddNew({
@@ -345,6 +330,7 @@ const SewingLineTable: React.FC<Props> = ({ ...props }) => {
                   ...addNewForm
                 })
                 message.success('Created!')
+                setOpenModal(false)
               } else {
                 message.error('Failed!')
               }

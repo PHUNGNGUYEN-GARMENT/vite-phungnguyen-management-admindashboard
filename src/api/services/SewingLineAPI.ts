@@ -6,7 +6,7 @@ const NAMESPACE = 'sewing-lines'
 
 export default {
   createNewItem: async (
-    item: SewingLine
+    item: Partial<SewingLine>
   ): Promise<ResponseDataType | undefined> => {
     return await client
       .post(`${NAMESPACE}`, {
@@ -36,11 +36,12 @@ export default {
         errorFormatter(error)
       })
   },
-  getItemBySewingLineName: async (
-    sewingLineName: string
-  ): Promise<ResponseDataType | undefined> => {
+  getItemBy: async (query: {
+    field: string
+    key: React.Key
+  }): Promise<ResponseDataType | undefined> => {
     return client
-      .get(`${NAMESPACE}/sewingLineName/${sewingLineName}`)
+      .get(`${NAMESPACE}/${query.field}/${query.key}`)
       .then((res) => {
         if (res.data) {
           return res.data as ResponseDataType
@@ -70,10 +71,31 @@ export default {
   },
   updateItemByPk: async (
     id: number,
-    item: SewingLine
+    item: Partial<SewingLine>
   ): Promise<ResponseDataType | undefined> => {
     return client
       .put(`${NAMESPACE}/${id}`, {
+        ...item
+      })
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  updateItemBy: async (
+    query: {
+      field: string
+      key: React.Key
+    },
+    item: Partial<SewingLine>
+  ): Promise<ResponseDataType | undefined> => {
+    return client
+      .put(`${NAMESPACE}/${query.field}/${query.key}`, {
         ...item
       })
       .then((res) => {

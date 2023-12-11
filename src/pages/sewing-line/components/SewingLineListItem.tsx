@@ -46,7 +46,7 @@ const ColorListItem: React.FC<Props> = ({
                 name={`sewingLineName`}
                 initialValue={data.sewingLineName}
               >
-                <Input size='large' />
+                <Input size='large' value={data.sewingLineName} />
               </Form.Item>
             ) : (
               <Typography.Title copyable className='m-0 h-fit p-0' level={4}>

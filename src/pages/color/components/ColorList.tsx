@@ -6,8 +6,7 @@ import {
   ResponseDataType,
   defaultRequestBody
 } from '~/api/client'
-import useList from '~/components/hooks/useList'
-import { TableItemWithKey } from '~/components/hooks/useTable'
+import useList, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import { Color } from '~/typing'
 import useColor from '../hooks/useColor'

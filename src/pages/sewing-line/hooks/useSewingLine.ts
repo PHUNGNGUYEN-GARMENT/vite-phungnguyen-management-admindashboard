@@ -55,7 +55,6 @@ export default function useSewingLine() {
     await SewingLineAPI.getItems(body)
       .then((meta) => {
         if (meta?.success) {
-          console.log(meta)
           setMetaData(meta)
           onDataSuccess?.(meta, true)
         }
