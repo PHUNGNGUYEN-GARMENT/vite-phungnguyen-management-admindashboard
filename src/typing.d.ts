@@ -206,7 +206,7 @@ export type SewingLineDelivery = {
 
 export type SewingLine = {
   id?: number
-  sewingLine?: string
+  sewingLineName?: string
   status?: ItemStatusType
   createdAt?: string
   updatedAt?: string

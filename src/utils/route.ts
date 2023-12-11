@@ -14,6 +14,7 @@ import {
   SewingMachineIcon
 } from '~/assets/icons'
 import SampleSewingPage from '~/pages/sample-sewing/SampleSewingPage'
+import SewingLinePage from '~/pages/sewing-line/SewingLinePage'
 const Dashboard = lazy(() => import('~/pages/dashboard/Dashboard'))
 const Cutting = lazy(() => import('~/pages/cutting/Cutting'))
 const ColorPage = lazy(() => import('~/pages/color/ColorPage'))
@@ -93,6 +94,13 @@ export const appRoutes: SideType[] = [
     icon: CutIcon
   },
   {
+    key: '5',
+    name: 'Chuyền may',
+    path: 'sewing-line-deliveries',
+    component: SewingLineDeliveryPage,
+    icon: DeliveryIcon
+  },
+  {
     key: '6',
     name: 'Hoàn thành',
     path: 'finish',
@@ -123,11 +131,10 @@ export const appRoutes: SideType[] = [
     icon: AgeGroupIcon
   },
   {
-    key: '5',
-    name: 'Chuyền may',
+    key: '13',
+    name: 'Chuyền',
     path: 'deliveries',
-    component: SewingLineDeliveryPage,
-    isGroup: false,
+    component: SewingLinePage,
     icon: DeliveryIcon
   },
   {

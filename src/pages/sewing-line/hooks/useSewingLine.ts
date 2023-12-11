@@ -4,10 +4,10 @@ import {
   ResponseDataType,
   defaultRequestBody
 } from '~/api/client'
-import SewingLineDeliveryAPI from '~/api/services/SewingLineDeliveryAPI'
-import { SewingLineDelivery, SortDirection } from '~/typing'
+import SewingLineAPI from '~/api/services/SewingLineAPI'
+import { SewingLine, SortDirection } from '~/typing'
 
-export default function useSewingLineDelivery() {
+export default function useSewingLine() {
   const [metaData, setMetaData] = useState<ResponseDataType>()
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [loading, setLoading] = useState<boolean>(false)
@@ -15,14 +15,14 @@ export default function useSewingLineDelivery() {
   const [dateCreation, setDateCreation] = useState<boolean>(true)
 
   const handleAddNewItem = async (
-    itemNew: SewingLineDelivery,
+    itemNew: SewingLine,
     onDataSuccess?: (
       data: ResponseDataType | undefined,
       status: boolean
     ) => void
   ) => {
     setLoading(true)
-    await SewingLineDeliveryAPI.createNewItem(itemNew)
+    await SewingLineAPI.createNewItem(itemNew)
       .then((meta) => {
         if (meta?.success) {
           onDataSuccess?.(meta, true)
@@ -52,7 +52,7 @@ export default function useSewingLineDelivery() {
       ...defaultRequestBody,
       ...params
     }
-    await SewingLineDeliveryAPI.getItems(body)
+    await SewingLineAPI.getItems(body)
       .then((meta) => {
         if (meta?.success) {
           console.log(meta)
@@ -92,14 +92,14 @@ export default function useSewingLineDelivery() {
 
   const handleUpdateItem = async (
     id: number,
-    itemToUpdate: SewingLineDelivery,
+    itemToUpdate: SewingLine,
     onDataSuccess?: (
       data: ResponseDataType | undefined,
       status: boolean
     ) => void
   ) => {
     setLoading(true)
-    SewingLineDeliveryAPI.updateItemByPk(id, itemToUpdate)
+    SewingLineAPI.updateItemByPk(id, itemToUpdate)
       .then((data) => {
         if (data?.success) {
           setMetaData(data)
@@ -123,7 +123,7 @@ export default function useSewingLineDelivery() {
     ) => void
   ) => {
     setLoading(true)
-    await SewingLineDeliveryAPI.updateItemByPk(id, { status: 'deleted' })
+    await SewingLineAPI.updateItemByPk(id, { status: 'deleted' })
       .then((data) => {
         if (data?.success) {
           setMetaData(data)

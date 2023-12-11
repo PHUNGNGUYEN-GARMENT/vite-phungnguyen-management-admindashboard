@@ -1,31 +1,27 @@
 /* eslint-disable react-refresh/only-export-components */
-import { ColorPicker, Flex, Form, Input, Modal, Typography } from 'antd'
+import { Flex, Form, Input, Modal, Typography } from 'antd'
 import React, { memo } from 'react'
-import { SewingLineDelivery } from '~/typing'
-import { SewingLineDeliveryTableDataType } from '../type'
+import { SewingLine } from '~/typing'
+import { SewingLineTableDataType } from '../type'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
   openModal: boolean
   setOpenModal: (enable: boolean) => void
-  onAddNew: (itemToAddNew: SewingLineDelivery) => void
+  onAddNew: (itemToAddNew: SewingLine) => void
 }
 
-const ModalAddNewSewingLineDelivery: React.FC<Props> = ({
+const ModalAddNewSewingLine: React.FC<Props> = ({
   openModal,
   setOpenModal,
   onAddNew,
   ...props
 }) => {
-  const [form] = Form.useForm<SewingLineDeliveryTableDataType>()
+  const [form] = Form.useForm<SewingLineTableDataType>()
 
   async function handleOk() {
     const row = await form.validateFields()
     onAddNew({
-      productID: row.productID,
-      sewingLineID: row.sewingLineID,
-      quantityOrigin: row.quantityOrigin,
-      quantitySewed: row.quantitySewed,
-      expiredDate: row.expiredDate
+      sewingLineName: row.sewingLineName
     })
   }
 
@@ -43,31 +39,23 @@ const ModalAddNewSewingLineDelivery: React.FC<Props> = ({
     >
       <Form form={form} {...props}>
         <Flex vertical gap={20}>
-          <Typography.Title level={2}>Add new color</Typography.Title>
+          <Typography.Title level={2}>Add new</Typography.Title>
           <Flex vertical gap={10}>
             <Flex align='center' gap={5}>
               <Typography.Text className='w-24 flex-shrink-0'>
-                Color name:
+                Sewing line name:
               </Typography.Text>
               <Form.Item
                 rules={[
                   {
                     required: true,
-                    message: `Please Input COLOR NAME!`
+                    message: `Please Input SEWING LINE1!`
                   }
                 ]}
-                name='nameColor'
+                name='sewingLineName'
                 className='m-0'
               >
                 <Input allowClear placeholder='Orange' />
-              </Form.Item>
-            </Flex>
-            <Flex align='center' gap={5}>
-              <Typography.Text className='w-24 flex-shrink-0'>
-                Pick color:
-              </Typography.Text>
-              <Form.Item name='hexColor' className='m-0' initialValue='#000000'>
-                <ColorPicker size='middle' showText />
               </Form.Item>
             </Flex>
           </Flex>
@@ -77,4 +65,4 @@ const ModalAddNewSewingLineDelivery: React.FC<Props> = ({
   )
 }
 
-export default memo(ModalAddNewSewingLineDelivery)
+export default memo(ModalAddNewSewingLine)

@@ -40,7 +40,7 @@ export default {
         errorFormatter(error)
       })
   },
-  getItemBySewingLine: async (
+  getItemBySewingLineID: async (
     sewingLineID: number
   ): Promise<ResponseDataType | undefined> => {
     return client

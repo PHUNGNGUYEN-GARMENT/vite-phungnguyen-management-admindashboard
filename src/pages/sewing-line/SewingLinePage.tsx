@@ -1,8 +1,8 @@
 import { Flex } from 'antd'
 import useDevice from '~/components/hooks/useDevice'
-import SewingLineDeliveryList from './components/SewingLineDeliveryList'
+import SewingLineDeliveryList from './components/SewingLineList'
 
-const SewingLineDeliveryPage = () => {
+const SewingLinePage = () => {
   const { width } = useDevice()
 
   return (
@@ -15,4 +15,4 @@ const SewingLineDeliveryPage = () => {
   )
 }
 
-export default SewingLineDeliveryPage
+export default SewingLinePage

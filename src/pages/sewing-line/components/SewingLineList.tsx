@@ -8,15 +8,15 @@ import {
 import useList from '~/components/hooks/useList'
 import { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
-import { SewingLineDelivery } from '~/typing'
-import useSewingLineDelivery from '../hooks/useSewingLineDelivery'
-import { SewingLineDeliveryTableDataType } from '../type'
-import ModalAddNewSewingLineDelivery from './ModalAddNewSewingLineDelivery'
-import SewingLineDeliveryListItem from './SewingLineDeliveryListItem'
+import { SewingLine } from '~/typing'
+import useSewingLine from '../hooks/useSewingLine'
+import { SewingLineTableDataType } from '../type'
+import ModalAddNewSewingLine from './ModalAddNewSewingLine'
+import SewingLineListItem from './SewingLineListItem'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
-const SewingLineDeliveryList: React.FC<Props> = ({ ...props }) => {
+const SewingLineList: React.FC<Props> = ({ ...props }) => {
   const {
     metaData,
     setPage,
@@ -31,7 +31,7 @@ const SewingLineDeliveryList: React.FC<Props> = ({ ...props }) => {
     handleDeleteItem,
     handleUpdateItem,
     handleSorted
-  } = useSewingLineDelivery()
+  } = useSewingLine()
   const {
     form,
     editingKey,
@@ -45,56 +45,56 @@ const SewingLineDeliveryList: React.FC<Props> = ({ ...props }) => {
     handleStartSaveEditing,
     handleConfirmCancelEditing,
     handleConfirmCancelDeleting
-  } = useList<SewingLineDeliveryTableDataType>([])
+  } = useList<SewingLineTableDataType>([])
   const { message } = AntApp.useApp()
 
   useEffect(() => {
     getDataList(defaultRequestBody, (meta) => {
       if (meta?.success) {
+        console.log(meta)
         handleProgressDataSource(meta)
       }
     })
   }, [])
 
   const handleProgressDataSource = (meta: ResponseDataType) => {
-    const colors = meta.data as SewingLineDelivery[]
+    const colors = meta.data as SewingLine[]
     setDataSource(
-      colors.map((item: SewingLineDelivery) => {
+      colors.map((item: SewingLine) => {
         return {
           ...item,
           key: item.id
-        } as TableItemWithKey<SewingLineDeliveryTableDataType>
+        } as TableItemWithKey<SewingLineTableDataType>
       })
     )
   }
 
   const selfHandleSaveClick = async (
-    item: TableItemWithKey<SewingLineDeliveryTableDataType>
+    item: TableItemWithKey<SewingLineTableDataType>
   ) => {
     const row = await form.validateFields()
-    handleStartSaveEditing(
-      item.key!,
+
+    handleUpdateItem(
+      item.id ?? Number(item.key),
       {
-        productID: row.productID,
-        sewingLineID: row.sewingLineID,
-        quantityOrigin: row.quantityOrigin,
-        quantitySewed: row.quantitySewed,
-        expiredDate: row.expiredDate
+        ...row
       },
-      (itemToSave) => {
-        handleUpdateItem(
-          item.id ?? Number(item.key),
-          {
-            ...itemToSave
-          },
-          (success) => {
-            if (success) {
-              message.success('Created!')
-            } else {
-              message.success('Failed!')
+      (success) => {
+        if (success) {
+          handleStartSaveEditing(
+            item.key!,
+            {
+              sewingLineName: row.sewingLineName
+            },
+            (itemToSave) => {
+              if (itemToSave) {
+                message.success('Updated!')
+              }
             }
-          }
-        )
+          )
+        } else {
+          message.error('Failed!')
+        }
       }
     )
   }
@@ -108,7 +108,7 @@ const SewingLineDeliveryList: React.FC<Props> = ({ ...props }) => {
               const body: RequestBodyType = {
                 ...defaultRequestBody,
                 search: {
-                  field: 'nameColor',
+                  field: 'sewingLineName',
                   term: value
                 }
               }
@@ -152,7 +152,7 @@ const SewingLineDeliveryList: React.FC<Props> = ({ ...props }) => {
                     pageSize: 5
                   },
                   search: {
-                    field: 'nameColor',
+                    field: 'sewingLineName',
                     term: form.getFieldValue('search') ?? ''
                   }
                 }
@@ -169,7 +169,7 @@ const SewingLineDeliveryList: React.FC<Props> = ({ ...props }) => {
             loading={loading}
             dataSource={dataSource}
             renderItem={(item) => (
-              <SewingLineDeliveryListItem
+              <SewingLineListItem
                 data={item}
                 key={item.key}
                 editingKey={editingKey}
@@ -198,17 +198,17 @@ const SewingLineDeliveryList: React.FC<Props> = ({ ...props }) => {
         </BaseLayout>
       </Form>
       {openModal && (
-        <ModalAddNewSewingLineDelivery
+        <ModalAddNewSewingLine
           openModal={openModal}
           setOpenModal={setOpenModal}
           onAddNew={(addNewForm) => {
             console.log(addNewForm)
-            handleStartAddNew({ key: dataSource.length + 1, ...addNewForm })
             handleAddNewItem(addNewForm, (success) => {
               if (success) {
+                handleStartAddNew({ key: dataSource.length + 1, ...addNewForm })
                 message.success('Created!')
               } else {
-                message.success('Failed!')
+                message.error('Failed!')
               }
             })
           }}
@@ -218,4 +218,4 @@ const SewingLineDeliveryList: React.FC<Props> = ({ ...props }) => {
   )
 }
 
-export default SewingLineDeliveryList
+export default SewingLineList

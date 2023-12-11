@@ -13,10 +13,10 @@ import ItemAction from '~/components/layout/Item/ItemAction'
 import { RootState } from '~/store/store'
 import { Color } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
-import useColor from '../hooks/useSewingLineDelivery'
+import useColor from '../hooks/useSewingLine'
 import { ColorTableDataType } from '../type'
 import EditableCell, { EditableTableProps } from './EditableCell'
-import ModalAddNewColor from './ModalAddNewSewingLineDelivery'
+import ModalAddNewColor from './ModalAddNewSewingLine'
 
 type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>
 

@@ -10,8 +10,8 @@ export default {
   ): Promise<ResponseDataType | undefined> => {
     return await client
       .post(`${NAMESPACE}`, {
-        sewingLine: item.sewingLine,
-        status: item.status
+        sewingLineName: item.sewingLineName,
+        status: item.status ?? 'active'
       })
       .then((res) => {
         if (res.data) {
@@ -36,11 +36,11 @@ export default {
         errorFormatter(error)
       })
   },
-  getItemBySewingLine: async (
-    sewingLine: string
+  getItemBySewingLineName: async (
+    sewingLineName: string
   ): Promise<ResponseDataType | undefined> => {
     return client
-      .get(`${NAMESPACE}/sewingLine/${sewingLine}`)
+      .get(`${NAMESPACE}/sewingLineName/${sewingLineName}`)
       .then((res) => {
         if (res.data) {
           return res.data as ResponseDataType
