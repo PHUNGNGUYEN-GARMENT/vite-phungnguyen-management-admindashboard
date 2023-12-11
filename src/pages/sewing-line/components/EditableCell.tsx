@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-refresh/only-export-components */
-import { ColorPicker, Form, Input, Table } from 'antd'
+import { Form, Input, Table } from 'antd'
 import { memo } from 'react'
 import { TableItemWithKey } from '~/components/hooks/useTable'
-import { ColorTableDataType } from '../type'
+import { SewingLineTableDataType } from '../type'
 
 type InputType = 'number' | 'text'
 
@@ -12,7 +12,7 @@ interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
   dataIndex: string
   title: string | undefined
   inputType: InputType
-  record: TableItemWithKey<ColorTableDataType>
+  record: TableItemWithKey<SewingLineTableDataType>
   index: number
   children: React.ReactNode
 }
@@ -30,10 +30,10 @@ const EditableCell: React.FC<EditableCellProps> = ({
 }) => {
   const inputNode = ((): React.ReactNode => {
     switch (dataIndex) {
-      case 'nameColor':
+      case 'sewingLineName':
         return (
           <Form.Item
-            name='nameColor'
+            name='sewingLineName'
             style={{ margin: 0 }}
             rules={[
               {
@@ -41,27 +41,13 @@ const EditableCell: React.FC<EditableCellProps> = ({
                 message: `Please Input ${title}!`
               }
             ]}
-            initialValue={record ? record.nameColor : ''}
+            initialValue={record ? record.sewingLineName : ''}
           >
             <Input className='w-full' />
           </Form.Item>
         )
       default:
-        return (
-          <Form.Item
-            name='hexColor'
-            style={{ margin: 0 }}
-            rules={[
-              {
-                required: true,
-                message: `Please Input ${title}!`
-              }
-            ]}
-            initialValue={record ? record.hexColor : '#000000'}
-          >
-            <ColorPicker defaultFormat='hex' showText className='w-full' />
-          </Form.Item>
-        )
+        return <></>
     }
   })()
 

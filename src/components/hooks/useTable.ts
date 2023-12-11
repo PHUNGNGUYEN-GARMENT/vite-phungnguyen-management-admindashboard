@@ -15,9 +15,12 @@ export default function useTable<T extends { key?: React.Key }>(
 
   // Add row
   async function handleStartAddNew(item: TableItemWithKey<T>) {
-    const newData = [...dataSource]
-    newData.push(item)
-    setDataSource(newData)
+    const newDataSource = [...dataSource]
+    newDataSource.unshift({
+      ...item,
+      key: item.key
+    } as TableItemWithKey<T>)
+    setDataSource(newDataSource)
   }
 
   // Edit row

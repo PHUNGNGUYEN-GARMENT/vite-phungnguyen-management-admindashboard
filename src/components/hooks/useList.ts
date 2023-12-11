@@ -68,11 +68,11 @@ export default function useList<T extends { key?: React.Key }>(
     }
   }
 
-  const handleStartAddNew = (item: T) => {
+  const handleStartAddNew = (item: TableItemWithKey<T>) => {
     const newDataSource = [...dataSource]
     newDataSource.unshift({
       ...item,
-      key: dataSource.length + 1
+      key: item.key
     } as TableItemWithKey<T>)
     setDataSource(newDataSource)
   }

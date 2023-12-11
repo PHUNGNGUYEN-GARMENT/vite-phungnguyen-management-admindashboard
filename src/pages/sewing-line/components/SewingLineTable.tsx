@@ -1,4 +1,4 @@
-import { App as AntApp, ColorPicker, Form, Table, Typography } from 'antd'
+import { App as AntApp, Form, Table, Typography } from 'antd'
 import type { Color as AntColor } from 'antd/es/color-picker'
 import { useEffect } from 'react'
 import { useSelector } from 'react-redux'
@@ -11,18 +11,18 @@ import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import ItemAction from '~/components/layout/Item/ItemAction'
 import { RootState } from '~/store/store'
-import { Color } from '~/typing'
+import { SewingLine } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
-import useColor from '../hooks/useSewingLine'
-import { ColorTableDataType } from '../type'
+import useSewingLine from '../hooks/useSewingLine'
+import { SewingLineTableDataType } from '../type'
 import EditableCell, { EditableTableProps } from './EditableCell'
-import ModalAddNewColor from './ModalAddNewSewingLine'
+import ModalAddNewSewingLine from './ModalAddNewSewingLine'
 
 type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>
 
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
-const ColorTable: React.FC<Props> = ({ ...props }) => {
+const SewingLineTable: React.FC<Props> = ({ ...props }) => {
   const {
     metaData,
     loading,
@@ -37,7 +37,7 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
     handleUpdateItem,
     handleDeleteItem,
     handleSorted
-  } = useColor()
+  } = useSewingLine()
   const {
     form,
     editingKey,
@@ -51,7 +51,7 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
     handleStartSaveEditing,
     handleConfirmCancelEditing,
     handleConfirmCancelDeleting
-  } = useTable<ColorTableDataType>([])
+  } = useTable<SewingLineTableDataType>([])
   const user = useSelector((state: RootState) => state.user)
   const { message } = AntApp.useApp()
 
@@ -64,19 +64,19 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
   }, [])
 
   const selfHandleProgressDataSource = (meta: ResponseDataType) => {
-    const colors = meta.data as Color[]
+    const colors = meta.data as SewingLine[]
     setDataSource(
-      colors.map((item: Color) => {
+      colors.map((item: SewingLine) => {
         return {
           ...item,
           key: item.id
-        } as ColorTableDataType
+        } as SewingLineTableDataType
       })
     )
   }
 
   const selfHandleSaveClick = async (
-    record: TableItemWithKey<ColorTableDataType>
+    record: TableItemWithKey<SewingLineTableDataType>
   ) => {
     const row = await form.validateFields()
     const hexColor = row.hexColor
@@ -112,7 +112,7 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
   }
 
   const selfHandleConfirmDelete = (
-    item: TableItemWithKey<ColorTableDataType>
+    item: TableItemWithKey<SewingLineTableDataType>
   ) => {
     setLoading(true)
     handleStartDeleting(item.key!, (productToDelete) => {
@@ -134,7 +134,7 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
       title: 'Operation',
       width: '15%',
       dataIndex: 'operation',
-      render: (_, record: ColorTableDataType) => {
+      render: (_, record: SewingLineTableDataType) => {
         return (
           <>
             <ItemAction
@@ -158,31 +158,15 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
     dataIndex: string
   })[] = [
     {
-      title: 'Color Name',
-      dataIndex: 'nameColor',
+      title: 'Name',
+      dataIndex: 'sewingLineName',
       width: '15%',
       editable: user.isAdmin,
-      render: (_, record: ColorTableDataType) => {
+      render: (_, record: SewingLineTableDataType) => {
         return (
           <Typography.Text copyable className='text-md flex-shrink-0 font-bold'>
-            {record.nameColor}
+            {record.sewingLineName}
           </Typography.Text>
-        )
-      }
-    },
-    {
-      title: 'Mã màu',
-      dataIndex: 'hexColor',
-      width: '15%',
-      editable: true,
-      render: (_, record: ColorTableDataType) => {
-        return (
-          <ColorPicker
-            defaultValue={record ? record.hexColor : ''}
-            showText
-            disabled
-            defaultFormat='hex'
-          />
         )
       }
     }
@@ -196,7 +180,7 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
       title: 'Created date',
       dataIndex: 'createdAt',
       width: '10%',
-      render: (_, record: ColorTableDataType) => {
+      render: (_, record: SewingLineTableDataType) => {
         return (
           <>
             <span>
@@ -212,7 +196,7 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
       title: 'Updated date',
       dataIndex: 'updatedAt',
       width: '10%',
-      render: (_, record: ColorTableDataType) => {
+      render: (_, record: SewingLineTableDataType) => {
         return (
           <>
             <span>
@@ -250,7 +234,7 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
       }
       return {
         ...col,
-        onCell: (record: ColorTableDataType) => ({
+        onCell: (record: SewingLineTableDataType) => ({
           record,
           inputType: onCellColumnType(col.dataIndex),
           dataIndex: col.dataIndex,
@@ -263,10 +247,10 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
 
   const onCellColumnType = (dataIndex: string): string => {
     switch (dataIndex) {
-      case 'nameColor':
+      case 'sewingLineName':
         return 'text'
       default:
-        return 'colorpicker'
+        return 'text'
     }
   }
 
@@ -349,14 +333,17 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
         </BaseLayout>
       </Form>
       {openModal && (
-        <ModalAddNewColor
+        <ModalAddNewSewingLine
           openModal={openModal}
           setOpenModal={setOpenModal}
           onAddNew={(addNewForm) => {
-            console.log(addNewForm)
-            handleStartAddNew({ key: dataSource.length + 1, ...addNewForm })
-            handleAddNewItem(addNewForm, (success) => {
-              if (success) {
+            handleAddNewItem(addNewForm, (meta) => {
+              if (meta?.success) {
+                const newItem = meta.data as SewingLine
+                handleStartAddNew({
+                  key: newItem.id,
+                  ...addNewForm
+                })
                 message.success('Created!')
               } else {
                 message.error('Failed!')
@@ -369,4 +356,4 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
   )
 }
 
-export default ColorTable
+export default SewingLineTable

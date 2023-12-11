@@ -209,7 +209,6 @@ const SewingLineList: React.FC<Props> = ({ ...props }) => {
                   key: newItem.id,
                   ...addNewForm
                 })
-                console.log(newItem)
                 message.success('Created!')
               } else {
                 message.error('Failed!')
