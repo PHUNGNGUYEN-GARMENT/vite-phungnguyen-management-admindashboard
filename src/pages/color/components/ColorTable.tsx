@@ -1,21 +1,20 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { App as AntApp, ColorPicker, Form, Table, Typography } from 'antd'
 import type { Color as AntColor } from 'antd/es/color-picker'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
-import {
-  RequestBodyType,
-  ResponseDataType,
-  defaultRequestBody
-} from '~/api/client'
+import { v4 as uuidv4 } from 'uuid'
+import { RequestBodyType, defaultRequestBody } from '~/api/client'
+import ColorAPI from '~/api/services/ColorAPI'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
-import ItemAction from '~/components/layout/Item/ItemAction'
+import EditableCell, { EditableTableProps } from '~/components/ui/Table/EditableCell'
+import ItemAction from '~/components/ui/Table/ItemAction'
+import useAPICaller from '~/hooks/useAPICaller'
 import { RootState } from '~/store/store'
 import { Color } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
-import useColor from '../hooks/useColor'
 import { ColorTableDataType } from '../type'
-import EditableCell, { EditableTableProps } from './EditableCell'
 import ModalAddNewColor from './ModalAddNewColor'
 
 type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>
@@ -23,28 +22,17 @@ type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 const ColorTable: React.FC<Props> = ({ ...props }) => {
-  const {
-    metaData,
-    loading,
-    setPage,
-    dateCreation,
-    setDateCreation,
-    setLoading,
-    openModal,
-    setOpenModal,
-    handleAddNewItem,
-    getDataList,
-    handleUpdateItem,
-    handleDeleteItem,
-    handleSorted
-  } = useColor()
+  const { metaData, setPage, loading, createNewItem, getListItems, updateItemByPk, deleteItemByPk, sortedListItems } =
+    useAPICaller<Color>(ColorAPI)
   const {
     form,
     editingKey,
     setDeleteKey,
     dataSource,
-    setDataSource,
     isEditing,
+    dateCreation,
+    setDateCreation,
+    handleConvertDataSource,
     handleStartAddNew,
     handleStartEditing,
     handleStartDeleting,
@@ -52,100 +40,87 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
     handleConfirmCancelEditing,
     handleConfirmCancelDeleting
   } = useTable<ColorTableDataType>([])
+  const [openModal, setOpenModal] = useState<boolean>(false)
   const user = useSelector((state: RootState) => state.user)
   const { message } = AntApp.useApp()
 
   useEffect(() => {
-    getDataList(defaultRequestBody, (meta) => {
+    getListItems(defaultRequestBody, (meta) => {
       if (meta?.success) {
-        selfHandleProgressDataSource(meta)
+        handleConvertDataSource(meta)
       }
     })
   }, [])
 
-  const selfHandleProgressDataSource = (meta: ResponseDataType) => {
-    const colors = meta.data as Color[]
-    setDataSource(
-      colors.map((item: Color) => {
-        return {
-          ...item,
-          key: item.id
-        } as ColorTableDataType
-      })
-    )
-  }
-
-  const selfHandleSaveClick = async (
-    record: TableItemWithKey<ColorTableDataType>
-  ) => {
+  const selfHandleSaveClick = async (item: TableItemWithKey<ColorTableDataType>) => {
     const row = await form.validateFields()
     const hexColor = row.hexColor
       ? typeof row.hexColor === 'string'
         ? row.hexColor
         : (row.hexColor as AntColor).toHexString()
       : ''
-    handleStartSaveEditing(
-      record.key!,
+    updateItemByPk(
+      item.id ?? Number(item.key),
       {
-        ...row,
+        nameColor: row.nameColor,
         hexColor: hexColor
       },
-      (status) => {
-        if (status) {
-          handleUpdateItem(
-            record.id ?? Number(record.key!),
-            {
-              ...row,
-              hexColor: hexColor
-            },
-            (success) => {
-              if (success) {
-                message.success('Updated!')
-              } else {
-                message.error('Failed!')
-              }
-            }
-          )
+      (meta) => {
+        if (meta?.success) {
+          const color = meta.data as Color
+          handleStartSaveEditing(color.id ?? Number(item.key), color, () => {
+            message.success('Updated!')
+          })
+        } else {
+          message.error('Failed!')
         }
       }
     )
   }
 
-  const selfHandleConfirmDelete = (
-    item: TableItemWithKey<ColorTableDataType>
-  ) => {
-    setLoading(true)
-    handleStartDeleting(item.key!, (productToDelete) => {
-      handleDeleteItem(Number(productToDelete), (success) => {
-        if (success) {
-          message.success('Deleted!')
-        } else {
-          message.error('Failed!')
-        }
-      })
-    })
+  const smartInitialValue = (dataIndex: string, record: ColorTableDataType): unknown => {
+    switch (dataIndex) {
+      case 'nameColor':
+        return record.nameColor
+      case 'hexColor':
+        return record.hexColor
+      default:
+        return record.id
+    }
   }
 
   const actionsCols: (ColumnTypes[number] & {
     editable?: boolean
     dataIndex: string
+    initialValue?: any
   })[] = [
     {
       title: 'Operation',
       width: '15%',
       dataIndex: 'operation',
-      render: (_, record: ColorTableDataType) => {
+      render: (_, item: TableItemWithKey<ColorTableDataType>) => {
         return (
           <>
             <ItemAction
-              isEditing={isEditing(record.key!)}
+              isEditing={isEditing(item.key!)}
               editingKey={editingKey}
-              onSaveClick={() => selfHandleSaveClick(record)}
-              onClickStartEditing={() => handleStartEditing(record.key!)}
+              onSaveClick={() => selfHandleSaveClick(item)}
+              onClickStartEditing={() => handleStartEditing(item.key!)}
               onConfirmCancelEditing={() => handleConfirmCancelEditing()}
               onConfirmCancelDeleting={() => handleConfirmCancelDeleting()}
-              onConfirmDelete={() => selfHandleConfirmDelete(record)}
-              onStartDeleting={() => setDeleteKey(record.key!)}
+              onConfirmDelete={() => {
+                deleteItemByPk(item.id!, (meta) => {
+                  if (meta) {
+                    if (meta.success) {
+                      handleStartDeleting(item.id!, () => {})
+                      message.success('Deleted!')
+                    }
+                  } else {
+                    message.error('Failed!')
+                  }
+                })
+              }}
+              onStartDeleting={() => setDeleteKey(item.key!)}
             />
           </>
         )
@@ -156,13 +131,14 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
   const commonCols: (ColumnTypes[number] & {
     editable?: boolean
     dataIndex: string
+    initialValue?: any
   })[] = [
     {
       title: 'Color Name',
       dataIndex: 'nameColor',
       width: '15%',
       editable: user.isAdmin,
-      render: (_, record: ColorTableDataType) => {
+      render: (_, record: TableItemWithKey<ColorTableDataType>) => {
         return (
           <Typography.Text copyable className='text-md flex-shrink-0 font-bold'>
             {record.nameColor}
@@ -175,15 +151,8 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
       dataIndex: 'hexColor',
       width: '15%',
       editable: true,
-      render: (_, record: ColorTableDataType) => {
-        return (
-          <ColorPicker
-            defaultValue={record ? record.hexColor : ''}
-            showText
-            disabled
-            defaultFormat='hex'
-          />
-        )
+      render: (_, record: TableItemWithKey<ColorTableDataType>) => {
+        return <ColorPicker defaultValue={record ? record.hexColor : ''} showText disabled defaultFormat='hex' />
       }
     }
   ]
@@ -191,19 +160,16 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
   const dateCreationColumns: (ColumnTypes[number] & {
     editable?: boolean
     dataIndex: string
+    initialValue?: any
   })[] = [
     {
       title: 'Created date',
       dataIndex: 'createdAt',
       width: '10%',
-      render: (_, record: ColorTableDataType) => {
+      render: (_, record: TableItemWithKey<ColorTableDataType>) => {
         return (
           <>
-            <span>
-              {DayJS(record ? record.createdAt : '').format(
-                DatePattern.display
-              )}
-            </span>
+            <span>{DayJS(record ? record.createdAt : '').format(DatePattern.display)}</span>
           </>
         )
       }
@@ -212,14 +178,10 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
       title: 'Updated date',
       dataIndex: 'updatedAt',
       width: '10%',
-      render: (_, record: ColorTableDataType) => {
+      render: (_, record: TableItemWithKey<ColorTableDataType>) => {
         return (
           <>
-            <span>
-              {DayJS(record ? record.updatedAt : '').format(
-                DatePattern.display
-              )}
-            </span>
+            <span>{DayJS(record ? record.updatedAt : '').format(DatePattern.display)}</span>
           </>
         )
       }
@@ -229,9 +191,8 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
   const adminColumns: (ColumnTypes[number] & {
     editable?: boolean
     dataIndex: string
-  })[] = dateCreation
-    ? [...commonCols, ...dateCreationColumns, ...actionsCols]
-    : [...commonCols, ...actionsCols]
+    initialValue?: any
+  })[] = dateCreation ? [...commonCols, ...dateCreationColumns, ...actionsCols] : [...commonCols, ...actionsCols]
 
   const staffColumns: (ColumnTypes[number] & {
     editable?: boolean
@@ -242,6 +203,7 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
     cols: (ColumnTypes[number] & {
       editable?: boolean
       dataIndex: string
+      initialValue?: any
     })[]
   ): ColumnTypes => {
     return cols.map((col) => {
@@ -255,6 +217,7 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
           inputType: onCellColumnType(col.dataIndex),
           dataIndex: col.dataIndex,
           title: col.title,
+          initialValue: smartInitialValue(col.dataIndex, record),
           editing: isEditing(record.key!)
         })
       }
@@ -283,25 +246,25 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
                   term: value
                 }
               }
-              getDataList(body, (meta) => {
+              getListItems(body, (meta) => {
                 if (meta?.success) {
-                  selfHandleProgressDataSource(meta)
+                  handleConvertDataSource(meta)
                 }
               })
             }
           }}
           onSortChange={(val) => {
-            handleSorted(val ? 'asc' : 'desc', (meta) => {
+            sortedListItems(val ? 'asc' : 'desc', (meta) => {
               if (meta?.success) {
-                selfHandleProgressDataSource(meta)
+                handleConvertDataSource(meta)
               }
             })
           }}
           onResetClick={() => {
             form.setFieldValue('search', '')
-            getDataList(defaultRequestBody, (meta) => {
+            getListItems(defaultRequestBody, (meta) => {
               if (meta?.success) {
-                selfHandleProgressDataSource(meta)
+                handleConvertDataSource(meta)
                 message.success('Reloaded!')
               }
             })
@@ -335,9 +298,9 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
                     term: form.getFieldValue('search') ?? ''
                   }
                 }
-                getDataList(body, (meta) => {
+                getListItems(body, (meta) => {
                   if (meta?.success) {
-                    selfHandleProgressDataSource(meta)
+                    handleConvertDataSource(meta)
                   }
                 })
               },
@@ -353,11 +316,12 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
           openModal={openModal}
           setOpenModal={setOpenModal}
           onAddNew={(addNewForm) => {
-            console.log(addNewForm)
-            handleStartAddNew({ key: dataSource.length + 1, ...addNewForm })
-            handleAddNewItem(addNewForm, (success) => {
-              if (success) {
+            createNewItem(addNewForm, (meta) => {
+              if (meta?.success) {
+                const colorNew = meta.data as Color
+                handleStartAddNew({ key: String(uuidv4()), ...colorNew })
                 message.success('Created!')
+                setOpenModal(false)
               } else {
                 message.error('Failed!')
               }

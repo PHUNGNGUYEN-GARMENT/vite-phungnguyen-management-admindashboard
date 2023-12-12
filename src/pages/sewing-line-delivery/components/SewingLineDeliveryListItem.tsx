@@ -3,7 +3,7 @@ import { ColorPicker, Flex, Form, Input, List, Typography } from 'antd'
 import React, { memo } from 'react'
 import { useSelector } from 'react-redux'
 import { TableItemWithKey } from '~/components/hooks/useTable'
-import ItemAction from '~/components/layout/Item/ItemAction'
+import ItemAction from '~/components/ui/Table/ItemAction'
 import { RootState } from '~/store/store'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import { SewingLineDeliveryTableDataType } from '../type'
@@ -67,11 +67,7 @@ const ColorListItem: React.FC<Props> = ({
               Mã màu
             </Typography.Text>
             {isEditing ? (
-              <Form.Item
-                name={`hexColor`}
-                initialValue={data.id}
-                className='m-0 w-full'
-              >
+              <Form.Item name={`hexColor`} initialValue={data.id} className='m-0 w-full'>
                 <ColorPicker
                   size='middle'
                   className='w-full'
@@ -83,12 +79,7 @@ const ColorListItem: React.FC<Props> = ({
               </Form.Item>
             ) : (
               <Flex className='w-full' align='center' justify='start'>
-                <ColorPicker
-                  className='w-full'
-                  size='middle'
-                  disabled={editingKey !== data.key}
-                  showText
-                />
+                <ColorPicker className='w-full' size='middle' disabled={editingKey !== data.key} showText />
               </Flex>
             )}
           </Flex>
@@ -102,9 +93,7 @@ const ColorListItem: React.FC<Props> = ({
                 <Input
                   name='createdAt'
                   className='w-full'
-                  defaultValue={DayJS(data.createdAt).format(
-                    DatePattern.display
-                  )}
+                  defaultValue={DayJS(data.createdAt).format(DatePattern.display)}
                   readOnly
                 />
               </Flex>
@@ -116,9 +105,7 @@ const ColorListItem: React.FC<Props> = ({
                 <Input
                   name='updatedAt'
                   className='w-full'
-                  defaultValue={DayJS(data.updatedAt).format(
-                    DatePattern.display
-                  )}
+                  defaultValue={DayJS(data.updatedAt).format(DatePattern.display)}
                   readOnly
                 />
               </Flex>

@@ -2,14 +2,10 @@ import { App as AntApp, ColorPicker, Form, Table, Typography } from 'antd'
 import type { Color as AntColor } from 'antd/es/color-picker'
 import { useEffect } from 'react'
 import { useSelector } from 'react-redux'
-import {
-  RequestBodyType,
-  ResponseDataType,
-  defaultRequestBody
-} from '~/api/client'
+import { RequestBodyType, ResponseDataType, defaultRequestBody } from '~/api/client'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
-import ItemAction from '~/components/layout/Item/ItemAction'
+import ItemAction from '~/components/ui/Table/ItemAction'
 import { RootState } from '~/store/store'
 import { Color } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
@@ -75,9 +71,7 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
     )
   }
 
-  const selfHandleSaveClick = async (
-    record: TableItemWithKey<ColorTableDataType>
-  ) => {
+  const selfHandleSaveClick = async (record: TableItemWithKey<ColorTableDataType>) => {
     const row = await form.validateFields()
     const hexColor = row.hexColor
       ? typeof row.hexColor === 'string'
@@ -111,9 +105,7 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
     )
   }
 
-  const selfHandleConfirmDelete = (
-    item: TableItemWithKey<ColorTableDataType>
-  ) => {
+  const selfHandleConfirmDelete = (item: TableItemWithKey<ColorTableDataType>) => {
     setLoading(true)
     handleStartDeleting(item.key!, (productToDelete) => {
       handleDeleteItem(Number(productToDelete), (success) => {
@@ -176,14 +168,7 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
       width: '15%',
       editable: true,
       render: (_, record: ColorTableDataType) => {
-        return (
-          <ColorPicker
-            defaultValue={record ? record.hexColor : ''}
-            showText
-            disabled
-            defaultFormat='hex'
-          />
-        )
+        return <ColorPicker defaultValue={record ? record.hexColor : ''} showText disabled defaultFormat='hex' />
       }
     }
   ]
@@ -199,11 +184,7 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
       render: (_, record: ColorTableDataType) => {
         return (
           <>
-            <span>
-              {DayJS(record ? record.createdAt : '').format(
-                DatePattern.display
-              )}
-            </span>
+            <span>{DayJS(record ? record.createdAt : '').format(DatePattern.display)}</span>
           </>
         )
       }
@@ -215,11 +196,7 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
       render: (_, record: ColorTableDataType) => {
         return (
           <>
-            <span>
-              {DayJS(record ? record.updatedAt : '').format(
-                DatePattern.display
-              )}
-            </span>
+            <span>{DayJS(record ? record.updatedAt : '').format(DatePattern.display)}</span>
           </>
         )
       }
@@ -229,9 +206,7 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
   const adminColumns: (ColumnTypes[number] & {
     editable?: boolean
     dataIndex: string
-  })[] = dateCreation
-    ? [...commonCols, ...dateCreationColumns, ...actionsCols]
-    : [...commonCols, ...actionsCols]
+  })[] = dateCreation ? [...commonCols, ...dateCreationColumns, ...actionsCols] : [...commonCols, ...actionsCols]
 
   const staffColumns: (ColumnTypes[number] & {
     editable?: boolean

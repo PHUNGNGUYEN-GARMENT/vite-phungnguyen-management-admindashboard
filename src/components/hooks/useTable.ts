@@ -1,31 +1,39 @@
 import { Form } from 'antd'
 import { useState } from 'react'
+import { ResponseDataType } from '~/api/client'
 
 export type TableItemWithKey<T> = T & { key?: React.Key }
+export type ItemWithId<T> = T & { id?: number }
 
-export default function useTable<T extends { key?: React.Key }>(
-  initValue: TableItemWithKey<T>[]
-) {
+export default function useTable<T extends { key?: React.Key }>(initValue: TableItemWithKey<T>[]) {
   const [form] = Form.useForm<T>()
   const [dataSource, setDataSource] = useState<TableItemWithKey<T>[]>(initValue)
   const [editingKey, setEditingKey] = useState<React.Key>('')
   const [deleteKey, setDeleteKey] = useState<React.Key>('')
+  const [dateCreation, setDateCreation] = useState<boolean>(false)
   const isEditing = (key: React.Key) => key === editingKey
   const isDelete = (key: React.Key) => key === deleteKey
+
+  const handleConvertDataSource = (meta: ResponseDataType) => {
+    const items = meta.data as ItemWithId<T>[]
+    setDataSource(
+      items.map((item: ItemWithId<T>) => {
+        return {
+          ...item,
+          key: item.id
+        } as TableItemWithKey<T>
+      })
+    )
+  }
 
   const handleStartEditing = (key: React.Key) => {
     setEditingKey(key)
   }
 
-  const handleStartDeleting = (
-    key: React.Key,
-    onSuccess: (row: TableItemWithKey<T>) => void
-  ) => {
+  const handleStartDeleting = (key: React.Key, onSuccess: (row: TableItemWithKey<T>) => void) => {
     const itemFound = dataSource.find((item) => item.key === key)
     if (itemFound) {
-      const dataSourceRemovedItem = dataSource.filter(
-        (item) => item.key !== key
-      )
+      const dataSourceRemovedItem = dataSource.filter((item) => item.key !== key)
       setDataSource(dataSourceRemovedItem)
       onSuccess(itemFound)
     }
@@ -39,11 +47,7 @@ export default function useTable<T extends { key?: React.Key }>(
     setDeleteKey('')
   }
 
-  const handleStartSaveEditing = async (
-    key: React.Key,
-    itemToUpdate: T,
-    onSuccess?: (row: T) => void
-  ) => {
+  const handleStartSaveEditing = async (key: React.Key, itemToUpdate: T, onSuccess?: (row: T) => void) => {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const newData = [...dataSource]
@@ -69,7 +73,7 @@ export default function useTable<T extends { key?: React.Key }>(
     }
   }
 
-  const handleStartAddNew = (item: TableItemWithKey<T>) => {
+  const handleStartAddNew = (item: T) => {
     const newDataSource = [...dataSource]
     newDataSource.unshift({
       ...item,
@@ -88,11 +92,14 @@ export default function useTable<T extends { key?: React.Key }>(
     setEditingKey,
     dataSource,
     setDataSource,
+    dateCreation,
+    setDateCreation,
     handleStartAddNew,
     handleStartEditing,
     handleStartDeleting,
     handleStartSaveEditing,
     handleConfirmCancelEditing,
-    handleConfirmCancelDeleting
+    handleConfirmCancelDeleting,
+    handleConvertDataSource
   }
 }

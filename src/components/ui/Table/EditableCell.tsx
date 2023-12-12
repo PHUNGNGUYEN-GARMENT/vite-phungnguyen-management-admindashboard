@@ -9,6 +9,7 @@ type InputType = 'number' | 'text' | 'colorpicker' | 'select' | 'datepicker'
 interface EditableCellProps<T extends { key?: React.Key }> extends React.HTMLAttributes<HTMLElement> {
   editing: boolean
   dataIndex: string
+  initialValue?: unknown
   title: string | undefined
   inputType: InputType
   record: TableItemWithKey<T>
@@ -23,6 +24,7 @@ function EditableCell<T extends { key?: React.Key }>({
   dataIndex,
   record,
   title,
+  initialValue,
   inputType,
   children,
   ...restProps
@@ -47,6 +49,7 @@ function EditableCell<T extends { key?: React.Key }>({
       {editing ? (
         <Form.Item
           name={dataIndex}
+          initialValue={initialValue}
           style={{ margin: 0 }}
           rules={[
             {

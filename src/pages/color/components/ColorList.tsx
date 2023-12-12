@@ -1,15 +1,13 @@
 import { App as AntApp, Form, List } from 'antd'
 import type { Color as AntColor } from 'antd/es/color-picker'
-import React, { useEffect } from 'react'
-import {
-  RequestBodyType,
-  ResponseDataType,
-  defaultRequestBody
-} from '~/api/client'
-import useList, { TableItemWithKey } from '~/components/hooks/useTable'
+import React, { useEffect, useState } from 'react'
+import { v4 as uuidv4 } from 'uuid'
+import { RequestBodyType, defaultRequestBody } from '~/api/client'
+import ColorAPI from '~/api/services/ColorAPI'
+import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
+import useAPICaller from '~/hooks/useAPICaller'
 import { Color } from '~/typing'
-import useColor from '../hooks/useColor'
 import { ColorTableDataType } from '../type'
 import ColorListItem from './ColorListItem'
 import ModalAddNewColor from './ModalAddNewColor'
@@ -17,87 +15,57 @@ import ModalAddNewColor from './ModalAddNewColor'
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 const ColorList: React.FC<Props> = ({ ...props }) => {
-  const {
-    metaData,
-    setPage,
-    loading,
-    dateCreation,
-    setDateCreation,
-    setLoading,
-    openModal,
-    setOpenModal,
-    handleAddNewItem,
-    getDataList,
-    handleDeleteItem,
-    handleUpdateItem,
-    handleSorted
-  } = useColor()
+  const { metaData, setPage, loading, createNewItem, getListItems, updateItemByPk, deleteItemByPk, sortedListItems } =
+    useAPICaller<Color>(ColorAPI)
   const {
     form,
     editingKey,
     setDeleteKey,
     dataSource,
-    setDataSource,
     isEditing,
+    dateCreation,
+    setDateCreation,
+    handleConvertDataSource,
     handleStartAddNew,
     handleStartEditing,
     handleStartDeleting,
     handleStartSaveEditing,
     handleConfirmCancelEditing,
     handleConfirmCancelDeleting
-  } = useList<ColorTableDataType>([])
+  } = useTable<ColorTableDataType>([])
+  const [openModal, setOpenModal] = useState<boolean>(false)
   const { message } = AntApp.useApp()
 
   useEffect(() => {
-    getDataList(defaultRequestBody, (meta) => {
+    getListItems(defaultRequestBody, (meta) => {
       if (meta?.success) {
-        handleProgressDataSource(meta)
+        handleConvertDataSource(meta)
       }
     })
   }, [])
 
-  const handleProgressDataSource = (meta: ResponseDataType) => {
-    const colors = meta.data as Color[]
-    setDataSource(
-      colors.map((item: Color) => {
-        return {
-          ...item,
-          key: item.id
-        } as TableItemWithKey<ColorTableDataType>
-      })
-    )
-  }
-
-  const selfHandleSaveClick = async (
-    item: TableItemWithKey<ColorTableDataType>
-  ) => {
+  const selfHandleSaveClick = async (item: TableItemWithKey<ColorTableDataType>) => {
     const row = await form.validateFields()
-    handleStartSaveEditing(
-      item.key!,
+    const hexColor = row.hexColor
+      ? typeof row.hexColor === 'string'
+        ? row.hexColor
+        : (row.hexColor as AntColor).toHexString()
+      : ''
+    updateItemByPk(
+      item.id ?? Number(item.key),
       {
         nameColor: row.nameColor,
-        hexColor: row.hexColor
+        hexColor: hexColor
       },
-      (itemToSave) => {
-        const hexColor = row.hexColor
-          ? typeof row.hexColor === 'string'
-            ? row.hexColor
-            : (row.hexColor as AntColor).toHexString()
-          : ''
-        handleUpdateItem(
-          item.id ?? Number(item.key),
-          {
-            ...itemToSave,
-            hexColor: hexColor
-          },
-          (success) => {
-            if (success) {
-              message.success('Created!')
-            } else {
-              message.success('Failed!')
-            }
-          }
-        )
+      (meta) => {
+        if (meta?.success) {
+          const color = meta.data as Color
+          handleStartSaveEditing(color.id ?? Number(item.key), color, () => {
+            message.success('Updated!')
+          })
+        } else {
+          message.error('Failed!')
+        }
       }
     )
   }
@@ -106,45 +74,46 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
     <>
       <Form form={form}>
         <BaseLayout
+          onDateCreationChange={(enable) => setDateCreation(enable)}
           onSearch={(value) => {
             if (value.length > 0) {
-              const body: RequestBodyType = {
-                ...defaultRequestBody,
-                search: {
-                  field: 'nameColor',
-                  term: value
+              getListItems(
+                {
+                  ...defaultRequestBody,
+                  search: {
+                    field: 'nameColor',
+                    term: value
+                  }
+                },
+                (meta) => {
+                  if (meta?.success) {
+                    handleConvertDataSource(meta)
+                  }
                 }
-              }
-              getDataList(body, (meta) => {
-                if (meta?.success) {
-                  handleProgressDataSource(meta)
-                }
-              })
+              )
             }
           }}
           onSortChange={(val) => {
-            handleSorted(val ? 'asc' : 'desc', (meta) => {
+            sortedListItems(val ? 'asc' : 'desc', (meta) => {
               if (meta?.success) {
-                handleProgressDataSource(meta)
+                handleConvertDataSource(meta)
               }
             })
           }}
           onResetClick={() => {
             form.setFieldValue('search', '')
-            getDataList(defaultRequestBody, (meta) => {
+            getListItems(defaultRequestBody, (meta) => {
               if (meta?.success) {
-                handleProgressDataSource(meta)
+                handleConvertDataSource(meta)
               }
             })
           }}
-          dateCreation={dateCreation}
-          onDateCreationChange={setDateCreation}
           onAddNewClick={() => setOpenModal(true)}
         >
           <List
             className={props.className}
             itemLayout='vertical'
-            size='large'
+            size='default'
             pagination={{
               onChange: (_page) => {
                 setPage(_page)
@@ -159,9 +128,9 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
                     term: form.getFieldValue('search') ?? ''
                   }
                 }
-                getDataList(body, (meta) => {
+                getListItems(body, (meta) => {
                   if (meta?.success) {
-                    handleProgressDataSource(meta)
+                    handleConvertDataSource(meta)
                   }
                 })
               },
@@ -175,23 +144,23 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
               <ColorListItem
                 data={item}
                 key={item.key}
+                dateCreation={dateCreation}
                 editingKey={editingKey}
                 isEditing={isEditing(item.key!)}
                 onSaveClick={() => selfHandleSaveClick(item)}
-                dateCreation={dateCreation}
                 onClickStartEditing={() => handleStartEditing(item.key!)}
                 onConfirmCancelEditing={() => handleConfirmCancelEditing()}
                 onConfirmCancelDeleting={() => handleConfirmCancelDeleting()}
                 onConfirmDelete={() => {
-                  setLoading(true)
-                  handleStartDeleting(item.key!, (productToDelete) => {
-                    handleDeleteItem(Number(productToDelete.key), (success) => {
-                      if (success) {
-                        message.success('Created!')
-                      } else {
-                        message.success('Failed!')
+                  deleteItemByPk(item.id!, (meta) => {
+                    if (meta) {
+                      if (meta.success) {
+                        handleStartDeleting(item.id!, () => {})
+                        message.success('Deleted!')
                       }
-                    })
+                    } else {
+                      message.error('Failed!')
+                    }
                   })
                 }}
                 onStartDeleting={() => setDeleteKey(item.key!)}
@@ -205,13 +174,14 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
           openModal={openModal}
           setOpenModal={setOpenModal}
           onAddNew={(addNewForm) => {
-            console.log(addNewForm)
-            handleStartAddNew({ key: dataSource.length + 1, ...addNewForm })
-            handleAddNewItem(addNewForm, (success) => {
-              if (success) {
+            createNewItem(addNewForm, (meta) => {
+              if (meta?.success) {
+                const colorNew = meta.data as Color
+                handleStartAddNew({ key: String(uuidv4()), ...colorNew })
                 message.success('Created!')
+                setOpenModal(false)
               } else {
-                message.success('Failed!')
+                message.error('Failed!')
               }
             })
           }}

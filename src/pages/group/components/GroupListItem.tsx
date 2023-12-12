@@ -3,7 +3,7 @@ import { Flex, Form, Input, List, Typography } from 'antd'
 import React, { memo } from 'react'
 import { useSelector } from 'react-redux'
 import { TableItemWithKey } from '~/components/hooks/useTable'
-import ItemAction from '~/components/layout/Item/ItemAction'
+import ItemAction from '~/components/ui/Table/ItemAction'
 import { RootState } from '~/store/store'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import { GroupTableDataType } from '../type'
@@ -72,9 +72,7 @@ const GroupListItem: React.FC<Props> = ({
                 <Input
                   name='createdAt'
                   className='w-full'
-                  defaultValue={DayJS(data.createdAt).format(
-                    DatePattern.display
-                  )}
+                  defaultValue={DayJS(data.createdAt).format(DatePattern.display)}
                   readOnly
                 />
               </Flex>
@@ -86,9 +84,7 @@ const GroupListItem: React.FC<Props> = ({
                 <Input
                   name='updatedAt'
                   className='w-full'
-                  defaultValue={DayJS(data.updatedAt).format(
-                    DatePattern.display
-                  )}
+                  defaultValue={DayJS(data.updatedAt).format(DatePattern.display)}
                   readOnly
                 />
               </Flex>

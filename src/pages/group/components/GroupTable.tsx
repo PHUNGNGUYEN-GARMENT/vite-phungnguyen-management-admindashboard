@@ -1,14 +1,10 @@
 import { App as AntApp, Form, Table, Typography } from 'antd'
 import { useEffect } from 'react'
 import { useSelector } from 'react-redux'
-import {
-  RequestBodyType,
-  ResponseDataType,
-  defaultRequestBody
-} from '~/api/client'
+import { RequestBodyType, ResponseDataType, defaultRequestBody } from '~/api/client'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
-import ItemAction from '~/components/layout/Item/ItemAction'
+import ItemAction from '~/components/ui/Table/ItemAction'
 import { RootState } from '~/store/store'
 import { Group } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
@@ -73,9 +69,7 @@ const GroupTable: React.FC<Props> = ({ ...props }) => {
     )
   }
 
-  const selfHandleSaveClick = async (
-    record: TableItemWithKey<GroupTableDataType>
-  ) => {
+  const selfHandleSaveClick = async (record: TableItemWithKey<GroupTableDataType>) => {
     const row = await form.validateFields()
     handleStartSaveEditing(
       record.key!,
@@ -104,9 +98,7 @@ const GroupTable: React.FC<Props> = ({ ...props }) => {
     )
   }
 
-  const selfHandleConfirmDelete = (
-    item: TableItemWithKey<GroupTableDataType>
-  ) => {
+  const selfHandleConfirmDelete = (item: TableItemWithKey<GroupTableDataType>) => {
     handleStartDeleting(item.key!, (deleteKey) => {
       handleDeleteItem(Number(deleteKey), (success) => {
         if (success) {
@@ -175,11 +167,7 @@ const GroupTable: React.FC<Props> = ({ ...props }) => {
       render: (_, record: GroupTableDataType) => {
         return (
           <>
-            <span>
-              {DayJS(record ? record.createdAt : '').format(
-                DatePattern.display
-              )}
-            </span>
+            <span>{DayJS(record ? record.createdAt : '').format(DatePattern.display)}</span>
           </>
         )
       }
@@ -191,11 +179,7 @@ const GroupTable: React.FC<Props> = ({ ...props }) => {
       render: (_, record: GroupTableDataType) => {
         return (
           <>
-            <span>
-              {DayJS(record ? record.updatedAt : '').format(
-                DatePattern.display
-              )}
-            </span>
+            <span>{DayJS(record ? record.updatedAt : '').format(DatePattern.display)}</span>
           </>
         )
       }
@@ -205,9 +189,7 @@ const GroupTable: React.FC<Props> = ({ ...props }) => {
   const adminColumns: (ColumnTypes[number] & {
     editable?: boolean
     dataIndex: string
-  })[] = dateCreation
-    ? [...commonCols, ...dateCreationColumns, ...actionsCols]
-    : [...commonCols, ...actionsCols]
+  })[] = dateCreation ? [...commonCols, ...dateCreationColumns, ...actionsCols] : [...commonCols, ...actionsCols]
 
   const staffColumns: (ColumnTypes[number] & {
     editable?: boolean

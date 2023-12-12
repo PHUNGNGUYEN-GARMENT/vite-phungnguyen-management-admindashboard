@@ -6,9 +6,9 @@ import {
   defaultRequestBody
 } from '~/api/client'
 import SewingLineAPI from '~/api/services/SewingLineAPI'
-import useAPICaller from '~/components/hooks/useAPICaller'
 import useList, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
+import useAPICaller from '~/hooks/useAPICaller'
 import { SewingLine } from '~/typing'
 import { SewingLineTableDataType } from '../type'
 import ModalAddNewSewingLine from './ModalAddNewSewingLine'

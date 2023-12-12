@@ -1,18 +1,16 @@
 /* eslint-disable react-refresh/only-export-components */
-import { ColorPicker, Flex, Form, Input, List, Typography } from 'antd'
+import { ColorPicker } from 'antd'
 import React, { memo } from 'react'
-import { useSelector } from 'react-redux'
 import { TableItemWithKey } from '~/components/hooks/useTable'
-import ItemAction from '~/components/layout/Item/ItemAction'
-import { RootState } from '~/store/store'
-import DayJS, { DatePattern } from '~/utils/date-formatter'
+import ListItem from '~/components/ui/Table/ListItem'
+import ListItemRow from '~/components/ui/Table/ListItemRow'
 import { ColorTableDataType } from '../type'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
   data: TableItemWithKey<ColorTableDataType>
   isEditing: boolean
   editingKey: React.Key
-  dateCreation?: boolean
+  dateCreation: boolean
   onSaveClick?: React.MouseEventHandler<HTMLElement> | undefined
   onClickStartEditing?: React.MouseEventHandler<HTMLElement> | undefined
   onConfirmCancelEditing?: (e?: React.MouseEvent<HTMLElement>) => void
@@ -34,99 +32,50 @@ const ColorListItem: React.FC<Props> = ({
   onStartDeleting,
   ...props
 }) => {
-  const user = useSelector((state: RootState) => state.user)
-
   return (
     <>
-      <List.Item {...props} key={data.key} className='mb-5 rounded-sm bg-white'>
-        <Flex vertical className='w-full' gap={10}>
-          <Flex align='center' justify='space-between'>
-            {isEditing && user.isAdmin ? (
-              <Form.Item name={`nameColor`} initialValue={data.nameColor}>
-                <Input size='large' />
-              </Form.Item>
-            ) : (
-              <Typography.Title copyable className='m-0 h-fit p-0' level={4}>
-                {data.nameColor}
-              </Typography.Title>
-            )}
-
-            <ItemAction
-              isEditing={isEditing}
-              editingKey={editingKey}
-              onSaveClick={onSaveClick}
-              onClickStartEditing={onClickStartEditing}
-              onConfirmCancelEditing={onConfirmCancelEditing}
-              onConfirmCancelDeleting={onConfirmCancelDeleting}
-              onConfirmDelete={onConfirmDelete}
-              onStartDeleting={() => onStartDeleting?.(data.key!)}
+      <ListItem
+        itemId={data.key ?? data.id!}
+        isEditing={isEditing}
+        createdAt={data.createdAt}
+        updatedAt={data.updatedAt}
+        editingKey={editingKey}
+        dateCreation={dateCreation}
+        onSaveClick={onSaveClick}
+        onClickStartEditing={onClickStartEditing}
+        onConfirmCancelEditing={onConfirmCancelEditing}
+        onConfirmCancelDeleting={onConfirmCancelDeleting}
+        onConfirmDelete={onConfirmDelete}
+        onStartDeleting={onStartDeleting}
+        title={data.nameColor}
+        {...props}
+      >
+        <ListItemRow
+          label='Mã màu'
+          render={
+            <ColorPicker
+              className='w-full'
+              defaultValue={data.hexColor}
+              size='middle'
+              disabled={editingKey !== data.key}
+              showText
             />
-          </Flex>
-          <Flex align='center' justify='start' gap={5}>
-            <Typography.Text type='secondary' className='w-40 font-medium'>
-              Mã màu
-            </Typography.Text>
-            {isEditing ? (
-              <Form.Item
-                name={`hexColor`}
-                initialValue={data.hexColor}
-                className='m-0 w-full'
-              >
-                <ColorPicker
-                  size='middle'
-                  className='w-full'
-                  format='hex'
-                  defaultFormat='hex'
-                  disabled={editingKey !== data.key}
-                  showText
-                />
-              </Form.Item>
-            ) : (
-              <Flex className='w-full' align='center' justify='start'>
-                <ColorPicker
-                  className='w-full'
-                  defaultValue={data.hexColor}
-                  size='middle'
-                  disabled={editingKey !== data.key}
-                  showText
-                />
-              </Flex>
-            )}
-          </Flex>
-          {user.isAdmin && dateCreation && (
-            <Flex vertical gap={10}>
-              <Flex align='center' justify='start' gap={5}>
-                <Typography.Text type='secondary' className='w-40 font-medium'>
-                  Created at
-                </Typography.Text>
-
-                <Input
-                  name='createdAt'
-                  className='w-full'
-                  defaultValue={DayJS(data.createdAt).format(
-                    DatePattern.display
-                  )}
-                  readOnly
-                />
-              </Flex>
-              <Flex align='center' justify='start' gap={5}>
-                <Typography.Text type='secondary' className='w-40 font-medium'>
-                  Updated at
-                </Typography.Text>
-
-                <Input
-                  name='updatedAt'
-                  className='w-full'
-                  defaultValue={DayJS(data.updatedAt).format(
-                    DatePattern.display
-                  )}
-                  readOnly
-                />
-              </Flex>
-            </Flex>
-          )}
-        </Flex>
-      </List.Item>
+          }
+          renderEditing={
+            <ColorPicker
+              size='middle'
+              className='w-full'
+              format='hex'
+              defaultFormat='hex'
+              disabled={editingKey !== data.key}
+              showText
+            />
+          }
+          name='hexColor'
+          initialValue={data.hexColor}
+          isEditing={isEditing}
+        />
+      </ListItem>
     </>
   )
 }

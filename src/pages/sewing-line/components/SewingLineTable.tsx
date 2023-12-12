@@ -1,16 +1,12 @@
 import { App as AntApp, Form, Table, Typography } from 'antd'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
-import {
-  RequestBodyType,
-  ResponseDataType,
-  defaultRequestBody
-} from '~/api/client'
+import { RequestBodyType, ResponseDataType, defaultRequestBody } from '~/api/client'
 import SewingLineAPI from '~/api/services/SewingLineAPI'
-import useAPICaller from '~/components/hooks/useAPICaller'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
-import ItemAction from '~/components/layout/Item/ItemAction'
+import ItemAction from '~/components/ui/Table/ItemAction'
+import useAPICaller from '~/hooks/useAPICaller'
 import { RootState } from '~/store/store'
 import { SewingLine } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
@@ -24,14 +20,8 @@ interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 const SewingLineTable: React.FC<Props> = ({ ...props }) => {
   const [openModal, setOpenModal] = useState<boolean>(false)
-  const {
-    loading,
-    metaData,
-    createNewItem,
-    getListItems,
-    updateItemByPk,
-    sortedListItems
-  } = useAPICaller<SewingLine>(SewingLineAPI)
+  const { loading, metaData, createNewItem, getListItems, updateItemByPk, sortedListItems } =
+    useAPICaller<SewingLine>(SewingLineAPI)
   const {
     form,
     editingKey,
@@ -69,9 +59,7 @@ const SewingLineTable: React.FC<Props> = ({ ...props }) => {
     )
   }
 
-  const selfHandleSaveClick = async (
-    record: TableItemWithKey<SewingLineTableDataType>
-  ) => {
+  const selfHandleSaveClick = async (record: TableItemWithKey<SewingLineTableDataType>) => {
     const row = await form.validateFields()
     handleStartSaveEditing(
       record.key!,
@@ -98,21 +86,15 @@ const SewingLineTable: React.FC<Props> = ({ ...props }) => {
     )
   }
 
-  const selfHandleConfirmDelete = (
-    item: TableItemWithKey<SewingLineTableDataType>
-  ) => {
+  const selfHandleConfirmDelete = (item: TableItemWithKey<SewingLineTableDataType>) => {
     handleStartDeleting(item.key!, (productToDelete) => {
-      updateItemByPk(
-        Number(productToDelete.key),
-        { status: 'deleted' },
-        (meta) => {
-          if (meta?.success) {
-            message.success('Deleted!')
-          } else {
-            message.error('Failed!')
-          }
+      updateItemByPk(Number(productToDelete.key), { status: 'deleted' }, (meta) => {
+        if (meta?.success) {
+          message.success('Deleted!')
+        } else {
+          message.error('Failed!')
         }
-      )
+      })
     })
   }
 
@@ -173,11 +155,7 @@ const SewingLineTable: React.FC<Props> = ({ ...props }) => {
       render: (_, record: SewingLineTableDataType) => {
         return (
           <>
-            <span>
-              {DayJS(record ? record.createdAt : '').format(
-                DatePattern.display
-              )}
-            </span>
+            <span>{DayJS(record ? record.createdAt : '').format(DatePattern.display)}</span>
           </>
         )
       }
@@ -189,11 +167,7 @@ const SewingLineTable: React.FC<Props> = ({ ...props }) => {
       render: (_, record: SewingLineTableDataType) => {
         return (
           <>
-            <span>
-              {DayJS(record ? record.updatedAt : '').format(
-                DatePattern.display
-              )}
-            </span>
+            <span>{DayJS(record ? record.updatedAt : '').format(DatePattern.display)}</span>
           </>
         )
       }

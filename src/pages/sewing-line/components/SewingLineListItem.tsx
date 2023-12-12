@@ -3,7 +3,7 @@ import { Flex, Form, Input, List, Typography } from 'antd'
 import React, { memo } from 'react'
 import { useSelector } from 'react-redux'
 import { TableItemWithKey } from '~/components/hooks/useTable'
-import ItemAction from '~/components/layout/Item/ItemAction'
+import ItemAction from '~/components/ui/Table/ItemAction'
 import { RootState } from '~/store/store'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import { SewingLineTableDataType } from '../type'
@@ -42,10 +42,7 @@ const ColorListItem: React.FC<Props> = ({
         <Flex vertical className='w-full' gap={10}>
           <Flex align='center' justify='space-between'>
             {isEditing && user.isAdmin ? (
-              <Form.Item
-                name={`sewingLineName`}
-                initialValue={data.sewingLineName}
-              >
+              <Form.Item name={`sewingLineName`} initialValue={data.sewingLineName}>
                 <Input size='large' value={data.sewingLineName} />
               </Form.Item>
             ) : (
@@ -76,9 +73,7 @@ const ColorListItem: React.FC<Props> = ({
                 <Input
                   name='createdAt'
                   className='w-full'
-                  defaultValue={DayJS(data.createdAt).format(
-                    DatePattern.display
-                  )}
+                  defaultValue={DayJS(data.createdAt).format(DatePattern.display)}
                   readOnly
                 />
               </Flex>
@@ -90,9 +85,7 @@ const ColorListItem: React.FC<Props> = ({
                 <Input
                   name='updatedAt'
                   className='w-full'
-                  defaultValue={DayJS(data.updatedAt).format(
-                    DatePattern.display
-                  )}
+                  defaultValue={DayJS(data.updatedAt).format(DatePattern.display)}
                   readOnly
                 />
               </Flex>

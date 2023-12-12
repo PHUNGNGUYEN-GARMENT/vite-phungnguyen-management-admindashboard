@@ -1,9 +1,5 @@
 import { useState } from 'react'
-import {
-  RequestBodyType,
-  ResponseDataType,
-  defaultRequestBody
-} from '~/api/client'
+import { RequestBodyType, ResponseDataType, defaultRequestBody } from '~/api/client'
 import { ItemStatusType, SortDirection } from '~/typing'
 
 export interface ItemWithId {
@@ -15,15 +11,9 @@ export interface ItemWithId {
 export interface APIService<T extends ItemWithId> {
   createNewItem: (itemNew: Partial<T>) => Promise<ResponseDataType | undefined>
   getItemByPk: (id: number) => Promise<ResponseDataType | undefined>
-  getItemBy: (query: {
-    field: string
-    key: React.Key
-  }) => Promise<ResponseDataType | undefined>
+  getItemBy: (query: { field: string; key: React.Key }) => Promise<ResponseDataType | undefined>
   getItems: (params: RequestBodyType) => Promise<ResponseDataType | undefined>
-  updateItemByPk: (
-    id: number,
-    itemToUpdate: Partial<T>
-  ) => Promise<ResponseDataType | undefined>
+  updateItemByPk: (id: number, itemToUpdate: Partial<T>) => Promise<ResponseDataType | undefined>
   updateItemBy: (
     query: {
       field: string
@@ -34,21 +24,14 @@ export interface APIService<T extends ItemWithId> {
   deleteItemByPk: (id: number) => Promise<ResponseDataType | undefined>
 }
 
-export default function useAPICaller<T extends { id?: number }>(
-  apiService: APIService<ItemWithId>
-) {
-  const [metaData, setMetaData] = useState<ResponseDataType | undefined>(
-    undefined
-  )
+export default function useAPICaller<T extends { id?: number }>(apiService: APIService<ItemWithId>) {
+  const [metaData, setMetaData] = useState<ResponseDataType | undefined>(undefined)
   const [loading, setLoading] = useState<boolean>(false)
   const [page, setPage] = useState<number>(1)
 
   const createNewItem = async (
     itemNew: T,
-    onDataSuccess?: (
-      data: ResponseDataType | undefined,
-      status: boolean
-    ) => void
+    onDataSuccess?: (data: ResponseDataType | undefined, status: boolean) => void
   ) => {
     setLoading(true)
     await apiService
@@ -71,10 +54,7 @@ export default function useAPICaller<T extends { id?: number }>(
 
   const getItemByPk = async (
     id: number,
-    onDataSuccess?: (
-      data: ResponseDataType | undefined,
-      status: boolean
-    ) => void
+    onDataSuccess?: (data: ResponseDataType | undefined, status: boolean) => void
   ) => {
     await apiService
       .getItemByPk(id)
@@ -101,10 +81,7 @@ export default function useAPICaller<T extends { id?: number }>(
       field: string
       key: React.Key
     },
-    onDataSuccess?: (
-      data: ResponseDataType | undefined,
-      status: boolean
-    ) => void
+    onDataSuccess?: (data: ResponseDataType | undefined, status: boolean) => void
   ) => {
     await apiService
       .getItemBy?.(query)
@@ -128,10 +105,7 @@ export default function useAPICaller<T extends { id?: number }>(
 
   const getListItems = async (
     params: RequestBodyType,
-    onDataSuccess?: (
-      data: ResponseDataType | undefined,
-      status: boolean
-    ) => void
+    onDataSuccess?: (data: ResponseDataType | undefined, status: boolean) => void
   ) => {
     setLoading(true)
     const body: RequestBodyType = {
@@ -157,10 +131,7 @@ export default function useAPICaller<T extends { id?: number }>(
 
   const sortedListItems = async (
     direction: SortDirection,
-    onDataSuccess?: (
-      data: ResponseDataType | undefined,
-      status: boolean
-    ) => void
+    onDataSuccess?: (data: ResponseDataType | undefined, status: boolean) => void
   ) => {
     const body: RequestBodyType = {
       ...defaultRequestBody,
@@ -179,10 +150,7 @@ export default function useAPICaller<T extends { id?: number }>(
   const updateItemByPk = async (
     id: number,
     itemToUpdate: T,
-    onDataSuccess?: (
-      data: ResponseDataType | undefined,
-      status: boolean
-    ) => void
+    onDataSuccess?: (data: ResponseDataType | undefined, status: boolean) => void
   ) => {
     setLoading(true)
     apiService
@@ -208,10 +176,7 @@ export default function useAPICaller<T extends { id?: number }>(
       key: React.Key
     },
     itemToUpdate: T,
-    onDataSuccess?: (
-      data: ResponseDataType | undefined,
-      status: boolean
-    ) => void
+    onDataSuccess?: (data: ResponseDataType | undefined, status: boolean) => void
   ) => {
     setLoading(true)
     apiService
@@ -233,14 +198,11 @@ export default function useAPICaller<T extends { id?: number }>(
 
   const deleteItemByPk = async (
     id: number,
-    onDataSuccess?: (
-      data: ResponseDataType | undefined,
-      status: boolean
-    ) => void
+    onDataSuccess?: (data: ResponseDataType | undefined, status: boolean) => void
   ) => {
     setLoading(true)
     await apiService
-      .updateItemByPk(id, { status: 'active' })
+      .deleteItemByPk(id)
       .then((data) => {
         if (data?.success) {
           setMetaData(data)
