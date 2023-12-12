@@ -1,13 +1,4 @@
-import {
-  App as AntApp,
-  Button,
-  Flex,
-  Form,
-  List,
-  Popconfirm,
-  Table,
-  Typography
-} from 'antd'
+import { App as AntApp, Button, Flex, Form, List, Popconfirm, Table, Typography } from 'antd'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { RequestBodyType, defaultRequestBody } from '~/api/client'
@@ -109,10 +100,7 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
             >
               Save
             </Button>
-            <Popconfirm
-              title={`Sure to cancel?`}
-              onConfirm={() => handleConfirmCancelEditing()}
-            >
+            <Popconfirm title={`Sure to cancel?`} onConfirm={() => handleConfirmCancelEditing()}>
               <Button type='dashed'>Cancel</Button>
             </Popconfirm>
           </Flex>
@@ -134,9 +122,7 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
                   { name: 'pack', value: record.progress?.pack },
                   {
                     name: 'dateOutputFCR',
-                    value: record.dateOutputFCR
-                      ? DayJS(record.dateOutputFCR)
-                      : ''
+                    value: record.dateOutputFCR ? DayJS(record.dateOutputFCR) : ''
                   }
                 ])
                 handleStartEditing(record)
@@ -159,10 +145,7 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
                   })
                 }}
               >
-                <Button
-                  type='dashed'
-                  onClick={() => handleStartDeleting(record.key!)}
-                >
+                <Button type='dashed' onClick={() => handleStartDeleting(record.key!)}>
                   Delete
                 </Button>
               </Popconfirm>
@@ -226,18 +209,10 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
                 return (
                   <List.Item key={index} className='m-0 p-0'>
                     <Flex className='m-0 w-full p-0'>
-                      <Typography.Text className='m-0 w-16 flex-shrink-0 p-0'>
-                        {item.task}
-                      </Typography.Text>
+                      <Typography.Text className='m-0 w-16 flex-shrink-0 p-0'>{item.task}</Typography.Text>
                       <Flex className='w-full' align='center' vertical>
-                        <ProgressBar
-                          count={item.quantity ?? 0}
-                          total={record.quantityPO ?? 0}
-                        />
-                        <Typography.Text
-                          type='secondary'
-                          className='w-24 font-medium'
-                        >
+                        <ProgressBar count={item.quantity ?? 0} total={record.quantityPO ?? 0} />
+                        <Typography.Text type='secondary' className='w-24 font-medium'>
                           {item.quantity ?? 0}/{record.quantityPO ?? 0}
                         </Typography.Text>
                       </Flex>

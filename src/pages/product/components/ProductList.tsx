@@ -1,11 +1,16 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { App as AntApp, Form, List } from 'antd'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
+import { v4 as uuidv4 } from 'uuid'
 import { RequestBodyType, defaultRequestBody } from '~/api/client'
+import PrintablePlaceAPI from '~/api/services/PrintablePlaceAPI'
+import ProductAPI from '~/api/services/ProductAPI'
 import ProductColorAPI from '~/api/services/ProductColorAPI'
-import useList from '~/components/hooks/useTable'
+import ProductGroupAPI from '~/api/services/ProductGroupAPI'
+import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
-import { Product, ProductColor } from '~/typing'
-import useProduct from '../hooks/useProduct'
+import useAPICaller from '~/hooks/useAPICaller'
+import { PrintablePlace, Product, ProductColor, ProductGroup } from '~/typing'
 import { ProductTableDataType } from '../type'
 import ModalAddNewProduct from './ModalAddNewProduct'
 import ProductListItem from './ProductListItem'
@@ -13,124 +18,149 @@ import ProductListItem from './ProductListItem'
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 const ProductList: React.FC<Props> = ({ ...props }) => {
-  const {
-    metaData,
-    loading,
-    setLoading,
-    openModal,
-    setOpenModal,
-    searchText,
-    setSearchText,
-    handleAddNewProduct,
-    getProductList,
-    handleUpdateProductItem,
-    handleDeleteProductItem,
-    handleSorted
-  } = useProduct()
+  const productService = useAPICaller<Product>(ProductAPI)
+  const productColorService = useAPICaller<ProductColor>(ProductColorAPI)
+  const productGroupService = useAPICaller<ProductGroup>(ProductGroupAPI)
+  const printablePlaceService = useAPICaller<PrintablePlace>(PrintablePlaceAPI)
   const {
     form,
+    isEditing,
     editingKey,
-    setDeleteKey,
     dataSource,
     setDataSource,
-    isEditing,
+    setDeleteKey,
+    dateCreation,
+    setDateCreation,
+    handleStartAddNew,
+    handleStartEditing,
     handleStartDeleting,
     handleStartSaveEditing,
-    handleStartEditing,
+    handleConvertDataSource,
     handleConfirmCancelEditing,
     handleConfirmCancelDeleting
-  } = useList<ProductTableDataType>([])
+  } = useTable<ProductTableDataType>([])
+  const [openModal, setOpenModal] = useState<boolean>(false)
   const { message } = AntApp.useApp()
   console.log('Product page loading...')
 
   useEffect(() => {
-    getProductList(defaultRequestBody, async (meta) => {
+    productService.getListItems(defaultRequestBody, (meta) => {
       if (meta?.success) {
         const products = meta.data as Product[]
-        await ProductColorAPI.getItems({
-          ...defaultRequestBody,
-          filter: {
-            status: 'active',
-            field: 'productID',
-            items: products.map((item) => item.id) as number[]
-          }
-        }).then((productColorMeta) => {
-          if (productColorMeta?.success) {
-            const productColors = productColorMeta.data as ProductColor[]
-            setDataSource(
-              meta.data.map((item: Product) => {
-                return {
-                  ...item,
-                  productColor: productColors.find(
-                    (col) => col.productID === item.id
-                  ),
-                  key: item.id
-                } as ProductTableDataType
-              })
-            )
-          }
+        productColorService.getListItems(defaultRequestBody, (meta2) => {
+          const productColors = meta2?.data as ProductColor[]
+          setDataSource(
+            products.map((item: Product) => {
+              return {
+                ...item,
+                productColor: productColors.find((col) => col.productID === item.id),
+                key: item.id
+              } as TableItemWithKey<ProductTableDataType>
+            })
+          )
         })
       }
     })
   }, [])
 
+  const selfHandleSaveClick = async (item: TableItemWithKey<ProductTableDataType>) => {
+    const row = (await form.validateFields()) as any
+    console.log(row)
+    productService.updateItemByPk(
+      item.id ?? Number(item.key),
+      {
+        productCode: row.productCode,
+        quantityPO: row.quantityPO,
+        dateInputNPL: row.dateInputNPL,
+        dateOutputFCR: row.dateOutputFCR
+      },
+      (meta) => {
+        if (meta?.success) {
+          const color = meta.data as Product
+          handleStartSaveEditing(color.id ?? Number(item.key), color, () => {
+            message.success('Updated!')
+          })
+        } else {
+          message.error('Failed!')
+        }
+      }
+    )
+
+    productColorService.getItemBy(
+      {
+        field: 'productID',
+        key: item.id!
+      },
+      (meta) => {
+        if (meta?.success) {
+          productColorService.updateItemBy(
+            {
+              field: 'productID',
+              key: item.id!
+            },
+            { colorID: row.colorID },
+            (meta2) => {
+              if (meta2?.success) {
+                console.log('ProductColor updated successfully')
+              }
+            }
+          )
+        } else {
+          productColorService.createNewItem({ productID: item.id, colorID: row.colorID, status: 'active' }, (meta3) => {
+            if (meta3?.success) {
+              console.log('ProductColor created')
+            }
+          })
+        }
+      }
+    )
+  }
+
+  //   {
+  //     "title": "ASO-413123",
+  //     "hexColor": 12,
+  //     "quantityPo": 1243,
+  //     "dateInputNPL": "2023-12-01T09:06:08.122Z",
+  //     "dateOutputFCR": "2023-12-01T09:06:10.291Z",
+  //     "groupID": 5,
+  //     "print": 2
+  // }
+
   return (
     <>
       <Form form={form} {...props}>
         <BaseLayout
+          onDateCreationChange={(enable) => setDateCreation(enable)}
           onSearch={(value) => {
             if (value.length > 0) {
-              const body: RequestBodyType = {
-                ...defaultRequestBody,
-                search: {
-                  field: 'productCode',
-                  term: value
+              productService.getListItems(
+                {
+                  ...defaultRequestBody,
+                  search: {
+                    field: 'nameColor',
+                    term: value
+                  }
+                },
+                (meta) => {
+                  if (meta?.success) {
+                    handleConvertDataSource(meta)
+                  }
                 }
-              }
-              getProductList(body, (meta) => {
-                if (meta?.success) {
-                  setDataSource(
-                    meta.data.map((item: Product) => {
-                      return {
-                        ...item,
-                        key: item.id
-                      } as ProductTableDataType
-                    })
-                  )
-                }
-              })
+              )
             }
           }}
-          searchValue={searchText}
-          onSearchChange={(e) => setSearchText(e.target.value)}
           onSortChange={(val) => {
-            handleSorted(val ? 'asc' : 'desc', (meta) => {
-              if (meta.success) {
-                setDataSource(
-                  meta.data.map((item: Product) => {
-                    return {
-                      ...item,
-                      key: item.id
-                    } as ProductTableDataType
-                  })
-                )
+            productService.sortedListItems(val ? 'asc' : 'desc', (meta) => {
+              if (meta?.success) {
+                handleConvertDataSource(meta)
               }
             })
           }}
           onResetClick={() => {
             form.setFieldValue('search', '')
-            setSearchText('')
-            getProductList(defaultRequestBody, (meta) => {
+            productService.getListItems(defaultRequestBody, (meta) => {
               if (meta?.success) {
-                setDataSource(
-                  meta.data.map((item: Product) => {
-                    return {
-                      ...item,
-                      key: item.id
-                    } as ProductTableDataType
-                  })
-                )
-                message.success('Reloaded!')
+                handleConvertDataSource(meta)
               }
             })
           }}
@@ -141,85 +171,55 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
             itemLayout='vertical'
             size='large'
             pagination={{
-              onChange: (page) => {
+              onChange: (_page) => {
+                productService.setPage(_page)
                 const body: RequestBodyType = {
                   ...defaultRequestBody,
                   paginator: {
-                    page: page,
+                    page: _page,
                     pageSize: 5
                   },
                   search: {
                     field: 'productCode',
-                    term: searchText
+                    term: form.getFieldValue('search') ?? ''
                   }
                 }
-                getProductList(body, (meta) => {
+                productService.getListItems(body, (meta) => {
                   if (meta?.success) {
-                    setDataSource(
-                      meta.data.map((item: Product) => {
-                        return {
-                          ...item,
-                          key: item.id
-                        } as ProductTableDataType
-                      })
-                    )
+                    handleConvertDataSource(meta)
                   }
                 })
               },
-              current: metaData?.page,
+              current: productService.metaData?.page,
               pageSize: 5,
-              total: metaData?.total
+              total: productService.metaData?.total
             }}
-            loading={loading}
+            loading={productService.loading}
             dataSource={dataSource}
             renderItem={(item) => (
               <ProductListItem
                 data={item}
+                key={item.key}
+                dateCreation={dateCreation}
                 editingKey={editingKey}
                 isEditing={isEditing(item.key!)}
-                onSaveClick={() => {
-                  handleStartSaveEditing(item.key!, (productToSave) => {
-                    console.log(productToSave)
-                    handleUpdateProductItem(
-                      Number(item.key),
-                      {
-                        productCode: productToSave.productCode,
-                        quantityPO: productToSave.quantityPO,
-                        dateOutputFCR: productToSave.dateOutputFCR,
-                        dateInputNPL: productToSave.dateInputNPL
-                      },
-                      (meta) => {
-                        if (meta.success) {
-                          // ProductColorAPI.updateItemByProductID(
-                          //   Number(item.data.key),
-                          //   {
-                          //     : hexColor
-                          //   }
-                          // )
-                          message.success('Updated!')
-                        }
-                      }
-                    )
-                  })
-                }}
+                onSaveClick={() => selfHandleSaveClick(item)}
                 onClickStartEditing={() => handleStartEditing(item.key!)}
                 onConfirmCancelEditing={() => handleConfirmCancelEditing()}
                 onConfirmCancelDeleting={() => handleConfirmCancelDeleting()}
                 onConfirmDelete={() => {
-                  setLoading(true)
-                  handleStartDeleting(item.key!, (productToDelete) => {
-                    handleDeleteProductItem(
-                      Number(productToDelete.key),
-                      (meta) => {
-                        if (meta.success) {
-                          setLoading(false)
-                          message.success('Deleted!')
-                        }
+                  productService.deleteItemByPk(item.id!, (meta) => {
+                    if (meta) {
+                      if (meta.success) {
+                        handleStartDeleting(item.id!, () => {})
+                        message.success('Deleted!')
                       }
-                    )
+                    } else {
+                      message.error('Failed!')
+                    }
                   })
                 }}
-                onStartDeleting={() => setDeleteKey(item.key)}
+                onStartDeleting={() => setDeleteKey(item.key!)}
               />
             )}
           />
@@ -229,15 +229,15 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
         <ModalAddNewProduct
           openModal={openModal}
           setOpenModal={setOpenModal}
-          onAddNew={(_form) => {
-            handleAddNewProduct(_form, (meta) => {
-              if (meta.success) {
-                const data = meta?.data as Product
-                const newDataSource = [...dataSource]
-                console.log({ newDataSource, data })
-                // newDataSource.unshift(data)
-                // setDataSource(newDataSource)
-                // message.success('Success!', 1)
+          onAddNew={(addNewForm) => {
+            productService.createNewItem(addNewForm, (meta) => {
+              if (meta?.success) {
+                const itemNew = meta.data as Product
+                handleStartAddNew({ key: String(uuidv4()), ...itemNew })
+                message.success('Created!')
+                setOpenModal(false)
+              } else {
+                message.error('Failed!')
               }
             })
           }}

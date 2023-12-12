@@ -1,9 +1,8 @@
 /* eslint-disable react-refresh/only-export-components */
-import { ColorPicker } from 'antd'
+import { ColorPicker, Flex, Form, Typography } from 'antd'
 import React, { memo } from 'react'
 import { TableItemWithKey } from '~/components/hooks/useTable'
 import ListItem from '~/components/ui/Table/ListItem'
-import ListItemRow from '~/components/ui/Table/ListItemRow'
 import { ColorTableDataType } from '../type'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
@@ -50,9 +49,22 @@ const ColorListItem: React.FC<Props> = ({
         title={data.nameColor}
         {...props}
       >
-        <ListItemRow
-          label='Mã màu'
-          render={
+        <Flex className='w-full' align='center' justify='start' gap={5}>
+          <Typography.Text type='secondary' className='w-40 font-medium'>
+            Mã màu
+          </Typography.Text>
+          {isEditing ? (
+            <Form.Item name='hexColor' className='m-0'>
+              <ColorPicker
+                size='middle'
+                className='w-full'
+                format='hex'
+                defaultFormat='hex'
+                disabled={editingKey !== data.key}
+                showText
+              />
+            </Form.Item>
+          ) : (
             <ColorPicker
               className='w-full'
               defaultValue={data.hexColor}
@@ -60,21 +72,8 @@ const ColorListItem: React.FC<Props> = ({
               disabled={editingKey !== data.key}
               showText
             />
-          }
-          renderEditing={
-            <ColorPicker
-              size='middle'
-              className='w-full'
-              format='hex'
-              defaultFormat='hex'
-              disabled={editingKey !== data.key}
-              showText
-            />
-          }
-          name='hexColor'
-          initialValue={data.hexColor}
-          isEditing={isEditing}
-        />
+          )}
+        </Flex>
       </ListItem>
     </>
   )

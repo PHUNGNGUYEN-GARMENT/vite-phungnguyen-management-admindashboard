@@ -11,12 +11,7 @@ export type StatusType = 'normal' | 'warn' | 'error' | 'success'
 
 export type SortDirection = 'asc' | 'desc'
 
-export type ItemStatusType =
-  | 'draft'
-  | 'active'
-  | 'closed'
-  | 'archived'
-  | 'deleted'
+export type ItemStatusType = 'draft' | 'active' | 'closed' | 'archived' | 'deleted'
 
 export type StepRound = {
   name: string
@@ -107,6 +102,8 @@ export type PrintablePlace = {
   status?: ItemStatusType
   product?: Product
   print?: Print
+  createdAt?: string
+  updatedAt?: string
 }
 
 export type ProductGroup = {
@@ -130,6 +127,8 @@ export type GarmentAccessory = {
   status?: ItemStatusType
   product?: Product
   accessoryNotes?: AccessoryNote[]
+  createdAt?: string
+  updatedAt?: string
 }
 
 export type AccessoryNote = {
