@@ -43,9 +43,9 @@ const ListItem: React.FC<Props> = ({
   const user = useSelector((state: RootState) => state.user)
 
   return (
-    <List.Item {...props} className='mb-5 rounded-sm bg-white'>
-      <Flex vertical className='w-full px-4' gap={10}>
-        <Flex align='center' justify='space-between'>
+    <List.Item {...props} className='mb-5 rounded-sm bg-white '>
+      <Flex vertical className='w-full' gap={10}>
+        <Flex align='center' justify='space-between' gap={10}>
           {label ? (
             typeof label === 'string' ? (
               <>

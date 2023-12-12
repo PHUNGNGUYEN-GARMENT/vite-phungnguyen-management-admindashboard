@@ -10,7 +10,7 @@ const ProductPage: React.FC = () => {
     <>
       <Flex vertical gap={20}>
         {width >= 768 && <ProductTable className='' />}
-        {width <= 768 && <ProductList className='' />}``
+        {width <= 768 && <ProductList className='' />}
       </Flex>
     </>
   )

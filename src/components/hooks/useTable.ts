@@ -8,6 +8,7 @@ export type ItemWithId<T> = T & { id?: number }
 export default function useTable<T extends { key?: React.Key }>(initValue: TableItemWithKey<T>[]) {
   const [form] = Form.useForm<T>()
   const [dataSource, setDataSource] = useState<TableItemWithKey<T>[]>(initValue)
+  const [loading, setLoading] = useState<boolean>(false)
   const [editingKey, setEditingKey] = useState<React.Key>('')
   const [deleteKey, setDeleteKey] = useState<React.Key>('')
   const [dateCreation, setDateCreation] = useState<boolean>(false)
@@ -15,6 +16,7 @@ export default function useTable<T extends { key?: React.Key }>(initValue: Table
   const isDelete = (key: React.Key) => key === deleteKey
 
   const handleConvertDataSource = (meta: ResponseDataType) => {
+    setLoading(true)
     const items = meta.data as ItemWithId<T>[]
     setDataSource(
       items.map((item: ItemWithId<T>) => {
@@ -24,6 +26,7 @@ export default function useTable<T extends { key?: React.Key }>(initValue: Table
         } as TableItemWithKey<T>
       })
     )
+    setLoading(false)
   }
 
   const handleStartEditing = (key: React.Key) => {
@@ -31,12 +34,14 @@ export default function useTable<T extends { key?: React.Key }>(initValue: Table
   }
 
   const handleStartDeleting = (key: React.Key, onSuccess: (row: TableItemWithKey<T>) => void) => {
+    setLoading(true)
     const itemFound = dataSource.find((item) => item.key === key)
     if (itemFound) {
       const dataSourceRemovedItem = dataSource.filter((item) => item.key !== key)
       setDataSource(dataSourceRemovedItem)
       onSuccess(itemFound)
     }
+    setLoading(false)
   }
 
   const handleConfirmCancelEditing = () => {
@@ -49,6 +54,7 @@ export default function useTable<T extends { key?: React.Key }>(initValue: Table
 
   const handleStartSaveEditing = async (key: React.Key, itemToUpdate: T, onSuccess?: (row: T) => void) => {
     try {
+      setLoading(true)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const newData = [...dataSource]
       const index = newData.findIndex((item) => key === item.key)
@@ -70,16 +76,20 @@ export default function useTable<T extends { key?: React.Key }>(initValue: Table
       }
     } catch (errInfo) {
       console.log('Validate Failed:', errInfo)
+    } finally {
+      setLoading(false)
     }
   }
 
   const handleStartAddNew = (item: T) => {
+    setLoading(true)
     const newDataSource = [...dataSource]
     newDataSource.unshift({
       ...item,
       key: item.key
     } as TableItemWithKey<T>)
     setDataSource(newDataSource)
+    setLoading(false)
   }
 
   return {
@@ -87,6 +97,8 @@ export default function useTable<T extends { key?: React.Key }>(initValue: Table
     isDelete,
     isEditing,
     deleteKey,
+    loading,
+    setLoading,
     setDeleteKey,
     editingKey,
     setEditingKey,

@@ -96,7 +96,7 @@ const ProductListItem: React.FC<Props> = ({
                 return {
                   label: item.nameColor,
                   value: item.id,
-                  key: item.id
+                  key: item.hexColor
                 }
               })}
               optionRender={(ori, info) => {
@@ -104,11 +104,12 @@ const ProductListItem: React.FC<Props> = ({
                   <>
                     <Flex justify='space-between' align='center' key={info.index}>
                       <Typography.Text>{ori.label}</Typography.Text>
-                      <div
-                        className='h-6 w-6 rounded-sm'
-                        style={{
-                          backgroundColor: `${ori.key}`
-                        }}
+                      <ColorPicker
+                        className='m-0 w-fit border-none p-0'
+                        defaultValue={`${ori.key}`}
+                        size='middle'
+                        format='hex'
+                        disabled
                       />
                     </Flex>
                   </>
@@ -118,14 +119,32 @@ const ProductListItem: React.FC<Props> = ({
             />
           </Form.Item>
         ) : (
-          <ColorPicker
-            className='w-full'
-            defaultValue={data.productColor?.color?.hexColor}
-            size='middle'
-            format='hex'
-            disabled
-            showText
-          />
+          <>
+            {data.productColor ? (
+              <Flex className='w-full'>
+                <Input
+                  name='display-hexcolor'
+                  readOnly
+                  value={data.productColor?.color?.nameColor}
+                  className='m-0 py-0 pr-0'
+                  suffix={
+                    <>
+                      <ColorPicker
+                        className='m-0 w-fit border-none p-0'
+                        size='middle'
+                        format='hex'
+                        value={data.productColor?.color?.hexColor}
+                        disabled
+                        showText
+                      />
+                    </>
+                  }
+                />
+              </Flex>
+            ) : (
+              <Input readOnly name='display-hexcolor' />
+            )}
+          </>
         )}
       </Flex>
       <Flex className='w-full' align='center' justify='start' gap={5}>
@@ -179,9 +198,9 @@ const ProductListItem: React.FC<Props> = ({
           Nhóm
         </Typography.Text>
         {isEditing ? (
-          <Form.Item name='groupID' className='m-0 w-full'>
+          <Form.Item name='groupID' initialValue={data.productGroup?.groupID} className='m-0 w-full'>
             <Select
-              placeholder='Select color...'
+              placeholder='Select group...'
               options={groups.map((item) => {
                 return {
                   label: item.name,
@@ -208,7 +227,7 @@ const ProductListItem: React.FC<Props> = ({
             />
           </Form.Item>
         ) : (
-          <Input name='dateOutputFCR' readOnly className='zoom-in-0' defaultValue={data.productGroup?.name} />
+          <Input name='groupID' readOnly className='zoom-in-0' value={data.productGroup?.group?.name} />
         )}
       </Flex>
       <Flex className='w-full' align='center' justify='start' gap={5}>
@@ -216,9 +235,9 @@ const ProductListItem: React.FC<Props> = ({
           Nơi in
         </Typography.Text>
         {isEditing ? (
-          <Form.Item name='print' className='m-0 w-full'>
+          <Form.Item name='printID' initialValue={data.printablePlace?.print?.name} className='m-0 w-full'>
             <Select
-              placeholder='Select color...'
+              placeholder='Select print place...'
               options={prints.map((item) => {
                 return {
                   label: item.name,
@@ -245,7 +264,7 @@ const ProductListItem: React.FC<Props> = ({
             />
           </Form.Item>
         ) : (
-          <Input name='dateOutputFCR' readOnly className='zoom-in-0' defaultValue={data.printablePlace?.name} />
+          <Input name='printID' readOnly className='zoom-in-0' value={data.printablePlace?.print?.name} />
         )}
       </Flex>
       <Collapse

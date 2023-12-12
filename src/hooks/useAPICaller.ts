@@ -26,54 +26,61 @@ export interface APIService<T extends ItemWithId> {
 
 export default function useAPICaller<T extends { id?: number }>(apiService: APIService<ItemWithId>) {
   const [metaData, setMetaData] = useState<ResponseDataType | undefined>(undefined)
-  const [loading, setLoading] = useState<boolean>(false)
   const [page, setPage] = useState<number>(1)
 
   const createNewItem = async (
     itemNew: T,
+    setLoading?: (enable: boolean) => void,
     onDataSuccess?: (data: ResponseDataType | undefined, status: boolean) => void
   ) => {
-    setLoading(true)
-    await apiService
-      .createNewItem(itemNew)
-      .then((meta) => {
-        if (meta?.success) {
-          onDataSuccess?.(meta, true)
-        } else {
+    try {
+      setLoading?.(true)
+      await apiService
+        .createNewItem(itemNew)
+        .then((meta) => {
+          if (meta?.success) {
+            onDataSuccess?.(meta, true)
+          } else {
+            onDataSuccess?.(undefined, false)
+          }
+        })
+        .catch((err) => {
+          console.log(err)
           onDataSuccess?.(undefined, false)
-        }
-      })
-      .catch((err) => {
-        console.log(err)
-        onDataSuccess?.(undefined, false)
-      })
-      .finally(() => {
-        setLoading(false)
-      })
+        })
+    } catch (err) {
+      console.log(err)
+    } finally {
+      setLoading?.(false)
+    }
   }
 
   const getItemByPk = async (
     id: number,
+    setLoading?: (enable: boolean) => void,
     onDataSuccess?: (data: ResponseDataType | undefined, status: boolean) => void
   ) => {
-    await apiService
-      .getItemByPk(id)
-      .then((meta) => {
-        setLoading(true)
-        if (meta?.success) {
-          onDataSuccess?.(meta, true)
-        } else {
+    try {
+      await apiService
+        .getItemByPk(id)
+        .then((meta) => {
+          setLoading?.(true)
+          if (meta?.success) {
+            onDataSuccess?.(meta, true)
+          } else {
+            onDataSuccess?.(undefined, false)
+          }
+          console.log(meta)
+        })
+        .catch((err) => {
+          console.log(err)
           onDataSuccess?.(undefined, false)
-        }
-        console.log(meta)
-      })
-      .catch((err) => {
-        console.log(err)
-        onDataSuccess?.(undefined, false)
-      })
-      .finally(() => {
-        setLoading(false)
-      })
+        })
+    } catch (err) {
+      console.log(err)
+    } finally {
+      setLoading?.(false)
+    }
   }
 
   const getItemBy = async (
@@ -81,93 +88,112 @@ export default function useAPICaller<T extends { id?: number }>(apiService: APIS
       field: string
       key: React.Key
     },
+    setLoading?: (enable: boolean) => void,
     onDataSuccess?: (data: ResponseDataType | undefined, status: boolean) => void
   ) => {
-    await apiService
-      .getItemBy?.(query)
-      .then((meta) => {
-        setLoading(true)
-        if (meta?.success) {
-          onDataSuccess?.(meta, true)
-        } else {
+    try {
+      await apiService
+        .getItemBy?.(query)
+        .then((meta) => {
+          setLoading?.(true)
+          if (meta?.success) {
+            onDataSuccess?.(meta, true)
+          } else {
+            onDataSuccess?.(undefined, false)
+          }
+          console.log(meta)
+        })
+        .catch((err) => {
+          console.log(err)
           onDataSuccess?.(undefined, false)
-        }
-        console.log(meta)
-      })
-      .catch((err) => {
-        console.log(err)
-        onDataSuccess?.(undefined, false)
-      })
-      .finally(() => {
-        setLoading(false)
-      })
+        })
+    } catch (err) {
+      console.log(err)
+    } finally {
+      setLoading?.(false)
+    }
   }
 
   const getListItems = async (
     params: RequestBodyType,
+    setLoading?: (enable: boolean) => void,
     onDataSuccess?: (data: ResponseDataType | undefined, status: boolean) => void
   ) => {
-    setLoading(true)
-    const body: RequestBodyType = {
-      ...defaultRequestBody,
-      ...params
+    try {
+      setLoading?.(true)
+      const body: RequestBodyType = {
+        ...defaultRequestBody,
+        ...params
+      }
+      await apiService
+        .getItems(body)
+        .then((meta) => {
+          if (meta?.success) {
+            setMetaData(meta)
+            onDataSuccess?.(meta, true)
+          }
+        })
+        .catch((err) => {
+          console.log(err)
+          onDataSuccess?.(undefined, false)
+        })
+    } catch (err) {
+      console.log(err)
+    } finally {
+      setLoading?.(false)
     }
-    await apiService
-      .getItems(body)
-      .then((meta) => {
-        if (meta?.success) {
-          setMetaData(meta)
-          onDataSuccess?.(meta, true)
-        }
-      })
-      .catch((err) => {
-        console.log(err)
-        onDataSuccess?.(undefined, false)
-      })
-      .finally(() => {
-        setLoading(false)
-      })
   }
 
   const sortedListItems = async (
     direction: SortDirection,
+    setLoading?: (enable: boolean) => void,
     onDataSuccess?: (data: ResponseDataType | undefined, status: boolean) => void
   ) => {
-    const body: RequestBodyType = {
-      ...defaultRequestBody,
-      paginator: {
-        page: page,
-        pageSize: 5
-      },
-      sorting: {
-        column: 'id',
-        direction: direction
+    try {
+      const body: RequestBodyType = {
+        ...defaultRequestBody,
+        paginator: {
+          page: page,
+          pageSize: 5
+        },
+        sorting: {
+          column: 'id',
+          direction: direction
+        }
       }
+      await getListItems(body, setLoading, onDataSuccess)
+    } catch (err) {
+      console.log(err)
+    } finally {
+      setLoading?.(false)
     }
-    await getListItems(body, onDataSuccess)
   }
 
   const updateItemByPk = async (
     id: number,
     itemToUpdate: T,
+    setLoading?: (enable: boolean) => void,
     onDataSuccess?: (data: ResponseDataType | undefined, status: boolean) => void
   ) => {
-    setLoading(true)
-    apiService
-      .updateItemByPk(id, itemToUpdate)
-      .then((data) => {
-        if (data?.success) {
-          setMetaData(data)
-          onDataSuccess?.(data, true)
-        }
-      })
-      .catch((err) => {
-        console.log(err)
-        onDataSuccess?.(undefined, false)
-      })
-      .finally(() => {
-        setLoading(false)
-      })
+    try {
+      setLoading?.(true)
+      apiService
+        .updateItemByPk(id, itemToUpdate)
+        .then((data) => {
+          if (data?.success) {
+            setMetaData(data)
+            onDataSuccess?.(data, true)
+          }
+        })
+        .catch((err) => {
+          console.log(err)
+          onDataSuccess?.(undefined, false)
+        })
+    } catch (err) {
+      console.log(err)
+    } finally {
+      setLoading?.(false)
+    }
   }
 
   const updateItemBy = async (
@@ -176,51 +202,57 @@ export default function useAPICaller<T extends { id?: number }>(apiService: APIS
       key: React.Key
     },
     itemToUpdate: T,
+    setLoading?: (enable: boolean) => void,
     onDataSuccess?: (data: ResponseDataType | undefined, status: boolean) => void
   ) => {
-    setLoading(true)
-    apiService
-      .updateItemBy(query, itemToUpdate)
-      .then((data) => {
-        if (data?.success) {
-          setMetaData(data)
-          onDataSuccess?.(data, true)
-        }
-      })
-      .catch((err) => {
-        console.log(err)
-        onDataSuccess?.(undefined, false)
-      })
-      .finally(() => {
-        setLoading(false)
-      })
+    try {
+      setLoading?.(true)
+      apiService
+        .updateItemBy(query, itemToUpdate)
+        .then((data) => {
+          if (data?.success) {
+            setMetaData(data)
+            onDataSuccess?.(data, true)
+          }
+        })
+        .catch((err) => {
+          console.log(err)
+          onDataSuccess?.(undefined, false)
+        })
+    } catch (err) {
+      console.log(err)
+    } finally {
+      setLoading?.(false)
+    }
   }
 
   const deleteItemByPk = async (
     id: number,
+    setLoading?: (enable: boolean) => void,
     onDataSuccess?: (data: ResponseDataType | undefined, status: boolean) => void
   ) => {
-    setLoading(true)
-    await apiService
-      .deleteItemByPk(id)
-      .then((data) => {
-        if (data?.success) {
-          setMetaData(data)
-          onDataSuccess?.(data, true)
-        }
-      })
-      .catch((err) => {
-        console.log(err)
-        onDataSuccess?.(undefined, false)
-      })
-      .finally(() => {
-        setLoading(false)
-      })
+    try {
+      setLoading?.(true)
+      await apiService
+        .deleteItemByPk(id)
+        .then((data) => {
+          if (data?.success) {
+            setMetaData(data)
+            onDataSuccess?.(data, true)
+          }
+        })
+        .catch((err) => {
+          console.log(err)
+          onDataSuccess?.(undefined, false)
+        })
+    } catch (err) {
+      console.log(err)
+    } finally {
+      setLoading?.(false)
+    }
   }
 
   return {
-    loading,
-    setLoading,
     page,
     setPage,
     metaData,

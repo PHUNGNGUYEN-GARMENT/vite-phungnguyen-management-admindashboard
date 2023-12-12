@@ -98,7 +98,6 @@ export type PrintablePlace = {
   id?: number
   printID?: number
   productID?: number
-  name?: string
   status?: ItemStatusType
   product?: Product
   print?: Print
