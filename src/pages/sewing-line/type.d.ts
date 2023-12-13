@@ -2,7 +2,7 @@ import { ItemStatusType } from '~/typing'
 
 export type SewingLineTableDataType = {
   key?: React.Key
-  id?: number | undefined
+  id?: number
   sewingLineName?: string
   status?: ItemStatusType
   createdAt?: string

@@ -3,7 +3,7 @@ import { App as AntApp, ColorPicker, Form, Table, Typography } from 'antd'
 import type { Color as AntColor } from 'antd/es/color-picker'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { v4 as uuidv4 } from 'uuid'
+import { v4 } from 'uuid'
 import { RequestBodyType, defaultRequestBody } from '~/api/client'
 import ColorAPI from '~/api/services/ColorAPI'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
@@ -326,8 +326,8 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
           onAddNew={(addNewForm) => {
             service.createNewItem(addNewForm, setLoading, (meta) => {
               if (meta?.success) {
-                const colorNew = meta.data as Color
-                handleStartAddNew({ key: String(uuidv4()), ...colorNew })
+                const itemNew = meta.data as Color
+                handleStartAddNew({ key: String(v4()), ...itemNew })
                 message.success('Created!')
                 setOpenModal(false)
               } else {

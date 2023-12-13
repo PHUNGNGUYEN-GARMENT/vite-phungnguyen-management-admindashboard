@@ -1,14 +1,11 @@
 import { App as AntApp, Form, List } from 'antd'
 import React, { useEffect, useState } from 'react'
-import {
-  RequestBodyType,
-  ResponseDataType,
-  defaultRequestBody
-} from '~/api/client'
+import { v4 as uuidv4 } from 'uuid'
+import { RequestBodyType, defaultRequestBody } from '~/api/client'
 import SewingLineAPI from '~/api/services/SewingLineAPI'
-import useList, { TableItemWithKey } from '~/components/hooks/useTable'
+import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
-import useAPICaller from '~/hooks/useAPICaller'
+import useAPICaller, { serviceActionUpdate } from '~/hooks/useAPICaller'
 import { SewingLine } from '~/typing'
 import { SewingLineTableDataType } from '../type'
 import ModalAddNewSewingLine from './ModalAddNewSewingLine'
@@ -17,122 +14,95 @@ import SewingLineListItem from './SewingLineListItem'
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 const SewingLineList: React.FC<Props> = ({ ...props }) => {
-  const [openModal, setOpenModal] = useState<boolean>(false)
-  const {
-    createNewItem,
-    getListItems,
-    updateItemByPk,
-    sortedListItems,
-    loading,
-    metaData
-  } = useAPICaller<SewingLine>(SewingLineAPI)
+  const service = useAPICaller<SewingLine>(SewingLineAPI)
   const {
     form,
+    loading,
+    isEditing,
+    setLoading,
+    dataSource,
     editingKey,
     setDeleteKey,
-    dataSource,
-    setDataSource,
-    isEditing,
+    dateCreation,
+    setDateCreation,
     handleStartAddNew,
     handleStartEditing,
     handleStartDeleting,
     handleStartSaveEditing,
+    handleConvertDataSource,
     handleConfirmCancelEditing,
     handleConfirmCancelDeleting
-  } = useList<SewingLineTableDataType>([])
+  } = useTable<SewingLineTableDataType>([])
+  const [openModal, setOpenModal] = useState<boolean>(false)
   const { message } = AntApp.useApp()
 
   useEffect(() => {
-    getListItems(defaultRequestBody, (meta) => {
+    service.getListItems(defaultRequestBody, setLoading, (meta) => {
       if (meta?.success) {
-        handleProgressDataSource(meta)
+        handleConvertDataSource(meta)
       }
     })
   }, [])
 
-  const handleProgressDataSource = (meta: ResponseDataType) => {
-    const colors = meta.data as SewingLine[]
-    setDataSource(
-      colors.map((item: SewingLine) => {
-        return {
-          ...item,
-          key: item.id
-        } as TableItemWithKey<SewingLineTableDataType>
-      })
-    )
-    console.log(
-      colors.map((item: SewingLine) => {
-        return {
-          ...item,
-          key: item.id
-        } as TableItemWithKey<SewingLineTableDataType>
-      })
-    )
-  }
-
-  const selfHandleSaveClick = async (
-    item: TableItemWithKey<SewingLineTableDataType>
-  ) => {
+  const selfHandleSaveClick = async (item: TableItemWithKey<SewingLineTableDataType>) => {
     const row = await form.validateFields()
-
-    updateItemByPk(
-      item.id ?? Number(item.key),
+    serviceActionUpdate(
+      { field: 'id', key: item.id! },
+      SewingLineAPI,
       {
-        ...row
-      },
-      (success) => {
-        if (success) {
-          handleStartSaveEditing(
-            item.key!,
-            {
-              sewingLineName: row.sewingLineName
-            },
-            (itemToSave) => {
-              if (itemToSave) {
-                message.success('Updated!')
-              }
-            }
-          )
+        sewingLineName: row.sewingLineName
+      } as SewingLine,
+      setLoading,
+      (data, msg) => {
+        if (data?.success) {
+          message.success(msg)
         } else {
-          message.error('Failed!')
+          message.error(msg)
         }
+        handleStartSaveEditing(item.id!, {
+          ...item,
+          sewingLineName: row.sewingLineName
+        })
       }
     )
-    form.resetFields()
   }
 
   return (
     <>
       <Form form={form}>
         <BaseLayout
+          onDateCreationChange={(enable) => setDateCreation(enable)}
           onSearch={(value) => {
             if (value.length > 0) {
-              const body: RequestBodyType = {
-                ...defaultRequestBody,
-                search: {
-                  field: 'sewingLineName',
-                  term: value
+              service.getListItems(
+                {
+                  ...defaultRequestBody,
+                  search: {
+                    field: 'sewingLineName',
+                    term: value
+                  }
+                },
+                setLoading,
+                (meta) => {
+                  if (meta?.success) {
+                    handleConvertDataSource(meta)
+                  }
                 }
-              }
-              getListItems(body, (meta) => {
-                if (meta?.success) {
-                  handleProgressDataSource(meta)
-                }
-              })
+              )
             }
           }}
           onSortChange={(val) => {
-            sortedListItems(val ? 'asc' : 'desc', (meta) => {
+            service.sortedListItems(val ? 'asc' : 'desc', setLoading, (meta) => {
               if (meta?.success) {
-                handleProgressDataSource(meta)
+                handleConvertDataSource(meta)
               }
             })
           }}
           onResetClick={() => {
             form.setFieldValue('search', '')
-            getListItems(defaultRequestBody, (meta) => {
+            service.getListItems(defaultRequestBody, setLoading, (meta) => {
               if (meta?.success) {
-                handleProgressDataSource(meta)
+                handleConvertDataSource(meta)
               }
             })
           }}
@@ -144,6 +114,7 @@ const SewingLineList: React.FC<Props> = ({ ...props }) => {
             size='large'
             pagination={{
               onChange: (_page) => {
+                service.setPage(_page)
                 const body: RequestBodyType = {
                   ...defaultRequestBody,
                   paginator: {
@@ -155,15 +126,15 @@ const SewingLineList: React.FC<Props> = ({ ...props }) => {
                     term: form.getFieldValue('search') ?? ''
                   }
                 }
-                getListItems(body, (meta) => {
+                service.getListItems(body, setLoading, (meta) => {
                   if (meta?.success) {
-                    handleProgressDataSource(meta)
+                    handleConvertDataSource(meta)
                   }
                 })
               },
-              current: metaData?.page,
+              current: service.metaData?.page,
               pageSize: 5,
-              total: metaData?.total
+              total: service.metaData?.total
             }}
             loading={loading}
             dataSource={dataSource}
@@ -172,24 +143,22 @@ const SewingLineList: React.FC<Props> = ({ ...props }) => {
                 data={item}
                 key={item.key}
                 editingKey={editingKey}
+                dateCreation={dateCreation}
                 isEditing={isEditing(item.key!)}
                 onSaveClick={() => selfHandleSaveClick(item)}
                 onClickStartEditing={() => handleStartEditing(item.key!)}
                 onConfirmCancelEditing={() => handleConfirmCancelEditing()}
                 onConfirmCancelDeleting={() => handleConfirmCancelDeleting()}
                 onConfirmDelete={() => {
-                  handleStartDeleting(item.key!, (productToDelete) => {
-                    updateItemByPk(
-                      Number(productToDelete.key),
-                      { status: 'deleted' },
-                      (meta) => {
-                        if (meta?.success) {
-                          message.success('Created!')
-                        } else {
-                          message.error('Failed!')
-                        }
+                  service.updateItemByPk(item.id!, { status: 'deleted' }, setLoading, (meta) => {
+                    if (meta) {
+                      if (meta.success) {
+                        handleStartDeleting(item.id!, () => {})
+                        message.success('Deleted!')
                       }
-                    )
+                    } else {
+                      message.error('Failed!')
+                    }
                   })
                 }}
                 onStartDeleting={() => setDeleteKey(item.key!)}
@@ -203,14 +172,12 @@ const SewingLineList: React.FC<Props> = ({ ...props }) => {
           openModal={openModal}
           setOpenModal={setOpenModal}
           onAddNew={(addNewForm) => {
-            createNewItem(addNewForm, (meta) => {
+            service.createNewItem(addNewForm, setLoading, (meta) => {
               if (meta?.success) {
-                const newItem = meta.data as SewingLine
-                handleStartAddNew({
-                  key: newItem.id,
-                  ...addNewForm
-                })
+                const colorNew = meta.data as SewingLine
+                handleStartAddNew({ key: String(uuidv4()), ...colorNew })
                 message.success('Created!')
+                setOpenModal(false)
               } else {
                 message.error('Failed!')
               }

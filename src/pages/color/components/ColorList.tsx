@@ -19,18 +19,18 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
   const {
     form,
     loading,
+    isEditing,
     setLoading,
+    dataSource,
     editingKey,
     setDeleteKey,
-    dataSource,
-    isEditing,
     dateCreation,
     setDateCreation,
-    handleConvertDataSource,
     handleStartAddNew,
     handleStartEditing,
     handleStartDeleting,
     handleStartSaveEditing,
+    handleConvertDataSource,
     handleConfirmCancelEditing,
     handleConfirmCancelDeleting
   } = useTable<ColorTableDataType>([])
