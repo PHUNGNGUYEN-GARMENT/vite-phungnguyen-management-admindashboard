@@ -104,13 +104,7 @@ const ProductListItem: React.FC<Props> = ({
                   <>
                     <Flex justify='space-between' align='center' key={info.index}>
                       <Typography.Text>{ori.label}</Typography.Text>
-                      <ColorPicker
-                        className='m-0 w-fit border-none p-0'
-                        defaultValue={`${ori.key}`}
-                        size='middle'
-                        format='hex'
-                        disabled
-                      />
+                      <div className={`m-0 h-6 w-6 rounded-lg border-none p-0 bg-${ori.key}`} />
                     </Flex>
                   </>
                 )
