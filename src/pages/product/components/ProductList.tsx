@@ -9,7 +9,7 @@ import ProductColorAPI from '~/api/services/ProductColorAPI'
 import ProductGroupAPI from '~/api/services/ProductGroupAPI'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
-import useAPICaller, { APIService, ItemWithId } from '~/hooks/useAPICaller'
+import useAPICaller, { serviceActionUpdateOrCreate } from '~/hooks/useAPICaller'
 import { PrintablePlace, Product, ProductColor, ProductGroup } from '~/typing'
 import { ProductTableDataType } from '../type'
 import ModalAddNewProduct from './ModalAddNewProduct'
@@ -98,89 +98,91 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
   const selfHandleSaveClick = async (item: TableItemWithKey<ProductTableDataType>) => {
     const row = (await form.validateFields()) as any
     console.log(row)
-    // if (
-    //   row.productCode !== item.productCode ||
-    //   row.quantityPo !== item.quantityPO ||
-    //   row.dateInputNPL !== item.dateInputNPL ||
-    //   row.dateOutputFCR !== item.dateOutputFCR
-    // ) {
-    //   productService.updateItemByPk(
-    //     item.id ?? Number(item.key),
-    //     {
-    //       productCode: row.productCode,
-    //       quantityPO: row.quantityPO,
-    //       dateInputNPL: row.dateInputNPL,
-    //       dateOutputFCR: row.dateOutputFCR
-    //     },
-    //     setLoading,
-    //     (meta) => {
-    //       if (meta?.success) {
-    //         const color = meta.data as Product
-    //         handleStartSaveEditing(color.id ?? Number(item.key), color, () => {
-    //           message.success('Updated!')
-    //         })
-    //       } else {
-    //         message.error('Failed!')
-    //       }
-    //     }
-    //   )
-    // }
+    if (
+      row.productCode !== item.productCode ||
+      row.quantityPo !== item.quantityPO ||
+      row.dateInputNPL !== item.dateInputNPL ||
+      row.dateOutputFCR !== item.dateOutputFCR
+    ) {
+      console.log('Product progressing')
+      serviceActionUpdateOrCreate(
+        { field: 'id', key: Number(item.id!) },
+        ProductAPI,
+        {
+          productCode: row.productCode,
+          quantityPO: row.quantityPO,
+          dateInputNPL: row.dateInputNPL,
+          dateOutputFCR: row.dateOutputFCR
+        } as Product,
+        setLoading,
+        (data, msg) => {
+          if (data?.success) {
+            message.success(msg)
+          } else {
+            message.error(msg)
+          }
+          handleStartSaveEditing(item.id!, {
+            ...item,
+            productCode: row.productCode,
+            quantityPO: row.quantityPO,
+            dateInputNPL: row.dateInputNPL,
+            dateOutputFCR: row.dateOutputFCR
+          })
+        }
+      )
+    }
     if (row.colorID !== item.productColor?.colorID) {
       console.log('ProductColor progressing')
-      serviceActionSave(item.id!, ProductColorAPI, { colorID: row.colorID } as ProductColor)
+      serviceActionUpdateOrCreate(
+        { field: 'productID', key: Number(item.id!) },
+        ProductColorAPI,
+        { colorID: row.colorID } as ProductColor,
+        setLoading,
+        (data, msg) => {
+          if (data?.success) {
+            message.success(msg)
+          } else {
+            message.error(msg)
+          }
+          handleStartSaveEditing(item.id!, { ...item, productColor: { colorID: row.colorID } as ProductColor })
+        }
+      )
     }
     if (row.groupID !== item.productGroup?.groupID) {
       console.log('ProductGroup progressing')
-      serviceActionSave(item.id!, ProductGroupAPI, { groupID: row.groupID } as ProductGroup)
+      serviceActionUpdateOrCreate(
+        { field: 'productID', key: Number(item.id!) },
+        ProductGroupAPI,
+        { groupID: row.groupID } as ProductGroup,
+        setLoading,
+        (data, msg) => {
+          if (data?.success) {
+            message.success(msg)
+          } else {
+            message.error(msg)
+          }
+          handleStartSaveEditing(item.id!, { ...item, productGroup: { groupID: row.groupID } as ProductGroup })
+        }
+      )
     }
     if (row.printID !== item.printablePlace?.printID) {
       console.log('PrintablePlace progressing')
-      serviceActionSave(item.id!, PrintablePlaceAPI, { printID: row.printID } as PrintablePlace)
+      serviceActionUpdateOrCreate(
+        { field: 'productID', key: Number(item.id!) },
+        PrintablePlaceAPI,
+        { printID: row.printID } as PrintablePlace,
+        setLoading,
+        (data, msg) => {
+          if (data?.success) {
+            message.success(msg)
+          } else {
+            message.error(msg)
+          }
+          handleStartSaveEditing(item.id!, { ...item, printablePlace: { printID: row.printID } as PrintablePlace })
+        }
+      )
     }
   }
-
-  async function serviceActionSave<T extends { id?: number }>(
-    productID: number,
-    service: APIService<ItemWithId>,
-    itemToUpdate: Partial<T>
-  ) {
-    try {
-      setLoading(true)
-      const itemFind = await service.getItemBy({ field: 'productID', key: productID })
-      if (itemFind?.success) {
-        // Found item
-        const itemUpdated = await service.updateItemBy({ field: 'productID', key: productID }, { ...itemToUpdate })
-        if (itemUpdated?.success) {
-          message.success(`${typeof service} Updated!`)
-        } else {
-          message.error(`${typeof service} Update failed!`)
-        }
-      } else {
-        const itemNew = await service.createNewItem({ ...itemToUpdate, productID: productID })
-        if (itemNew?.success) {
-          message.success(`${typeof service} Created!`)
-        } else {
-          message.error(`${typeof service} Create failed!`)
-        }
-      }
-    } catch (err) {
-      console.log(err)
-      setLoading(false)
-    } finally {
-      handleConfirmCancelEditing()
-      setLoading(false)
-    }
-  }
-
-  //   {
-  //     "title": "ASO-413123",
-  //     "hexColor": 12,
-  //     "quantityPo": 1243,
-  //     "dateInputNPL": "2023-12-01T09:06:08.122Z",
-  //     "dateOutputFCR": "2023-12-01T09:06:10.291Z",
-  //     "groupID": 5,
-  //     "print": 2
-  // }
 
   return (
     <>

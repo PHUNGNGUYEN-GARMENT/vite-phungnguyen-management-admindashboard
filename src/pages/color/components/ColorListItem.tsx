@@ -46,7 +46,8 @@ const ColorListItem: React.FC<Props> = ({
         onConfirmCancelDeleting={onConfirmCancelDeleting}
         onConfirmDelete={onConfirmDelete}
         onStartDeleting={onStartDeleting}
-        title={data.nameColor}
+        label={`${data.nameColor}`}
+        name='nameColor'
         {...props}
       >
         <Flex className='w-full' align='center' justify='start' gap={5}>
@@ -54,7 +55,7 @@ const ColorListItem: React.FC<Props> = ({
             Mã màu
           </Typography.Text>
           {isEditing ? (
-            <Form.Item name='hexColor' className='m-0'>
+            <Form.Item name='hexColor' initialValue={data.hexColor} className='m-0 w-full'>
               <ColorPicker
                 size='middle'
                 className='w-full'

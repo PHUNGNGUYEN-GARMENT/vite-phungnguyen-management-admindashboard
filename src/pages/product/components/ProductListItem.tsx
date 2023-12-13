@@ -89,7 +89,7 @@ const ProductListItem: React.FC<Props> = ({
           Mã màu
         </Typography.Text>
         {isEditing ? (
-          <Form.Item name='colorID' className='m-0 w-full' initialValue={data.productColor?.color?.id}>
+          <Form.Item name='colorID' className='m-0 w-full' initialValue={data.productColor?.color?.nameColor}>
             <Select
               placeholder='Select color...'
               options={colors.map((item) => {
@@ -119,8 +119,18 @@ const ProductListItem: React.FC<Props> = ({
                 <Input
                   name='display-hexcolor'
                   readOnly
+                  disabled
                   value={data.productColor?.color?.nameColor}
                   className='m-0 py-0 pr-0'
+                  prefix={
+                    <>
+                      {data.productColor.color?.status === 'deleted' && (
+                        <Typography.Text type='danger' className='rounded-sm uppercase' code>
+                          {data.productColor.color?.status}
+                        </Typography.Text>
+                      )}
+                    </>
+                  }
                   suffix={
                     <>
                       <ColorPicker

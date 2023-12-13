@@ -6,7 +6,7 @@ import { RequestBodyType, defaultRequestBody } from '~/api/client'
 import ColorAPI from '~/api/services/ColorAPI'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
-import useAPICaller from '~/hooks/useAPICaller'
+import useAPICaller, { serviceActionUpdate } from '~/hooks/useAPICaller'
 import { Color } from '~/typing'
 import { ColorTableDataType } from '../type'
 import ColorListItem from './ColorListItem'
@@ -15,10 +15,11 @@ import ModalAddNewColor from './ModalAddNewColor'
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 const ColorList: React.FC<Props> = ({ ...props }) => {
-  const { metaData, setPage, loading, createNewItem, getListItems, updateItemByPk, deleteItemByPk, sortedListItems } =
-    useAPICaller<Color>(ColorAPI)
+  const service = useAPICaller<Color>(ColorAPI)
   const {
     form,
+    loading,
+    setLoading,
     editingKey,
     setDeleteKey,
     dataSource,
@@ -37,7 +38,7 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
   const { message } = AntApp.useApp()
 
   useEffect(() => {
-    getListItems(defaultRequestBody, (meta) => {
+    service.getListItems(defaultRequestBody, setLoading, (meta) => {
       if (meta?.success) {
         handleConvertDataSource(meta)
       }
@@ -51,21 +52,25 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
         ? row.hexColor
         : (row.hexColor as AntColor).toHexString()
       : ''
-    updateItemByPk(
-      item.id ?? Number(item.key),
+    serviceActionUpdate(
+      { field: 'id', key: item.id! },
+      ColorAPI,
       {
         nameColor: row.nameColor,
         hexColor: hexColor
-      },
-      (meta) => {
-        if (meta?.success) {
-          const color = meta.data as Color
-          handleStartSaveEditing(color.id ?? Number(item.key), color, () => {
-            message.success('Updated!')
-          })
+      } as Color,
+      setLoading,
+      (data, msg) => {
+        if (data?.success) {
+          message.success(msg)
         } else {
-          message.error('Failed!')
+          message.error(msg)
         }
+        handleStartSaveEditing(item.id!, {
+          ...item,
+          nameColor: row.nameColor,
+          hexColor: hexColor
+        })
       }
     )
   }
@@ -77,7 +82,7 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
           onDateCreationChange={(enable) => setDateCreation(enable)}
           onSearch={(value) => {
             if (value.length > 0) {
-              getListItems(
+              service.getListItems(
                 {
                   ...defaultRequestBody,
                   search: {
@@ -85,6 +90,7 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
                     term: value
                   }
                 },
+                setLoading,
                 (meta) => {
                   if (meta?.success) {
                     handleConvertDataSource(meta)
@@ -94,7 +100,7 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
             }
           }}
           onSortChange={(val) => {
-            sortedListItems(val ? 'asc' : 'desc', (meta) => {
+            service.sortedListItems(val ? 'asc' : 'desc', setLoading, (meta) => {
               if (meta?.success) {
                 handleConvertDataSource(meta)
               }
@@ -102,7 +108,7 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
           }}
           onResetClick={() => {
             form.setFieldValue('search', '')
-            getListItems(defaultRequestBody, (meta) => {
+            service.getListItems(defaultRequestBody, setLoading, (meta) => {
               if (meta?.success) {
                 handleConvertDataSource(meta)
               }
@@ -116,7 +122,7 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
             size='default'
             pagination={{
               onChange: (_page) => {
-                setPage(_page)
+                service.setPage(_page)
                 const body: RequestBodyType = {
                   ...defaultRequestBody,
                   paginator: {
@@ -128,15 +134,15 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
                     term: form.getFieldValue('search') ?? ''
                   }
                 }
-                getListItems(body, (meta) => {
+                service.getListItems(body, setLoading, (meta) => {
                   if (meta?.success) {
                     handleConvertDataSource(meta)
                   }
                 })
               },
-              current: metaData?.page,
+              current: service.metaData?.page,
               pageSize: 5,
-              total: metaData?.total
+              total: service.metaData?.total
             }}
             loading={loading}
             dataSource={dataSource}
@@ -152,7 +158,7 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
                 onConfirmCancelEditing={() => handleConfirmCancelEditing()}
                 onConfirmCancelDeleting={() => handleConfirmCancelDeleting()}
                 onConfirmDelete={() => {
-                  deleteItemByPk(item.id!, (meta) => {
+                  service.updateItemByPk(item.id!, { status: 'deleted' }, setLoading, (meta) => {
                     if (meta) {
                       if (meta.success) {
                         handleStartDeleting(item.id!, () => {})
@@ -174,7 +180,7 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
           openModal={openModal}
           setOpenModal={setOpenModal}
           onAddNew={(addNewForm) => {
-            createNewItem(addNewForm, (meta) => {
+            service.createNewItem(addNewForm, setLoading, (meta) => {
               if (meta?.success) {
                 const colorNew = meta.data as Color
                 handleStartAddNew({ key: String(uuidv4()), ...colorNew })

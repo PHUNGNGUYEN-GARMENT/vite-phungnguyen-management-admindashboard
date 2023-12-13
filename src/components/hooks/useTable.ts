@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { ResponseDataType } from '~/api/client'
 
 export type TableItemWithKey<T> = T & { key?: React.Key }
-export type ItemWithId<T> = T & { id?: number }
+type TableItemWithId<T> = T & { id?: number }
 
 export default function useTable<T extends { key?: React.Key }>(initValue: TableItemWithKey<T>[]) {
   const [form] = Form.useForm<T>()
@@ -17,9 +17,9 @@ export default function useTable<T extends { key?: React.Key }>(initValue: Table
 
   const handleConvertDataSource = (meta: ResponseDataType) => {
     setLoading(true)
-    const items = meta.data as ItemWithId<T>[]
+    const items = meta.data as TableItemWithId<T>[]
     setDataSource(
-      items.map((item: ItemWithId<T>) => {
+      items.map((item: TableItemWithId<T>) => {
         return {
           ...item,
           key: item.id
@@ -52,7 +52,7 @@ export default function useTable<T extends { key?: React.Key }>(initValue: Table
     setDeleteKey('')
   }
 
-  const handleStartSaveEditing = async (key: React.Key, itemToUpdate: T, onSuccess?: (row: T) => void) => {
+  const handleStartSaveEditing = async (key: React.Key, itemToUpdate: T, onDataSuccess?: (row: T) => void) => {
     try {
       setLoading(true)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -66,13 +66,14 @@ export default function useTable<T extends { key?: React.Key }>(initValue: Table
         })
         setDataSource(newData)
         setEditingKey('')
-        onSuccess?.(itemToUpdate)
+        onDataSuccess?.(itemToUpdate)
         // After updated local data
         // We need to update on database
       } else {
         newData.push(itemToUpdate)
         setDataSource(newData)
         setEditingKey('')
+        onDataSuccess?.(itemToUpdate)
       }
     } catch (errInfo) {
       console.log('Validate Failed:', errInfo)

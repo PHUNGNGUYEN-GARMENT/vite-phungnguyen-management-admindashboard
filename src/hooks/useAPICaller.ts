@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react'
 import { RequestBodyType, ResponseDataType, defaultRequestBody } from '~/api/client'
 import { ItemStatusType, SortDirection } from '~/typing'
 
 export interface ItemWithId {
-  id: number
+  id?: number
   status?: ItemStatusType
   // ... other common properties
 }
@@ -264,5 +265,68 @@ export default function useAPICaller<T extends { id?: number }>(apiService: APIS
     updateItemBy,
     deleteItemByPk,
     sortedListItems
+  }
+}
+
+export async function serviceActionUpdate<T extends { id?: number }>(
+  query: {
+    field: string
+    key: React.Key
+  },
+  service: APIService<ItemWithId>,
+  itemToUpdate: Partial<T>,
+  setLoading?: (enable: boolean) => void,
+  onDataSuccess?: (data: ResponseDataType | undefined, message: string) => void
+) {
+  try {
+    setLoading?.(true)
+    const itemUpdated =
+      query.field === 'id'
+        ? await service.updateItemByPk(Number(query.key), { ...itemToUpdate })
+        : await service.updateItemBy(query, { ...itemToUpdate })
+    if (itemUpdated?.success) {
+      onDataSuccess?.(itemUpdated, 'Updated!')
+    } else {
+      onDataSuccess?.(itemUpdated, 'Update failed!')
+    }
+  } catch (err) {
+    console.log(err)
+    setLoading?.(false)
+  } finally {
+    setLoading?.(false)
+  }
+}
+
+export async function serviceActionUpdateOrCreate<T extends { id?: number }>(
+  query: {
+    field: string
+    key: React.Key
+  },
+  service: APIService<ItemWithId>,
+  itemToUpdate: Partial<T>,
+  setLoading?: (enable: boolean) => void,
+  onDataSuccess?: (data: ResponseDataType | undefined, message: string) => void
+) {
+  try {
+    setLoading?.(true)
+    const itemUpdated =
+      query.field === 'id'
+        ? await service.updateItemByPk(Number(query.key), { ...itemToUpdate })
+        : await service.updateItemBy(query, { ...itemToUpdate })
+    if (itemUpdated?.success) {
+      onDataSuccess?.(itemUpdated, 'Updated!')
+    } else {
+      const itemNew = await service.createNewItem({ ...itemToUpdate })
+      if (itemNew?.success) {
+        onDataSuccess?.(itemNew, 'Added!')
+      } else {
+        onDataSuccess?.(itemNew, 'Add failed!')
+      }
+    }
+  } catch (err) {
+    console.log(err)
+    setLoading?.(false)
+  } finally {
+    setLoading?.(false)
   }
 }
