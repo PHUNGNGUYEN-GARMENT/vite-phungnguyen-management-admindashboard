@@ -1,14 +1,12 @@
 import { App as AntApp, Form, List } from 'antd'
-import React, { useEffect } from 'react'
-import {
-  RequestBodyType,
-  ResponseDataType,
-  defaultRequestBody
-} from '~/api/client'
+import React, { useEffect, useState } from 'react'
+import { v4 as uuidv4 } from 'uuid'
+import { RequestBodyType, defaultRequestBody } from '~/api/client'
+import GroupAPI from '~/api/services/GroupAPI'
 import useList, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
+import useAPICaller, { serviceActionUpdate } from '~/hooks/useAPICaller'
 import { Group } from '~/typing'
-import useGroup from '../hooks/useGroup'
 import { GroupTableDataType } from '../type'
 import GroupListItem from './GroupListItem'
 import ModalAddNewGroup from './ModalAddNewGroup'
@@ -16,28 +14,18 @@ import ModalAddNewGroup from './ModalAddNewGroup'
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 const GroupList: React.FC<Props> = ({ ...props }) => {
-  const {
-    metaData,
-    setPage,
-    loading,
-    dateCreation,
-    setDateCreation,
-    setLoading,
-    openModal,
-    setOpenModal,
-    handleAddNewItem,
-    getDataList,
-    handleDeleteItem,
-    handleUpdateItem,
-    handleSorted
-  } = useGroup()
+  const service = useAPICaller<Group>(GroupAPI)
   const {
     form,
     editingKey,
     setDeleteKey,
     dataSource,
-    setDataSource,
     isEditing,
+    loading,
+    setLoading,
+    dateCreation,
+    setDateCreation,
+    handleConvertDataSource,
     handleStartAddNew,
     handleStartEditing,
     handleStartDeleting,
@@ -45,52 +33,36 @@ const GroupList: React.FC<Props> = ({ ...props }) => {
     handleConfirmCancelEditing,
     handleConfirmCancelDeleting
   } = useList<GroupTableDataType>([])
+  const [openModal, setOpenModal] = useState<boolean>(false)
   const { message } = AntApp.useApp()
 
   useEffect(() => {
-    getDataList(defaultRequestBody, (meta) => {
+    service.getListItems(defaultRequestBody, setLoading, (meta) => {
       if (meta?.success) {
-        handleProgressDataSource(meta)
+        handleConvertDataSource(meta)
       }
     })
   }, [])
 
-  const handleProgressDataSource = (meta: ResponseDataType) => {
-    const groups = meta.data as Group[]
-    setDataSource(
-      groups.map((item: Group) => {
-        return {
-          ...item,
-          key: item.id
-        } as TableItemWithKey<GroupTableDataType>
-      })
-    )
-  }
-
-  const selfHandleSaveClick = async (
-    item: TableItemWithKey<GroupTableDataType>
-  ) => {
+  const selfHandleSaveClick = async (item: TableItemWithKey<GroupTableDataType>) => {
     const row = await form.validateFields()
-    handleStartSaveEditing(
-      item.key!,
+    serviceActionUpdate(
+      { field: 'id', key: item.id! },
+      GroupAPI,
       {
         name: row.name
-      },
-      (itemToSave) => {
-        handleUpdateItem(
-          item.id ?? Number(item.key),
-          {
-            ...itemToSave,
-            name: row.name
-          },
-          (success) => {
-            if (success) {
-              message.success('Created!')
-            } else {
-              message.success('Failed!')
-            }
-          }
-        )
+      } as Group,
+      setLoading,
+      (data, msg) => {
+        if (data?.success) {
+          message.success(msg)
+        } else {
+          message.error(msg)
+        }
+        handleStartSaveEditing(item.id!, {
+          ...item,
+          name: row.name
+        })
       }
     )
   }
@@ -101,32 +73,36 @@ const GroupList: React.FC<Props> = ({ ...props }) => {
         <BaseLayout
           onSearch={(value) => {
             if (value.length > 0) {
-              const body: RequestBodyType = {
-                ...defaultRequestBody,
-                search: {
-                  field: 'name',
-                  term: value
+              service.getListItems(
+                {
+                  ...defaultRequestBody,
+                  search: {
+                    field: 'name',
+                    term: value
+                  }
+                },
+                setLoading,
+                (meta) => {
+                  if (meta?.success) {
+                    handleConvertDataSource(meta)
+                  }
                 }
-              }
-              getDataList(body, (meta) => {
-                if (meta?.success) {
-                  handleProgressDataSource(meta)
-                }
-              })
+              )
             }
           }}
           onSortChange={(val) => {
-            handleSorted(val ? 'asc' : 'desc', (meta) => {
+            service.sortedListItems(val ? 'asc' : 'desc', setLoading, (meta) => {
               if (meta?.success) {
-                handleProgressDataSource(meta)
+                handleConvertDataSource(meta)
               }
             })
           }}
           onResetClick={() => {
             form.setFieldValue('search', '')
-            getDataList(defaultRequestBody, (meta) => {
+            service.getListItems(defaultRequestBody, setLoading, (meta) => {
               if (meta?.success) {
-                handleProgressDataSource(meta)
+                handleConvertDataSource(meta)
+                message.success('Reloaded!')
               }
             })
           }}
@@ -140,7 +116,7 @@ const GroupList: React.FC<Props> = ({ ...props }) => {
             size='large'
             pagination={{
               onChange: (_page) => {
-                setPage(_page)
+                service.setPage(_page)
                 const body: RequestBodyType = {
                   ...defaultRequestBody,
                   paginator: {
@@ -152,15 +128,15 @@ const GroupList: React.FC<Props> = ({ ...props }) => {
                     term: form.getFieldValue('search') ?? ''
                   }
                 }
-                getDataList(body, (meta) => {
+                service.getListItems(body, setLoading, (meta) => {
                   if (meta?.success) {
-                    handleProgressDataSource(meta)
+                    handleConvertDataSource(meta)
                   }
                 })
               },
-              current: metaData?.page,
+              current: service.metaData?.page,
               pageSize: 5,
-              total: metaData?.total
+              total: service.metaData?.total
             }}
             loading={loading}
             dataSource={dataSource}
@@ -176,15 +152,15 @@ const GroupList: React.FC<Props> = ({ ...props }) => {
                 onConfirmCancelEditing={() => handleConfirmCancelEditing()}
                 onConfirmCancelDeleting={() => handleConfirmCancelDeleting()}
                 onConfirmDelete={() => {
-                  setLoading(true)
-                  handleStartDeleting(item.key!, (productToDelete) => {
-                    handleDeleteItem(Number(productToDelete.key), (success) => {
-                      if (success) {
-                        message.success('Created!')
-                      } else {
-                        message.success('Failed!')
+                  service.updateItemByPk(item.id!, { status: 'deleted' }, setLoading, (meta) => {
+                    if (meta) {
+                      if (meta.success) {
+                        handleStartDeleting(item.id!, () => {})
+                        message.success('Deleted!')
                       }
-                    })
+                    } else {
+                      message.error('Failed!')
+                    }
                   })
                 }}
                 onStartDeleting={() => setDeleteKey(item.key!)}
@@ -198,14 +174,12 @@ const GroupList: React.FC<Props> = ({ ...props }) => {
           openModal={openModal}
           setOpenModal={setOpenModal}
           onAddNew={(addNewForm) => {
-            handleAddNewItem(addNewForm, (meta) => {
+            service.createNewItem(addNewForm, setLoading, (meta) => {
               if (meta?.success) {
-                const newItem = meta.data as Group
-                handleStartAddNew({
-                  key: newItem.id,
-                  ...addNewForm
-                })
+                const itemNew = meta.data as Group
+                handleStartAddNew({ key: String(uuidv4()), ...itemNew })
                 message.success('Created!')
+                setOpenModal(false)
               } else {
                 message.error('Failed!')
               }

@@ -1,14 +1,16 @@
 import { App as AntApp, Form, Table, Typography } from 'antd'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { RequestBodyType, ResponseDataType, defaultRequestBody } from '~/api/client'
+import { v4 as uuidv4 } from 'uuid'
+import { RequestBodyType, defaultRequestBody } from '~/api/client'
+import GroupAPI from '~/api/services/GroupAPI'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import ItemAction from '~/components/ui/Table/ItemAction'
+import useAPICaller, { serviceActionUpdate } from '~/hooks/useAPICaller'
 import { RootState } from '~/store/store'
 import { Group } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
-import useGroup from '../hooks/useGroup'
 import { GroupTableDataType } from '../type'
 import EditableCell, { EditableTableProps } from './EditableCell'
 import ModalAddNewGroup from './ModalAddNewGroup'
@@ -18,96 +20,58 @@ type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 const GroupTable: React.FC<Props> = ({ ...props }) => {
-  const {
-    metaData,
-    loading,
-    setPage,
-    dateCreation,
-    setDateCreation,
-    openModal,
-    setOpenModal,
-    handleAddNewItem,
-    getDataList,
-    handleUpdateItem,
-    handleDeleteItem,
-    handleSorted
-  } = useGroup()
+  const service = useAPICaller<Group>(GroupAPI)
   const {
     form,
+    loading,
+    isEditing,
+    setLoading,
+    dataSource,
     editingKey,
     setDeleteKey,
-    dataSource,
-    setDataSource,
-    isEditing,
+    dateCreation,
+    setDateCreation,
     handleStartAddNew,
     handleStartEditing,
     handleStartDeleting,
     handleStartSaveEditing,
+    handleConvertDataSource,
     handleConfirmCancelEditing,
     handleConfirmCancelDeleting
   } = useTable<GroupTableDataType>([])
+  const [openModal, setOpenModal] = useState<boolean>(false)
   const user = useSelector((state: RootState) => state.user)
   const { message } = AntApp.useApp()
 
   useEffect(() => {
-    getDataList(defaultRequestBody, (meta) => {
+    service.getListItems(defaultRequestBody, setLoading, (meta) => {
       if (meta?.success) {
-        handleProgressDataSource(meta)
+        handleConvertDataSource(meta)
       }
     })
   }, [])
 
-  const handleProgressDataSource = (meta: ResponseDataType) => {
-    const groups = meta.data as Group[]
-    setDataSource(
-      groups.map((item: Group) => {
-        return {
-          ...item,
-          key: item.id
-        } as GroupTableDataType
-      })
-    )
-  }
-
-  const selfHandleSaveClick = async (record: TableItemWithKey<GroupTableDataType>) => {
+  const selfHandleSaveClick = async (item: TableItemWithKey<GroupTableDataType>) => {
     const row = await form.validateFields()
-    handleStartSaveEditing(
-      record.key!,
+    serviceActionUpdate(
+      { field: 'id', key: item.id! },
+      GroupAPI,
       {
-        ...row,
         name: row.name
-      },
-      (status) => {
-        if (status) {
-          handleUpdateItem(
-            record.id ?? Number(record.key!),
-            {
-              ...row,
-              ame: row.name
-            },
-            (success) => {
-              if (success) {
-                message.success('Updated!')
-              } else {
-                message.error('Failed!')
-              }
-            }
-          )
+      } as Group,
+      setLoading,
+      (data, msg) => {
+        if (data?.success) {
+          message.success(msg)
+        } else {
+          message.error(msg)
         }
+        handleStartSaveEditing(item.id!, {
+          ...item,
+          name: row.name
+        })
       }
     )
-  }
-
-  const selfHandleConfirmDelete = (item: TableItemWithKey<GroupTableDataType>) => {
-    handleStartDeleting(item.key!, (deleteKey) => {
-      handleDeleteItem(Number(deleteKey), (success) => {
-        if (success) {
-          message.success('Deleted!')
-        } else {
-          message.error('Failed!')
-        }
-      })
-    })
   }
 
   const actionsCols: (ColumnTypes[number] & {
@@ -118,18 +82,29 @@ const GroupTable: React.FC<Props> = ({ ...props }) => {
       title: 'Operation',
       width: '15%',
       dataIndex: 'operation',
-      render: (_, record: GroupTableDataType) => {
+      render: (_, item: TableItemWithKey<GroupTableDataType>) => {
         return (
           <>
             <ItemAction
-              isEditing={isEditing(record.key!)}
+              isEditing={isEditing(item.key!)}
               editingKey={editingKey}
-              onSaveClick={() => selfHandleSaveClick(record)}
-              onClickStartEditing={() => handleStartEditing(record.key!)}
+              onSaveClick={() => selfHandleSaveClick(item)}
+              onClickStartEditing={() => handleStartEditing(item.key!)}
               onConfirmCancelEditing={() => handleConfirmCancelEditing()}
               onConfirmCancelDeleting={() => handleConfirmCancelDeleting()}
-              onConfirmDelete={() => selfHandleConfirmDelete(record)}
-              onStartDeleting={() => setDeleteKey(record.key!)}
+              onConfirmDelete={() => {
+                service.updateItemByPk(item.id!, { status: 'deleted' }, setLoading, (meta) => {
+                  if (meta) {
+                    if (meta.success) {
+                      handleStartDeleting(item.id!, () => {})
+                      message.success('Deleted!')
+                    }
+                  } else {
+                    message.error('Failed!')
+                  }
+                })
+              }}
+              onStartDeleting={() => setDeleteKey(item.key!)}
             />
           </>
         )
@@ -221,7 +196,7 @@ const GroupTable: React.FC<Props> = ({ ...props }) => {
 
   const onCellColumnType = (dataIndex: string): string => {
     switch (dataIndex) {
-      case 'nameColor':
+      case 'name':
         return 'text'
       default:
         return 'colorpicker'
@@ -234,32 +209,35 @@ const GroupTable: React.FC<Props> = ({ ...props }) => {
         <BaseLayout
           onSearch={(value) => {
             if (value.length > 0) {
-              const body: RequestBodyType = {
-                ...defaultRequestBody,
-                search: {
-                  field: 'name',
-                  term: value
+              service.getListItems(
+                {
+                  ...defaultRequestBody,
+                  search: {
+                    field: 'name',
+                    term: value
+                  }
+                },
+                setLoading,
+                (meta) => {
+                  if (meta?.success) {
+                    handleConvertDataSource(meta)
+                  }
                 }
-              }
-              getDataList(body, (meta) => {
-                if (meta?.success) {
-                  handleProgressDataSource(meta)
-                }
-              })
+              )
             }
           }}
           onSortChange={(val) => {
-            handleSorted(val ? 'asc' : 'desc', (meta) => {
+            service.sortedListItems(val ? 'asc' : 'desc', setLoading, (meta) => {
               if (meta?.success) {
-                handleProgressDataSource(meta)
+                handleConvertDataSource(meta)
               }
             })
           }}
           onResetClick={() => {
             form.setFieldValue('search', '')
-            getDataList(defaultRequestBody, (meta) => {
+            service.getListItems(defaultRequestBody, setLoading, (meta) => {
               if (meta?.success) {
-                handleProgressDataSource(meta)
+                handleConvertDataSource(meta)
                 message.success('Reloaded!')
               }
             })
@@ -281,7 +259,7 @@ const GroupTable: React.FC<Props> = ({ ...props }) => {
             rowClassName='editable-row'
             pagination={{
               onChange: (_page) => {
-                setPage(_page)
+                service.setPage(_page)
                 const body: RequestBodyType = {
                   ...defaultRequestBody,
                   paginator: {
@@ -293,15 +271,15 @@ const GroupTable: React.FC<Props> = ({ ...props }) => {
                     term: form.getFieldValue('search') ?? ''
                   }
                 }
-                getDataList(body, (meta) => {
+                service.getListItems(body, setLoading, (meta) => {
                   if (meta?.success) {
-                    handleProgressDataSource(meta)
+                    handleConvertDataSource(meta)
                   }
                 })
               },
-              current: metaData?.page,
+              current: service.metaData?.page,
               pageSize: 5,
-              total: metaData?.total
+              total: service.metaData?.total
             }}
           />
         </BaseLayout>
@@ -311,11 +289,12 @@ const GroupTable: React.FC<Props> = ({ ...props }) => {
           openModal={openModal}
           setOpenModal={setOpenModal}
           onAddNew={(addNewForm) => {
-            console.log(addNewForm)
-            handleStartAddNew({ key: dataSource.length + 1, ...addNewForm })
-            handleAddNewItem(addNewForm, (success) => {
-              if (success) {
+            service.createNewItem(addNewForm, setLoading, (meta) => {
+              if (meta?.success) {
+                const itemNew = meta.data as Group
+                handleStartAddNew({ key: String(uuidv4()), ...itemNew })
                 message.success('Created!')
+                setOpenModal(false)
               } else {
                 message.error('Failed!')
               }
