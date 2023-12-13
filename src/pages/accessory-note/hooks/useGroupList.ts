@@ -1,10 +1,10 @@
 import { Form } from 'antd'
 import { useState } from 'react'
-import { Print } from '~/typing'
+import { Group } from '~/typing'
 
-export default function usePrintList() {
+export default function useColorList() {
   const [form] = Form.useForm()
-  const [dataSource, setDataSource] = useState<Print[]>([])
+  const [dataSource, setDataSource] = useState<Group[]>([])
   const [editingKey, setEditingKey] = useState<React.Key>('')
   const [deleteKey, setDeleteKey] = useState<React.Key>('')
   const isEditing = (key: React.Key) => key === editingKey
@@ -20,7 +20,7 @@ export default function usePrintList() {
 
   const handleStartDelete = (
     key: React.Key,
-    onSuccess: (data: Print) => void
+    onSuccess: (data: Group) => void
   ) => {
     const itemFound = dataSource.find((item) => item.id === key)
     if (itemFound) {
@@ -44,10 +44,10 @@ export default function usePrintList() {
 
   const handleStartSaveEditing = async (
     key: React.Key,
-    onSuccess: (data: Print) => void
+    onSuccess: (data: Group) => void
   ) => {
     try {
-      const row: Print = await form.validateFields()
+      const row: Group = await form.validateFields()
       const newData = [...dataSource]
       const index = newData.findIndex((item) => key === item.id)
       if (index > -1) {
@@ -72,7 +72,7 @@ export default function usePrintList() {
     }
   }
 
-  const handleAddNewItemData = (item: Print) => {
+  const handleAddNewItemData = (item: Group) => {
     console.log('Handle AddNewItem, ', item)
   }
 

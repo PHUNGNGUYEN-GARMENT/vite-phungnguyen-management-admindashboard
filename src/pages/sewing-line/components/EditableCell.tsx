@@ -30,7 +30,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
 }) => {
   const inputNode = ((): React.ReactNode => {
     switch (dataIndex) {
-      case dataIndex:
+      case 'sewingLineName':
         return (
           <Form.Item
             name={dataIndex}
@@ -41,7 +41,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
                 message: `Please Input ${title}!`
               }
             ]}
-            initialValue={record ? record.sewingLineName : ''}
+            initialValue={record.sewingLineName}
           >
             <Input className='w-full' />
           </Form.Item>

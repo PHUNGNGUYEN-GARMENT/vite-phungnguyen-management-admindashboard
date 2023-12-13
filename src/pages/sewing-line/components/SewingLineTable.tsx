@@ -1,10 +1,9 @@
 import { App as AntApp, Form, Table, Typography } from 'antd'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { v4 } from 'uuid'
 import { RequestBodyType, defaultRequestBody } from '~/api/client'
 import SewingLineAPI from '~/api/services/SewingLineAPI'
-import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
+import useTable, { TableCellProps, TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableCell, { EditableTableProps } from '~/components/ui/Table/EditableCell'
 import ItemAction from '~/components/ui/Table/ItemAction'
@@ -74,10 +73,7 @@ const SewingLineTable: React.FC<Props> = ({ ...props }) => {
     )
   }
 
-  const actionsCols: (ColumnTypes[number] & {
-    editable?: boolean
-    dataIndex: string
-  })[] = [
+  const actionsCols: (ColumnTypes[number] & TableCellProps)[] = [
     {
       title: 'Operation',
       width: '15%',
@@ -112,10 +108,7 @@ const SewingLineTable: React.FC<Props> = ({ ...props }) => {
     }
   ]
 
-  const commonCols: (ColumnTypes[number] & {
-    editable?: boolean
-    dataIndex: string
-  })[] = [
+  const commonCols: (ColumnTypes[number] & TableCellProps)[] = [
     {
       title: 'Chuyền',
       dataIndex: 'sewingLineName',
@@ -131,10 +124,7 @@ const SewingLineTable: React.FC<Props> = ({ ...props }) => {
     }
   ]
 
-  const dateCreationColumns: (ColumnTypes[number] & {
-    editable?: boolean
-    dataIndex: string
-  })[] = [
+  const dateCreationColumns: (ColumnTypes[number] & TableCellProps)[] = [
     {
       title: 'Created date',
       dataIndex: 'createdAt',
@@ -161,15 +151,9 @@ const SewingLineTable: React.FC<Props> = ({ ...props }) => {
     }
   ]
 
-  const adminColumns: (ColumnTypes[number] & {
-    editable?: boolean
-    dataIndex: string
-  })[] = [...commonCols, ...dateCreationColumns, ...actionsCols]
+  const adminColumns: (ColumnTypes[number] & TableCellProps)[] = [...commonCols, ...dateCreationColumns, ...actionsCols]
 
-  const staffColumns: (ColumnTypes[number] & {
-    editable?: boolean
-    dataIndex: string
-  })[] = [...commonCols]
+  const staffColumns: (ColumnTypes[number] & TableCellProps)[] = [...commonCols]
 
   const mergedColumns = (
     cols: (ColumnTypes[number] & {
@@ -292,7 +276,7 @@ const SewingLineTable: React.FC<Props> = ({ ...props }) => {
             service.createNewItem(addNewForm, setLoading, (meta) => {
               if (meta?.success) {
                 const itemNew = meta.data as SewingLine
-                handleStartAddNew({ key: String(v4()), ...itemNew })
+                handleStartAddNew({ key: Number(itemNew.id), ...itemNew })
                 message.success('Created!')
                 setOpenModal(false)
               } else {

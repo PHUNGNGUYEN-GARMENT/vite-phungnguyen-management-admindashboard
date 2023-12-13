@@ -5,14 +5,12 @@ import { errorFormatter } from '~/utils/promise-formatter'
 const NAMESPACE = 'accessory-notes'
 
 export default {
-  createNewItem: async (
-    item: AccessoryNote
-  ): Promise<ResponseDataType | undefined> => {
+  createNewItem: async (item: AccessoryNote): Promise<ResponseDataType | undefined> => {
     return await client
       .post(`${NAMESPACE}`, {
         title: item.title,
         summary: item.summary,
-        status: item.status
+        status: item.status ?? 'active'
       })
       .then((res) => {
         if (res.data) {
@@ -37,10 +35,7 @@ export default {
         errorFormatter(error)
       })
   },
-  getItemBy: async (query: {
-    field: string
-    key: React.Key
-  }): Promise<ResponseDataType | undefined> => {
+  getItemBy: async (query: { field: string; key: React.Key }): Promise<ResponseDataType | undefined> => {
     return client
       .get(`${NAMESPACE}/${query.field}/${query.key}`)
       .then((res) => {
@@ -53,9 +48,7 @@ export default {
         errorFormatter(error)
       })
   },
-  getItems: async (
-    bodyRequest: RequestBodyType
-  ): Promise<ResponseDataType | undefined> => {
+  getItems: async (bodyRequest: RequestBodyType): Promise<ResponseDataType | undefined> => {
     return await client
       .post(`${NAMESPACE}/find`, {
         ...bodyRequest
@@ -70,10 +63,7 @@ export default {
         errorFormatter(error)
       })
   },
-  updateItemByPk: async (
-    id: number,
-    itemToUpdate: AccessoryNote
-  ): Promise<ResponseDataType | undefined> => {
+  updateItemByPk: async (id: number, itemToUpdate: AccessoryNote): Promise<ResponseDataType | undefined> => {
     return client
       .put(`${NAMESPACE}/${id}`, {
         title: itemToUpdate.title,

@@ -2,7 +2,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { Form, Input, Table } from 'antd'
 import { memo } from 'react'
-import { GroupTableDataType } from '~/pages/group/type'
+import { AccessoryNoteTableDataType } from '../type'
 
 type InputType = 'number' | 'text'
 
@@ -11,7 +11,7 @@ interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
   dataIndex: string
   title: string | undefined
   inputType: InputType
-  record: GroupTableDataType
+  record: AccessoryNoteTableDataType
   index: number
   children: React.ReactNode
 }
@@ -29,11 +29,11 @@ const EditableCell: React.FC<EditableCellProps> = ({
 }) => {
   const inputNode = ((): React.ReactNode => {
     switch (dataIndex) {
-      case 'name':
+      case 'title':
         return (
           <Form.Item
-            name='name'
-            initialValue={record.name}
+            name='title'
+            initialValue={record.title}
             style={{ margin: 0 }}
             rules={[
               {
@@ -45,7 +45,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
             <Input className='w-full' />
           </Form.Item>
         )
-      default: // Default là trạng thái mặc định
+      default:
         return <></>
     }
   })()

@@ -9,7 +9,7 @@ export default {
     return await client
       .post(`${NAMESPACE}`, {
         name: item.name,
-        status: item.status
+        status: item.status ?? 'active'
       })
       .then((res) => {
         if (res.data) {

@@ -1,10 +1,9 @@
 import { App as AntApp, Form, Table, Typography } from 'antd'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { v4 as uuidv4 } from 'uuid'
 import { RequestBodyType, defaultRequestBody } from '~/api/client'
 import GroupAPI from '~/api/services/GroupAPI'
-import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
+import useTable, { TableCellProps, TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import ItemAction from '~/components/ui/Table/ItemAction'
 import useAPICaller, { serviceActionUpdate } from '~/hooks/useAPICaller'
@@ -74,10 +73,7 @@ const GroupTable: React.FC<Props> = ({ ...props }) => {
     )
   }
 
-  const actionsCols: (ColumnTypes[number] & {
-    editable?: boolean
-    dataIndex: string
-  })[] = [
+  const actionsCols: (ColumnTypes[number] & TableCellProps)[] = [
     {
       title: 'Operation',
       width: '15%',
@@ -112,10 +108,7 @@ const GroupTable: React.FC<Props> = ({ ...props }) => {
     }
   ]
 
-  const commonCols: (ColumnTypes[number] & {
-    editable?: boolean
-    dataIndex: string
-  })[] = [
+  const commonCols: (ColumnTypes[number] & TableCellProps)[] = [
     {
       title: 'Name',
       dataIndex: 'name',
@@ -131,10 +124,7 @@ const GroupTable: React.FC<Props> = ({ ...props }) => {
     }
   ]
 
-  const dateCreationColumns: (ColumnTypes[number] & {
-    editable?: boolean
-    dataIndex: string
-  })[] = [
+  const dateCreationColumns: (ColumnTypes[number] & TableCellProps)[] = [
     {
       title: 'Created date',
       dataIndex: 'createdAt',
@@ -161,15 +151,11 @@ const GroupTable: React.FC<Props> = ({ ...props }) => {
     }
   ]
 
-  const adminColumns: (ColumnTypes[number] & {
-    editable?: boolean
-    dataIndex: string
-  })[] = dateCreation ? [...commonCols, ...dateCreationColumns, ...actionsCols] : [...commonCols, ...actionsCols]
+  const adminColumns: (ColumnTypes[number] & TableCellProps)[] = dateCreation
+    ? [...commonCols, ...dateCreationColumns, ...actionsCols]
+    : [...commonCols, ...actionsCols]
 
-  const staffColumns: (ColumnTypes[number] & {
-    editable?: boolean
-    dataIndex: string
-  })[] = [...commonCols]
+  const staffColumns: (ColumnTypes[number] & TableCellProps)[] = [...commonCols]
 
   const mergedColumns = (
     cols: (ColumnTypes[number] & {
@@ -292,7 +278,7 @@ const GroupTable: React.FC<Props> = ({ ...props }) => {
             service.createNewItem(addNewForm, setLoading, (meta) => {
               if (meta?.success) {
                 const itemNew = meta.data as Group
-                handleStartAddNew({ key: String(uuidv4()), ...itemNew })
+                handleStartAddNew({ key: Number(itemNew.id), ...itemNew })
                 message.success('Created!')
                 setOpenModal(false)
               } else {

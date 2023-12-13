@@ -1,7 +1,6 @@
 import { App as AntApp, Form, List } from 'antd'
 import type { Color as AntColor } from 'antd/es/color-picker'
 import React, { useEffect, useState } from 'react'
-import { v4 as uuidv4 } from 'uuid'
 import { RequestBodyType, defaultRequestBody } from '~/api/client'
 import ColorAPI from '~/api/services/ColorAPI'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
@@ -182,8 +181,8 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
           onAddNew={(addNewForm) => {
             service.createNewItem(addNewForm, setLoading, (meta) => {
               if (meta?.success) {
-                const colorNew = meta.data as Color
-                handleStartAddNew({ key: String(uuidv4()), ...colorNew })
+                const itemNew = meta.data as Color
+                handleStartAddNew({ key: Number(itemNew.id), ...itemNew })
                 message.success('Created!')
                 setOpenModal(false)
               } else {

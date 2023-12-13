@@ -1,14 +1,4 @@
-import {
-  App as AntApp,
-  Button,
-  Flex,
-  Form,
-  Input,
-  Popconfirm,
-  Switch,
-  Table,
-  Typography
-} from 'antd'
+import { App as AntApp, Button, Flex, Form, Input, Popconfirm, Switch, Table, Typography } from 'antd'
 import { Plus } from 'lucide-react'
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -90,10 +80,7 @@ const ImportationTable: React.FC<Props> = ({ ...props }) => {
     })
   }, [])
 
-  const actionsCols: (ColumnTypes[number] & {
-    editable?: boolean
-    dataIndex: string
-  })[] = [
+  const actionsCols: (ColumnTypes[number] & TableCellProps)[] = [
     {
       title: 'Operation',
       width: '15%',
@@ -104,16 +91,13 @@ const ImportationTable: React.FC<Props> = ({ ...props }) => {
             <Button
               type='primary'
               onClick={() =>
-                handleStartSaveEditingRow(
-                  record.id!,
-                  (row: SewingLineDelivery) => {
-                    handleSaveUpdateItem(record.id!, row, (meta) => {
-                      if (meta?.success) {
-                        message.success('Updated!')
-                      }
-                    })
-                  }
-                )
+                handleStartSaveEditingRow(record.id!, (row: SewingLineDelivery) => {
+                  handleSaveUpdateItem(record.id!, row, (meta) => {
+                    if (meta?.success) {
+                      message.success('Updated!')
+                    }
+                  })
+                })
               }
             >
               Save
@@ -152,11 +136,7 @@ const ImportationTable: React.FC<Props> = ({ ...props }) => {
                   })
                 }
               >
-                <Button
-                  disabled={editingKey !== ''}
-                  type='dashed'
-                  onClick={() => handleStartDeleteRow(record.key!)}
-                >
+                <Button disabled={editingKey !== ''} type='dashed' onClick={() => handleStartDeleteRow(record.key!)}>
                   Delete
                 </Button>
               </Popconfirm>
@@ -167,10 +147,7 @@ const ImportationTable: React.FC<Props> = ({ ...props }) => {
     }
   ]
 
-  const commonCols: (ColumnTypes[number] & {
-    editable?: boolean
-    dataIndex: string
-  })[] = [
+  const commonCols: (ColumnTypes[number] & TableCellProps)[] = [
     {
       title: 'Group Name',
       dataIndex: 'name',
@@ -186,10 +163,7 @@ const ImportationTable: React.FC<Props> = ({ ...props }) => {
     }
   ]
 
-  const dateCreationColumns: (ColumnTypes[number] & {
-    editable?: boolean
-    dataIndex: string
-  })[] = [
+  const dateCreationColumns: (ColumnTypes[number] & TableCellProps)[] = [
     {
       title: 'Created date',
       dataIndex: 'createdAt',
@@ -210,17 +184,11 @@ const ImportationTable: React.FC<Props> = ({ ...props }) => {
     }
   ]
 
-  const adminColumns: (ColumnTypes[number] & {
-    editable?: boolean
-    dataIndex: string
-  })[] = dateCreation
+  const adminColumns: (ColumnTypes[number] & TableCellProps)[] = dateCreation
     ? [...commonCols, ...dateCreationColumns, ...actionsCols]
     : [...commonCols, ...actionsCols]
 
-  const staffColumns: (ColumnTypes[number] & {
-    editable?: boolean
-    dataIndex: string
-  })[] = [...commonCols]
+  const staffColumns: (ColumnTypes[number] & TableCellProps)[] = [...commonCols]
 
   const mergedColumns = (
     cols: (ColumnTypes[number] & {
@@ -258,11 +226,7 @@ const ImportationTable: React.FC<Props> = ({ ...props }) => {
     <>
       <Form {...props} form={form} component={false}>
         <Flex vertical gap={20}>
-          <Flex
-            justify='space-between'
-            align='center'
-            className='rounded-sm bg-white px-5 py-3'
-          >
+          <Flex justify='space-between' align='center' className='rounded-sm bg-white px-5 py-3'>
             <Flex gap={10} className='m-0 w-full' align='center'>
               <Switch
                 checkedChildren='Admin'

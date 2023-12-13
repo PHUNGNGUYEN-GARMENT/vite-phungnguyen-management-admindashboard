@@ -22,7 +22,7 @@ const GroupPage = lazy(() => import('~/pages/group/GroupPage'))
 const ImportationPage = lazy(
   () => import('~/pages/importation/ImportationPage')
 )
-const NotePage = lazy(() => import('~/pages/note/Note'))
+const NotePage = lazy(() => import('~/pages/accessory-note/AccessoryNotePage'))
 const AccessoryPage = lazy(() => import('~/pages/accessory/AccessoryPage'))
 const PrintPage = lazy(() => import('~/pages/print/PrintPage'))
 const ProductPage = lazy(() => import('~/pages/product/ProductPage'))

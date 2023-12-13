@@ -1,6 +1,5 @@
 import { App as AntApp, Form, List } from 'antd'
 import React, { useEffect, useState } from 'react'
-import { v4 as uuidv4 } from 'uuid'
 import { RequestBodyType, defaultRequestBody } from '~/api/client'
 import GroupAPI from '~/api/services/GroupAPI'
 import useList, { TableItemWithKey } from '~/components/hooks/useTable'
@@ -43,6 +42,12 @@ const GroupList: React.FC<Props> = ({ ...props }) => {
       }
     })
   }, [])
+
+  useEffect(() => {
+    if (dataSource.length > 0) {
+      console.log(dataSource)
+    }
+  }, [dataSource])
 
   const selfHandleSaveClick = async (item: TableItemWithKey<GroupTableDataType>) => {
     const row = await form.validateFields()
@@ -177,7 +182,7 @@ const GroupList: React.FC<Props> = ({ ...props }) => {
             service.createNewItem(addNewForm, setLoading, (meta) => {
               if (meta?.success) {
                 const itemNew = meta.data as Group
-                handleStartAddNew({ key: String(uuidv4()), ...itemNew })
+                handleStartAddNew({ key: Number(itemNew.id), ...itemNew })
                 message.success('Created!')
                 setOpenModal(false)
               } else {

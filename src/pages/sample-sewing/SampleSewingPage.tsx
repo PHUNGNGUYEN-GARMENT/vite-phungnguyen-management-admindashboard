@@ -21,14 +21,7 @@ export interface SampleSewingTableDataType {
 
 // eslint-disable-next-line react-refresh/only-export-components
 const SampleSewingPage = () => {
-  const {
-    product,
-    setProduct,
-    dateSewingNPL,
-    setDateSewingNPL,
-    openModal,
-    setOpenModal
-  } = useSampleSewing()
+  const { product, setProduct, dateSewingNPL, setDateSewingNPL, openModal, setOpenModal } = useSampleSewing()
   const {
     form,
     loading,
@@ -46,10 +39,7 @@ const SampleSewingPage = () => {
 
   type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>
 
-  const columns: (ColumnTypes[number] & {
-    editable?: boolean
-    dataIndex: string
-  })[] = [
+  const columns: (ColumnTypes[number] & TableCellProps)[] = [
     {
       title: 'ID',
       dataIndex: 'sampleSewingID',
@@ -68,11 +58,7 @@ const SampleSewingPage = () => {
       width: '15%',
       editable: true,
       render(value) {
-        return (
-          <Typography.Text className='text-sm'>
-            {firstLetterUppercase(DayJS(value).toNow())}
-          </Typography.Text>
-        )
+        return <Typography.Text className='text-sm'>{firstLetterUppercase(DayJS(value).toNow())}</Typography.Text>
       }
     },
     {
@@ -81,11 +67,7 @@ const SampleSewingPage = () => {
       width: '15%',
       editable: true,
       render(value) {
-        return (
-          <Typography.Text className='text-sm'>
-            {firstLetterUppercase(DayJS(value).toNow())}
-          </Typography.Text>
-        )
+        return <Typography.Text className='text-sm'>{firstLetterUppercase(DayJS(value).toNow())}</Typography.Text>
       }
     },
     {
@@ -97,13 +79,8 @@ const SampleSewingPage = () => {
         // const deletable = isDelete(record as PrintInTableDataType)
         return editable ? (
           <Flex gap={30}>
-            <Typography.Link onClick={() => handleSaveEditing(record.key)}>
-              Save
-            </Typography.Link>
-            <Popconfirm
-              title={`Sure to cancel?`}
-              onConfirm={handleCancelEditing}
-            >
+            <Typography.Link onClick={() => handleSaveEditing(record.key)}>Save</Typography.Link>
+            <Popconfirm title={`Sure to cancel?`} onConfirm={handleCancelEditing}>
               <a>Cancel</a>
             </Popconfirm>
           </Flex>

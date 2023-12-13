@@ -1,23 +1,24 @@
 /* eslint-disable react-refresh/only-export-components */
 import { Flex, Form, Input, Modal, Typography } from 'antd'
 import React, { memo } from 'react'
-import { Print } from '~/typing'
+import AddNewTitle from '~/components/ui/AddNewTitle'
+import { AccessoryNote } from '~/typing'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
   openModal: boolean
   setOpenModal: (enable: boolean) => void
-  onAddNew: (itemToAddNew: Print) => void
+  onAddNew: (itemToAddNew: AccessoryNote) => void
 }
 
-const ModalAddNewPrint: React.FC<Props> = ({ openModal, setOpenModal, onAddNew, ...props }) => {
+const ModalAddNewAccessoryNote: React.FC<Props> = ({ openModal, setOpenModal, onAddNew, ...props }) => {
   const [form] = Form.useForm()
 
   async function handleOk() {
     const row = await form.validateFields()
     onAddNew({
-      name: row.name
+      title: row.title,
+      summary: row.summary
     })
-    setOpenModal(false)
   }
 
   function handleCancel() {
@@ -26,18 +27,17 @@ const ModalAddNewPrint: React.FC<Props> = ({ openModal, setOpenModal, onAddNew, 
 
   return (
     <Modal
-      {...props}
-      title='Thêm mới nơi in'
+      title={<AddNewTitle title='Add new' />}
       open={openModal}
       onOk={handleOk}
       onCancel={handleCancel}
       centered
       width='auto'
     >
-      <Form form={form}>
-        <Flex vertical gap={10} className='w-full'>
-          <Flex align='center' gap={5} className='w-auto'>
-            <Typography.Text className='w-12 flex-shrink-0'>Nơi in:</Typography.Text>
+      <Form form={form} {...props}>
+        <Flex vertical gap={10}>
+          <Flex align='center' gap={5}>
+            <Typography.Text className='w-24 flex-shrink-0'>Ghi chú:</Typography.Text>
             <Form.Item
               rules={[
                 {
@@ -45,10 +45,10 @@ const ModalAddNewPrint: React.FC<Props> = ({ openModal, setOpenModal, onAddNew, 
                   message: `Please input this field!`
                 }
               ]}
-              name='name'
+              name='title'
               className='m-0'
             >
-              <Input className='w-52' allowClear placeholder='Tên' />
+              <Input allowClear placeholder='Placeholder' />
             </Form.Item>
           </Flex>
         </Flex>
@@ -57,4 +57,4 @@ const ModalAddNewPrint: React.FC<Props> = ({ openModal, setOpenModal, onAddNew, 
   )
 }
 
-export default memo(ModalAddNewPrint)
+export default memo(ModalAddNewAccessoryNote)

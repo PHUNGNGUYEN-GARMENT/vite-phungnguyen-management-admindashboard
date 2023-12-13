@@ -1,37 +1,37 @@
 import { App as AntApp, Form, List } from 'antd'
 import React, { useEffect, useState } from 'react'
 import { RequestBodyType, defaultRequestBody } from '~/api/client'
-import SewingLineAPI from '~/api/services/SewingLineAPI'
-import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
+import AccessoryNoteAPI from '~/api/services/AccessoryNoteAPI'
+import useList, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import useAPICaller, { serviceActionUpdate } from '~/hooks/useAPICaller'
-import { SewingLine } from '~/typing'
-import { SewingLineTableDataType } from '../type'
-import ModalAddNewSewingLine from './ModalAddNewSewingLine'
-import SewingLineListItem from './SewingLineListItem'
+import { AccessoryNote, Group } from '~/typing'
+import { AccessoryNoteTableDataType } from '../type'
+import AccessoryNoteListItem from './AccessoryNoteListItem'
+import ModalAddNewGroup from './ModalAddNewAccessoryNote'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
-const SewingLineList: React.FC<Props> = ({ ...props }) => {
-  const service = useAPICaller<SewingLine>(SewingLineAPI)
+const AccessoryNoteList: React.FC<Props> = ({ ...props }) => {
+  const service = useAPICaller<AccessoryNote>(AccessoryNoteAPI)
   const {
     form,
-    loading,
-    isEditing,
-    setLoading,
-    dataSource,
     editingKey,
     setDeleteKey,
+    dataSource,
+    isEditing,
+    loading,
+    setLoading,
     dateCreation,
     setDateCreation,
+    handleConvertDataSource,
     handleStartAddNew,
     handleStartEditing,
     handleStartDeleting,
     handleStartSaveEditing,
-    handleConvertDataSource,
     handleConfirmCancelEditing,
     handleConfirmCancelDeleting
-  } = useTable<SewingLineTableDataType>([])
+  } = useList<AccessoryNoteTableDataType>([])
   const [openModal, setOpenModal] = useState<boolean>(false)
   const { message } = AntApp.useApp()
 
@@ -43,14 +43,21 @@ const SewingLineList: React.FC<Props> = ({ ...props }) => {
     })
   }, [])
 
-  const selfHandleSaveClick = async (item: TableItemWithKey<SewingLineTableDataType>) => {
+  useEffect(() => {
+    if (dataSource.length > 0) {
+      console.log(dataSource)
+    }
+  }, [dataSource])
+
+  const selfHandleSaveClick = async (item: TableItemWithKey<AccessoryNoteTableDataType>) => {
     const row = await form.validateFields()
     serviceActionUpdate(
       { field: 'id', key: item.id! },
-      SewingLineAPI,
+      AccessoryNoteAPI,
       {
-        sewingLineName: row.sewingLineName
-      } as SewingLine,
+        title: row.title,
+        summary: row.summary
+      } as AccessoryNote,
       setLoading,
       (data, msg) => {
         if (data?.success) {
@@ -60,7 +67,8 @@ const SewingLineList: React.FC<Props> = ({ ...props }) => {
         }
         handleStartSaveEditing(item.id!, {
           ...item,
-          sewingLineName: row.sewingLineName
+          title: row.title,
+          summary: row.summary
         })
       }
     )
@@ -70,14 +78,13 @@ const SewingLineList: React.FC<Props> = ({ ...props }) => {
     <>
       <Form form={form}>
         <BaseLayout
-          onDateCreationChange={(enable) => setDateCreation(enable)}
           onSearch={(value) => {
             if (value.length > 0) {
               service.getListItems(
                 {
                   ...defaultRequestBody,
                   search: {
-                    field: 'sewingLineName',
+                    field: 'title',
                     term: value
                   }
                 },
@@ -102,9 +109,12 @@ const SewingLineList: React.FC<Props> = ({ ...props }) => {
             service.getListItems(defaultRequestBody, setLoading, (meta) => {
               if (meta?.success) {
                 handleConvertDataSource(meta)
+                message.success('Reloaded!')
               }
             })
           }}
+          dateCreation={dateCreation}
+          onDateCreationChange={setDateCreation}
           onAddNewClick={() => setOpenModal(true)}
         >
           <List
@@ -121,7 +131,7 @@ const SewingLineList: React.FC<Props> = ({ ...props }) => {
                     pageSize: 5
                   },
                   search: {
-                    field: 'sewingLineName',
+                    field: 'title',
                     term: form.getFieldValue('search') ?? ''
                   }
                 }
@@ -138,13 +148,13 @@ const SewingLineList: React.FC<Props> = ({ ...props }) => {
             loading={loading}
             dataSource={dataSource}
             renderItem={(item) => (
-              <SewingLineListItem
+              <AccessoryNoteListItem
                 data={item}
                 key={item.key}
                 editingKey={editingKey}
-                dateCreation={dateCreation}
                 isEditing={isEditing(item.key!)}
                 onSaveClick={() => selfHandleSaveClick(item)}
+                dateCreation={dateCreation}
                 onClickStartEditing={() => handleStartEditing(item.key!)}
                 onConfirmCancelEditing={() => handleConfirmCancelEditing()}
                 onConfirmCancelDeleting={() => handleConfirmCancelDeleting()}
@@ -167,13 +177,13 @@ const SewingLineList: React.FC<Props> = ({ ...props }) => {
         </BaseLayout>
       </Form>
       {openModal && (
-        <ModalAddNewSewingLine
+        <ModalAddNewGroup
           openModal={openModal}
           setOpenModal={setOpenModal}
           onAddNew={(addNewForm) => {
             service.createNewItem(addNewForm, setLoading, (meta) => {
               if (meta?.success) {
-                const itemNew = meta.data as SewingLine
+                const itemNew = meta.data as Group
                 handleStartAddNew({ key: Number(itemNew.id), ...itemNew })
                 message.success('Created!')
                 setOpenModal(false)
@@ -188,4 +198,4 @@ const SewingLineList: React.FC<Props> = ({ ...props }) => {
   )
 }
 
-export default SewingLineList
+export default AccessoryNoteList

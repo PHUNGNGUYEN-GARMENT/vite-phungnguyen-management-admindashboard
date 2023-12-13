@@ -4,6 +4,12 @@ import { ResponseDataType } from '~/api/client'
 
 export type TableItemWithKey<T> = T & { key?: React.Key }
 type TableItemWithId<T> = T & { id?: number }
+export interface TableCellProps {
+  editable?: boolean
+  dataIndex: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  initialValue?: any
+}
 
 export default function useTable<T extends { key?: React.Key }>(initValue: TableItemWithKey<T>[]) {
   const [form] = Form.useForm<T>()

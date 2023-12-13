@@ -65,10 +65,7 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
     })
   }, [])
 
-  const actionsCols: (ColumnTypes[number] & {
-    editable?: boolean
-    dataIndex: string
-  })[] = [
+  const actionsCols: (ColumnTypes[number] & TableCellProps)[] = [
     {
       title: 'Operation',
       width: '15%',
@@ -156,10 +153,7 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
     }
   ]
 
-  const commonCols: (ColumnTypes[number] & {
-    editable?: boolean
-    dataIndex: string
-  })[] = [
+  const commonCols: (ColumnTypes[number] & TableCellProps)[] = [
     {
       title: 'Code',
       dataIndex: 'productCode',
@@ -237,10 +231,7 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
     }
   ]
 
-  const dateCreationColumns: (ColumnTypes[number] & {
-    editable?: boolean
-    dataIndex: string
-  })[] = [
+  const dateCreationColumns: (ColumnTypes[number] & TableCellProps)[] = [
     {
       title: 'Created date',
       dataIndex: 'createdAt',
@@ -262,15 +253,9 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
     }
   ]
 
-  const adminColumns: (ColumnTypes[number] & {
-    editable?: boolean
-    dataIndex: string
-  })[] = [...commonCols, ...actionsCols]
+  const adminColumns: (ColumnTypes[number] & TableCellProps)[] = [...commonCols, ...actionsCols]
 
-  const staffColumns: (ColumnTypes[number] & {
-    editable?: boolean
-    dataIndex: string
-  })[] = [...commonCols]
+  const staffColumns: (ColumnTypes[number] & TableCellProps)[] = [...commonCols]
 
   const mergedColumns = (
     cols: (ColumnTypes[number] & {
