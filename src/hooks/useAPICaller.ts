@@ -11,6 +11,8 @@ export interface ItemWithId {
 
 export interface APIService<T extends ItemWithId> {
   createNewItem: (itemNew: Partial<T>) => Promise<ResponseDataType | undefined>
+  createOrUpdateByPk?: (id: number, itemNew: Partial<T>) => Promise<ResponseDataType | undefined>
+  createOrUpdateByProductID?: (productID: number, itemNew: Partial<T>) => Promise<ResponseDataType | undefined>
   getItemByPk: (id: number) => Promise<ResponseDataType | undefined>
   getItemBy: (query: { field: string; key: React.Key }) => Promise<ResponseDataType | undefined>
   getItems: (params: RequestBodyType) => Promise<ResponseDataType | undefined>

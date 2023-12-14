@@ -1,505 +1,191 @@
-import {
-  App as AntApp,
-  Button,
-  ColorPicker,
-  DatePicker,
-  Flex,
-  Form,
-  Input,
-  InputNumber,
-  List,
-  Popconfirm,
-  Switch,
-  Typography
-} from 'antd'
-import React, { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { App as AntApp, Form, List } from 'antd'
+import React, { useEffect, useState } from 'react'
 import { RequestBodyType, defaultRequestBody } from '~/api/client'
 import ImportationAPI from '~/api/services/ImportationAPI'
-import ProductAPI from '~/api/services/ProductAPI'
-import useList, { ListDataType } from '~/components/hooks/useTable'
-import { setAdminAction, setRoleAction } from '~/store/actions-creator'
-import { RootState } from '~/store/store'
-import { Importation, Product } from '~/typing'
-import DayJS, { DatePattern } from '~/utils/date-formatter'
-import useImportation from '../hooks/useImportation'
+import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
+import BaseLayout from '~/components/layout/BaseLayout'
+import useAPICaller, { serviceActionUpdate } from '~/hooks/useAPICaller'
+import { Importation } from '~/typing'
+import { ImportationTableDataType } from '../type'
+import ImportationListItem from './ImportationListItem'
+import ModalAddNewImportation from './ModalAddNewImportation'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
-const { Search } = Input
-
 const ImportationList: React.FC<Props> = ({ ...props }) => {
-  const {
-    metaData,
-    loading,
-    setLoading,
-    searchText,
-    setSearchText,
-    dateCreation,
-    setDateCreation,
-    getDataList,
-    handleSaveUpdateItem,
-    handleDeleteItem,
-    handleSorted
-  } = useImportation()
+  const service = useAPICaller<Importation>(ImportationAPI)
   const {
     form,
-    editingKey,
-    setEditingKey,
-    setDeleteKey,
-    dataSource,
-    setDataSource,
+    loading,
     isEditing,
+    setLoading,
+    dataSource,
+    editingKey,
+    setDeleteKey,
+    dateCreation,
+    setDateCreation,
+    handleStartAddNew,
+    handleStartEditing,
     handleStartDeleting,
-    handleStartSaveEditing
-  } = useList<Importation>([])
-  const user = useSelector((state: RootState) => state.user)
-  const dispatch = useDispatch()
+    handleStartSaveEditing,
+    handleConvertDataSource,
+    handleConfirmCancelEditing,
+    handleConfirmCancelDeleting
+  } = useTable<ImportationTableDataType>([])
+  const [openModal, setOpenModal] = useState<boolean>(false)
   const { message } = AntApp.useApp()
-  console.log('Group page loading...')
 
   useEffect(() => {
-    dispatch(setRoleAction('importation'))
-
-    Promise.all([
-      ProductAPI.getItems(defaultRequestBody),
-      ImportationAPI.getItems(defaultRequestBody)
-    ])
-      .then(([metaProduct, metaImportation]) => {
-        if (metaProduct?.success && metaImportation?.success) {
-          const products: Product[] = metaProduct.data
-          const importations: Importation[] = metaImportation.data
-
-          const dataSource = products.map((product) => {
-            const productImportation = importations.find(
-              (importation) => importation.productID === product.id
-            )
-
-            return {
-              data: {
-                ...productImportation,
-                product
-              },
-              key: product.id!
-            }
-          })
-          setDataSource(
-            importations.length > 0
-              ? dataSource
-              : dataSource.map((item) => ({
-                  ...item,
-                  data: { product: item.data.product } as Importation
-                }))
-          )
-        }
-      })
-      .catch((error) => {
-        // Xử lý lỗi nếu cần
-        console.error(error)
-      })
+    service.getListItems(defaultRequestBody, setLoading, (meta) => {
+      if (meta?.success) {
+        handleConvertDataSource(meta)
+      }
+    })
   }, [])
+
+  const selfHandleSaveClick = async (item: TableItemWithKey<ImportationTableDataType>) => {
+    const row = await form.validateFields()
+    serviceActionUpdate(
+      { field: 'id', key: item.id! },
+      ImportationAPI,
+      {
+        quantity: row.quantity,
+        dateImported: row.dateImported
+      } as Importation,
+      setLoading,
+      (data, msg) => {
+        if (data?.success) {
+          message.success(msg)
+        } else {
+          message.error(msg)
+        }
+        handleStartSaveEditing(item.id!, {
+          ...item,
+          quantity: row.quantity,
+          dateImported: row.dateImported
+        })
+      }
+    )
+  }
 
   return (
     <>
       <Form form={form}>
-        <Flex vertical gap={20}>
-          <Search
-            name='search'
-            placeholder='Search code...'
-            size='middle'
-            enterButton
-            allowClear
-            onSearch={(value) => {
-              if (value.length > 0) {
-                const body: RequestBodyType = {
+        <BaseLayout
+          onDateCreationChange={(enable) => setDateCreation(enable)}
+          onSearch={(value) => {
+            if (value.length > 0) {
+              service.getListItems(
+                {
                   ...defaultRequestBody,
                   search: {
-                    field: 'name',
+                    field: 'nameColor',
                     term: value
                   }
-                }
-                getDataList(body, (meta) => {
+                },
+                setLoading,
+                (meta) => {
                   if (meta?.success) {
-                    setDataSource(
-                      meta.data.map((item: Importation) => {
-                        return {
-                          ...item,
-                          key: item.id
-                        } as ListDataType<Importation>
-                      })
-                    )
+                    handleConvertDataSource(meta)
                   }
-                })
+                }
+              )
+            }
+          }}
+          onSortChange={(val) => {
+            service.sortedListItems(val ? 'asc' : 'desc', setLoading, (meta) => {
+              if (meta?.success) {
+                handleConvertDataSource(meta)
               }
-            }}
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-          />
-          <Flex justify='space-between' align='center'>
-            <Flex gap={10} align='center'>
-              <Flex vertical gap={10}>
-                <Switch
-                  checkedChildren='Admin'
-                  unCheckedChildren='Admin'
-                  defaultChecked={false}
-                  checked={user.isAdmin}
-                  onChange={(val) => {
-                    dispatch(setAdminAction(val))
-                  }}
-                />
-                <Switch
-                  checkedChildren='Access'
-                  unCheckedChildren='Access'
-                  defaultChecked={false}
-                  checked={user.role === 'importation'}
-                  onChange={(val) => {
-                    dispatch(setRoleAction(val ? 'importation' : 'admin'))
-                  }}
-                />
-              </Flex>
-              <Switch
-                checkedChildren='Date Creation'
-                unCheckedChildren='Date Creation'
-                defaultChecked={dateCreation}
-                onChange={(val) => {
-                  setDateCreation(val)
-                }}
-              />
-              <Switch
-                checkedChildren='Sorted'
-                unCheckedChildren='Sorted'
-                defaultChecked={false}
-                onChange={(val) => {
-                  handleSorted(val ? 'asc' : 'desc', (meta) => {
-                    if (meta.success) {
-                      setDataSource(
-                        meta.data.map((item: Importation) => {
-                          return {
-                            ...item,
-                            key: item.id
-                          } as ListDataType<Importation>
-                        })
-                      )
-                    }
-                  })
-                }}
-              />
-            </Flex>
-            <Flex gap={10} align='center'>
-              <Button
-                onClick={() => {
-                  form.setFieldValue('search', '')
-                  setSearchText('')
-                  getDataList(defaultRequestBody, (meta) => {
-                    if (meta?.success) {
-                      setDataSource(
-                        meta.data.map((item: Importation) => {
-                          return {
-                            ...item,
-                            key: item.id
-                          } as ListDataType<Importation>
-                        })
-                      )
-                      message.success('Reloaded!')
-                    }
-                  })
-                }}
-                className='flex items-center'
-                type='default'
-              >
-                Reset
-              </Button>
-            </Flex>
-          </Flex>
+            })
+          }}
+          onResetClick={() => {
+            form.setFieldValue('search', '')
+            service.getListItems(defaultRequestBody, setLoading, (meta) => {
+              if (meta?.success) {
+                handleConvertDataSource(meta)
+              }
+            })
+          }}
+          onAddNewClick={() => setOpenModal(true)}
+        >
           <List
             className={props.className}
             itemLayout='vertical'
-            size='large'
+            size='default'
             pagination={{
-              onChange: (page) => {
+              onChange: (_page) => {
+                service.setPage(_page)
                 const body: RequestBodyType = {
                   ...defaultRequestBody,
                   paginator: {
-                    page: page,
+                    page: _page,
                     pageSize: 5
                   },
                   search: {
-                    field: 'id',
-                    term: searchText
+                    field: 'nameColor',
+                    term: form.getFieldValue('search') ?? ''
                   }
                 }
-                getDataList(body, (meta) => {
+                service.getListItems(body, setLoading, (meta) => {
                   if (meta?.success) {
-                    setDataSource(
-                      meta.data.map((item: Importation) => {
-                        return {
-                          ...item,
-                          key: item.id
-                        } as ListDataType<Importation>
-                      })
-                    )
+                    handleConvertDataSource(meta)
                   }
                 })
               },
-              current: metaData?.page,
+              current: service.metaData?.page,
               pageSize: 5,
-              total: metaData?.total
+              total: service.metaData?.total
             }}
             loading={loading}
             dataSource={dataSource}
             renderItem={(item) => (
-              <List.Item key={item.key} className='mb-5 rounded-sm bg-white'>
-                <Flex vertical className='w-full' gap={10}>
-                  <Flex align='center' justify='space-between'>
-                    <Flex gap={10} align='center' className='relative'>
-                      <Typography.Title
-                        copyable
-                        className='m-0 h-fit p-0'
-                        level={4}
-                      >
-                        {item.data.product?.productCode}
-                      </Typography.Title>
-
-                      {item.data.product?.status === 'deleted' && (
-                        <Typography.Title
-                          code
-                          className='m-0 p-0'
-                          type='danger'
-                          level={5}
-                        >
-                          Deleted
-                        </Typography.Title>
-                      )}
-                    </Flex>
-
-                    {isEditing(item.key!) ? (
-                      <Flex gap={5}>
-                        <Button
-                          type='primary'
-                          onClick={async () => {
-                            const row: Importation = await form.validateFields()
-                            handleSaveUpdateItem(
-                              Number(item.key!),
-                              row,
-                              (meta) => {
-                                if (meta?.success) {
-                                  message.success('Success')
-                                }
-                              }
-                            )
-                          }}
-                        >
-                          Save
-                        </Button>
-                        <Popconfirm
-                          title={`Sure to cancel?`}
-                          okButtonProps={{
-                            size: 'middle'
-                          }}
-                          cancelButtonProps={{
-                            size: 'middle'
-                          }}
-                          placement='topLeft'
-                          onConfirm={() => {
-                            form.setFieldValue('quantity', item.data.quantity)
-                            setEditingKey('')
-                          }}
-                        >
-                          <Button type='dashed'>Cancel</Button>
-                        </Popconfirm>
-                      </Flex>
-                    ) : (
-                      <Flex gap={10}>
-                        {(user.isAdmin || user.role === 'importation') && (
-                          <Button
-                            type='primary'
-                            disabled={editingKey !== ''}
-                            onClick={() => {
-                              setEditingKey(item.key!)
-                            }}
-                          >
-                            Edit
-                          </Button>
-                        )}
-                        {user.isAdmin && (
-                          <Popconfirm
-                            title={`Sure to delete?`}
-                            onCancel={() => setDeleteKey('')}
-                            onConfirm={() => {
-                              setLoading(true)
-                              // handleStartDelete(item.id!, (productToDelete) => {
-                              //   handleDeleteItem(
-                              //     productToDelete.id!,
-                              //     (meta) => {
-                              //       if (meta.success) {
-                              //         setLoading(false)
-                              //         message.success('Deleted!')
-                              //       }
-                              //     }
-                              //   )
-                              // })
-                            }}
-                          >
-                            <Button
-                              type='dashed'
-                              disabled={editingKey !== ''}
-                              onClick={() => setDeleteKey(item.key!)}
-                            >
-                              Delete
-                            </Button>
-                          </Popconfirm>
-                        )}
-                      </Flex>
-                    )}
-                  </Flex>
-
-                  <Flex align='center' justify='start' gap={5}>
-                    <Typography.Text
-                      type='secondary'
-                      className='w-40 font-medium'
-                    >
-                      Mã màu
-                    </Typography.Text>
-                    <Flex className='w-full' align='center' justify='start'>
-                      <ColorPicker
-                        className='w-full'
-                        defaultValue={item.data.product?.productColor?.hexColor}
-                        size='middle'
-                        disabled
-                        showText
-                      />
-                    </Flex>
-                  </Flex>
-
-                  <Flex align='center' justify='start' gap={5}>
-                    <Typography.Text
-                      type='secondary'
-                      className='w-40 font-medium'
-                    >
-                      Lô nhập
-                    </Typography.Text>
-                    <Flex
-                      className='w-full gap-2'
-                      align='center'
-                      justify='start'
-                    >
-                      {isEditing(item.key) ? (
-                        <Form.Item
-                          name='quantity'
-                          initialValue={item.data.quantity}
-                          className='m-0 w-full'
-                          rules={[
-                            {
-                              required: true,
-                              message: `Please Input this field!`
-                            }
-                          ]}
-                        >
-                          <InputNumber
-                            className='relative w-full'
-                            size='middle'
-                            placeholder='Số lượng'
-                            readOnly={editingKey !== item.key}
-                          />
-                        </Form.Item>
-                      ) : (
-                        <Input
-                          name='quantity'
-                          defaultValue={item.data.quantity}
-                          className='relative w-full'
-                          size='middle'
-                          placeholder='Số lượng'
-                          readOnly
-                        />
-                      )}
-                      <Input
-                        name='quantity-placeholder'
-                        className='w-16'
-                        size='middle'
-                        disabled
-                        defaultValue='Kiện'
-                      />
-                    </Flex>
-                  </Flex>
-
-                  <Flex align='center' justify='start' gap={5}>
-                    <Typography.Text
-                      type='secondary'
-                      className='w-40 font-medium'
-                    >
-                      Ngày nhập
-                    </Typography.Text>
-                    {isEditing(item.key!) ? (
-                      <Form.Item
-                        className='m-0 w-full'
-                        initialValue={DayJS(item.data.dateImported)}
-                        name='dateImported'
-                      >
-                        <DatePicker
-                          className='w-full'
-                          format={DatePattern.display}
-                        />
-                      </Form.Item>
-                    ) : (
-                      <Input
-                        name='dateImported'
-                        readOnly
-                        className='zoom-in-0'
-                        placeholder='Ngày nhập khẩu'
-                        defaultValue={
-                          item.data.dateImported &&
-                          DayJS(item.data.dateImported).format(
-                            DatePattern.display
-                          )
-                        }
-                      />
-                    )}
-                  </Flex>
-
-                  {dateCreation && (
-                    <Flex vertical gap={10}>
-                      <Flex align='center' justify='start' gap={5}>
-                        <Typography.Text
-                          type='secondary'
-                          className='w-40 font-medium'
-                        >
-                          Created at
-                        </Typography.Text>
-
-                        <Input
-                          name='createdAt'
-                          className='w-full'
-                          defaultValue={DayJS(item.data.createdAt).format(
-                            DatePattern.display
-                          )}
-                          readOnly
-                        />
-                      </Flex>
-                      <Flex align='center' justify='start' gap={5}>
-                        <Typography.Text
-                          type='secondary'
-                          className='w-40 font-medium'
-                        >
-                          Updated at
-                        </Typography.Text>
-
-                        <Input
-                          name='updatedAt'
-                          className='w-full'
-                          defaultValue={DayJS(item.data.updatedAt).format(
-                            DatePattern.display
-                          )}
-                          readOnly
-                        />
-                      </Flex>
-                    </Flex>
-                  )}
-                </Flex>
-              </List.Item>
+              <ImportationListItem
+                data={item}
+                key={item.key}
+                dateCreation={dateCreation}
+                editingKey={editingKey}
+                isEditing={isEditing(item.key!)}
+                onSaveClick={() => selfHandleSaveClick(item)}
+                onClickStartEditing={() => handleStartEditing(item.key!)}
+                onConfirmCancelEditing={() => handleConfirmCancelEditing()}
+                onConfirmCancelDeleting={() => handleConfirmCancelDeleting()}
+                onConfirmDelete={() => {
+                  service.updateItemByPk(item.id!, { status: 'deleted' }, setLoading, (meta) => {
+                    if (meta) {
+                      if (meta.success) {
+                        handleStartDeleting(item.id!, () => {})
+                        message.success('Deleted!')
+                      }
+                    } else {
+                      message.error('Failed!')
+                    }
+                  })
+                }}
+                onStartDeleting={() => setDeleteKey(item.key!)}
+              />
             )}
           />
-        </Flex>
+        </BaseLayout>
       </Form>
+      {openModal && (
+        <ModalAddNewImportation
+          openModal={openModal}
+          setOpenModal={setOpenModal}
+          onAddNew={(addNewForm) => {
+            service.createNewItem(addNewForm, setLoading, (meta) => {
+              if (meta?.success) {
+                const itemNew = meta.data as Importation
+                handleStartAddNew({ key: Number(itemNew.id), ...itemNew })
+                message.success('Created!')
+                setOpenModal(false)
+              } else {
+                message.error('Failed!')
+              }
+            })
+          }}
+        />
+      )}
     </>
   )
 }

@@ -3,8 +3,9 @@
 import { ColorPicker, DatePicker, Form, Input, InputNumber, Select, Table } from 'antd'
 import { memo } from 'react'
 import { TableItemWithKey } from '~/components/hooks/useTable'
+import { DatePattern } from '~/utils/date-formatter'
 
-type InputType = 'number' | 'text' | 'colorpicker' | 'select' | 'datepicker'
+export type InputType = 'number' | 'text' | 'colorpicker' | 'select' | 'datepicker'
 
 interface EditableCellProps<T extends { key?: React.Key }> extends React.HTMLAttributes<HTMLElement> {
   editing: boolean
@@ -34,13 +35,13 @@ function EditableCell<T extends { key?: React.Key }>({
       case 'colorpicker':
         return <ColorPicker defaultFormat='hex' showText className='w-full' />
       case 'number':
-        return <InputNumber />
+        return <InputNumber className='w-full' />
       case 'select':
         return <Select />
       case 'datepicker':
-        return <DatePicker />
+        return <DatePicker format={DatePattern.display} className='w-full' />
       default:
-        return <Input />
+        return <Input className='w-full' />
     }
   })()
 
@@ -49,7 +50,7 @@ function EditableCell<T extends { key?: React.Key }>({
       {editing ? (
         <Form.Item
           name={dataIndex}
-          initialValue={initialValue}
+          initialValue={initialValue ?? ''}
           style={{ margin: 0 }}
           rules={[
             {

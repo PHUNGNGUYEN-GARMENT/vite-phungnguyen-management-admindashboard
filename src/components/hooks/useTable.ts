@@ -12,7 +12,7 @@ export interface TableCellProps {
 }
 
 export default function useTable<T extends { key?: React.Key }>(initValue: TableItemWithKey<T>[]) {
-  const [form] = Form.useForm<T>()
+  const [form] = Form.useForm()
   const [dataSource, setDataSource] = useState<TableItemWithKey<T>[]>(initValue)
   const [loading, setLoading] = useState<boolean>(false)
   const [editingKey, setEditingKey] = useState<React.Key>('')

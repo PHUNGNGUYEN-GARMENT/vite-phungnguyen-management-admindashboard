@@ -1,147 +1,153 @@
-import { App as AntApp, Button, Flex, Form, Input, Popconfirm, Switch, Table, Typography } from 'antd'
-import { Plus } from 'lucide-react'
-import { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { App as AntApp, Form, Table, Typography } from 'antd'
+import { useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
 import { RequestBodyType, defaultRequestBody } from '~/api/client'
-import useTable from '~/components/hooks/useTable'
-import { setAdminAction } from '~/store/actions-creator'
+import ImportationAPI from '~/api/services/ImportationAPI'
+import ProductAPI from '~/api/services/ProductAPI'
+import useTable, { TableCellProps, TableItemWithKey } from '~/components/hooks/useTable'
+import BaseLayout from '~/components/layout/BaseLayout'
+import EditableCell, { EditableTableProps, InputType } from '~/components/ui/Table/EditableCell'
+import ItemAction from '~/components/ui/Table/ItemAction'
+import useAPICaller from '~/hooks/useAPICaller'
 import { RootState } from '~/store/store'
-import { ItemStatusType, Product, SewingLineDelivery } from '~/typing'
+import { Importation, Product } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
-import useImportation from '../hooks/useImportation'
-import EditableCell, { EditableTableProps } from './EditableCell'
-
-const { Search } = Input
+import { ImportationTableDataType } from '../type'
+import ModalAddNewImportation from './ModalAddNewImportation'
 
 type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>
 
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
-export interface ImportationTableDataType {
-  key?: React.Key
-  id?: number
-  productID?: number
-  dateImported?: string
-  quantity?: number
-  status?: ItemStatusType
-  product?: Product
-  createdAt?: string
-  updatedAt?: string
-  orderNumber?: number
-}
-
 const ImportationTable: React.FC<Props> = ({ ...props }) => {
-  const user = useSelector((state: RootState) => state.user)
-
-  const dispatch = useDispatch()
-  const { message } = AntApp.useApp()
-  const {
-    metaData,
-    loading,
-    setOpenModal,
-    searchText,
-    setSearchText,
-    dateCreation,
-    setDateCreation,
-    getDataList,
-    handleSaveUpdateItem,
-    handleDeleteItem,
-    handleSorted
-  } = useImportation()
+  const productService = useAPICaller<Product>(ProductAPI)
+  const importationService = useAPICaller<Importation>(ImportationAPI)
   const {
     form,
+    loading,
+    setLoading,
     editingKey,
-    isEditing,
-    isDisableEditing,
+    setDeleteKey,
     dataSource,
+    isEditing,
     setDataSource,
-    handleStartEditingRow,
-    handleStartSaveEditingRow,
-    handleCancelEditingRow,
-    handleStartDeleteRow,
-    handleDeleteRow,
-    handleCancelDeleteRow
+    dateCreation,
+    setDateCreation,
+    handleConvertDataSource,
+    handleStartAddNew,
+    handleStartEditing,
+    handleStartDeleting,
+    handleStartSaveEditing,
+    handleConfirmCancelEditing,
+    handleConfirmCancelDeleting
   } = useTable<ImportationTableDataType>([])
+  const [openModal, setOpenModal] = useState<boolean>(false)
+  const user = useSelector((state: RootState) => state.user)
+  const { message } = AntApp.useApp()
 
   console.log('ImportationTableDataType...')
 
   useEffect(() => {
-    getDataList(defaultRequestBody, (meta) => {
+    productService.getListItems(defaultRequestBody, setLoading, (meta) => {
       if (meta?.success) {
+        const products = meta.data as Product[]
+        selfHandleConvertDataSource(products)
+      }
+    })
+  }, [])
+
+  useEffect(() => {
+    if (dataSource.length > 0) {
+      console.log(dataSource)
+    }
+  }, [dataSource])
+
+  const selfHandleConvertDataSource = (products: Product[]) => {
+    importationService.getListItems(defaultRequestBody, setLoading, (meta2) => {
+      if (meta2?.success) {
+        const importations = meta2.data as Importation[]
         setDataSource(
-          meta.data.map((item: SewingLineDelivery) => {
+          products.map((item) => {
             return {
               ...item,
-              key: item.id
-            } as ImportationTableDataType
+              productID: item.id,
+              key: Number(item.id),
+              importation: importations.find((i) => i.productID === item.id)
+            }
+          })
+        )
+      } else {
+        setDataSource(
+          products.map((item) => {
+            return { ...item, productID: item.id, key: Number(item.id) }
           })
         )
       }
     })
-  }, [])
+  }
+
+  const selfHandleSaveClick = async (item: TableItemWithKey<ImportationTableDataType>) => {
+    const row = await form.validateFields()
+    console.log({
+      row: row,
+      item: item
+    })
+    await ImportationAPI.createOrUpdateItemByProductID(Number(item.key!), {
+      productID: item.productID,
+      quantity: row.quantity,
+      dateImported: DayJS(row.dateImported).format(DatePattern.iso8601)
+    } as Importation).then((meta) => {
+      if (meta?.success) {
+        const importation = meta.data as Importation
+        handleStartSaveEditing(item.key!, {
+          ...item,
+          importation: importation
+        })
+        message.success('Success!')
+      } else {
+        message.error('Failed!')
+      }
+    })
+  }
 
   const actionsCols: (ColumnTypes[number] & TableCellProps)[] = [
     {
       title: 'Operation',
       width: '15%',
       dataIndex: 'operation',
-      render: (_, record: ImportationTableDataType) => {
-        return isEditing(record.key!) ? (
-          <Flex className='flex flex-col gap-3 lg:flex-row'>
-            <Button
-              type='primary'
-              onClick={() =>
-                handleStartSaveEditingRow(record.id!, (row: SewingLineDelivery) => {
-                  handleSaveUpdateItem(record.id!, row, (meta) => {
-                    if (meta?.success) {
-                      message.success('Updated!')
-                    }
-                  })
-                })
-              }
-            >
-              Save
-            </Button>
-            <Popconfirm
-              title={`Sure to cancel?`}
-              onConfirm={() => {
-                handleCancelEditingRow()
-              }}
-            >
-              <Button type='dashed'>Cancel</Button>
-            </Popconfirm>
-          </Flex>
-        ) : (
-          <Flex gap={10}>
-            <Button
-              type='primary'
-              disabled={isDisableEditing}
-              onClick={() => {
-                handleStartEditingRow(record)
-              }}
-            >
-              Edit
-            </Button>
-            {user.isAdmin && (
-              <Popconfirm
-                title={`Sure to delete?`}
-                onCancel={() => handleCancelDeleteRow()}
-                onConfirm={() =>
-                  handleDeleteRow(record.key!, (key) => {
-                    handleDeleteItem(Number(key), (meta) => {
-                      if (meta?.success) {
+      render: (_, item: TableItemWithKey<ImportationTableDataType>) => {
+        return (
+          <>
+            <ItemAction
+              isEditing={isEditing(item.key!)}
+              editingKey={editingKey}
+              onSaveClick={() => selfHandleSaveClick(item)}
+              onClickStartEditing={() => handleStartEditing(item.key!)}
+              onConfirmCancelEditing={() => handleConfirmCancelEditing()}
+              onConfirmCancelDeleting={() => handleConfirmCancelDeleting()}
+              onConfirmDelete={() => {
+                importationService.updateItemBy(
+                  { field: 'productID', key: item.key! },
+                  { status: 'deleted' },
+                  setLoading,
+                  (meta) => {
+                    if (meta) {
+                      if (meta.success) {
+                        handleStartSaveEditing(item.key!, {
+                          ...item,
+                          importation: undefined
+                        })
                         message.success('Deleted!')
                       }
-                    })
-                  })
-                }
-              >
-                <Button disabled={editingKey !== ''} type='dashed' onClick={() => handleStartDeleteRow(record.key!)}>
-                  Delete
-                </Button>
-              </Popconfirm>
-            )}
-          </Flex>
+                    } else {
+                      message.error('Failed!')
+                    }
+                  }
+                )
+              }}
+              onStartDeleting={() => setDeleteKey(item.key!)}
+            />
+          </>
         )
       }
     }
@@ -149,16 +155,34 @@ const ImportationTable: React.FC<Props> = ({ ...props }) => {
 
   const commonCols: (ColumnTypes[number] & TableCellProps)[] = [
     {
-      title: 'Group Name',
-      dataIndex: 'name',
+      title: 'Product code',
+      dataIndex: 'productCode',
       width: '15%',
-      editable: user.isAdmin,
       render: (_, record: ImportationTableDataType) => {
         return (
           <Typography.Text copyable className='text-md flex-shrink-0 font-bold'>
-            {record.quantity}
+            {record.productCode}
           </Typography.Text>
         )
+      }
+    },
+    {
+      title: 'Kiện',
+      dataIndex: 'quantity',
+      width: '15%',
+      editable: true,
+      render: (_, record: ImportationTableDataType) => {
+        return <span className=''>{record.importation?.quantity ?? 0}</span>
+      }
+    },
+    {
+      title: 'Date Imported',
+      dataIndex: 'dateImported',
+      width: '15%',
+      editable: true,
+      render: (_, record: ImportationTableDataType) => {
+        const validData = record.importation?.dateImported ? record.importation.dateImported : ''
+        return <span>{DayJS(validData).format(DatePattern.display)}</span>
       }
     }
   ]
@@ -169,7 +193,7 @@ const ImportationTable: React.FC<Props> = ({ ...props }) => {
       dataIndex: 'createdAt',
       width: '10%',
       render: (_, record: ImportationTableDataType) => {
-        const validData = record.createdAt ? record.createdAt : ''
+        const validData = record.importation?.createdAt ? record.importation.createdAt : ''
         return <span>{DayJS(validData).format(DatePattern.display)}</span>
       }
     },
@@ -178,7 +202,7 @@ const ImportationTable: React.FC<Props> = ({ ...props }) => {
       dataIndex: 'updatedAt',
       width: '10%',
       render: (_, record: ImportationTableDataType) => {
-        const validData = record.updatedAt ? record.updatedAt : ''
+        const validData = record.importation?.updatedAt ? record.importation?.updatedAt : ''
         return <span>{DayJS(validData).format(DatePattern.display)}</span>
       }
     }
@@ -190,12 +214,7 @@ const ImportationTable: React.FC<Props> = ({ ...props }) => {
 
   const staffColumns: (ColumnTypes[number] & TableCellProps)[] = [...commonCols]
 
-  const mergedColumns = (
-    cols: (ColumnTypes[number] & {
-      editable?: boolean
-      dataIndex: string
-    })[]
-  ): ColumnTypes => {
+  const mergedColumns = (cols: (ColumnTypes[number] & TableCellProps)[]): ColumnTypes => {
     return cols.map((col) => {
       if (!col.editable) {
         return col
@@ -207,136 +226,82 @@ const ImportationTable: React.FC<Props> = ({ ...props }) => {
           inputType: onCellColumnType(col.dataIndex),
           dataIndex: col.dataIndex,
           title: col.title,
+          initialValue: smartInitialValue(col.dataIndex, record),
           editing: isEditing(record.key!)
         })
       }
     }) as ColumnTypes
   }
 
-  const onCellColumnType = (dataIndex: string): string => {
+  const onCellColumnType = (dataIndex: string): InputType => {
     switch (dataIndex) {
-      case 'name':
-        return 'text'
+      case 'quantity':
+        return 'number'
+      case 'dateImported':
+        return 'datepicker'
       default:
-        return ''
+        return 'text'
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const smartInitialValue = (dataIndex: string, record: ImportationTableDataType): any => {
+    switch (dataIndex) {
+      case 'quantity':
+        return record.importation?.quantity
+      case 'dateImported':
+        return DayJS(record.importation?.dateImported)
+      default:
+        return record.id
     }
   }
 
   return (
     <>
       <Form {...props} form={form} component={false}>
-        <Flex vertical gap={20}>
-          <Flex justify='space-between' align='center' className='rounded-sm bg-white px-5 py-3'>
-            <Flex gap={10} className='m-0 w-full' align='center'>
-              <Switch
-                checkedChildren='Admin'
-                unCheckedChildren='Admin'
-                defaultChecked={user.isAdmin}
-                onChange={(val) => {
-                  dispatch(setAdminAction(val))
-                }}
-              />
-              <Switch
-                checkedChildren='Date Creation'
-                unCheckedChildren='Date Creation'
-                defaultChecked={dateCreation}
-                onChange={(val) => {
-                  setDateCreation(val)
-                }}
-              />
-              <Search
-                name='search'
-                placeholder='Search name...'
-                size='middle'
-                enterButton
-                allowClear
-                className='w-1/2'
-                onSearch={(value) => {
-                  if (value.length > 0) {
-                    const body: RequestBodyType = {
-                      ...defaultRequestBody,
-                      search: {
-                        field: 'name',
-                        term: value
-                      }
-                    }
-                    getDataList(body, (meta) => {
-                      if (meta?.success) {
-                        setDataSource(
-                          meta.data.map((item: SewingLineDelivery) => {
-                            return {
-                              ...item,
-                              key: item.id
-                            } as ImportationTableDataType
-                          })
-                        )
-                      }
-                    })
+        <BaseLayout
+          onSearch={(value) => {
+            if (value.length > 0) {
+              productService.getListItems(
+                {
+                  ...defaultRequestBody,
+                  search: {
+                    field: 'productCode',
+                    term: value
                   }
-                }}
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-              />
-            </Flex>
-            <Flex gap={10} align='center'>
-              <Switch
-                checkedChildren='Sorted'
-                unCheckedChildren='Sorted'
-                onChange={async (val) => {
-                  await handleSorted(val ? 'asc' : 'desc', (meta) => {
-                    if (meta.success) {
-                      setDataSource(
-                        meta.data.map((item: SewingLineDelivery) => {
-                          return {
-                            ...item,
-                            key: item.id
-                          } as ImportationTableDataType
-                        })
-                      )
-                    }
-                  })
-                }}
-              />
-              <Button
-                onClick={() => {
-                  form.setFieldValue('search', '')
-                  setSearchText('')
-                  getDataList(defaultRequestBody, (meta) => {
-                    if (meta?.success) {
-                      setDataSource(
-                        meta.data.map((item: SewingLineDelivery) => {
-                          return {
-                            ...item,
-                            key: item.id
-                          } as ImportationTableDataType
-                        })
-                      )
-                      message.success('Reloaded!')
-                    }
-                  })
-                }}
-                className='flex items-center'
-                type='default'
-              >
-                Reset
-              </Button>
-
-              {user.isAdmin && (
-                <Flex gap={10} align='center'>
-                  <Button
-                    onClick={() => {
-                      setOpenModal(true)
-                    }}
-                    className='flex items-center'
-                    type='primary'
-                    icon={<Plus size={20} />}
-                  >
-                    New
-                  </Button>
-                </Flex>
-              )}
-            </Flex>
-          </Flex>
+                },
+                setLoading,
+                (meta) => {
+                  if (meta?.success) {
+                    const products = meta.data as Product[]
+                    selfHandleConvertDataSource(products)
+                  }
+                }
+              )
+            }
+          }}
+          onSortChange={(val) => {
+            productService.sortedListItems(val ? 'asc' : 'desc', setLoading, (meta) => {
+              if (meta?.success) {
+                const products = meta.data as Product[]
+                selfHandleConvertDataSource(products)
+              }
+            })
+          }}
+          onResetClick={() => {
+            form.setFieldValue('search', '')
+            productService.getListItems(defaultRequestBody, setLoading, (meta) => {
+              if (meta?.success) {
+                const products = meta.data as Product[]
+                selfHandleConvertDataSource(products)
+                message.success('Reloaded!')
+              }
+            })
+          }}
+          dateCreation={dateCreation}
+          onDateCreationChange={setDateCreation}
+          onAddNewClick={() => setOpenModal(true)}
+        >
           <Table
             components={{
               body: {
@@ -349,40 +314,51 @@ const ImportationTable: React.FC<Props> = ({ ...props }) => {
             columns={mergedColumns(user.isAdmin ? adminColumns : staffColumns)}
             rowClassName='editable-row'
             pagination={{
-              onChange: (page) => {
+              onChange: (_page) => {
+                productService.setPage(_page)
                 const body: RequestBodyType = {
                   ...defaultRequestBody,
                   paginator: {
-                    page: page,
+                    page: _page,
                     pageSize: 5
                   },
                   search: {
-                    field: 'productCode',
-                    term: searchText
+                    field: 'dateImported',
+                    term: form.getFieldValue('search') ?? ''
                   }
                 }
-                getDataList(body, (meta) => {
+                productService.getListItems(body, setLoading, (meta) => {
                   if (meta?.success) {
-                    setDataSource(
-                      meta.data.map((item: SewingLineDelivery) => {
-                        return {
-                          ...item,
-                          key: item.id
-                        } as ImportationTableDataType
-                      })
-                    )
+                    const products = meta.data as Product[]
+                    selfHandleConvertDataSource(products)
                   }
                 })
-                handleCancelEditingRow()
-                handleCancelDeleteRow()
               },
-              current: metaData?.page,
+              current: productService.metaData?.page,
               pageSize: 5,
-              total: metaData?.total
+              total: productService.metaData?.total
             }}
           />
-        </Flex>
+        </BaseLayout>
       </Form>
+      {openModal && (
+        <ModalAddNewImportation
+          openModal={openModal}
+          setOpenModal={setOpenModal}
+          onAddNew={(addNewForm) => {
+            importationService.createNewItem(addNewForm, setLoading, (meta) => {
+              if (meta?.success) {
+                const itemNew = meta.data as Importation
+                handleStartAddNew({ key: Number(itemNew.id), ...itemNew })
+                message.success('Created!')
+                setOpenModal(false)
+              } else {
+                message.error('Failed!')
+              }
+            })
+          }}
+        />
+      )}
     </>
   )
 }

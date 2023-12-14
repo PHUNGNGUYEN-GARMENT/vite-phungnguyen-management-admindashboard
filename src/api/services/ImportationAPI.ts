@@ -5,15 +5,52 @@ import { errorFormatter } from '~/utils/promise-formatter'
 const NAMESPACE = 'importations'
 
 export default {
-  createNewItem: async (
-    item: Importation
-  ): Promise<ResponseDataType | undefined> => {
+  createNewItem: async (item: Importation): Promise<ResponseDataType | undefined> => {
     return await client
       .post(`${NAMESPACE}`, {
         productID: item.productID,
         quantity: item.quantity,
         dateImported: item.dateImported,
-        status: item.status
+        status: item.status ?? 'active'
+      })
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  createOrUpdateItemByPk: async (id: number, item: Importation): Promise<ResponseDataType | undefined> => {
+    return await client
+      .post(`${NAMESPACE}/createOrUpdate`, {
+        id: id,
+        quantity: item.quantity,
+        dateImported: item.dateImported,
+        status: item.status ?? 'active'
+      })
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  createOrUpdateItemByProductID: async (
+    productID: number,
+    item: Importation
+  ): Promise<ResponseDataType | undefined> => {
+    return await client
+      .post(`${NAMESPACE}/createOrUpdate/productID`, {
+        productID: productID,
+        quantity: item.quantity,
+        dateImported: item.dateImported,
+        status: item.status ?? 'active'
       })
       .then((res) => {
         if (res.data) {
@@ -38,10 +75,7 @@ export default {
         errorFormatter(error)
       })
   },
-  getItemBy: async (query: {
-    field: string
-    key: React.Key
-  }): Promise<ResponseDataType | undefined> => {
+  getItemBy: async (query: { field: string; key: React.Key }): Promise<ResponseDataType | undefined> => {
     return client
       .get(`${NAMESPACE}/${query.field}/${query.key}`)
       .then((res) => {
@@ -54,9 +88,7 @@ export default {
         errorFormatter(error)
       })
   },
-  getItems: async (
-    bodyRequest: RequestBodyType
-  ): Promise<ResponseDataType | undefined> => {
+  getItems: async (bodyRequest: RequestBodyType): Promise<ResponseDataType | undefined> => {
     return await client
       .post(`${NAMESPACE}/find`, {
         ...bodyRequest
@@ -71,10 +103,7 @@ export default {
         errorFormatter(error)
       })
   },
-  updateItemByPk: async (
-    id: number,
-    item: Importation
-  ): Promise<ResponseDataType | undefined> => {
+  updateItemByPk: async (id: number, item: Importation): Promise<ResponseDataType | undefined> => {
     return client
       .put(`${NAMESPACE}/${id}`, {
         ...item
