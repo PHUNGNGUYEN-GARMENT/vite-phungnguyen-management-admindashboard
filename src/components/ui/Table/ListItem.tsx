@@ -51,7 +51,7 @@ const ListItem: React.FC<Props> = ({
               <>
                 {isEditing && user.isAdmin ? (
                   <Form.Item name={name} initialValue={label} className='m-0'>
-                    <Input size='large' value={label} className='text-lg font-medium' />
+                    <Input size='large' className='text-lg font-medium' />
                   </Form.Item>
                 ) : (
                   <Typography.Title copyable className='m-0 h-fit p-0' level={4}>

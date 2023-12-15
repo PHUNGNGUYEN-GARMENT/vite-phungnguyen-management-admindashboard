@@ -99,6 +99,43 @@ export default {
         errorFormatter(error)
       })
   },
+  createOrUpdateItemByPk: async (id: number, item: ProductColor): Promise<ResponseDataType | undefined> => {
+    return await client
+      .post(`${NAMESPACE}/createOrUpdate`, {
+        id: id,
+        colorID: item.colorID,
+        productID: item.productID,
+        status: item.status ?? 'active'
+      })
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  createOrUpdateItemByProductID: async (
+    productID: number,
+    item: ProductColor
+  ): Promise<ResponseDataType | undefined> => {
+    return await client
+      .post(`${NAMESPACE}/createOrUpdate/productID/${productID}`, {
+        colorID: item.colorID,
+        status: item.status ?? 'active'
+      })
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
   deleteItemByPk: async (id: number): Promise<ResponseDataType | undefined> => {
     return client
       .delete(`${NAMESPACE}/${id}`)

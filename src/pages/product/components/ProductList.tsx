@@ -8,8 +8,9 @@ import ProductColorAPI from '~/api/services/ProductColorAPI'
 import ProductGroupAPI from '~/api/services/ProductGroupAPI'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
-import useAPICaller, { serviceActionUpdateOrCreate } from '~/hooks/useAPICaller'
+import useAPICaller from '~/hooks/useAPICaller'
 import { PrintablePlace, Product, ProductColor, ProductGroup } from '~/typing'
+import DayJS, { DatePattern } from '~/utils/date-formatter'
 import { ProductTableDataType } from '../type'
 import ModalAddNewProduct from './ModalAddNewProduct'
 import ProductListItem from './ProductListItem'
@@ -31,12 +32,11 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
     setDataSource,
     setDeleteKey,
     dateCreation,
+    handleStartSaveEditing,
     setDateCreation,
     handleStartAddNew,
     handleStartEditing,
     handleStartDeleting,
-    handleStartSaveEditing,
-    handleConvertDataSource,
     handleConfirmCancelEditing,
     handleConfirmCancelDeleting
   } = useTable<ProductTableDataType>([])
@@ -66,24 +66,13 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
     })
     printablePlaceService.getListItems(defaultRequestBody, setLoading, (meta) => {
       if (meta?.success) {
-        console.log('Printable place', meta.data)
         setPrintablePlaces(meta.data as PrintablePlace[])
       }
     })
   }, [])
 
   useEffect(() => {
-    setDataSource(
-      products.map((item) => {
-        return {
-          ...item,
-          productColor: productColors.find((i) => i.productID === item.id),
-          productGroup: productGroups.find((i) => i.productID === item.id),
-          printablePlace: printablePlaces.find((i) => i.productID === item.id),
-          key: item.id
-        } as ProductTableDataType
-      })
-    )
+    selfConvertDataSource(products, productColors, productGroups, printablePlaces)
   }, [products, productColors, productGroups, printablePlaces])
 
   useEffect(() => {
@@ -92,92 +81,120 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
     }
   }, [dataSource])
 
+  const selfConvertDataSource = (
+    _products?: Product[],
+    _productColors?: ProductColor[],
+    _productGroups?: ProductGroup[],
+    _printablePlaces?: PrintablePlace[]
+  ) => {
+    if (_products) {
+      setDataSource(
+        _products.map((item) => {
+          return {
+            ...item,
+            productColor: (_productColors ? _productColors : productColors).find((i) => i.productID === item.id),
+            productGroup: (_productGroups ? _productGroups : productGroups).find((i) => i.productID === item.id),
+            printablePlace: (_printablePlaces ? _printablePlaces : printablePlaces).find(
+              (i) => i.productID === item.id
+            ),
+            key: item.id
+          } as ProductTableDataType
+        })
+      )
+    }
+  }
+
   const selfHandleSaveClick = async (item: TableItemWithKey<ProductTableDataType>) => {
     const row = (await form.validateFields()) as any
-    console.log(row)
-    if (
-      row.productCode !== item.productCode ||
-      row.quantityPo !== item.quantityPO ||
-      row.dateInputNPL !== item.dateInputNPL ||
-      row.dateOutputFCR !== item.dateOutputFCR
-    ) {
-      console.log('Product progressing')
-      serviceActionUpdateOrCreate(
-        { field: 'id', key: Number(item.id!) },
-        ProductAPI,
-        {
-          productCode: row.productCode,
-          quantityPO: row.quantityPO,
-          dateInputNPL: row.dateInputNPL,
-          dateOutputFCR: row.dateOutputFCR
-        } as Product,
-        setLoading,
-        (data, msg) => {
-          if (data?.success) {
-            message.success(msg)
-          } else {
-            message.error(msg)
-          }
-          handleStartSaveEditing(item.id!, {
-            ...item,
+    console.log({ row: row, item: item })
+    try {
+      if (
+        (row.productCode && row.productCode !== item.productCode) ||
+        (row.quantityPO && row.quantityPO !== item.quantityPO) ||
+        (row.dateInputNPL && row.dateInputNPL !== DayJS(item.dateInputNPL).format(DatePattern.display)) ||
+        (row.dateOutputFCR && row.dateOutputFCR !== DayJS(item.dateOutputFCR).format(DatePattern.display))
+      ) {
+        console.log('Product progressing...')
+        productService.updateItemByPk(
+          Number(item.id!),
+          {
             productCode: row.productCode,
             quantityPO: row.quantityPO,
             dateInputNPL: row.dateInputNPL,
             dateOutputFCR: row.dateOutputFCR
-          })
-        }
-      )
-    }
-    if (row.colorID !== item.productColor?.colorID) {
-      console.log('ProductColor progressing')
-      serviceActionUpdateOrCreate(
-        { field: 'productID', key: Number(item.id!) },
-        ProductColorAPI,
-        { colorID: row.colorID } as ProductColor,
-        setLoading,
-        (data, msg) => {
-          if (data?.success) {
-            message.success(msg)
-          } else {
-            message.error(msg)
+          } as Product,
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              const productNew = meta.data as Product
+              console.log(productNew)
+              handleStartSaveEditing(item.key!, { ...productNew })
+              message.success('Updated!')
+            } else {
+              message.error('Failed!')
+            }
           }
-          handleStartSaveEditing(item.id!, { ...item, productColor: { colorID: row.colorID } as ProductColor })
-        }
-      )
-    }
-    if (row.groupID !== item.productGroup?.groupID) {
-      console.log('ProductGroup progressing')
-      serviceActionUpdateOrCreate(
-        { field: 'productID', key: Number(item.id!) },
-        ProductGroupAPI,
-        { groupID: row.groupID } as ProductGroup,
-        setLoading,
-        (data, msg) => {
-          if (data?.success) {
-            message.success(msg)
-          } else {
-            message.error(msg)
+        )
+      }
+      if (row.colorID !== item.productColor?.colorID) {
+        console.log('Product color progressing...')
+        productColorService.updateItemBy(
+          { field: 'productID', key: item.key! },
+          { colorID: row.colorID },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              console.log(meta.data)
+              handleStartSaveEditing(item.key!, {
+                productColor: productColors.find((i) => i.colorID === row.colorID)
+              })
+              message.success('Updated!')
+            } else {
+              message.error('Failed!')
+            }
           }
-          handleStartSaveEditing(item.id!, { ...item, productGroup: { groupID: row.groupID } as ProductGroup })
-        }
-      )
-    }
-    if (row.printID !== item.printablePlace?.printID) {
-      console.log('PrintablePlace progressing')
-      serviceActionUpdateOrCreate(
-        { field: 'productID', key: Number(item.id!) },
-        PrintablePlaceAPI,
-        { printID: row.printID } as PrintablePlace,
-        setLoading,
-        (data, msg) => {
-          if (data?.success) {
-            message.success(msg)
-          } else {
-            message.error(msg)
-          }
-          handleStartSaveEditing(item.id!, { ...item, printablePlace: { printID: row.printID } as PrintablePlace })
-        }
-      )
+        )
+        //   await ProductColorAPI.createOrUpdateItemByProductID(Number(item.key!), {
+        //     colorID: row.colorID
+        //   } as ProductColor).then((meta) => {
+        //     if (meta?.success) {
+        //       const productColorNew = meta.data as ProductColor
+        //       itemNew = { ...itemNew, productColor: { ...productColorNew } }
+        //       handleStartSaveEditing(item.id!, { ...item })
+        //     }
+        //   })
+      }
+      if (row.groupID !== item.productGroup?.groupID) {
+        console.log('ProductGroup progressing...')
+        //   await ProductGroupAPI.createOrUpdateItemByProductID(Number(item.key!), {
+        //     groupID: row.groupID
+        //   } as ProductColor).then((meta) => {
+        //     if (meta?.success) {
+        //       const productGroupNew = meta.data as ProductGroup
+        //       itemNew = { ...itemNew, productGroup: { ...productGroupNew } }
+        //       handleStartSaveEditing(item.id!, { ...item })
+        //     }
+        //   })
+      }
+      if (row.printID !== item.printablePlace?.printID) {
+        console.log('PrintablePlace progressing...')
+        //   await PrintablePlaceAPI.createOrUpdateItemByProductID(Number(item.key!), {
+        //     groupID: row.groupID
+        //   } as ProductColor).then((meta) => {
+        //     if (meta?.success) {
+        //       const printablePlaceNew = meta.data as PrintablePlace
+        //       itemNew = { ...itemNew, printablePlace: { ...printablePlaceNew } }
+        //       handleStartSaveEditing(item.id!, { ...item })
+        //     }
+        //   })
+      }
+    } catch (error) {
+      console.log(error)
+      message.error('Failed!')
+      message.error('Error!')
+    } finally {
+      setLoading(false)
+      handleConfirmCancelEditing()
     }
   }
 
@@ -199,7 +216,7 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
                 setLoading,
                 (meta) => {
                   if (meta?.success) {
-                    handleConvertDataSource(meta)
+                    selfConvertDataSource(meta?.data as Product[])
                   }
                 }
               )
@@ -208,7 +225,7 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
           onSortChange={(val) => {
             productService.sortedListItems(val ? 'asc' : 'desc', setLoading, (meta) => {
               if (meta?.success) {
-                handleConvertDataSource(meta)
+                selfConvertDataSource(meta?.data as Product[])
               }
             })
           }}
@@ -216,7 +233,7 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
             form.setFieldValue('search', '')
             productService.getListItems(defaultRequestBody, setLoading, (meta) => {
               if (meta?.success) {
-                handleConvertDataSource(meta)
+                selfConvertDataSource(meta?.data as Product[])
               }
             })
           }}
@@ -241,7 +258,7 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
                 }
                 productService.getListItems(body, setLoading, (meta) => {
                   if (meta?.success) {
-                    handleConvertDataSource(meta)
+                    selfConvertDataSource(meta?.data as Product[])
                   }
                 })
               },
@@ -290,59 +307,50 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
             console.log(addNewForm)
             try {
               setLoading(true)
-              productService.createNewItem(addNewForm, setLoading, (meta1) => {
-                if (meta1?.success) {
-                  const itemNew = meta1.data as Product
+              productService.createNewItem(addNewForm, setLoading, (meta) => {
+                if (meta?.data) {
+                  const product = meta.data as Product
                   productColorService.createNewItem(
-                    { productID: itemNew.id!, colorID: addNewForm.colorID } as ProductColor,
+                    { productID: product.id!, colorID: addNewForm.colorID },
                     setLoading,
-                    async (meta2) => {
-                      if (meta2?.success) {
-                        const productColorNew = meta2.data as ProductColor
-                        const getProductColorNew = await ProductColorAPI.getItemByPk(productColorNew.id!)
-                        productGroupService.createNewItem(
-                          { productID: itemNew.id!, groupID: addNewForm.groupID } as ProductGroup,
-                          setLoading,
-                          async (meta3) => {
-                            if (meta3?.success) {
-                              const productGroupNew = meta3.data as ProductGroup
-                              const getProductGroupNew = await ProductGroupAPI.getItemByPk(productGroupNew.id!)
-                              printablePlaceService.createNewItem(
-                                { productID: itemNew.id!, printID: addNewForm.printID } as PrintablePlace,
-                                setLoading,
-                                async (meta4) => {
-                                  if (meta4?.success) {
-                                    const printablePlaceNew = meta4.data as PrintablePlace
-                                    const getPrintablePlaceNew = await PrintablePlaceAPI.getItemByPk(
-                                      printablePlaceNew.id!
-                                    )
-                                    handleStartAddNew({
-                                      key: Number(itemNew.id),
-                                      ...itemNew,
-                                      productColor: getProductColorNew?.data as ProductColor,
-                                      productGroup: getProductGroupNew?.data as ProductGroup,
-                                      printablePlace: getPrintablePlaceNew?.data as PrintablePlace
-                                    })
-                                    message.success('Created!')
-                                    setOpenModal(false)
-                                  }
-                                }
-                              )
-                            }
-                          }
-                        )
+                    (meta) => {
+                      if (meta?.success) {
+                        const productColorNew = meta.data as ProductColor
+                        handleStartAddNew({ id: product.id!, key: product.id!, ...productColorNew })
                       }
                     }
                   )
+                  productGroupService.createNewItem(
+                    { productID: product.id!, groupID: addNewForm.groupID },
+                    setLoading,
+                    (meta) => {
+                      if (meta?.success) {
+                        const productGroupNew = meta.data as ProductGroup
+                        handleStartAddNew({ id: product.id!, key: product.id!, ...productGroupNew })
+                      }
+                    }
+                  )
+                  printablePlaceService.createNewItem(
+                    { productID: product.id!, printID: addNewForm.printID },
+                    setLoading,
+                    (meta) => {
+                      if (meta?.success) {
+                        const printablePlaceNew = meta.data as PrintablePlace
+                        handleStartAddNew({ id: product.id!, key: product.id!, ...printablePlaceNew })
+                      }
+                    }
+                  )
+                  message.success('Created!')
                 } else {
                   message.error('Failed!')
                 }
               })
             } catch (error) {
-              message.error('Failed!')
               console.log(error)
+              message.error('Failed!')
             } finally {
               setLoading(false)
+              setOpenModal(false)
             }
           }}
         />

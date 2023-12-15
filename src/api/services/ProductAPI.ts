@@ -24,6 +24,22 @@ export default {
         errorFormatter(error)
       })
   },
+  createOrUpdateItemByPk: async (id: number, product: Product): Promise<ResponseDataType | undefined> => {
+    return await client
+      .post(`${NAMESPACE}/createOrUpdate/${id}`, {
+        ...product,
+        status: product.status ?? 'active'
+      })
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
   getItemByPk: async (id: number): Promise<ResponseDataType | undefined> => {
     return client
       .get(`${NAMESPACE}/${id}`)
@@ -68,7 +84,11 @@ export default {
   updateItemByPk: async (id: number, product: Product): Promise<ResponseDataType | undefined> => {
     return client
       .put(`${NAMESPACE}/${id}`, {
-        ...product
+        productCode: product.productCode,
+        quantityPO: product.quantityPO,
+        dateInputNPL: product.dateInputNPL,
+        dateOutputFCR: product.dateOutputFCR,
+        status: product.status
       })
       .then((res) => {
         if (res.data) {

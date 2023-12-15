@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { Collapse, ColorPicker, DatePicker, Flex, Form, Input, InputNumber, Select, Typography } from 'antd'
+import { Collapse, DatePicker, Flex, Form, Input, InputNumber, Select, Typography } from 'antd'
 import React, { memo, useEffect, useState } from 'react'
 import { defaultRequestBody } from '~/api/client'
 import ColorAPI from '~/api/services/ColorAPI'
@@ -39,6 +39,7 @@ const ProductListItem: React.FC<Props> = ({
   ...props
 }) => {
   const [colors, setColors] = useState<Color[]>([])
+  const [colorSelected, setColorSelected] = useState<Color | undefined>(undefined)
   const [groups, setGroups] = useState<Group[]>([])
   const [prints, setPrints] = useState<Print[]>([])
 
@@ -89,7 +90,7 @@ const ProductListItem: React.FC<Props> = ({
           Màu
         </Typography.Text>
         {isEditing ? (
-          <Form.Item name='colorID' className='m-0 w-full' initialValue={data.productColor?.color?.nameColor}>
+          <Form.Item name='colorID' className='m-0 w-full' initialValue={data.productColor?.color?.id}>
             <Select
               placeholder='Select color...'
               options={colors.map((item) => {
@@ -104,10 +105,19 @@ const ProductListItem: React.FC<Props> = ({
                   <>
                     <Flex justify='space-between' align='center' key={info.index}>
                       <Typography.Text>{ori.label}</Typography.Text>
-                      <div className={`m-0 h-6 w-6 rounded-lg border-none p-0 bg-${ori.key}`} />
+                      <div
+                        className='h-6 w-6 rounded-sm'
+                        style={{
+                          backgroundColor: `${ori.key}`
+                        }}
+                      />
                     </Flex>
                   </>
                 )
+              }}
+              onSelect={(value) => {
+                console.log(value)
+                setColorSelected(value)
               }}
               className='w-full'
             />
@@ -119,7 +129,6 @@ const ProductListItem: React.FC<Props> = ({
                 <Input
                   name='display-hexcolor'
                   readOnly
-                  disabled
                   value={data.productColor?.color?.nameColor}
                   className='m-0 py-0 pr-0'
                   prefix={
@@ -133,13 +142,11 @@ const ProductListItem: React.FC<Props> = ({
                   }
                   suffix={
                     <>
-                      <ColorPicker
-                        className='m-0 w-fit border-none p-0'
-                        size='middle'
-                        format='hex'
-                        value={data.productColor?.color?.hexColor}
-                        disabled
-                        showText
+                      <div
+                        className='h-6 w-6 rounded-sm'
+                        style={{
+                          backgroundColor: `${colors.find((i) => i.id === colorSelected?.id)?.hexColor}`
+                        }}
                       />
                     </>
                   }
@@ -156,11 +163,11 @@ const ProductListItem: React.FC<Props> = ({
           Số lượng PO
         </Typography.Text>
         {isEditing ? (
-          <Form.Item name='quantityPo' className='m-0 w-full'>
+          <Form.Item name='quantityPO' initialValue={data.quantityPO} className='m-0 w-full'>
             <InputNumber className='w-full text-center' readOnly={!isEditing} />
           </Form.Item>
         ) : (
-          <Input name='quantityPo' className='w-full' defaultValue={data.quantityPO} readOnly />
+          <Input name='quantityPo' className='w-full' value={data.quantityPO} readOnly />
         )}
       </Flex>
       <Flex className='w-full' align='center' justify='start' gap={5}>
@@ -168,7 +175,7 @@ const ProductListItem: React.FC<Props> = ({
           Ngày nhập NPL
         </Typography.Text>
         {isEditing ? (
-          <Form.Item name='dateInputNPL' className='m-0 w-full'>
+          <Form.Item name='dateInputNPL' initialValue={DayJS(data.dateInputNPL)} className='m-0 w-full'>
             <DatePicker className='w-full' format={DatePattern.display} />
           </Form.Item>
         ) : (
@@ -185,7 +192,7 @@ const ProductListItem: React.FC<Props> = ({
           Ngày xuất FCR
         </Typography.Text>
         {isEditing ? (
-          <Form.Item name='dateOutputFCR' className='m-0 w-full'>
+          <Form.Item name='dateOutputFCR' initialValue={DayJS(data.dateOutputFCR)} className='m-0 w-full'>
             <DatePicker className='w-full' format={DatePattern.display} />
           </Form.Item>
         ) : (

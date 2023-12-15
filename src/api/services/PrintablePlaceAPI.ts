@@ -22,6 +22,43 @@ export default {
         errorFormatter(error)
       })
   },
+  createOrUpdateItemByPk: async (id: number, item: PrintablePlace): Promise<ResponseDataType | undefined> => {
+    return await client
+      .post(`${NAMESPACE}/createOrUpdate`, {
+        id: id,
+        printID: item.printID,
+        productID: item.productID,
+        status: item.status ?? 'active'
+      })
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  createOrUpdateItemByProductID: async (
+    productID: number,
+    item: PrintablePlace
+  ): Promise<ResponseDataType | undefined> => {
+    return await client
+      .post(`${NAMESPACE}/createOrUpdate/productID/${productID}`, {
+        printID: item.printID,
+        status: item.status ?? 'active'
+      })
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
   getItemByPk: async (id: number): Promise<ResponseDataType | undefined> => {
     return client
       .get(`${NAMESPACE}/${id}`)

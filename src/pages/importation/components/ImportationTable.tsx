@@ -33,10 +33,8 @@ const ImportationTable: React.FC<Props> = ({ ...props }) => {
     setDataSource,
     dateCreation,
     setDateCreation,
-    handleConvertDataSource,
     handleStartAddNew,
     handleStartEditing,
-    handleStartDeleting,
     handleStartSaveEditing,
     handleConfirmCancelEditing,
     handleConfirmCancelDeleting

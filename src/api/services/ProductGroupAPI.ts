@@ -98,6 +98,43 @@ export default {
         errorFormatter(error)
       })
   },
+  createOrUpdateItemByPk: async (id: number, item: ProductGroup): Promise<ResponseDataType | undefined> => {
+    return await client
+      .post(`${NAMESPACE}/createOrUpdate`, {
+        id: id,
+        groupID: item.groupID,
+        productID: item.productID,
+        status: item.status ?? 'active'
+      })
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  createOrUpdateItemByProductID: async (
+    productID: number,
+    item: ProductGroup
+  ): Promise<ResponseDataType | undefined> => {
+    return await client
+      .post(`${NAMESPACE}/createOrUpdate/productID/${productID}`, {
+        groupID: item.groupID,
+        status: item.status ?? 'active'
+      })
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
   deleteItemByPk: async (id: number): Promise<ResponseDataType | undefined> => {
     return client
       .delete(`${NAMESPACE}/${id}`)

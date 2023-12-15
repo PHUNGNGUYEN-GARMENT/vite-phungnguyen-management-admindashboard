@@ -8,7 +8,7 @@ import PrintAPI from '~/api/services/PrintAPI'
 import AddNewTitle from '~/components/ui/AddNewTitle'
 import useAPICaller from '~/hooks/useAPICaller'
 import { Color, Group, Print } from '~/typing'
-import DayJS from '~/utils/date-formatter'
+import DayJS, { DatePattern } from '~/utils/date-formatter'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
   openModal: boolean
@@ -102,7 +102,7 @@ const ModalAddNewProduct: React.FC<Props> = ({ loading, openModal, setOpenModal,
               <Typography.Text className='w-28 flex-shrink-0'>Mã màu:</Typography.Text>
               <Form.Item name='colorID' className='m-0 w-full'>
                 <Select
-                  placeholder='Select 1 color...'
+                  placeholder='Select color...'
                   options={colors.map((item) => {
                     return {
                       label: item.nameColor,
@@ -194,13 +194,13 @@ const ModalAddNewProduct: React.FC<Props> = ({ loading, openModal, setOpenModal,
             <Flex className='w-full' align='center'>
               <Typography.Text className='w-28 flex-shrink-0'>Ngày nhập NPL</Typography.Text>
               <Form.Item className='m-0 w-full' name='dateInputNPL' initialValue={DayJS(Date.now())}>
-                <DatePicker className='w-full' />
+                <DatePicker format={DatePattern.display} className='w-full' />
               </Form.Item>
             </Flex>
             <Flex className='w-full' align='center'>
               <Typography.Text className='w-28 flex-shrink-0'>Ngày xuất FCR</Typography.Text>
               <Form.Item name='dateOutputFCR' className='m-0 w-full' initialValue={DayJS(Date.now())}>
-                <DatePicker className='w-full' />
+                <DatePicker format={DatePattern.display} className='w-full' />
               </Form.Item>
             </Flex>
           </Flex>
