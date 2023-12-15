@@ -86,7 +86,7 @@ const ProductListItem: React.FC<Props> = ({
     >
       <Flex className='w-full' align='center' justify='start' gap={5}>
         <Typography.Text type='secondary' className='w-40 font-medium'>
-          Mã màu
+          Màu
         </Typography.Text>
         {isEditing ? (
           <Form.Item name='colorID' className='m-0 w-full' initialValue={data.productColor?.color?.nameColor}>

@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { App as AntApp, Form, List } from 'antd'
 import React, { useEffect, useState } from 'react'
-import { v4 as uuidv4 } from 'uuid'
 import { RequestBodyType, defaultRequestBody } from '~/api/client'
 import PrintablePlaceAPI from '~/api/services/PrintablePlaceAPI'
 import ProductAPI from '~/api/services/ProductAPI'
@@ -45,7 +44,7 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
   const [products, setProducts] = useState<Product[]>([])
   const [productColors, setProductColors] = useState<ProductColor[]>([])
   const [productGroups, setProductGroups] = useState<ProductGroup[]>([])
-  const [productPrints, setProductPrints] = useState<PrintablePlace[]>([])
+  const [printablePlaces, setPrintablePlaces] = useState<PrintablePlace[]>([])
   const { message } = AntApp.useApp()
   console.log('Product page loading...')
 
@@ -67,27 +66,25 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
     })
     printablePlaceService.getListItems(defaultRequestBody, setLoading, (meta) => {
       if (meta?.success) {
-        setProductPrints(meta.data as PrintablePlace[])
+        console.log('Printable place', meta.data)
+        setPrintablePlaces(meta.data as PrintablePlace[])
       }
     })
   }, [])
 
   useEffect(() => {
-    if (products.length > 0) {
-      console.log('products: ', products)
-      setDataSource(
-        products.map((item) => {
-          return {
-            ...item,
-            productColor: productColors.find((i) => i.productID === item.id),
-            productGroup: productGroups.find((i) => i.productID === item.id),
-            printablePlace: productPrints.find((i) => i.productID === item.id),
-            key: item.id
-          } as ProductTableDataType
-        })
-      )
-    }
-  }, [products, productColors, productGroups, productPrints])
+    setDataSource(
+      products.map((item) => {
+        return {
+          ...item,
+          productColor: productColors.find((i) => i.productID === item.id),
+          productGroup: productGroups.find((i) => i.productID === item.id),
+          printablePlace: printablePlaces.find((i) => i.productID === item.id),
+          key: item.id
+        } as ProductTableDataType
+      })
+    )
+  }, [products, productColors, productGroups, printablePlaces])
 
   useEffect(() => {
     if (dataSource.length > 0) {
@@ -195,7 +192,7 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
                 {
                   ...defaultRequestBody,
                   search: {
-                    field: 'nameColor',
+                    field: 'productCode',
                     term: value
                   }
                 },
@@ -285,19 +282,68 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
       </Form>
       {openModal && (
         <ModalAddNewProduct
+          setLoading={setLoading}
+          loading={loading}
           openModal={openModal}
           setOpenModal={setOpenModal}
           onAddNew={(addNewForm) => {
-            productService.createNewItem(addNewForm, setLoading, (meta) => {
-              if (meta?.success) {
-                const itemNew = meta.data as Product
-                handleStartAddNew({ key: String(uuidv4()), ...itemNew })
-                message.success('Created!')
-                setOpenModal(false)
-              } else {
-                message.error('Failed!')
-              }
-            })
+            console.log(addNewForm)
+            try {
+              setLoading(true)
+              productService.createNewItem(addNewForm, setLoading, (meta1) => {
+                if (meta1?.success) {
+                  const itemNew = meta1.data as Product
+                  productColorService.createNewItem(
+                    { productID: itemNew.id!, colorID: addNewForm.colorID } as ProductColor,
+                    setLoading,
+                    async (meta2) => {
+                      if (meta2?.success) {
+                        const productColorNew = meta2.data as ProductColor
+                        const getProductColorNew = await ProductColorAPI.getItemByPk(productColorNew.id!)
+                        productGroupService.createNewItem(
+                          { productID: itemNew.id!, groupID: addNewForm.groupID } as ProductGroup,
+                          setLoading,
+                          async (meta3) => {
+                            if (meta3?.success) {
+                              const productGroupNew = meta3.data as ProductGroup
+                              const getProductGroupNew = await ProductGroupAPI.getItemByPk(productGroupNew.id!)
+                              printablePlaceService.createNewItem(
+                                { productID: itemNew.id!, printID: addNewForm.printID } as PrintablePlace,
+                                setLoading,
+                                async (meta4) => {
+                                  if (meta4?.success) {
+                                    const printablePlaceNew = meta4.data as PrintablePlace
+                                    const getPrintablePlaceNew = await PrintablePlaceAPI.getItemByPk(
+                                      printablePlaceNew.id!
+                                    )
+                                    handleStartAddNew({
+                                      key: Number(itemNew.id),
+                                      ...itemNew,
+                                      productColor: getProductColorNew?.data as ProductColor,
+                                      productGroup: getProductGroupNew?.data as ProductGroup,
+                                      printablePlace: getPrintablePlaceNew?.data as PrintablePlace
+                                    })
+                                    message.success('Created!')
+                                    setOpenModal(false)
+                                  }
+                                }
+                              )
+                            }
+                          }
+                        )
+                      }
+                    }
+                  )
+                } else {
+                  message.error('Failed!')
+                }
+              })
+            } catch (error) {
+              message.error('Failed!')
+              console.log(error)
+            } finally {
+              setLoading(false)
+            }
           }}
         />
       )}

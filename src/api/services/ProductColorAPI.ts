@@ -10,7 +10,7 @@ export default {
       .post(`${NAMESPACE}`, {
         productID: item.productID,
         colorID: item.colorID,
-        status: 'active'
+        status: item.status ?? 'active'
       })
       .then((res) => {
         if (res.data) {

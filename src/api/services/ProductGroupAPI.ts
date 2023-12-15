@@ -11,7 +11,7 @@ export default {
         productID: item.productID,
         groupID: item.groupID,
         name: item.name,
-        status: 'active'
+        status: item.status ?? 'active'
       })
       .then((res) => {
         if (res.data) {

@@ -1,40 +1,55 @@
 /* eslint-disable react-refresh/only-export-components */
-import { Calendar, Flex, Form, Input, InputNumber, Modal, Select, Typography } from 'antd'
+import { DatePicker, Flex, Form, Input, InputNumber, Modal, Select, Spin, Typography } from 'antd'
 import React, { memo, useEffect, useState } from 'react'
 import { defaultRequestBody } from '~/api/client'
 import ColorAPI from '~/api/services/ColorAPI'
-import { Color, Product } from '~/typing'
+import GroupAPI from '~/api/services/GroupAPI'
+import PrintAPI from '~/api/services/PrintAPI'
+import AddNewTitle from '~/components/ui/AddNewTitle'
+import useAPICaller from '~/hooks/useAPICaller'
+import { Color, Group, Print } from '~/typing'
 import DayJS from '~/utils/date-formatter'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
   openModal: boolean
+  loading: boolean
   setOpenModal: (enable: boolean) => void
-  onAddNew: (itemToAddNew: Product) => void
+  setLoading: (enable: boolean) => void
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onAddNew: (itemToAddNew: any) => void
 }
 
-const ModalAddNewProduct: React.FC<Props> = ({ openModal, setOpenModal, onAddNew, ...props }) => {
+const ModalAddNewProduct: React.FC<Props> = ({ loading, openModal, setOpenModal, setLoading, onAddNew, ...props }) => {
   const [form] = Form.useForm()
+  const colorService = useAPICaller<Color>(ColorAPI)
+  const groupService = useAPICaller<Group>(GroupAPI)
+  const printService = useAPICaller<Print>(PrintAPI)
   const [colors, setColors] = useState<Color[]>([])
+  const [groups, setGroups] = useState<Group[]>([])
+  const [prints, setPrints] = useState<Print[]>([])
   console.log('Load AddNewProduct...')
 
   useEffect(() => {
-    ColorAPI.getItems({
-      ...defaultRequestBody,
-      paginator: {
-        page: 1,
-        pageSize: 1000
+    colorService.getListItems(defaultRequestBody, setLoading, (meta) => {
+      if (meta?.success) {
+        setColors(meta.data as Color[])
       }
-    }).then((data) => {
-      if (data?.success) {
-        const _colors = data.data as Product[]
-        setColors(_colors)
+    })
+    groupService.getListItems(defaultRequestBody, setLoading, (meta) => {
+      if (meta?.success) {
+        setGroups(meta.data as Group[])
+      }
+    })
+    printService.getListItems(defaultRequestBody, setLoading, (meta) => {
+      if (meta?.success) {
+        setPrints(meta.data as Print[])
       }
     })
   }, [])
 
   async function handleOk() {
     const row = await form.validateFields()
-    onAddNew({ ...row })
+    onAddNew(row)
   }
 
   function handleCancel() {
@@ -42,123 +57,155 @@ const ModalAddNewProduct: React.FC<Props> = ({ openModal, setOpenModal, onAddNew
   }
 
   return (
-    <Modal open={openModal} onOk={handleOk} centered width='auto' onCancel={handleCancel}>
-      <Form form={form} {...props}>
-        <Flex vertical gap={20} className='w-full sm:w-[500px] md:w-[600px] lg:w-[900px]'>
-          <Typography.Title level={2}>Add new product</Typography.Title>
-          <Flex align='center' gap={5} className='w-full'>
-            <Typography.Text className='w-24 flex-shrink-0'>Mã Code:</Typography.Text>
-            <Form.Item
-              className='m-0 w-full'
-              name='productCode'
-              rules={[
-                {
-                  required: true,
-                  message: `Please enter product code!`
-                }
-              ]}
-            >
-              <Input allowClear className='w-full' placeholder='Product code..' />
-            </Form.Item>
-          </Flex>
-          <Flex align='center' gap={5} className='w-full'>
-            <Typography.Text className='w-24 flex-shrink-0'>Số lượng PO:</Typography.Text>
-            <Form.Item
-              name='quantityPO'
-              className='m-0 w-full'
-              rules={[
-                {
-                  required: true,
-                  message: `Please enter quantity PO!`
-                }
-              ]}
-            >
-              <InputNumber className='w-full' placeholder='Quantity po..' />
-            </Form.Item>
-          </Flex>
-          <Flex align='center' gap={5} className='w-full'>
-            <Typography.Text className='w-24 flex-shrink-0'>Màu:</Typography.Text>
-
-            <Form.Item name='colorID'>
-              <Select
-                placeholder='Select color...'
-                options={colors.map((item) => {
-                  return {
-                    label: item.nameColor,
-                    value: item.id,
-                    key: item.hexColor
+    <Modal
+      title={<AddNewTitle title='Add new' />}
+      open={openModal}
+      onOk={handleOk}
+      centered
+      width='auto'
+      onCancel={handleCancel}
+    >
+      <Spin spinning={loading} tip='loading'>
+        <Form form={form} {...props}>
+          <Flex vertical gap={20} className='w-full sm:w-[350px]'>
+            <Flex align='center' className='w-full'>
+              <Typography.Text className='w-28 flex-shrink-0'>Mã Code:</Typography.Text>
+              <Form.Item
+                className='m-0 w-full'
+                name='productCode'
+                rules={[
+                  {
+                    required: true,
+                    message: `Please enter product code!`
                   }
-                })}
-                optionRender={(ori, info) => {
-                  return (
-                    <>
-                      <Flex justify='space-between' align='center' key={info.index}>
-                        <Typography.Text>{ori.label}</Typography.Text>
-                        <div
-                          className='h-6 w-6 rounded-sm'
-                          style={{
-                            backgroundColor: `${ori.key}`
-                          }}
-                        />
-                      </Flex>
-                    </>
-                  )
-                }}
-                className='w-full'
-              />
-            </Form.Item>
-          </Flex>
-          <Flex className='w-full' align='center' justify='start' gap={5}>
-            <Typography.Text type='secondary' className='w-40 font-medium'>
-              Mã màu
-            </Typography.Text>
-            <Form.Item name='colorID'>
-              <Select
-                placeholder='Select color...'
-                options={colors.map((item) => {
-                  return {
-                    label: item.nameColor,
-                    value: item.id,
-                    key: item.hexColor
+                ]}
+              >
+                <Input allowClear className='w-full' placeholder='Product code..' />
+              </Form.Item>
+            </Flex>
+            <Flex align='center' className='w-full'>
+              <Typography.Text className='w-28 flex-shrink-0'>Số lượng PO:</Typography.Text>
+              <Form.Item
+                name='quantityPO'
+                className='m-0 w-full'
+                rules={[
+                  {
+                    required: true,
+                    message: `Please enter quantity PO!`
                   }
-                })}
-                optionRender={(ori, info) => {
-                  return (
-                    <>
-                      <Flex justify='space-between' align='center' key={info.index}>
-                        <Typography.Text>{ori.label}</Typography.Text>
-                        <div
-                          className='h-6 w-6 rounded-sm'
-                          style={{
-                            backgroundColor: `${ori.key}`
-                          }}
-                        />
-                      </Flex>
-                    </>
-                  )
-                }}
-                className='w-full'
-              />
-            </Form.Item>
+                ]}
+              >
+                <InputNumber className='w-full' placeholder='Quantity po..' />
+              </Form.Item>
+            </Flex>
+            <Flex align='center' className='w-full'>
+              <Typography.Text className='w-28 flex-shrink-0'>Mã màu:</Typography.Text>
+              <Form.Item name='colorID' className='m-0 w-full'>
+                <Select
+                  placeholder='Select 1 color...'
+                  options={colors.map((item) => {
+                    return {
+                      label: item.nameColor,
+                      value: item.id,
+                      key: item.hexColor
+                    }
+                  })}
+                  optionRender={(ori, info) => {
+                    return (
+                      <>
+                        <Flex justify='space-between' align='center' key={info.index}>
+                          <Typography.Text>{ori.label}</Typography.Text>
+                          <div
+                            className='h-6 w-6 rounded-sm'
+                            style={{
+                              backgroundColor: `${ori.key}`
+                            }}
+                          />
+                        </Flex>
+                      </>
+                    )
+                  }}
+                  className='w-full'
+                />
+              </Form.Item>
+            </Flex>
+            <Flex className='w-full' align='center'>
+              <Typography.Text className='w-28 flex-shrink-0'>Nhóm</Typography.Text>
+              <Form.Item name='groupID' className='m-0 w-full'>
+                <Select
+                  placeholder='Select group...'
+                  options={groups.map((item) => {
+                    return {
+                      label: item.name,
+                      value: item.id,
+                      key: item.id
+                    }
+                  })}
+                  optionRender={(ori, info) => {
+                    return (
+                      <>
+                        <Flex justify='space-between' align='center' key={info.index}>
+                          <Typography.Text>{ori.label}</Typography.Text>
+                          <div
+                            className='h-6 w-6 rounded-sm'
+                            style={{
+                              backgroundColor: `${ori.key}`
+                            }}
+                          />
+                        </Flex>
+                      </>
+                    )
+                  }}
+                  className='w-full'
+                />
+              </Form.Item>
+            </Flex>
+            <Flex className='w-full' align='center'>
+              <Typography.Text className='w-28 flex-shrink-0'>Nơi in</Typography.Text>
+              <Form.Item name='printID' className='m-0 w-full'>
+                <Select
+                  placeholder='Select print place...'
+                  options={prints.map((item) => {
+                    return {
+                      label: item.name,
+                      value: item.id,
+                      key: item.id
+                    }
+                  })}
+                  optionRender={(ori, info) => {
+                    return (
+                      <>
+                        <Flex justify='space-between' align='center' key={info.index}>
+                          <Typography.Text>{ori.label}</Typography.Text>
+                          <div
+                            className='h-6 w-6 rounded-sm'
+                            style={{
+                              backgroundColor: `${ori.key}`
+                            }}
+                          />
+                        </Flex>
+                      </>
+                    )
+                  }}
+                  className='w-full'
+                />
+              </Form.Item>
+            </Flex>
+            <Flex className='w-full' align='center'>
+              <Typography.Text className='w-28 flex-shrink-0'>Ngày nhập NPL</Typography.Text>
+              <Form.Item className='m-0 w-full' name='dateInputNPL' initialValue={DayJS(Date.now())}>
+                <DatePicker className='w-full' />
+              </Form.Item>
+            </Flex>
+            <Flex className='w-full' align='center'>
+              <Typography.Text className='w-28 flex-shrink-0'>Ngày xuất FCR</Typography.Text>
+              <Form.Item name='dateOutputFCR' className='m-0 w-full' initialValue={DayJS(Date.now())}>
+                <DatePicker className='w-full' />
+              </Form.Item>
+            </Flex>
           </Flex>
-          <Flex className='w-full' align='center' justify='start' gap={5}>
-            <Typography.Text type='secondary' className='w-40 font-medium'>
-              Ngày nhập NPL
-            </Typography.Text>
-            <Form.Item className='m-0' name='dateInputNPL' initialValue={DayJS(Date.now())}>
-              <Calendar fullscreen={false} />
-            </Form.Item>
-          </Flex>
-          <Flex className='w-full' align='center' justify='start' gap={5}>
-            <Typography.Text type='secondary' className='w-40 font-medium'>
-              Ngày xuất FCR
-            </Typography.Text>
-            <Form.Item name='dateOutputFCR' initialValue={DayJS(Date.now())}>
-              <Calendar fullscreen={false} />
-            </Form.Item>
-          </Flex>
-        </Flex>
-      </Form>
+        </Form>
+      </Spin>
     </Modal>
   )
 }

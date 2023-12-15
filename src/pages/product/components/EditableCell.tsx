@@ -51,9 +51,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
     }
   ]
 
-  const convertStatusType = (
-    value: string | number
-  ): { type: StatusType; label: string } => {
+  const convertStatusType = (value: string | number): { type: StatusType; label: string } => {
     switch (value) {
       case 'error':
         return { type: 'error', label: 'Error' }

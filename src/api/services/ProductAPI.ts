@@ -5,14 +5,12 @@ import { errorFormatter } from '~/utils/promise-formatter'
 const NAMESPACE = 'products'
 
 export default {
-  createNewItem: async (
-    product: Product
-  ): Promise<ResponseDataType | undefined> => {
+  createNewItem: async (product: Product): Promise<ResponseDataType | undefined> => {
     return await client
       .post(`${NAMESPACE}`, {
         productCode: product.productCode,
         quantityPO: product.quantityPO,
-        status: product.status,
+        status: product.status ?? 'active',
         dateInputNPL: product.dateInputNPL,
         dateOutputFCR: product.dateOutputFCR
       })
@@ -39,10 +37,7 @@ export default {
         errorFormatter(error)
       })
   },
-  getItemBy: async (query: {
-    field: string
-    key: React.Key
-  }): Promise<ResponseDataType | undefined> => {
+  getItemBy: async (query: { field: string; key: React.Key }): Promise<ResponseDataType | undefined> => {
     return client
       .get(`${NAMESPACE}/${query.field}/${query.key}`)
       .then((res) => {
@@ -55,9 +50,7 @@ export default {
         errorFormatter(error)
       })
   },
-  getItems: async (
-    bodyRequest: RequestBodyType
-  ): Promise<ResponseDataType | undefined> => {
+  getItems: async (bodyRequest: RequestBodyType): Promise<ResponseDataType | undefined> => {
     return await client
       .post(`${NAMESPACE}/find`, {
         ...bodyRequest
@@ -72,10 +65,7 @@ export default {
         errorFormatter(error)
       })
   },
-  updateItemByPk: async (
-    id: number,
-    product: Product
-  ): Promise<ResponseDataType | undefined> => {
+  updateItemByPk: async (id: number, product: Product): Promise<ResponseDataType | undefined> => {
     return client
       .put(`${NAMESPACE}/${id}`, {
         ...product

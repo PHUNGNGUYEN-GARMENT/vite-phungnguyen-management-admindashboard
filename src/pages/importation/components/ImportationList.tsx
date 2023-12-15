@@ -61,8 +61,10 @@ const ImportationList: React.FC<Props> = ({ ...props }) => {
         }
         handleStartSaveEditing(item.id!, {
           ...item,
-          quantity: row.quantity,
-          dateImported: row.dateImported
+          importation: {
+            quantity: row.quantity,
+            dateImported: row.dateImported
+          }
         })
       }
     )

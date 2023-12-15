@@ -39,7 +39,7 @@ function EditableCell<T extends { key?: React.Key }>({
       case 'select':
         return <Select />
       case 'datepicker':
-        return <DatePicker format={DatePattern.display} className='w-full' />
+        return <DatePicker format={DatePattern.display} className='' />
       default:
         return <Input className='w-full' />
     }

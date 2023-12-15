@@ -8,8 +8,9 @@ export default {
   createNewItem: async (items: PrintablePlace): Promise<ResponseDataType | undefined> => {
     return client
       .post(`${NAMESPACE}`, {
-        ...items,
-        status: 'active'
+        printID: items.printID,
+        productID: items.productID,
+        status: items.status ?? 'active'
       })
       .then((res) => {
         if (res.data) {
