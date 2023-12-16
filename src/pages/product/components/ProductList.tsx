@@ -41,7 +41,6 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
     dateCreation,
     handleStartSaveEditing,
     setDateCreation,
-    handleStartAddNew,
     handleStartEditing,
     handleStartDeleting,
     handleConfirmCancelEditing,
@@ -65,22 +64,24 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
   const { message } = AntApp.useApp()
 
   useEffect(() => {
-    colorService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        setColors(meta.data as Color[])
-      }
-    })
-    groupService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        setGroups(meta.data as Group[])
-      }
-    })
-    printService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        setPrints(meta.data as Print[])
-      }
-    })
-  }, [isEditing])
+    if (editingKey !== '') {
+      colorService.getListItems(defaultRequestBody, setLoading, (meta) => {
+        if (meta?.success) {
+          setColors(meta.data as Color[])
+        }
+      })
+      groupService.getListItems(defaultRequestBody, setLoading, (meta) => {
+        if (meta?.success) {
+          setGroups(meta.data as Group[])
+        }
+      })
+      printService.getListItems(defaultRequestBody, setLoading, (meta) => {
+        if (meta?.success) {
+          setPrints(meta.data as Print[])
+        }
+      })
+    }
+  }, [editingKey])
 
   useEffect(() => {
     productService.getListItems(defaultRequestBody, setLoading, (meta) => {

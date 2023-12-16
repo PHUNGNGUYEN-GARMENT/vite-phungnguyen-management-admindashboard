@@ -39,7 +39,6 @@ const ProductListItem: React.FC<Props> = ({
   ...props
 }) => {
   const [colors, setColors] = useState<Color[]>([])
-  const [colorSelected, setColorSelected] = useState<Color | undefined>(undefined)
   const [groups, setGroups] = useState<Group[]>([])
   const [prints, setPrints] = useState<Print[]>([])
 
@@ -115,7 +114,6 @@ const ProductListItem: React.FC<Props> = ({
                   </>
                 )
               }}
-              onSelect={(value) => setColorSelected(value)}
               className='w-full'
             />
           </Form.Item>
