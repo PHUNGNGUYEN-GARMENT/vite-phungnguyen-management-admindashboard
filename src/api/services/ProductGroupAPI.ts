@@ -100,8 +100,7 @@ export default {
   },
   createOrUpdateItemByPk: async (id: number, item: ProductGroup): Promise<ResponseDataType | undefined> => {
     return await client
-      .post(`${NAMESPACE}/createOrUpdate`, {
-        id: id,
+      .post(`${NAMESPACE}/createOrUpdate/${id}`, {
         groupID: item.groupID,
         productID: item.productID,
         status: item.status ?? 'active'
@@ -116,15 +115,26 @@ export default {
         errorFormatter(error)
       })
   },
-  createOrUpdateItemByProductID: async (
-    productID: number,
+  createOrUpdateItemBy: async (
+    query: {
+      field: string
+      key: React.Key
+    },
     item: ProductGroup
   ): Promise<ResponseDataType | undefined> => {
     return await client
-      .post(`${NAMESPACE}/createOrUpdate/productID/${productID}`, {
-        groupID: item.groupID,
-        status: item.status ?? 'active'
-      })
+      .post(
+        `${NAMESPACE}/createOrUpdate/${query.field}/${query.key}`,
+        query.field === 'productID'
+          ? {
+              groupID: item.groupID,
+              status: item.status ?? 'active'
+            }
+          : {
+              productID: item.productID,
+              status: item.status ?? 'active'
+            }
+      )
       .then((res) => {
         if (res.data) {
           return res.data as ResponseDataType

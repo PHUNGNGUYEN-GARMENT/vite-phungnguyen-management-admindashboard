@@ -5,7 +5,7 @@ import { RequestBodyType, defaultRequestBody } from '~/api/client'
 import ColorAPI from '~/api/services/ColorAPI'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
-import useAPICaller, { serviceActionUpdate } from '~/hooks/useAPICaller'
+import useAPIService, { serviceActionUpdate } from '~/hooks/useAPIService'
 import { Color } from '~/typing'
 import { ColorTableDataType } from '../type'
 import ColorListItem from './ColorListItem'
@@ -14,7 +14,7 @@ import ModalAddNewColor from './ModalAddNewColor'
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 const ColorList: React.FC<Props> = ({ ...props }) => {
-  const service = useAPICaller<Color>(ColorAPI)
+  const service = useAPIService<Color>(ColorAPI)
   const {
     form,
     loading,

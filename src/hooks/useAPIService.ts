@@ -232,7 +232,7 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
   ) => {
     try {
       setLoading?.(true)
-      const meta = await apiService.deleteItemBy(query)
+      const meta = await apiService.deleteItemBy?.(query)
       if (meta?.success) {
         onDataSuccess?.(meta, 'Deleted!')
       } else {
@@ -278,6 +278,7 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
     try {
       setLoading?.(true)
       const meta = await apiService.createOrUpdateItemBy?.(query, item)
+      console.log(meta)
       onDataSuccess?.(meta, meta?.message)
       setMetaData(meta)
     } catch (err) {
@@ -303,5 +304,34 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
     sortedListItems,
     createOrUpdateItemBy,
     createOrUpdateItemByPk
+  }
+}
+
+export async function serviceActionUpdate<T extends { id?: number }>(
+  query: {
+    field: string
+    key: React.Key
+  },
+  service: APIService<ItemWithId>,
+  itemToUpdate: Partial<T>,
+  setLoading?: (enable: boolean) => void,
+  onDataSuccess?: (data: ResponseDataType | undefined, message: string) => void
+) {
+  try {
+    setLoading?.(true)
+    const itemUpdated =
+      query.field === 'id'
+        ? await service.updateItemByPk(Number(query.key), { ...itemToUpdate })
+        : await service.updateItemBy(query, { ...itemToUpdate })
+    if (itemUpdated?.success) {
+      onDataSuccess?.(itemUpdated, 'Updated!')
+    } else {
+      onDataSuccess?.(itemUpdated, 'Update failed!')
+    }
+  } catch (err) {
+    console.log(err)
+    setLoading?.(false)
+  } finally {
+    setLoading?.(false)
   }
 }

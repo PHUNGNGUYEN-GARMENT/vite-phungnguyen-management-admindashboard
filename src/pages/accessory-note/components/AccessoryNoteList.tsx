@@ -4,7 +4,7 @@ import { RequestBodyType, defaultRequestBody } from '~/api/client'
 import AccessoryNoteAPI from '~/api/services/AccessoryNoteAPI'
 import useList, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
-import useAPICaller, { serviceActionUpdate } from '~/hooks/useAPICaller'
+import useAPIService, { serviceActionUpdate } from '~/hooks/useAPIService'
 import { AccessoryNote, Group } from '~/typing'
 import { AccessoryNoteTableDataType } from '../type'
 import AccessoryNoteListItem from './AccessoryNoteListItem'
@@ -13,7 +13,7 @@ import ModalAddNewGroup from './ModalAddNewAccessoryNote'
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 const AccessoryNoteList: React.FC<Props> = ({ ...props }) => {
-  const service = useAPICaller<AccessoryNote>(AccessoryNoteAPI)
+  const service = useAPIService<AccessoryNote>(AccessoryNoteAPI)
   const {
     form,
     editingKey,

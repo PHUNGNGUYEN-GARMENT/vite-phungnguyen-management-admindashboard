@@ -22,6 +22,88 @@ export default {
         errorFormatter(error)
       })
   },
+  createOrUpdateItemByPk: async (id: number, item: ProductColor): Promise<ResponseDataType | undefined> => {
+    return await client
+      .post(`${NAMESPACE}/createOrUpdate/${id}`, {
+        colorID: item.colorID,
+        productID: item.productID,
+        status: item.status ?? 'active'
+      })
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  createOrUpdateItemBy: async (
+    query: {
+      field: string
+      key: React.Key
+    },
+    item: ProductColor
+  ): Promise<ResponseDataType | undefined> => {
+    return await client
+      .post(
+        `${NAMESPACE}/createOrUpdate/${query.field}/${query.key}`,
+        query.field === 'productID'
+          ? {
+              colorID: item.colorID,
+              status: item.status ?? 'active'
+            }
+          : {
+              productID: item.productID,
+              status: item.status ?? 'active'
+            }
+      )
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  createOrUpdateItemByProductID: async (
+    productID: number,
+    item: ProductColor
+  ): Promise<ResponseDataType | undefined> => {
+    return await client
+      .post(`${NAMESPACE}/createOrUpdate/productID/${productID}`, {
+        colorID: item.colorID,
+        status: item.status ?? 'active'
+      })
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  createOrUpdateItemByColorID: async (colorID: number, item: ProductColor): Promise<ResponseDataType | undefined> => {
+    return await client
+      .post(`${NAMESPACE}/createOrUpdate/colorID/${colorID}`, {
+        productID: item.productID,
+        status: item.status ?? 'active'
+      })
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
   getItemByPk: async (id: number): Promise<ResponseDataType | undefined> => {
     return client
       .get(`${NAMESPACE}/${id}`)
@@ -88,43 +170,6 @@ export default {
     return client
       .put(`${NAMESPACE}/${query.field}/${query.key}`, {
         ...item
-      })
-      .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
-      })
-      .catch(function (error) {
-        errorFormatter(error)
-      })
-  },
-  createOrUpdateItemByPk: async (id: number, item: ProductColor): Promise<ResponseDataType | undefined> => {
-    return await client
-      .post(`${NAMESPACE}/createOrUpdate`, {
-        id: id,
-        colorID: item.colorID,
-        productID: item.productID,
-        status: item.status ?? 'active'
-      })
-      .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
-      })
-      .catch(function (error) {
-        errorFormatter(error)
-      })
-  },
-  createOrUpdateItemByProductID: async (
-    productID: number,
-    item: ProductColor
-  ): Promise<ResponseDataType | undefined> => {
-    return await client
-      .post(`${NAMESPACE}/createOrUpdate/productID/${productID}`, {
-        colorID: item.colorID,
-        status: item.status ?? 'active'
       })
       .then((res) => {
         if (res.data) {

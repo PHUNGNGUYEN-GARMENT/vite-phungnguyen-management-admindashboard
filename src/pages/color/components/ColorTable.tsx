@@ -9,7 +9,7 @@ import useTable, { TableCellProps, TableItemWithKey } from '~/components/hooks/u
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableCell, { EditableTableProps } from '~/components/ui/Table/EditableCell'
 import ItemAction from '~/components/ui/Table/ItemAction'
-import useAPICaller, { serviceActionUpdate } from '~/hooks/useAPICaller'
+import useAPIService, { serviceActionUpdate } from '~/hooks/useAPIService'
 import { RootState } from '~/store/store'
 import { Color } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
@@ -21,7 +21,7 @@ type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 const ColorTable: React.FC<Props> = ({ ...props }) => {
-  const service = useAPICaller<Color>(ColorAPI)
+  const service = useAPIService<Color>(ColorAPI)
   const {
     form,
     loading,

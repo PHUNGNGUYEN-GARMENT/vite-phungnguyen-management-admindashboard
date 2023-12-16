@@ -4,7 +4,7 @@ import { RequestBodyType, defaultRequestBody } from '~/api/client'
 import ImportationAPI from '~/api/services/ImportationAPI'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
-import useAPICaller, { serviceActionUpdate } from '~/hooks/useAPICaller'
+import useAPIService, { serviceActionUpdate } from '~/hooks/useAPIService'
 import { Importation } from '~/typing'
 import { ImportationTableDataType } from '../type'
 import ImportationListItem from './ImportationListItem'
@@ -13,7 +13,7 @@ import ModalAddNewImportation from './ModalAddNewImportation'
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 const ImportationList: React.FC<Props> = ({ ...props }) => {
-  const service = useAPICaller<Importation>(ImportationAPI)
+  const service = useAPIService<Importation>(ImportationAPI)
   const {
     form,
     loading,

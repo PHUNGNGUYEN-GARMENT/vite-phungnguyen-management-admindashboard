@@ -115,47 +115,12 @@ const ProductListItem: React.FC<Props> = ({
                   </>
                 )
               }}
-              onSelect={(value) => {
-                console.log(value)
-                setColorSelected(value)
-              }}
+              onSelect={(value) => setColorSelected(value)}
               className='w-full'
             />
           </Form.Item>
         ) : (
-          <>
-            {data.productColor ? (
-              <Flex className='w-full'>
-                <Input
-                  name='display-hexcolor'
-                  readOnly
-                  value={data.productColor?.color?.nameColor}
-                  className='m-0 py-0 pr-0'
-                  prefix={
-                    <>
-                      {data.productColor.color?.status === 'deleted' && (
-                        <Typography.Text type='danger' className='rounded-sm uppercase' code>
-                          {data.productColor.color?.status}
-                        </Typography.Text>
-                      )}
-                    </>
-                  }
-                  suffix={
-                    <>
-                      <div
-                        className='h-6 w-6 rounded-sm'
-                        style={{
-                          backgroundColor: `${colors.find((i) => i.id === colorSelected?.id)?.hexColor}`
-                        }}
-                      />
-                    </>
-                  }
-                />
-              </Flex>
-            ) : (
-              <Input readOnly name='display-hexcolor' />
-            )}
-          </>
+          <Input value={data.productColor?.color?.nameColor} readOnly name='display-hexcolor' />
         )}
       </Flex>
       <Flex className='w-full' align='center' justify='start' gap={5}>
@@ -183,7 +148,7 @@ const ProductListItem: React.FC<Props> = ({
             name='dateOutputFCR'
             readOnly
             className='zoom-in-0'
-            value={DayJS(data.dateOutputFCR).format('DD/MM/YYYY')}
+            value={DayJS(data.dateInputNPL).format('DD/MM/YYYY')}
           />
         )}
       </Flex>
@@ -246,7 +211,7 @@ const ProductListItem: React.FC<Props> = ({
           Nơi in
         </Typography.Text>
         {isEditing ? (
-          <Form.Item name='printID' initialValue={data.printablePlace?.print?.name} className='m-0 w-full'>
+          <Form.Item name='printID' initialValue={data.printablePlace?.print?.id} className='m-0 w-full'>
             <Select
               placeholder='Select print place...'
               options={prints.map((item) => {

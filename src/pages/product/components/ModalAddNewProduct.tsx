@@ -6,7 +6,8 @@ import ColorAPI from '~/api/services/ColorAPI'
 import GroupAPI from '~/api/services/GroupAPI'
 import PrintAPI from '~/api/services/PrintAPI'
 import AddNewTitle from '~/components/ui/AddNewTitle'
-import useAPICaller from '~/hooks/useAPICaller'
+import DotRequired from '~/components/ui/DotRequired'
+import useAPIService from '~/hooks/useAPIService'
 import { Color, Group, Print } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 
@@ -21,9 +22,9 @@ interface Props extends React.HTMLAttributes<HTMLElement> {
 
 const ModalAddNewProduct: React.FC<Props> = ({ loading, openModal, setOpenModal, setLoading, onAddNew, ...props }) => {
   const [form] = Form.useForm()
-  const colorService = useAPICaller<Color>(ColorAPI)
-  const groupService = useAPICaller<Group>(GroupAPI)
-  const printService = useAPICaller<Print>(PrintAPI)
+  const colorService = useAPIService<Color>(ColorAPI)
+  const groupService = useAPIService<Group>(GroupAPI)
+  const printService = useAPIService<Print>(PrintAPI)
   const [colors, setColors] = useState<Color[]>([])
   const [groups, setGroups] = useState<Group[]>([])
   const [prints, setPrints] = useState<Print[]>([])
@@ -69,10 +70,13 @@ const ModalAddNewProduct: React.FC<Props> = ({ loading, openModal, setOpenModal,
         <Form form={form} {...props}>
           <Flex vertical gap={20} className='w-full sm:w-[350px]'>
             <Flex align='center' className='w-full'>
-              <Typography.Text className='w-28 flex-shrink-0'>Mã Code:</Typography.Text>
+              <Typography.Text className='w-28 flex-shrink-0'>
+                Mã Code <DotRequired />
+              </Typography.Text>
               <Form.Item
                 className='m-0 w-full'
                 name='productCode'
+                required
                 rules={[
                   {
                     required: true,
@@ -84,9 +88,12 @@ const ModalAddNewProduct: React.FC<Props> = ({ loading, openModal, setOpenModal,
               </Form.Item>
             </Flex>
             <Flex align='center' className='w-full'>
-              <Typography.Text className='w-28 flex-shrink-0'>Số lượng PO:</Typography.Text>
+              <Typography.Text className='w-28 flex-shrink-0'>
+                Số lượng PO <DotRequired />
+              </Typography.Text>
               <Form.Item
                 name='quantityPO'
+                required
                 className='m-0 w-full'
                 rules={[
                   {
@@ -192,14 +199,18 @@ const ModalAddNewProduct: React.FC<Props> = ({ loading, openModal, setOpenModal,
               </Form.Item>
             </Flex>
             <Flex className='w-full' align='center'>
-              <Typography.Text className='w-28 flex-shrink-0'>Ngày nhập NPL</Typography.Text>
-              <Form.Item className='m-0 w-full' name='dateInputNPL' initialValue={DayJS(Date.now())}>
+              <Typography.Text className='w-28 flex-shrink-0'>
+                Ngày nhập NPL <DotRequired />
+              </Typography.Text>
+              <Form.Item required className='m-0 w-full' name='dateInputNPL' initialValue={DayJS(Date.now())}>
                 <DatePicker format={DatePattern.display} className='w-full' />
               </Form.Item>
             </Flex>
             <Flex className='w-full' align='center'>
-              <Typography.Text className='w-28 flex-shrink-0'>Ngày xuất FCR</Typography.Text>
-              <Form.Item name='dateOutputFCR' className='m-0 w-full' initialValue={DayJS(Date.now())}>
+              <Typography.Text className='w-28 flex-shrink-0'>
+                Ngày xuất FCR <DotRequired />
+              </Typography.Text>
+              <Form.Item required name='dateOutputFCR' className='m-0 w-full' initialValue={DayJS(Date.now())}>
                 <DatePicker format={DatePattern.display} className='w-full' />
               </Form.Item>
             </Flex>

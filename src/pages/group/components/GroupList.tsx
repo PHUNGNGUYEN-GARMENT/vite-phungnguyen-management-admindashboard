@@ -4,7 +4,7 @@ import { RequestBodyType, defaultRequestBody } from '~/api/client'
 import GroupAPI from '~/api/services/GroupAPI'
 import useList, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
-import useAPICaller, { serviceActionUpdate } from '~/hooks/useAPICaller'
+import useAPIService, { serviceActionUpdate } from '~/hooks/useAPIService'
 import { Group } from '~/typing'
 import { GroupTableDataType } from '../type'
 import GroupListItem from './GroupListItem'
@@ -13,7 +13,7 @@ import ModalAddNewGroup from './ModalAddNewGroup'
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 const GroupList: React.FC<Props> = ({ ...props }) => {
-  const service = useAPICaller<Group>(GroupAPI)
+  const service = useAPIService<Group>(GroupAPI)
   const {
     form,
     editingKey,

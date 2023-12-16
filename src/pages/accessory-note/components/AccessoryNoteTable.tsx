@@ -6,7 +6,7 @@ import AccessoryNoteAPI from '~/api/services/AccessoryNoteAPI'
 import useTable, { TableCellProps, TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import ItemAction from '~/components/ui/Table/ItemAction'
-import useAPICaller, { serviceActionUpdate } from '~/hooks/useAPICaller'
+import useAPIService, { serviceActionUpdate } from '~/hooks/useAPIService'
 import { RootState } from '~/store/store'
 import { AccessoryNote } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
@@ -19,7 +19,7 @@ type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 const AccessoryNoteTable: React.FC<Props> = ({ ...props }) => {
-  const service = useAPICaller<AccessoryNote>(AccessoryNoteAPI)
+  const service = useAPIService<AccessoryNote>(AccessoryNoteAPI)
   const {
     form,
     loading,

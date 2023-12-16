@@ -8,7 +8,7 @@ import useTable, { TableCellProps, TableItemWithKey } from '~/components/hooks/u
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableCell, { EditableTableProps, InputType } from '~/components/ui/Table/EditableCell'
 import ItemAction from '~/components/ui/Table/ItemAction'
-import useAPICaller from '~/hooks/useAPICaller'
+import useAPIService from '~/hooks/useAPIService'
 import { RootState } from '~/store/store'
 import { Importation, Product } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
@@ -20,8 +20,8 @@ type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 const ImportationTable: React.FC<Props> = ({ ...props }) => {
-  const productService = useAPICaller<Product>(ProductAPI)
-  const importationService = useAPICaller<Importation>(ImportationAPI)
+  const productService = useAPIService<Product>(ProductAPI)
+  const importationService = useAPIService<Importation>(ImportationAPI)
   const {
     form,
     loading,

@@ -7,7 +7,7 @@ import PrintAPI from '~/api/services/PrintAPI'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import ItemAction from '~/components/ui/Table/ItemAction'
-import useAPICaller, { serviceActionUpdate } from '~/hooks/useAPICaller'
+import useAPIService, { serviceActionUpdate } from '~/hooks/useAPIService'
 import { RootState } from '~/store/store'
 import { ItemStatusType, Print } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
@@ -28,7 +28,7 @@ export type PrintTableDataType = {
 }
 
 const PrintTable: React.FC<Props> = ({ ...props }) => {
-  const service = useAPICaller<Print>(PrintAPI)
+  const service = useAPIService<Print>(PrintAPI)
   const {
     form,
     loading,

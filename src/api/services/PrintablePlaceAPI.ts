@@ -40,15 +40,26 @@ export default {
         errorFormatter(error)
       })
   },
-  createOrUpdateItemByProductID: async (
-    productID: number,
+  createOrUpdateItemBy: async (
+    query: {
+      field: string
+      key: React.Key
+    },
     item: PrintablePlace
   ): Promise<ResponseDataType | undefined> => {
     return await client
-      .post(`${NAMESPACE}/createOrUpdate/productID/${productID}`, {
-        printID: item.printID,
-        status: item.status ?? 'active'
-      })
+      .post(
+        `${NAMESPACE}/createOrUpdate/${query.field}/${query.key}`,
+        query.field === 'productID'
+          ? {
+              printID: item.printID,
+              status: item.status ?? 'active'
+            }
+          : {
+              productID: item.productID,
+              status: item.status ?? 'active'
+            }
+      )
       .then((res) => {
         if (res.data) {
           return res.data as ResponseDataType

@@ -4,7 +4,7 @@ import { RequestBodyType, defaultRequestBody } from '~/api/client'
 import PrintAPI from '~/api/services/PrintAPI'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
-import useAPICaller, { serviceActionUpdate } from '~/hooks/useAPICaller'
+import useAPIService, { serviceActionUpdate } from '~/hooks/useAPIService'
 import { Print } from '~/typing'
 import ModalAddNewPrint from './ModalAddNewPrint'
 import PrintListItem from './PrintListItem'
@@ -13,7 +13,7 @@ import { PrintTableDataType } from './PrintTable'
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 const PrintList: React.FC<Props> = ({ ...props }) => {
-  const service = useAPICaller<Print>(PrintAPI)
+  const service = useAPIService<Print>(PrintAPI)
   const {
     form,
     loading,

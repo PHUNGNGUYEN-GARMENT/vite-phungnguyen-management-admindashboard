@@ -4,7 +4,7 @@ import { RequestBodyType, defaultRequestBody } from '~/api/client'
 import SewingLineAPI from '~/api/services/SewingLineAPI'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
-import useAPICaller, { serviceActionUpdate } from '~/hooks/useAPICaller'
+import useAPIService, { serviceActionUpdate } from '~/hooks/useAPIService'
 import { SewingLine } from '~/typing'
 import { SewingLineTableDataType } from '../type'
 import ModalAddNewSewingLine from './ModalAddNewSewingLine'
@@ -13,7 +13,7 @@ import SewingLineListItem from './SewingLineListItem'
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 const SewingLineList: React.FC<Props> = ({ ...props }) => {
-  const service = useAPICaller<SewingLine>(SewingLineAPI)
+  const service = useAPIService<SewingLine>(SewingLineAPI)
   const {
     form,
     loading,
