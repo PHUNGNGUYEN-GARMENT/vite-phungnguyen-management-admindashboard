@@ -9,7 +9,7 @@ import ProductGroupAPI from '~/api/services/ProductGroupAPI'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import useAPICaller from '~/hooks/useAPICaller'
-import { PrintablePlace, Product, ProductColor, ProductGroup } from '~/typing'
+import { Color, Group, PrintablePlace, Product, ProductColor, ProductGroup } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import { ProductTableDataType } from '../type'
 import ModalAddNewProduct from './ModalAddNewProduct'
@@ -45,6 +45,12 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
   const [productColors, setProductColors] = useState<ProductColor[]>([])
   const [productGroups, setProductGroups] = useState<ProductGroup[]>([])
   const [printablePlaces, setPrintablePlaces] = useState<PrintablePlace[]>([])
+
+  const [productNew, setProductNew] = useState<Product | undefined>(undefined)
+  const [productColorNew, setProductColorNew] = useState<Color | undefined>(undefined)
+  const [productGroupNew, setProductGroupNew] = useState<Group | undefined>(undefined)
+  const [printablePlaceNew, setPrintablePlaceNew] = useState<PrintablePlace | undefined>(undefined)
+
   const { message } = AntApp.useApp()
   console.log('Product page loading...')
 
@@ -69,11 +75,25 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
         setPrintablePlaces(meta.data as PrintablePlace[])
       }
     })
-  }, [])
+  }, [productNew, productColorNew, productGroupNew, printablePlaceNew])
 
   useEffect(() => {
     selfConvertDataSource(products, productColors, productGroups, printablePlaces)
   }, [products, productColors, productGroups, printablePlaces])
+
+  useEffect(() => {
+    if (productNew && productColorNew && productGroupNew && printablePlaceNew) {
+      const item = {
+        ...productNew,
+        key: productNew?.id,
+        productColor: productColors.find((i) => i.id === productColorNew.id),
+        productGroup: productGroups.find((i) => i.id === productGroupNew.id),
+        printablePlace: printablePlaces.find((i) => i.id === printablePlaceNew.id)
+      } as ProductTableDataType
+      console.log(item)
+      handleStartAddNew(item)
+    }
+  }, [productNew, productColorNew, productGroupNew, printablePlaceNew])
 
   useEffect(() => {
     if (dataSource.length > 0) {
@@ -198,6 +218,76 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const selfHandleAddNewItem = async (formAddNew: any) => {
+    try {
+      setLoading(true)
+      productService.createNewItem(
+        {
+          productCode: formAddNew.productCode,
+          quantityPO: formAddNew.quantityPO,
+          dateInputNPL: DayJS(formAddNew.dateInputNPL).format(DatePattern.iso8601),
+          dateOutputFCR: DayJS(formAddNew.dateOutputFCR).format(DatePattern.iso8601)
+        },
+        setLoading,
+        (meta) => {
+          if (meta?.data) {
+            const productNew = meta.data as Product
+            setProductNew(productNew)
+            productColorService.createNewItem(
+              { productID: productNew.id!, colorID: formAddNew.colorID },
+              setLoading,
+              (meta) => {
+                if (meta?.success) {
+                  const productColorNew = meta.data as ProductColor
+                  setProductColorNew(productColorNew)
+                }
+              }
+            )
+            productGroupService.createNewItem(
+              { productID: productNew.id!, groupID: formAddNew.groupID },
+              setLoading,
+              (meta) => {
+                if (meta?.success) {
+                  const productGroupNew = meta.data as ProductGroup
+                  setProductGroupNew(productGroupNew)
+                }
+              }
+            )
+            printablePlaceService.createNewItem(
+              { productID: productNew.id!, printID: formAddNew.printID },
+              setLoading,
+              (meta) => {
+                if (meta?.success) {
+                  const printablePlaceNew = meta.data as PrintablePlace
+                  setPrintablePlaceNew(printablePlaceNew)
+                }
+              }
+            )
+          } else {
+            message.error('Failed!')
+          }
+        }
+      )
+    } catch (error) {
+      console.log(error)
+      message.error('Failed!')
+    } finally {
+      setLoading(false)
+      setOpenModal(false)
+    }
+  }
+
+  // {
+  //   "productCode": "APEX-1",
+  //   "quantityPO": 2000,
+  //   "colorID": 3,
+  //   "groupID": 2,
+  //   "printID": 1,
+  //   "dateInputNPL": "2023-12-01T16:36:43.298Z",
+  //   "dateOutputFCR": "2023-12-07T16:36:43.298Z"
+  // }
+
   return (
     <>
       <Form form={form} {...props}>
@@ -303,56 +393,7 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
           loading={loading}
           openModal={openModal}
           setOpenModal={setOpenModal}
-          onAddNew={(addNewForm) => {
-            console.log(addNewForm)
-            try {
-              setLoading(true)
-              productService.createNewItem(addNewForm, setLoading, (meta) => {
-                if (meta?.data) {
-                  const product = meta.data as Product
-                  productColorService.createNewItem(
-                    { productID: product.id!, colorID: addNewForm.colorID },
-                    setLoading,
-                    (meta) => {
-                      if (meta?.success) {
-                        const productColorNew = meta.data as ProductColor
-                        handleStartAddNew({ id: product.id!, key: product.id!, ...productColorNew })
-                      }
-                    }
-                  )
-                  productGroupService.createNewItem(
-                    { productID: product.id!, groupID: addNewForm.groupID },
-                    setLoading,
-                    (meta) => {
-                      if (meta?.success) {
-                        const productGroupNew = meta.data as ProductGroup
-                        handleStartAddNew({ id: product.id!, key: product.id!, ...productGroupNew })
-                      }
-                    }
-                  )
-                  printablePlaceService.createNewItem(
-                    { productID: product.id!, printID: addNewForm.printID },
-                    setLoading,
-                    (meta) => {
-                      if (meta?.success) {
-                        const printablePlaceNew = meta.data as PrintablePlace
-                        handleStartAddNew({ id: product.id!, key: product.id!, ...printablePlaceNew })
-                      }
-                    }
-                  )
-                  message.success('Created!')
-                } else {
-                  message.error('Failed!')
-                }
-              })
-            } catch (error) {
-              console.log(error)
-              message.error('Failed!')
-            } finally {
-              setLoading(false)
-              setOpenModal(false)
-            }
-          }}
+          onAddNew={selfHandleAddNewItem}
         />
       )}
     </>

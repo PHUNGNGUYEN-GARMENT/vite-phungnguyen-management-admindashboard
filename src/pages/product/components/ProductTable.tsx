@@ -12,7 +12,7 @@ import BaseLayout from '~/components/layout/BaseLayout'
 import ProgressBar from '~/components/ui/ProgressBar'
 import EditableCell, { EditableTableProps, InputType } from '~/components/ui/Table/EditableCell'
 import ItemAction from '~/components/ui/Table/ItemAction'
-import useAPICaller, { serviceActionUpdateOrCreate } from '~/hooks/useAPICaller'
+import { serviceActionUpdateOrCreate } from '~/hooks/useAPICaller'
 import { RootState } from '~/store/store'
 import { Color, Group, Print, PrintablePlace, Product, ProductColor, ProductGroup } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
@@ -21,6 +21,7 @@ import { ProductTableDataType } from '../type'
 import ColorAPI from '~/api/services/ColorAPI'
 import GroupAPI from '~/api/services/GroupAPI'
 import PrintAPI from '~/api/services/PrintAPI'
+import useAPIService from '~/hooks/useAPIService'
 import ModalAddNewProduct from './ModalAddNewProduct'
 
 type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>
@@ -28,13 +29,13 @@ type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 const ProductTable: React.FC<Props> = ({ ...props }) => {
-  const colorService = useAPICaller<Color>(ColorAPI)
-  const groupService = useAPICaller<Group>(GroupAPI)
-  const printService = useAPICaller<Print>(PrintAPI)
-  const productService = useAPICaller<Product>(ProductAPI)
-  const productColorService = useAPICaller<ProductColor>(ProductColorAPI)
-  const productGroupService = useAPICaller<ProductGroup>(ProductGroupAPI)
-  const printablePlaceService = useAPICaller<PrintablePlace>(PrintablePlaceAPI)
+  const colorService = useAPIService<Color>(ColorAPI)
+  const groupService = useAPIService<Group>(GroupAPI)
+  const printService = useAPIService<Print>(PrintAPI)
+  const productService = useAPIService<Product>(ProductAPI)
+  const productColorService = useAPIService<ProductColor>(ProductColorAPI)
+  const productGroupService = useAPIService<ProductGroup>(ProductGroupAPI)
+  const printablePlaceService = useAPIService<PrintablePlace>(PrintablePlaceAPI)
   const {
     form,
     isEditing,
@@ -51,6 +52,7 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
     handleStartDeleting,
     handleStartSaveEditing,
     handleConvertDataSource,
+    handleConvertDataSource2,
     handleConfirmCancelEditing,
     handleConfirmCancelDeleting
   } = useTable<ProductTableDataType>([])
@@ -88,7 +90,7 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
   }, [])
 
   useEffect(() => {
-    setDataSource(
+    handleConvertDataSource2(
       products.map((item) => {
         return {
           ...item,
@@ -97,7 +99,7 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
           printablePlace: printablePlaces.find((i) => i.productID === item.id),
           key: item.id
         } as ProductTableDataType
-      })
+      }) as ProductTableDataType[]
     )
   }, [products, productColors, productGroups, printablePlaces])
 
@@ -105,7 +107,7 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
     if (dataSource.length > 0) {
       console.log('dataSource: ', dataSource)
     }
-  }, [editingKey])
+  }, [dataSource])
 
   const selfHandleSaveClick = async (item: TableItemWithKey<ProductTableDataType>) => {
     const row = (await form.validateFields()) as any
@@ -187,10 +189,10 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
         (data, msg) => {
           if (data?.success) {
             message.success(msg)
+            handleStartSaveEditing(item.id!, { ...item, printablePlace: { printID: row.printID } as PrintablePlace })
           } else {
             message.error(msg)
           }
-          handleStartSaveEditing(item.id!, { ...item, printablePlace: { printID: row.printID } as PrintablePlace })
         }
       )
     }
