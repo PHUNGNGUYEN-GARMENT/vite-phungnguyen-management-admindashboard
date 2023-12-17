@@ -115,7 +115,7 @@ const ModalAddNewProduct: React.FC<Props> = ({ loading, openModal, setOpenModal,
                   placeholder='Select color...'
                   options={colors.map((item) => {
                     return {
-                      label: item.nameColor,
+                      label: item.name,
                       value: item.id,
                       key: item.hexColor
                     }

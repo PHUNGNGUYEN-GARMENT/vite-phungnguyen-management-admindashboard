@@ -42,7 +42,7 @@ const ColorListItem: React.FC<Props> = ({
         <Flex vertical className='w-full' gap={10}>
           <Flex align='center' justify='space-between'>
             {isEditing && user.isAdmin ? (
-              <Form.Item name={`nameColor`} initialValue={data.id}>
+              <Form.Item name={`name`} initialValue={data.id}>
                 <Input size='large' />
               </Form.Item>
             ) : (

@@ -8,7 +8,7 @@ export default {
   createNewItem: async (item: Color): Promise<ResponseDataType | undefined> => {
     return await client
       .post(`${NAMESPACE}`, {
-        nameColor: item.nameColor,
+        name: item.name,
         hexColor: item.hexColor,
         status: item.status ?? 'active'
       })

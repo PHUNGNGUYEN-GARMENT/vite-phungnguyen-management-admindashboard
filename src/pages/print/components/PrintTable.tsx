@@ -262,7 +262,7 @@ const PrintTable: React.FC<Props> = ({ ...props }) => {
                     pageSize: 5
                   },
                   search: {
-                    field: 'nameColor',
+                    field: 'name',
                     term: form.getFieldValue('search') ?? ''
                   }
                 }

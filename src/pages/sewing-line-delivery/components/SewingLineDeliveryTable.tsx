@@ -145,13 +145,13 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
   const commonCols: (ColumnTypes[number] & TableCellProps)[] = [
     {
       title: 'Color Name',
-      dataIndex: 'nameColor',
+      dataIndex: 'name',
       width: '15%',
       editable: user.isAdmin,
       render: (_, record: ColorTableDataType) => {
         return (
           <Typography.Text copyable className='text-md flex-shrink-0 font-bold'>
-            {record.nameColor}
+            {record.name}
           </Typography.Text>
         )
       }
@@ -225,7 +225,7 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
 
   const onCellColumnType = (dataIndex: string): string => {
     switch (dataIndex) {
-      case 'nameColor':
+      case 'name':
         return 'text'
       default:
         return 'colorpicker'
@@ -241,7 +241,7 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
               const body: RequestBodyType = {
                 ...defaultRequestBody,
                 search: {
-                  field: 'nameColor',
+                  field: 'name',
                   term: value
                 }
               }
@@ -293,7 +293,7 @@ const ColorTable: React.FC<Props> = ({ ...props }) => {
                     pageSize: 5
                   },
                   search: {
-                    field: 'nameColor',
+                    field: 'name',
                     term: form.getFieldValue('search') ?? ''
                   }
                 }

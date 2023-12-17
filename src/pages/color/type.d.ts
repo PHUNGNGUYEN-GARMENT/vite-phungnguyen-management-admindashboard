@@ -3,7 +3,7 @@ import { ItemStatusType } from '~/typing'
 export type ColorTableDataType = {
   key?: React.Key
   id?: number
-  nameColor?: string
+  name?: string
   hexColor?: string
   status?: ItemStatusType
   createdAt?: string

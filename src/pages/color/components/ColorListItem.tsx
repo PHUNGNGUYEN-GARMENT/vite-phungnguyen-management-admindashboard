@@ -46,8 +46,8 @@ const ColorListItem: React.FC<Props> = ({
         onConfirmCancelDeleting={onConfirmCancelDeleting}
         onConfirmDelete={onConfirmDelete}
         onStartDeleting={onStartDeleting}
-        label={`${data.nameColor}`}
-        name='nameColor'
+        label={`${data.name}`}
+        name='name'
         {...props}
       >
         <Flex className='w-full' align='center' justify='start' gap={5}>

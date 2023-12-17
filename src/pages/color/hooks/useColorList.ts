@@ -19,10 +19,7 @@ export default function useColorList() {
     setEditingKey(key)
   }
 
-  const handleStartDelete = (
-    key: React.Key,
-    onSuccess: (data: Color) => void
-  ) => {
+  const handleStartDelete = (key: React.Key, onSuccess: (data: Color) => void) => {
     const itemFound = dataSource.find((item) => item.id === key)
     if (itemFound) {
       const dataSourceRemovedItem = dataSource.filter((item) => item.id !== key)
@@ -43,14 +40,11 @@ export default function useColorList() {
     setDeleteKey('')
   }
 
-  const handleStartSaveEditing = async (
-    key: React.Key,
-    onSuccess: (data: Color) => void
-  ) => {
+  const handleStartSaveEditing = async (key: React.Key, onSuccess: (data: Color) => void) => {
     try {
       const hexColor: AntColor = await form.getFieldValue(`hexColor/${key}`)
-      const nameColor: string = await form.getFieldValue(`nameColor/${key}`)
-      const row: Color = { nameColor, hexColor: hexColor.toHexString() }
+      const name: string = await form.getFieldValue(`name/${key}`)
+      const row: Color = { name, hexColor: hexColor.toHexString() }
       const newData = [...dataSource]
       const index = newData.findIndex((item) => key === item.id)
       if (index > -1) {

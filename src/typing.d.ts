@@ -13,6 +13,8 @@ export type SortDirection = 'asc' | 'desc'
 
 export type ItemStatusType = 'draft' | 'active' | 'closed' | 'archived' | 'deleted'
 
+export type InputType = 'number' | 'text' | 'colorpicker' | 'select' | 'datepicker'
+
 export type StepRound = {
   name: string
   type: StatusType
@@ -57,7 +59,7 @@ export type Product = {
 
 export type Color = {
   id?: number
-  nameColor?: string
+  name?: string
   hexColor?: string
   status?: ItemStatusType
   createdAt?: string

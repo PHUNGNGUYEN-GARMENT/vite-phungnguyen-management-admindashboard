@@ -30,10 +30,10 @@ const EditableCell: React.FC<EditableCellProps> = ({
 }) => {
   const inputNode = ((): React.ReactNode => {
     switch (dataIndex) {
-      case 'nameColor':
+      case 'name':
         return (
           <Form.Item
-            name='nameColor'
+            name='name'
             style={{ margin: 0 }}
             rules={[
               {
@@ -41,7 +41,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
                 message: `Please Input ${title}!`
               }
             ]}
-            initialValue={record ? record.nameColor : ''}
+            initialValue={record ? record.name : ''}
           >
             <Input className='w-full' />
           </Form.Item>

@@ -2,9 +2,7 @@ import { useEffect, useState } from 'react'
 
 const useDevice = () => {
   const [width, setWidth] = useState(window.innerWidth)
-  const [breakpoint, setBreakpoint] = useState<
-    'sm' | 'md' | 'lg' | 'xl' | '2xl'
-  >('2xl')
+  const [breakpoint, setBreakpoint] = useState<'sm' | 'md' | 'lg' | 'xl' | '2xl'>('2xl')
   useEffect(() => {
     const handleResizeWindow = () => setWidth(window.innerWidth)
     // subscribe to window resize event "onComponentDidMount"

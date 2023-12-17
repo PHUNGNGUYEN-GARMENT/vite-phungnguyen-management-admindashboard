@@ -1,10 +1,6 @@
 import { App as AntApp, Form, List } from 'antd'
 import React, { useEffect } from 'react'
-import {
-  RequestBodyType,
-  ResponseDataType,
-  defaultRequestBody
-} from '~/api/client'
+import { RequestBodyType, ResponseDataType, defaultRequestBody } from '~/api/client'
 import useList, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import { SewingLineDelivery } from '~/typing'
@@ -67,9 +63,7 @@ const SewingLineDeliveryList: React.FC<Props> = ({ ...props }) => {
     )
   }
 
-  const selfHandleSaveClick = async (
-    item: TableItemWithKey<SewingLineDeliveryTableDataType>
-  ) => {
+  const selfHandleSaveClick = async (item: TableItemWithKey<SewingLineDeliveryTableDataType>) => {
     const row = await form.validateFields()
     handleStartSaveEditing(
       item.key!,
@@ -107,7 +101,7 @@ const SewingLineDeliveryList: React.FC<Props> = ({ ...props }) => {
               const body: RequestBodyType = {
                 ...defaultRequestBody,
                 search: {
-                  field: 'nameColor',
+                  field: 'name',
                   term: value
                 }
               }
@@ -151,7 +145,7 @@ const SewingLineDeliveryList: React.FC<Props> = ({ ...props }) => {
                     pageSize: 5
                   },
                   search: {
-                    field: 'nameColor',
+                    field: 'name',
                     term: form.getFieldValue('search') ?? ''
                   }
                 }

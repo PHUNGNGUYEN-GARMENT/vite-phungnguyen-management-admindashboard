@@ -93,7 +93,7 @@ const ProductListItem: React.FC<Props> = ({
               placeholder='Select color...'
               options={colors.map((item) => {
                 return {
-                  label: item.nameColor,
+                  label: item.name,
                   value: item.id,
                   key: item.hexColor
                 }
@@ -117,7 +117,7 @@ const ProductListItem: React.FC<Props> = ({
             />
           </Form.Item>
         ) : (
-          <Input value={data.productColor?.color?.nameColor} readOnly name='display-hexcolor' />
+          <Input value={data.productColor?.color?.name} readOnly name='display-hexcolor' />
         )}
       </Flex>
       <Flex className='w-full' align='center' justify='start' gap={5}>

@@ -55,7 +55,7 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
       { field: 'id', key: item.id! },
       ColorAPI,
       {
-        nameColor: row.nameColor,
+        name: row.name,
         hexColor: hexColor
       } as Color,
       setLoading,
@@ -67,7 +67,7 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
         }
         handleStartSaveEditing(item.id!, {
           ...item,
-          nameColor: row.nameColor,
+          name: row.name,
           hexColor: hexColor
         })
       }
@@ -85,7 +85,7 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
                 {
                   ...defaultRequestBody,
                   search: {
-                    field: 'nameColor',
+                    field: 'name',
                     term: value
                   }
                 },
@@ -129,7 +129,7 @@ const ColorList: React.FC<Props> = ({ ...props }) => {
                     pageSize: 5
                   },
                   search: {
-                    field: 'nameColor',
+                    field: 'name',
                     term: form.getFieldValue('search') ?? ''
                   }
                 }

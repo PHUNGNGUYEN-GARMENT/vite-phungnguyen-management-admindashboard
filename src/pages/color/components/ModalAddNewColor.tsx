@@ -22,7 +22,7 @@ const ModalAddNewColor: React.FC<Props> = ({ openModal, setOpenModal, onAddNew, 
         : (row.hexColor as AntColor).toHexString()
       : ''
     onAddNew({
-      nameColor: row.nameColor,
+      name: row.name,
       hexColor: hexColor
     })
   }
@@ -51,7 +51,7 @@ const ModalAddNewColor: React.FC<Props> = ({ openModal, setOpenModal, onAddNew, 
                   message: `Please input this field!`
                 }
               ]}
-              name='nameColor'
+              name='name'
               className='m-0'
             >
               <Input className='w-52' allowClear placeholder='Orange' />

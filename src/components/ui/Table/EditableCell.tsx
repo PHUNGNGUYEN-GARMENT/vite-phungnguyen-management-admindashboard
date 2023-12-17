@@ -1,17 +1,18 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-refresh/only-export-components */
 import { ColorPicker, DatePicker, Form, Input, InputNumber, Select, Table } from 'antd'
 import { memo } from 'react'
 import { TableItemWithKey } from '~/components/hooks/useTable'
+import { InputType } from '~/typing'
 import { DatePattern } from '~/utils/date-formatter'
 
-export type InputType = 'number' | 'text' | 'colorpicker' | 'select' | 'datepicker'
-
-interface EditableCellProps<T extends { key?: React.Key }> extends React.HTMLAttributes<HTMLElement> {
+export interface EditableCellProps<T extends { key?: React.Key }> extends React.HTMLAttributes<HTMLElement> {
   editing: boolean
   dataIndex: string
-  initialValue?: unknown
-  title: string | undefined
+  setLoading?: (enable: boolean) => void
+  initialValue?: any
+  title: string
   inputType: InputType
   record: TableItemWithKey<T>
   index: number
@@ -19,6 +20,8 @@ interface EditableCellProps<T extends { key?: React.Key }> extends React.HTMLAtt
 }
 
 export type EditableTableProps = Parameters<typeof Table>[0]
+
+export type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>
 
 function EditableCell<T extends { key?: React.Key }>({
   editing,
