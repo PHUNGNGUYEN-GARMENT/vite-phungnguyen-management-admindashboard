@@ -47,7 +47,6 @@ const ProductListItem: React.FC<Props> = ({
       ColorAPI.getItems(defaultRequestBody).then((meta) => {
         if (meta?.success) {
           const items = meta.data as Color[]
-          console.log(items)
           setColors(items)
         }
       })

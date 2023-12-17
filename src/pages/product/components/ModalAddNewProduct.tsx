@@ -31,21 +31,24 @@ const ModalAddNewProduct: React.FC<Props> = ({ loading, openModal, setOpenModal,
   console.log('Load AddNewProduct...')
 
   useEffect(() => {
-    colorService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        setColors(meta.data as Color[])
-      }
-    })
-    groupService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        setGroups(meta.data as Group[])
-      }
-    })
-    printService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        setPrints(meta.data as Print[])
-      }
-    })
+    const loadData = async () => {
+      await colorService.getListItems(defaultRequestBody, setLoading, (meta) => {
+        if (meta?.success) {
+          setColors(meta.data as Color[])
+        }
+      })
+      await groupService.getListItems(defaultRequestBody, setLoading, (meta) => {
+        if (meta?.success) {
+          setGroups(meta.data as Group[])
+        }
+      })
+      await printService.getListItems(defaultRequestBody, setLoading, (meta) => {
+        if (meta?.success) {
+          setPrints(meta.data as Print[])
+        }
+      })
+    }
+    loadData()
   }, [])
 
   async function handleOk() {

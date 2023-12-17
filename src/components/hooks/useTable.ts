@@ -35,19 +35,6 @@ export default function useTable<T extends { key?: React.Key }>(initValue: Table
     setLoading(false)
   }
 
-  const handleConvertDataSource2 = (data: TableItemWithId<T>[]) => {
-    setLoading(true)
-    setDataSource(
-      data.map((item: TableItemWithId<T>) => {
-        return {
-          ...item,
-          key: item.id
-        } as TableItemWithKey<T>
-      })
-    )
-    setLoading(false)
-  }
-
   const handleStartEditing = (key: React.Key) => {
     setEditingKey(key)
   }
@@ -130,7 +117,6 @@ export default function useTable<T extends { key?: React.Key }>(initValue: Table
     handleStartSaveEditing,
     handleConfirmCancelEditing,
     handleConfirmCancelDeleting,
-    handleConvertDataSource,
-    handleConvertDataSource2
+    handleConvertDataSource
   }
 }

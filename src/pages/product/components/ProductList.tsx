@@ -64,65 +64,57 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
   const { message } = AntApp.useApp()
 
   useEffect(() => {
-    if (editingKey !== '') {
-      colorService.getListItems(defaultRequestBody, setLoading, (meta) => {
-        if (meta?.success) {
-          setColors(meta.data as Color[])
-        }
-      })
-      groupService.getListItems(defaultRequestBody, setLoading, (meta) => {
-        if (meta?.success) {
-          setGroups(meta.data as Group[])
-        }
-      })
-      printService.getListItems(defaultRequestBody, setLoading, (meta) => {
-        if (meta?.success) {
-          setPrints(meta.data as Print[])
-        }
-      })
+    const loadData = async () => {
+      if (editingKey !== '') {
+        await colorService.getListItems(defaultRequestBody, setLoading, (meta) => {
+          if (meta?.success) {
+            setColors(meta.data as Color[])
+          }
+        })
+        await groupService.getListItems(defaultRequestBody, setLoading, (meta) => {
+          if (meta?.success) {
+            setGroups(meta.data as Group[])
+          }
+        })
+        await printService.getListItems(defaultRequestBody, setLoading, (meta) => {
+          if (meta?.success) {
+            setPrints(meta.data as Print[])
+          }
+        })
+      }
     }
+    loadData()
   }, [editingKey])
 
   useEffect(() => {
-    productService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        setProducts(meta.data as Product[])
-      }
-    })
-    productColorService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        setProductColors(meta.data as ProductColor[])
-      }
-    })
-    productGroupService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        setProductGroups(meta.data as ProductGroup[])
-      }
-    })
-    printablePlaceService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        setPrintablePlaces(meta.data as PrintablePlace[])
-      }
-    })
+    const loadData = async () => {
+      await productService.getListItems(defaultRequestBody, setLoading, (meta) => {
+        if (meta?.success) {
+          setProducts(meta.data as Product[])
+        }
+      })
+      await productColorService.getListItems(defaultRequestBody, setLoading, (meta) => {
+        if (meta?.success) {
+          setProductColors(meta.data as ProductColor[])
+        }
+      })
+      await productGroupService.getListItems(defaultRequestBody, setLoading, (meta) => {
+        if (meta?.success) {
+          setProductGroups(meta.data as ProductGroup[])
+        }
+      })
+      await printablePlaceService.getListItems(defaultRequestBody, setLoading, (meta) => {
+        if (meta?.success) {
+          setPrintablePlaces(meta.data as PrintablePlace[])
+        }
+      })
+    }
+    loadData()
   }, [productNew, productColorNew, productGroupNew, printablePlaceNew])
 
   useEffect(() => {
     selfConvertDataSource(products, productColors, productGroups, printablePlaces)
   }, [products, productColors, productGroups, printablePlaces])
-
-  // Create action
-  // useEffect(() => {
-  //   if (productNew && productColorNew && productGroupNew && printablePlaceNew) {
-  //     const item = {
-  //       ...productNew,
-  //       key: productNew?.id,
-  //       productColor: productColors.find((i) => i.id === productColorNew.id),
-  //       productGroup: productGroups.find((i) => i.id === productGroupNew.id),
-  //       printablePlace: printablePlaces.find((i) => i.id === printablePlaceNew.id)
-  //     } as ProductTableDataType
-  //     handleStartAddNew(item)
-  //   }
-  // }, [productNew, productColorNew, productGroupNew, printablePlaceNew])
 
   const selfConvertDataSource = (
     _products: Product[],
@@ -154,7 +146,7 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
         (row.dateOutputFCR && DayJS(row.dateOutputFCR).diff(DayJS(item.dateOutputFCR)))
       ) {
         console.log('Product progressing...')
-        productService.updateItemByPk(
+        await productService.updateItemByPk(
           Number(item.id!),
           {
             productCode: row.productCode,
@@ -163,24 +155,24 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
             dateOutputFCR: row.dateOutputFCR
           },
           setLoading,
-          (meta) => {
+          (meta, msg) => {
             if (meta?.success) {
               const productNew = meta.data as Product
               handleStartSaveEditing(item.key!, { ...productNew })
-              message.success('Updated!')
+              message.success(msg)
             } else {
-              message.error('Failed!')
+              message.error(msg)
             }
           }
         )
       }
       if (row.colorID !== item.productColor?.colorID) {
         console.log('Product color progressing...')
-        productColorService.createOrUpdateItemBy(
+        await productColorService.createOrUpdateItemBy(
           { field: 'productID', key: item.key! },
           { colorID: row.colorID },
           setLoading,
-          (meta) => {
+          (meta, msg) => {
             if (meta?.success) {
               const productColorUpdated = meta.data as ProductColor
               handleStartSaveEditing(item.key!, {
@@ -189,20 +181,20 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
                   color: colors.find((i) => i.id === row.colorID)
                 }
               })
-              message.success('Updated!')
+              message.success(msg)
             } else {
-              message.error('Failed!')
+              message.error(msg)
             }
           }
         )
       }
       if (row.groupID !== item.productGroup?.groupID) {
         console.log('ProductGroup progressing...')
-        productGroupService.createOrUpdateItemBy(
+        await productGroupService.createOrUpdateItemBy(
           { field: 'productID', key: item.key! },
           { groupID: row.groupID },
           setLoading,
-          (meta) => {
+          (meta, msg) => {
             if (meta?.success) {
               const productGroupUpdated = meta.data as ProductGroup
               handleStartSaveEditing(item.key!, {
@@ -211,20 +203,20 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
                   group: groups.find((i) => i.id === row.groupID)
                 }
               })
-              message.success('Updated!')
+              message.success(msg)
             } else {
-              message.error('Failed!')
+              message.error(msg)
             }
           }
         )
       }
       if (row.printID !== item.printablePlace?.printID) {
         console.log('PrintablePlace progressing...')
-        printablePlaceService.createOrUpdateItemBy(
+        await printablePlaceService.createOrUpdateItemBy(
           { field: 'productID', key: item.key! },
           { printID: row.printID },
           setLoading,
-          (meta) => {
+          (meta, msg) => {
             if (meta?.success) {
               const printablePlaceUpdated = meta.data as PrintablePlace
               handleStartSaveEditing(item.key!, {
@@ -233,16 +225,15 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
                   print: prints.find((i) => i.id === row.printID)
                 }
               })
-              message.success('Updated!')
+              message.success(msg)
             } else {
-              message.error('Failed!')
+              message.error(msg)
             }
           }
         )
       }
     } catch (error) {
       console.error(error)
-      message.error('Error!')
     } finally {
       setLoading(false)
       handleConfirmCancelEditing()
@@ -254,7 +245,7 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
     try {
       console.log(formAddNew)
       setLoading(true)
-      productService.createNewItem(
+      await productService.createNewItem(
         {
           productCode: formAddNew.productCode,
           quantityPO: formAddNew.quantityPO,
@@ -262,13 +253,13 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
           dateOutputFCR: DayJS(formAddNew.dateOutputFCR).format(DatePattern.iso8601)
         },
         setLoading,
-        (meta, msg) => {
+        async (meta, msg) => {
           if (meta?.data) {
             const productNew = meta.data as Product
             setProductNew(productNew)
             if (formAddNew.colorID) {
               console.log('Product color created')
-              productColorService.createNewItem(
+              await productColorService.createNewItem(
                 { productID: productNew.id!, colorID: formAddNew.colorID },
                 setLoading,
                 (meta) => {
@@ -281,7 +272,7 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
             }
             if (formAddNew.groupID) {
               console.log('Product group created')
-              productGroupService.createNewItem(
+              await productGroupService.createNewItem(
                 { productID: productNew.id!, groupID: formAddNew.groupID },
                 setLoading,
                 (meta) => {
@@ -294,7 +285,7 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
             }
             if (formAddNew.printID) {
               console.log('Product print created')
-              printablePlaceService.createNewItem(
+              await printablePlaceService.createNewItem(
                 { productID: productNew.id!, printID: formAddNew.printID },
                 setLoading,
                 (meta) => {
@@ -313,11 +304,23 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
       )
     } catch (error) {
       console.error(error)
-      message.error('Failed!')
     } finally {
       setLoading(false)
       setOpenModal(false)
     }
+  }
+
+  const handleConfirmDelete = async (item: TableItemWithKey<ProductTableDataType>) => {
+    await productService.deleteItemByPk(item.id!, setLoading, (meta, msg) => {
+      if (meta) {
+        if (meta.success) {
+          handleStartDeleting(item.id!, () => {})
+          message.success(msg)
+        }
+      } else {
+        message.error(msg)
+      }
+    })
   }
 
   return (
@@ -325,9 +328,9 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
       <Form form={form} {...props}>
         <BaseLayout
           onDateCreationChange={(enable) => setDateCreation(enable)}
-          onSearch={(value) => {
+          onSearch={async (value) => {
             if (value.length > 0) {
-              productService.getListItems(
+              await productService.getListItems(
                 {
                   ...defaultRequestBody,
                   search: {
@@ -344,16 +347,16 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
               )
             }
           }}
-          onSortChange={(val) => {
-            productService.sortedListItems(val ? 'asc' : 'desc', setLoading, (meta) => {
+          onSortChange={async (val) => {
+            await productService.sortedListItems(val ? 'asc' : 'desc', setLoading, (meta) => {
               if (meta?.success) {
                 selfConvertDataSource(meta?.data as Product[])
               }
             })
           }}
-          onResetClick={() => {
+          onResetClick={async () => {
             form.setFieldValue('search', '')
-            productService.getListItems(defaultRequestBody, setLoading, (meta) => {
+            await productService.getListItems(defaultRequestBody, setLoading, (meta) => {
               if (meta?.success) {
                 selfConvertDataSource(meta?.data as Product[])
               }
@@ -365,7 +368,7 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
             itemLayout='vertical'
             size='large'
             pagination={{
-              onChange: (_page) => {
+              onChange: async (_page) => {
                 productService.setPage(_page)
                 const body: RequestBodyType = {
                   ...defaultRequestBody,
@@ -378,7 +381,7 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
                     term: form.getFieldValue('search') ?? ''
                   }
                 }
-                productService.getListItems(body, setLoading, (meta) => {
+                await productService.getListItems(body, setLoading, (meta) => {
                   if (meta?.success) {
                     selfConvertDataSource(meta?.data as Product[])
                   }
@@ -401,18 +404,7 @@ const ProductList: React.FC<Props> = ({ ...props }) => {
                 onClickStartEditing={() => handleStartEditing(item.key!)}
                 onConfirmCancelEditing={() => handleConfirmCancelEditing()}
                 onConfirmCancelDeleting={() => handleConfirmCancelDeleting()}
-                onConfirmDelete={() => {
-                  productService.deleteItemByPk(item.id!, setLoading, (meta) => {
-                    if (meta) {
-                      if (meta.success) {
-                        handleStartDeleting(item.id!, () => {})
-                        message.success('Deleted!')
-                      }
-                    } else {
-                      message.error('Failed!')
-                    }
-                  })
-                }}
+                onConfirmDelete={() => handleConfirmDelete(item)}
                 onStartDeleting={() => setDeleteKey(item.key!)}
               />
             )}
