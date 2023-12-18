@@ -47,53 +47,106 @@ const EditableCell: React.FC<EditableCellProps<ProductTableDataType>> = ({ ...pr
     }
   }, [props.editing])
 
-  const SelectCustom = ({ ...props }: { items: Color[] | Group[] | Print[] }) => {
-    return (
-      <Select
-        placeholder='Select group...'
-        options={props.items.map((item) => {
-          return {
-            label: item.name,
-            value: item.id,
-            key: item.id
-          }
-        })}
-        optionRender={(ori, info) => {
-          return (
-            <>
-              <Flex justify='space-between' align='center' key={info.index}>
-                <Typography.Text>{ori.label}</Typography.Text>
-                <div
-                  className='h-6 w-6 rounded-sm'
-                  style={{
-                    backgroundColor: `${ori.key}`
-                  }}
-                />
-              </Flex>
-            </>
-          )
-        }}
-        className='w-full'
-      />
-    )
-  }
-
   const inputNode = ((): React.ReactNode => {
     switch (props.dataIndex) {
       case 'productCode':
-        return <Input name='product-code' className='w-full' />
+        return <Input value={props.initialValue} name='product-code' className='w-full' />
       case 'quantityPO':
-        return <InputNumber className='w-full' />
+        return <InputNumber value={props.initialValue} className='w-full' />
       case 'dateOutputFCR':
-        return <DatePicker className='w-full' format={DatePattern.display} />
+        return <DatePicker value={props.initialValue} className='w-full' format={DatePattern.display} />
       case 'dateInputNPL':
         return <DatePicker className='w-full' format={DatePattern.display} />
       case 'colorID':
-        return <SelectCustom items={colors} />
+        return (
+          <Select
+            placeholder='Select...'
+            options={colors.map((item) => {
+              return {
+                label: item.name,
+                value: item.id,
+                key: item.id
+              }
+            })}
+            value={props.initialValue}
+            optionRender={(ori, info) => {
+              return (
+                <>
+                  <Flex justify='space-between' align='center' key={info.index}>
+                    <Typography.Text>{ori.label}</Typography.Text>
+                    <div
+                      className='h-6 w-6 rounded-sm'
+                      style={{
+                        backgroundColor: `${ori.key}`
+                      }}
+                    />
+                  </Flex>
+                </>
+              )
+            }}
+            className='w-full'
+          />
+        )
       case 'groupID':
-        return <SelectCustom items={groups} />
+        return (
+          <Select
+            placeholder='Select...'
+            options={groups.map((item) => {
+              return {
+                label: item.name,
+                value: item.id,
+                key: item.id
+              }
+            })}
+            value={props.initialValue}
+            optionRender={(ori, info) => {
+              return (
+                <>
+                  <Flex justify='space-between' align='center' key={info.index}>
+                    <Typography.Text>{ori.label}</Typography.Text>
+                    <div
+                      className='h-6 w-6 rounded-sm'
+                      style={{
+                        backgroundColor: `${ori.key}`
+                      }}
+                    />
+                  </Flex>
+                </>
+              )
+            }}
+            className='w-full'
+          />
+        )
       case 'printID':
-        return <SelectCustom items={prints} />
+        return (
+          <Select
+            placeholder='Select...'
+            options={prints.map((item) => {
+              return {
+                label: item.name,
+                value: item.id,
+                key: item.id
+              }
+            })}
+            value={props.initialValue}
+            optionRender={(ori, info) => {
+              return (
+                <>
+                  <Flex justify='space-between' align='center' key={info.index}>
+                    <Typography.Text>{ori.label}</Typography.Text>
+                    <div
+                      className='h-6 w-6 rounded-sm'
+                      style={{
+                        backgroundColor: `${ori.key}`
+                      }}
+                    />
+                  </Flex>
+                </>
+              )
+            }}
+            className='w-full'
+          />
+        )
       default:
         return <Input name='input-form' />
     }
@@ -108,7 +161,7 @@ const EditableCell: React.FC<EditableCellProps<ProductTableDataType>> = ({ ...pr
           style={{ margin: 0 }}
           rules={[
             {
-              required: true,
+              required: props.required,
               message: `Please Input ${props.title}!`
             }
           ]}

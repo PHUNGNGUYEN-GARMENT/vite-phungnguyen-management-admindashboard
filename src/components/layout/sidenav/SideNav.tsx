@@ -12,12 +12,7 @@ export interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 type MenuItem = Required<MenuProps>['items'][number]
 
-function getItem(
-  label: React.ReactNode,
-  key: React.Key,
-  icon?: React.ReactNode,
-  type?: 'group'
-): MenuItem {
+function getItem(label: React.ReactNode, key: React.Key, icon?: React.ReactNode, type?: 'group'): MenuItem {
   return {
     key,
     icon,
@@ -40,9 +35,7 @@ const SideNav: React.FC<Props> = ({ ...props }) => {
   const [selectedKey, setSelectedKey] = useState<string>(appRoutes[0].key)
 
   useEffect(() => {
-    const keyFound = appRoutes.find(
-      (route) => route.path === lastPath(pathname)
-    )
+    const keyFound = appRoutes.find((route) => route.path === lastPath(pathname))
     if (keyFound) {
       setSelectedKey(keyFound.key)
     }
@@ -60,16 +53,8 @@ const SideNav: React.FC<Props> = ({ ...props }) => {
 
   return (
     <div {...props} className={cn('bg-white', props.className)}>
-      <Link
-        to={'/'}
-        onClick={() => {}}
-        className='relative flex justify-center py-5'
-      >
-        <img
-          src={logo}
-          alt='logo'
-          className='h-10 w-10 object-contain lg:h-10 lg:w-10'
-        />
+      <Link to={'/'} onClick={() => {}} className='relative flex justify-center py-5'>
+        <img src={logo} alt='logo' className='h-10 w-10 object-contain lg:h-10 lg:w-10' />
       </Link>
       <Menu
         onClick={onClick}

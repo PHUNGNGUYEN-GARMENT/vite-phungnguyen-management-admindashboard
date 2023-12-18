@@ -35,7 +35,7 @@ const Main: React.FC = () => {
         collapsible
         // collapsed={collapsed}
         trigger={null}
-        width={250}
+        width={100}
         style={{
           position: 'fixed',
           left: '0px',
@@ -47,7 +47,7 @@ const Main: React.FC = () => {
       >
         <SideNav />
       </Sider>
-      <Layout className='lg:ml-[250px]'>
+      <Layout className='lg:ml-[100px]'>
         <AntHeader className='h-fit p-0'>
           <Header
             // collapsed={collapsed}

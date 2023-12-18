@@ -12,6 +12,7 @@ export interface EditableCellProps<T extends { key?: React.Key }> extends React.
   dataIndex: string
   setLoading?: (enable: boolean) => void
   initialValue?: any
+  required?: boolean
   title: string
   inputType: InputType
   record: TableItemWithKey<T>
@@ -28,6 +29,7 @@ function EditableCell<T extends { key?: React.Key }>({
   dataIndex,
   record,
   title,
+  required,
   initialValue,
   inputType,
   children,

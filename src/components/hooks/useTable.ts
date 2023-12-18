@@ -7,6 +7,7 @@ type TableItemWithId<T> = T & { id?: number }
 export interface TableCellProps {
   editable?: boolean
   dataIndex: string
+  required?: boolean
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   initialValue?: any
 }

@@ -62,10 +62,11 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
 
   const commonCols: (ColumnTypes[number] & TableCellProps)[] = [
     {
-      title: 'Code',
+      title: 'Mã hàng',
       dataIndex: 'productCode',
       width: '10%',
       editable: user.isAdmin,
+      required: true,
       render: (_value: any, record: ProductTableDataType) => {
         return (
           <Typography.Text copyable className='text-md flex-shrink-0 font-bold'>
@@ -78,12 +79,14 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
       title: 'Số lượng PO',
       dataIndex: 'quantityPO',
       width: '10%',
-      editable: true
+      editable: true,
+      required: true
     },
     {
       title: 'Màu',
       dataIndex: 'colorID',
       width: '10%',
+      required: true,
       editable: true,
       render: (_value: any, record: ProductTableDataType) => {
         return (
@@ -98,6 +101,7 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
       title: 'Nhóm',
       dataIndex: 'groupID',
       width: '10%',
+      required: false,
       editable: true,
       render: (_value: any, record: ProductTableDataType) => {
         return <span>{record.productGroup?.group?.name}</span>
@@ -106,7 +110,8 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
     {
       title: 'Nơi in',
       dataIndex: 'printID',
-      width: '10%',
+      width: '15%',
+      required: false,
       editable: true,
       render: (_value: any, record: ProductTableDataType) => {
         return <span>{record.printablePlace?.print?.name}</span>
@@ -119,19 +124,19 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
       render: (_value: any, record: ProductTableDataType) => {
         const progressArr: { task: string; quantity: number }[] = [
           {
-            task: 'Sewing',
+            task: 'May',
             quantity: record.progress?.sewing ?? 0
           },
           {
-            task: 'Iron',
+            task: 'Ủi',
             quantity: record.progress?.iron ?? 0
           },
           {
-            task: 'Check',
+            task: 'Kiểm',
             quantity: record.progress?.check ?? 0
           },
           {
-            task: 'Pack',
+            task: 'Hoàn thành',
             quantity: record.progress?.pack ?? 0
           }
         ]
@@ -161,8 +166,9 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
     {
       title: 'NPL',
       dataIndex: 'dateInputNPL',
-      width: '5%',
+      width: '10%',
       editable: true,
+      required: true,
       render: (_value: any, record: ProductTableDataType) => {
         return <span>{DayJS(record.dateInputNPL).format(DatePattern.display)}</span>
       }
@@ -170,8 +176,9 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
     {
       title: 'FCR',
       dataIndex: 'dateOutputFCR',
-      width: '5%',
+      width: '10%',
       editable: true,
+      required: true,
       render: (_value: any, record: ProductTableDataType) => {
         return <span>{DayJS(record.dateOutputFCR).format(DatePattern.display)}</span>
       }
@@ -204,12 +211,7 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
 
   const staffColumns: (ColumnTypes[number] & TableCellProps)[] = [...commonCols]
 
-  const mergedColumns = (
-    cols: (ColumnTypes[number] & {
-      editable?: boolean
-      dataIndex: string
-    })[]
-  ): ColumnTypes => {
+  const mergedColumns = (cols: (ColumnTypes[number] & TableCellProps)[]): ColumnTypes => {
     return cols.map((col) => {
       if (!col.editable) {
         return col
@@ -223,6 +225,7 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
           title: col.title,
           initialValue: smartInitialValue(col.dataIndex, record),
           editing: props.isEditing(record.key!),
+          required: col.required,
           setLoading: props.setLoading
         })
       }
@@ -233,14 +236,14 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
     const valueMapping: Record<string, any> = {
       productCode: record.productCode,
       quantityPO: record.quantityPO,
-      groupID: record.productGroup?.group?.id,
-      colorID: record.productColor?.color?.id,
-      printID: record.printablePlace?.print?.id,
+      groupID: record.productGroup?.groupID,
+      colorID: record.productColor?.colorID,
+      printID: record.printablePlace?.printID,
       dateInputNPL: DayJS(record.dateInputNPL),
       dateOutputFCR: DayJS(record.dateOutputFCR)
     }
 
-    return valueMapping[dataIndex] || record.id
+    return valueMapping[dataIndex]
   }
 
   const onCellColumnType = (dataIndex: string): InputType => {

@@ -88,7 +88,7 @@ const ProductListItem: React.FC<Props> = ({
           Màu
         </Typography.Text>
         {isEditing ? (
-          <Form.Item name='colorID' className='m-0 w-full' initialValue={data.productColor?.color?.id}>
+          <Form.Item name='colorID' className='m-0 w-full' initialValue={data.productColor?.colorID}>
             <Select
               placeholder='Select color...'
               options={colors.map((item) => {
@@ -208,7 +208,7 @@ const ProductListItem: React.FC<Props> = ({
           Nơi in
         </Typography.Text>
         {isEditing ? (
-          <Form.Item name='printID' initialValue={data.printablePlace?.print?.id} className='m-0 w-full'>
+          <Form.Item name='printID' initialValue={data.printablePlace?.printID} className='m-0 w-full'>
             <Select
               placeholder='Select print place...'
               options={prints.map((item) => {
