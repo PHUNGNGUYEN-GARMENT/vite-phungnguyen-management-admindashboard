@@ -269,8 +269,13 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
             cell: EditableCell
           }
         }}
-        bordered
         dataSource={props.dataSource}
+        bordered
+        // expandable={{
+        //   expandedRowRender: (record) => <p className='m-0'>123456789</p>,
+        //   rowExpandable: (record) => record.name !== 'Not Expandable',
+        //   defaultExpandAllRows: true
+        // }}
         columns={mergedColumns(user.isAdmin ? adminColumns : staffColumns)}
         rowClassName='editable-row'
         pagination={{

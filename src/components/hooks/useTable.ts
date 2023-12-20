@@ -83,7 +83,7 @@ export default function useTable<T extends { key?: React.Key }>(initValue: Table
         onDataSuccess?.(itemToUpdate)
       }
     } catch (errInfo) {
-      console.log('Validate Failed:', errInfo)
+      console.error('Validate Failed:', errInfo)
     } finally {
       setLoading(false)
     }

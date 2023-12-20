@@ -2,9 +2,6 @@
 import { App as AntApp, Form } from 'antd'
 import React, { useEffect, useState } from 'react'
 import { RequestBodyType, defaultRequestBody } from '~/api/client'
-import ColorAPI from '~/api/services/ColorAPI'
-import GroupAPI from '~/api/services/GroupAPI'
-import PrintAPI from '~/api/services/PrintAPI'
 import PrintablePlaceAPI from '~/api/services/PrintablePlaceAPI'
 import ProductAPI from '~/api/services/ProductAPI'
 import ProductColorAPI from '~/api/services/ProductColorAPI'
@@ -13,7 +10,7 @@ import useDevice from '~/components/hooks/useDevice'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import useAPIService from '~/hooks/useAPIService'
-import { Color, Group, Print, PrintablePlace, Product, ProductColor, ProductGroup } from '~/typing'
+import { Color, Group, PrintablePlace, Product, ProductColor, ProductGroup } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import ModalAddNewProduct from './components/ModalAddNewProduct'
 import ProductList from './components/ProductList'
@@ -26,9 +23,9 @@ const ProductPage: React.FC = () => {
   const productGroupService = useAPIService<ProductGroup>(ProductGroupAPI)
   const printablePlaceService = useAPIService<PrintablePlace>(PrintablePlaceAPI)
 
-  const colorService = useAPIService<Color>(ColorAPI)
-  const groupService = useAPIService<Group>(GroupAPI)
-  const printService = useAPIService<Print>(PrintAPI)
+  // const colorService = useAPIService<Color>(ColorAPI)
+  // const groupService = useAPIService<Group>(GroupAPI)
+  // const printService = useAPIService<Print>(PrintAPI)
   const {
     form,
     isEditing,
@@ -39,7 +36,7 @@ const ProductPage: React.FC = () => {
     setDataSource,
     setDeleteKey,
     dateCreation,
-    handleStartSaveEditing,
+    // handleStartSaveEditing,
     setDateCreation,
     handleStartEditing,
     handleStartDeleting,
@@ -52,9 +49,9 @@ const ProductPage: React.FC = () => {
   const [productGroups, setProductGroups] = useState<ProductGroup[]>([])
   const [printablePlaces, setPrintablePlaces] = useState<PrintablePlace[]>([])
 
-  const [colors, setColors] = useState<Color[]>([])
-  const [groups, setGroups] = useState<Group[]>([])
-  const [prints, setPrints] = useState<Print[]>([])
+  // const [colors, setColors] = useState<Color[]>([])
+  // const [groups, setGroups] = useState<Group[]>([])
+  // const [prints, setPrints] = useState<Print[]>([])
 
   const [productNew, setProductNew] = useState<Product | undefined>(undefined)
   const [productColorNew, setProductColorNew] = useState<Color | undefined>(undefined)
@@ -65,54 +62,55 @@ const ProductPage: React.FC = () => {
 
   const { width } = useDevice()
 
-  useEffect(() => {
-    const loadData = async () => {
-      if (editingKey !== '') {
-        await colorService.getListItems(defaultRequestBody, setLoading, (meta) => {
-          if (meta?.success) {
-            setColors(meta.data as Color[])
-          }
-        })
-        await groupService.getListItems(defaultRequestBody, setLoading, (meta) => {
-          if (meta?.success) {
-            setGroups(meta.data as Group[])
-          }
-        })
-        await printService.getListItems(defaultRequestBody, setLoading, (meta) => {
-          if (meta?.success) {
-            setPrints(meta.data as Print[])
-          }
-        })
-      }
-    }
-    loadData()
-  }, [editingKey])
+  // useEffect(() => {
+  //   const loadData = async () => {
+  //     if (editingKey !== '') {
+  //       await colorService.getListItems(defaultRequestBody, setLoading, (meta) => {
+  //         if (meta?.success) {
+  //           setColors(meta.data as Color[])
+  //         }
+  //       })
+  //       await groupService.getListItems(defaultRequestBody, setLoading, (meta) => {
+  //         if (meta?.success) {
+  //           setGroups(meta.data as Group[])
+  //         }
+  //       })
+  //       await printService.getListItems(defaultRequestBody, setLoading, (meta) => {
+  //         if (meta?.success) {
+  //           setPrints(meta.data as Print[])
+  //         }
+  //       })
+  //     }
+  //   }
+  //   loadData()
+  // }, [editingKey])
 
   useEffect(() => {
-    const loadData = async () => {
-      await productService.getListItems(defaultRequestBody, setLoading, (meta) => {
-        if (meta?.success) {
-          setProducts(meta.data as Product[])
-        }
-      })
-      await productColorService.getListItems(defaultRequestBody, setLoading, (meta) => {
-        if (meta?.success) {
-          setProductColors(meta.data as ProductColor[])
-        }
-      })
-      await productGroupService.getListItems(defaultRequestBody, setLoading, (meta) => {
-        if (meta?.success) {
-          setProductGroups(meta.data as ProductGroup[])
-        }
-      })
-      await printablePlaceService.getListItems(defaultRequestBody, setLoading, (meta) => {
-        if (meta?.success) {
-          setPrintablePlaces(meta.data as PrintablePlace[])
-        }
-      })
-    }
     loadData()
   }, [productNew, productColorNew, productGroupNew, printablePlaceNew])
+
+  const loadData = async () => {
+    await productService.getListItems(defaultRequestBody, setLoading, (meta) => {
+      if (meta?.success) {
+        setProducts(meta.data as Product[])
+      }
+    })
+    await productColorService.getListItems(defaultRequestBody, setLoading, (meta) => {
+      if (meta?.success) {
+        setProductColors(meta.data as ProductColor[])
+      }
+    })
+    await productGroupService.getListItems(defaultRequestBody, setLoading, (meta) => {
+      if (meta?.success) {
+        setProductGroups(meta.data as ProductGroup[])
+      }
+    })
+    await printablePlaceService.getListItems(defaultRequestBody, setLoading, (meta) => {
+      if (meta?.success) {
+        setPrintablePlaces(meta.data as PrintablePlace[])
+      }
+    })
+  }
 
   useEffect(() => {
     selfConvertDataSource(products, productColors, productGroups, printablePlaces)
@@ -156,16 +154,16 @@ const ProductPage: React.FC = () => {
             dateInputNPL: row.dateInputNPL,
             dateOutputFCR: row.dateOutputFCR
           },
-          setLoading,
-          (meta, msg) => {
-            if (meta?.success) {
-              const productNew = meta.data as Product
-              handleStartSaveEditing(item.key!, { ...productNew })
-              message.success(msg)
-            } else {
-              message.error(msg)
-            }
-          }
+          setLoading
+          // (meta, msg) => {
+          //   if (meta?.success) {
+          //     const productNew = meta.data as Product
+          //     handleStartSaveEditing(item.key!, { ...productNew })
+          //     message.success(msg)
+          //   } else {
+          //     message.error(msg)
+          //   }
+          // }
         )
       }
       if (row.colorID !== item.productColor?.colorID) {
@@ -173,21 +171,21 @@ const ProductPage: React.FC = () => {
         await productColorService.createOrUpdateItemBy(
           { field: 'productID', key: item.key! },
           { colorID: row.colorID },
-          setLoading,
-          (meta, msg) => {
-            if (meta?.success) {
-              const productColorUpdated = meta.data as ProductColor
-              handleStartSaveEditing(item.key!, {
-                productColor: {
-                  ...productColorUpdated,
-                  color: colors.find((i) => i.id === row.colorID)
-                }
-              })
-              message.success(msg)
-            } else {
-              message.error(msg)
-            }
-          }
+          setLoading
+          // (meta, msg) => {
+          //   if (meta?.success) {
+          //     const productColorUpdated = meta.data as ProductColor
+          //     handleStartSaveEditing(item.key!, {
+          //       productColor: {
+          //         ...productColorUpdated,
+          //         color: colors.find((i) => i.id === row.colorID)
+          //       }
+          //     })
+          //     message.success(msg)
+          //   } else {
+          //     message.error(msg)
+          //   }
+          // }
         )
       }
       if (row.groupID !== item.productGroup?.groupID) {
@@ -195,21 +193,21 @@ const ProductPage: React.FC = () => {
         await productGroupService.createOrUpdateItemBy(
           { field: 'productID', key: item.key! },
           { groupID: row.groupID },
-          setLoading,
-          (meta, msg) => {
-            if (meta?.success) {
-              const productGroupUpdated = meta.data as ProductGroup
-              handleStartSaveEditing(item.key!, {
-                productGroup: {
-                  ...productGroupUpdated,
-                  group: groups.find((i) => i.id === row.groupID)
-                }
-              })
-              message.success(msg)
-            } else {
-              message.error(msg)
-            }
-          }
+          setLoading
+          // (meta, msg) => {
+          //   if (meta?.success) {
+          //     const productGroupUpdated = meta.data as ProductGroup
+          //     handleStartSaveEditing(item.key!, {
+          //       productGroup: {
+          //         ...productGroupUpdated,
+          //         group: groups.find((i) => i.id === row.groupID)
+          //       }
+          //     })
+          //     message.success(msg)
+          //   } else {
+          //     message.error(msg)
+          //   }
+          // }
         )
       }
       if (row.printID !== item.printablePlace?.printID) {
@@ -217,21 +215,21 @@ const ProductPage: React.FC = () => {
         await printablePlaceService.createOrUpdateItemBy(
           { field: 'productID', key: item.key! },
           { printID: row.printID },
-          setLoading,
-          (meta, msg) => {
-            if (meta?.success) {
-              const printablePlaceUpdated = meta.data as PrintablePlace
-              handleStartSaveEditing(item.key!, {
-                printablePlace: {
-                  ...printablePlaceUpdated,
-                  print: prints.find((i) => i.id === row.printID)
-                }
-              })
-              message.success(msg)
-            } else {
-              message.error(msg)
-            }
-          }
+          setLoading
+          // (meta, msg) => {
+          //   if (meta?.success) {
+          //     const printablePlaceUpdated = meta.data as PrintablePlace
+          //     handleStartSaveEditing(item.key!, {
+          //       printablePlace: {
+          //         ...printablePlaceUpdated,
+          //         print: prints.find((i) => i.id === row.printID)
+          //       }
+          //     })
+          //     message.success(msg)
+          //   } else {
+          //     message.error(msg)
+          //   }
+          // }
         )
       }
     } catch (error) {
@@ -239,6 +237,7 @@ const ProductPage: React.FC = () => {
     } finally {
       setLoading(false)
       handleConfirmCancelEditing()
+      loadData()
     }
   }
 
@@ -300,7 +299,7 @@ const ProductPage: React.FC = () => {
             }
             message.success(msg)
           } else {
-            console.log('Errr')
+            console.log(msg)
             message.error(msg)
           }
         }
