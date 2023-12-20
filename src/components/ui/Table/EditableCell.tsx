@@ -7,7 +7,7 @@ import { TableItemWithKey } from '~/components/hooks/useTable'
 import { InputType } from '~/typing'
 import { DatePattern } from '~/utils/date-formatter'
 
-export interface EditableCellProps<T extends { key?: React.Key }> extends React.HTMLAttributes<HTMLElement> {
+export interface EditableCellProps<T extends { key?: React.Key }> {
   editing: boolean
   dataIndex: string
   setLoading?: (enable: boolean) => void
@@ -17,12 +17,10 @@ export interface EditableCellProps<T extends { key?: React.Key }> extends React.
   inputType: InputType
   record: TableItemWithKey<T>
   index: number
-  children: React.ReactNode
+  children?: React.ReactNode
 }
 
 export type EditableTableProps = Parameters<typeof Table>[0]
-
-export type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>
 
 function EditableCell<T extends { key?: React.Key }>({
   editing,

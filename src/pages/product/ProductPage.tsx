@@ -10,12 +10,15 @@ import useDevice from '~/components/hooks/useDevice'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import useAPIService from '~/hooks/useAPIService'
-import { Color, Group, PrintablePlace, Product, ProductColor, ProductGroup } from '~/typing'
+import { Color, Group, Print, PrintablePlace, Product, ProductColor, ProductGroup } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import ModalAddNewProduct from './components/ModalAddNewProduct'
 import ProductList from './components/ProductList'
 import ProductTable from './components/ProductTable'
 import { ProductTableDataType } from './type'
+import ColorAPI from '~/api/services/ColorAPI'
+import GroupAPI from '~/api/services/GroupAPI'
+import PrintAPI from '~/api/services/PrintAPI'
 
 const ProductPage: React.FC = () => {
   const productService = useAPIService<Product>(ProductAPI)
@@ -23,9 +26,7 @@ const ProductPage: React.FC = () => {
   const productGroupService = useAPIService<ProductGroup>(ProductGroupAPI)
   const printablePlaceService = useAPIService<PrintablePlace>(PrintablePlaceAPI)
 
-  // const colorService = useAPIService<Color>(ColorAPI)
-  // const groupService = useAPIService<Group>(GroupAPI)
-  // const printService = useAPIService<Print>(PrintAPI)
+
   const {
     form,
     isEditing,
@@ -49,9 +50,7 @@ const ProductPage: React.FC = () => {
   const [productGroups, setProductGroups] = useState<ProductGroup[]>([])
   const [printablePlaces, setPrintablePlaces] = useState<PrintablePlace[]>([])
 
-  // const [colors, setColors] = useState<Color[]>([])
-  // const [groups, setGroups] = useState<Group[]>([])
-  // const [prints, setPrints] = useState<Print[]>([])
+
 
   const [productNew, setProductNew] = useState<Product | undefined>(undefined)
   const [productColorNew, setProductColorNew] = useState<Color | undefined>(undefined)
@@ -62,28 +61,6 @@ const ProductPage: React.FC = () => {
 
   const { width } = useDevice()
 
-  // useEffect(() => {
-  //   const loadData = async () => {
-  //     if (editingKey !== '') {
-  //       await colorService.getListItems(defaultRequestBody, setLoading, (meta) => {
-  //         if (meta?.success) {
-  //           setColors(meta.data as Color[])
-  //         }
-  //       })
-  //       await groupService.getListItems(defaultRequestBody, setLoading, (meta) => {
-  //         if (meta?.success) {
-  //           setGroups(meta.data as Group[])
-  //         }
-  //       })
-  //       await printService.getListItems(defaultRequestBody, setLoading, (meta) => {
-  //         if (meta?.success) {
-  //           setPrints(meta.data as Print[])
-  //         }
-  //       })
-  //     }
-  //   }
-  //   loadData()
-  // }, [editingKey])
 
   useEffect(() => {
     loadData()
