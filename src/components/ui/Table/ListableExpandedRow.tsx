@@ -11,7 +11,6 @@ interface Props<T extends ItemWithKeyAndTitleType> extends ListProps<T> {
 const ListableExpandedRow = <T extends ItemWithKeyAndTitleType>({ ...props }: Props<T>) => {
   return (
     <List
-      {...props}
       className={props.className}
       itemLayout='vertical'
       size='large'

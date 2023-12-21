@@ -186,7 +186,7 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
         return (
           <>
             <EditableCellNew
-              editing={props.isEditing(record.key!)}
+              editing={props.isEditing(Number(record.productGroup?.groupID))}
               dataIndex='groupID'
               title='Nhóm'
               inputType='select'
@@ -205,7 +205,7 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
       title: 'Nơi in',
       dataIndex: 'printID',
       width: '10%',
-      responsive: ['xl'],
+      responsive: ['xxl'],
       render: (_value: any, record: ProductTableDataType) => {
         return (
           <>
@@ -378,32 +378,35 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
                 items={[
                   {
                     ...record,
-                    key: Number(record.printablePlace?.id),
+                    key: record.key,
                     title: 'Nơi in / thêu',
                     editable: true,
-                    isEditing: props.isEditing(record.key!),
+                    dataIndex: 'printID',
+                    initialField: { value: record.printablePlace?.print?.name, data: prints },
                     desc: record.printablePlace?.print?.name,
-                    responsive: ['xl'],
+                    responsive: ['xxl'],
                     inputType: 'select'
                   },
                   {
                     ...record,
-                    key: Number(record.id),
+                    key: record.key,
                     title: 'Ngày nhập NPL',
                     editable: true,
-                    isEditing: props.isEditing(record.key!),
+                    dataIndex: 'dateInputNPL',
+                    initialField: { value: DayJS(record.dateInputNPL) },
                     desc: DayJS(record.dateInputNPL).format(DatePattern.display),
                     responsive: ['lg'],
                     inputType: 'datepicker'
                   },
                   {
                     ...record,
-                    key: Number(record.id),
+                    key: Number(Number(record.key) * 3.14),
                     editable: false,
+                    title: 'Tiến trình',
+                    dataIndex: 'progress',
                     desc: (
                       <>
                         <Flex vertical className='w-full 2xl:hidden'>
-                          <Typography.Text className='w-40 font-bold'>Tiến trình</Typography.Text>
                           <List className='w-full list-none'>
                             {progressArr.map((item, index) => {
                               return (
@@ -412,9 +415,13 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
                                     <Typography.Text className='m-0 w-16 flex-shrink-0 p-0'>
                                       {item.task}
                                     </Typography.Text>
-                                    <Flex className='w-full' align='center' vertical>
-                                      <ProgressBar count={item.quantity ?? 0} total={record.quantityPO ?? 0} />
-                                      <Typography.Text type='secondary' className='w-24 font-medium'>
+                                    <Flex className='m-0 w-full p-0' align='center' vertical>
+                                      <ProgressBar
+                                        className='m-0 p-0'
+                                        count={item.quantity ?? 0}
+                                        total={record.quantityPO ?? 0}
+                                      />
+                                      <Typography.Text type='secondary' className='m-0 w-24 p-0 font-medium'>
                                         {item.quantity ?? 0} / {record.quantityPO ?? 0}
                                       </Typography.Text>
                                     </Flex>
@@ -436,7 +443,7 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
             )
           },
           columnWidth: '1%',
-          showExpandColumn: true
+          showExpandColumn: innerWidth < 1536
         }}
         columns={user.isAdmin ? adminColumns : staffColumns}
         pagination={{

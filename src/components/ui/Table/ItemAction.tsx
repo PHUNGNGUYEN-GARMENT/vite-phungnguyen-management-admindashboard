@@ -52,25 +52,13 @@ const ItemAction: React.FC<Props> = ({
         ) : (
           <Flex gap={10}>
             {user.isAdmin && (
-              <Button
-                type='primary'
-                disabled={editingKey !== ''}
-                onClick={onClickStartEditing}
-              >
+              <Button type='primary' disabled={editingKey !== ''} onClick={onClickStartEditing}>
                 Edit
               </Button>
             )}
             {user.isAdmin && (
-              <Popconfirm
-                title={`Sure to delete?`}
-                onCancel={onConfirmCancelDeleting}
-                onConfirm={onConfirmDelete}
-              >
-                <Button
-                  type='dashed'
-                  disabled={editingKey !== ''}
-                  onClick={onStartDeleting}
-                >
+              <Popconfirm title={`Sure to delete?`} onCancel={onConfirmCancelDeleting} onConfirm={onConfirmDelete}>
+                <Button type='dashed' disabled={editingKey !== ''} onClick={onStartDeleting}>
                   Delete
                 </Button>
               </Popconfirm>

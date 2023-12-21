@@ -10,22 +10,18 @@ import useDevice from '~/components/hooks/useDevice'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import useAPIService from '~/hooks/useAPIService'
-import { Color, Group, Print, PrintablePlace, Product, ProductColor, ProductGroup } from '~/typing'
+import { Color, Group, PrintablePlace, Product, ProductColor, ProductGroup } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import ModalAddNewProduct from './components/ModalAddNewProduct'
 import ProductList from './components/ProductList'
 import ProductTable from './components/ProductTable'
 import { ProductTableDataType } from './type'
-import ColorAPI from '~/api/services/ColorAPI'
-import GroupAPI from '~/api/services/GroupAPI'
-import PrintAPI from '~/api/services/PrintAPI'
 
 const ProductPage: React.FC = () => {
   const productService = useAPIService<Product>(ProductAPI)
   const productColorService = useAPIService<ProductColor>(ProductColorAPI)
   const productGroupService = useAPIService<ProductGroup>(ProductGroupAPI)
   const printablePlaceService = useAPIService<PrintablePlace>(PrintablePlaceAPI)
-
 
   const {
     form,
@@ -50,8 +46,6 @@ const ProductPage: React.FC = () => {
   const [productGroups, setProductGroups] = useState<ProductGroup[]>([])
   const [printablePlaces, setPrintablePlaces] = useState<PrintablePlace[]>([])
 
-
-
   const [productNew, setProductNew] = useState<Product | undefined>(undefined)
   const [productColorNew, setProductColorNew] = useState<Color | undefined>(undefined)
   const [productGroupNew, setProductGroupNew] = useState<Group | undefined>(undefined)
@@ -60,7 +54,6 @@ const ProductPage: React.FC = () => {
   const { message } = AntApp.useApp()
 
   const { width } = useDevice()
-
 
   useEffect(() => {
     loadData()

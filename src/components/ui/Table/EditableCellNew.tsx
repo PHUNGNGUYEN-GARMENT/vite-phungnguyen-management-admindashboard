@@ -10,7 +10,7 @@ import { DatePattern } from '~/utils/date-formatter'
 export interface EditableCellNewProps<T extends { key?: React.Key }> extends HTMLAttributes<HTMLElement> {
   editing: boolean
   dataIndex: string
-  initialField: {
+  initialField?: {
     value: any
     data?: any[]
   }
@@ -44,15 +44,14 @@ function EditableCellNew<T extends { key?: React.Key }>({
           <Select
             placeholder='Select...'
             options={
-              initialField.data
-                ? initialField.data?.map((item) => {
-                    return {
-                      label: item.name,
-                      value: item.id,
-                      key: item.id
-                    }
-                  })
-                : undefined
+              initialField?.data &&
+              initialField.data.map((item) => {
+                return {
+                  label: item.name,
+                  value: item.id,
+                  key: item.id
+                }
+              })
             }
             value={initialField?.value}
             optionRender={(ori, info) => {
@@ -76,7 +75,7 @@ function EditableCellNew<T extends { key?: React.Key }>({
       case 'datepicker':
         return <DatePicker format={DatePattern.display} className='' />
       default:
-        return <Input value={initialField?.value} name={dataIndex} className='w-full' />
+        return <Input value={initialField?.value} />
     }
   })()
 

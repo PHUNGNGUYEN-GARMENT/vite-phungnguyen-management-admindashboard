@@ -1,14 +1,21 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-refresh/only-export-components */
-import { Breakpoint, Divider, Flex, Form, Typography } from 'antd'
+import { Breakpoint, Divider, Flex, Typography } from 'antd'
 import React, { memo, useEffect, useState } from 'react'
 import { InputType } from '~/typing'
 import { cn } from '~/utils/helpers'
+import EditableCellNew from './EditableCellNew'
 
 export type ItemWithKeyAndTitleType = {
   key?: React.Key
-  title?: string | React.ReactNode
+  title?: string
   desc?: string | React.ReactNode
   editable?: boolean
+  dataIndex: string
+  initialField?: {
+    value: any
+    data?: any[]
+  }
   inputType?: InputType
   responsive?: Breakpoint[]
 }
@@ -61,20 +68,30 @@ const ListableExpandedRowItem = <T extends ItemWithKeyAndTitleType>({ ...props }
         'sm:hidden': responsive?.sm,
         'md:hidden': responsive?.md,
         'lg:hidden': responsive?.lg,
-        'xl:hidden': responsive?.xl
+        'xl:hidden': responsive?.xl,
+        '2xl:hidden': responsive?.xxl
       })}
     >
       <Flex className='w-full' align='center' justify='start' gap={5}>
-        {props.item.title && <Typography.Text className='m-0 w-40 font-bold'>{props.item.title}</Typography.Text>}
-        {props.isEditing ? (
-          <Form.Item></Form.Item>
-        ) : props.item.desc ? (
-          props.item.desc
-        ) : (
-          <Typography.Text type='secondary' className='m-0 w-40 font-medium'>
-            {props.item.desc}
-          </Typography.Text>
-        )}
+        <Typography.Text className='m-0 w-40 p-0 font-bold'>{props.item.title}</Typography.Text>
+        <EditableCellNew
+          editing={props.item.editable ? props.isEditing ?? false : false}
+          dataIndex={props.item.dataIndex}
+          title='FCR'
+          inputType={props.item.inputType ?? 'text'}
+          record={props.item}
+          index={Number(props.item.key!)}
+          required={true}
+          initialField={props.item.initialField}
+        >
+          {props.item.desc ? (
+            props.item.desc
+          ) : (
+            <Typography.Text type='secondary' className='m-0 w-40 p-0 font-medium'>
+              {props.item.desc}
+            </Typography.Text>
+          )}
+        </EditableCellNew>
       </Flex>
       <Divider />
     </Flex>
