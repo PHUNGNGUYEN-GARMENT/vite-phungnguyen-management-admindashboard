@@ -2,6 +2,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { Flex, Typography } from 'antd'
 import React, { memo } from 'react'
+import { cn } from '~/utils/helpers'
 import EditableCellNew, { EditableCellNewProps } from './EditableCellNew'
 
 interface Props extends EditableCellNewProps {
@@ -12,7 +13,7 @@ interface Props extends EditableCellNewProps {
 
 const ListItemRow = ({ value, children, ...props }: Props) => {
   return (
-    <Flex className='w-full' align='center' justify='start' gap={5}>
+    <Flex className={cn('w-full', props.className)} align='center' justify='start' gap={5}>
       {typeof props.label !== 'string' ? (
         props.label
       ) : (

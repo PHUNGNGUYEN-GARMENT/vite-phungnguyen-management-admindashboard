@@ -9,6 +9,7 @@ import GroupAPI from '~/api/services/GroupAPI'
 import PrintAPI from '~/api/services/PrintAPI'
 import EditableCellNew from '~/components/ui/Table/EditableCellNew'
 import ItemAction from '~/components/ui/Table/ItemAction'
+import ListItemRow from '~/components/ui/Table/ListItemRow'
 import useAPIService from '~/hooks/useAPIService'
 import { RootState } from '~/store/store'
 import { Color, Group, Print } from '~/typing'
@@ -111,9 +112,7 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
               required={true}
               initialField={{ value: record.productCode }}
             >
-              <Typography.Text copyable className='text-md flex-shrink-0 font-bold'>
-                {record.productCode}
-              </Typography.Text>
+              <Typography.Text className='text-md flex-shrink-0 font-bold'>{record.productCode}</Typography.Text>
             </EditableCellNew>
           </>
         )
@@ -173,7 +172,7 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
       title: 'Nhóm',
       dataIndex: 'groupID',
       width: '10%',
-      responsive: ['md'],
+      responsive: ['xl'],
       render: (_value: any, record: ProductTableDataType) => {
         return (
           <>
@@ -320,8 +319,36 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
         expandable={{
           expandedRowRender: (record: ProductTableDataType) => {
             return (
-              <Flex className='w-full'>
-                <ProductProgressStatus record={record} />
+              <Flex className='w-1/2' vertical gap={20}>
+                <ListItemRow
+                  label='Nhóm'
+                  isEditing={props.isEditing(record.key!)}
+                  dataIndex='groupID'
+                  inputType='select'
+                  initialField={{
+                    value: record.productGroup?.groupID,
+                    selectItems: groups.map((i) => {
+                      return { label: i.name, value: i.id, optionData: i.id }
+                    })
+                  }}
+                  className='xl:hidden'
+                  value={record.productGroup?.group?.name}
+                />
+                <ListItemRow
+                  label='Nơi in'
+                  isEditing={props.isEditing(record.key!)}
+                  dataIndex='printID'
+                  inputType='select'
+                  initialField={{
+                    value: record.printablePlace?.printID,
+                    selectItems: prints.map((i) => {
+                      return { label: i.name, value: i.id, optionData: i.id }
+                    })
+                  }}
+                  className='2xl:hidden'
+                  value={record.printablePlace?.print?.name}
+                />
+                <ProductProgressStatus collapse className='w-full 2xl:hidden' record={record} />
               </Flex>
             )
           },

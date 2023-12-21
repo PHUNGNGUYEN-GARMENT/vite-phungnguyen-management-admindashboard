@@ -3,6 +3,7 @@ import { Collapse, Flex, Typography } from 'antd'
 import React, { HTMLAttributes, memo } from 'react'
 import { TableItemWithKey } from '~/components/hooks/useTable'
 import ProgressBar from '~/components/ui/ProgressBar'
+import { cn } from '~/utils/helpers'
 import { ProductTableDataType } from '../type'
 
 interface Props extends HTMLAttributes<HTMLElement> {
@@ -36,7 +37,7 @@ const ProductProgressStatus: React.FC<Props> = ({ record, collapse, ...props }) 
 
   const Processable = ({ list }: ProcessableProps) => {
     return (
-      <Flex className='' vertical>
+      <Flex className='w-full' vertical>
         {list.map((item, index) => {
           return (
             <Flex key={index} className='w-full' align='center' justify='start' gap={5}>
@@ -44,7 +45,7 @@ const ProductProgressStatus: React.FC<Props> = ({ record, collapse, ...props }) 
               <Flex className='w-full' align='center' vertical>
                 <ProgressBar count={item.quantity ?? 0} total={record.quantityPO ?? 0} />
                 <Typography.Text type='secondary' className='w-24 font-medium'>
-                  <span>{item.quantity ?? 0}</span> / <span>{record.quantityPO ?? 0}</span>
+                  <span>{item.quantity ?? 0}</span>/<span>{record.quantityPO ?? 0}</span>
                 </Typography.Text>
               </Flex>
             </Flex>
@@ -56,7 +57,7 @@ const ProductProgressStatus: React.FC<Props> = ({ record, collapse, ...props }) 
 
   return (
     <>
-      <Flex {...props} className='w-full'>
+      <Flex {...props} className={cn('w-full', props.className)}>
         {collapse ? (
           <Collapse
             className='w-full'

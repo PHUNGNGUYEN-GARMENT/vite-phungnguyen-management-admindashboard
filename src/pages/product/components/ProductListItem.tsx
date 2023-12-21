@@ -175,7 +175,7 @@ const ProductListItem: React.FC<Props> = ({
                     value={data.printablePlace?.print?.name}
                   />
                 </Space>
-                <ProductProgressStatus record={data} />
+                <ProductProgressStatus collapse record={data} />
               </Space>
             )
           }
