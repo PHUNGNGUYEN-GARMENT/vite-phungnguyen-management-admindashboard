@@ -2,37 +2,38 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-refresh/only-export-components */
 import { ColorPicker, DatePicker, Flex, Form, Input, InputNumber, Select, Table, Typography } from 'antd'
+import { DefaultOptionType } from 'antd/es/select'
 import { HTMLAttributes, memo } from 'react'
-import { TableItemWithKey } from '~/components/hooks/useTable'
 import { InputType } from '~/typing'
 import { DatePattern } from '~/utils/date-formatter'
+import { cn } from '~/utils/helpers'
 
-export interface EditableCellNewProps<T extends { key?: React.Key }> extends HTMLAttributes<HTMLElement> {
-  editing: boolean
+export type EditableCellRequiredType = { key?: React.Key; name?: string; id?: number }
+
+export interface EditableCellNewProps extends HTMLAttributes<HTMLElement> {
+  isEditing: boolean
   dataIndex: string
+  inputType?: InputType
   initialField?: {
     value: any
-    data?: any[]
+    data?: any
+    selectItems?: (DefaultOptionType & { optionData?: any })[]
   }
   required?: boolean
-  title: string
-  inputType: InputType
-  record: TableItemWithKey<T>
-  index: number
+  title?: string
 }
 
 export type EditableTableProps = Parameters<typeof Table>[0]
 
-function EditableCellNew<T extends { key?: React.Key }>({
-  editing,
+function EditableCellNew({
+  isEditing,
   dataIndex,
-  record,
   title,
   required,
   initialField,
   inputType,
   ...restProps
-}: EditableCellNewProps<T>) {
+}: EditableCellNewProps) {
   const inputNode = ((): React.ReactNode => {
     switch (inputType) {
       case 'colorpicker':
@@ -42,15 +43,15 @@ function EditableCellNew<T extends { key?: React.Key }>({
       case 'select':
         return (
           <Select
-            placeholder='Select...'
+            placeholder={`Select ${title}`}
             options={
-              initialField?.data &&
-              initialField.data.map((item) => {
+              initialField?.selectItems &&
+              initialField.selectItems.map((item) => {
                 return {
-                  label: item.name,
-                  value: item.id,
-                  key: item.id
-                }
+                  label: item.label,
+                  value: item.value,
+                  key: item.optionData
+                } as DefaultOptionType
               })
             }
             value={initialField?.value}
@@ -73,18 +74,18 @@ function EditableCellNew<T extends { key?: React.Key }>({
           />
         )
       case 'datepicker':
-        return <DatePicker format={DatePattern.display} className='' />
+        return <DatePicker format={DatePattern.display} className='w-full' />
       default:
-        return <Input value={initialField?.value} />
+        return <Input value={initialField?.value} className='w-full' />
     }
   })()
 
   return (
     <>
-      {editing ? (
+      {isEditing ? (
         <Form.Item
           name={dataIndex}
-          className={restProps.className}
+          className={cn('w-full', restProps.className)}
           initialValue={initialField?.value}
           style={{ margin: 0 }}
           rules={[

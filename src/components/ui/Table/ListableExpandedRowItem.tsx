@@ -2,23 +2,9 @@
 /* eslint-disable react-refresh/only-export-components */
 import { Breakpoint, Divider, Flex, Typography } from 'antd'
 import React, { memo, useEffect, useState } from 'react'
-import { InputType } from '~/typing'
+import { ItemWithKeyAndTitleType } from '~/typing'
 import { cn } from '~/utils/helpers'
 import EditableCellNew from './EditableCellNew'
-
-export type ItemWithKeyAndTitleType = {
-  key?: React.Key
-  title?: string
-  desc?: string | React.ReactNode
-  editable?: boolean
-  dataIndex: string
-  initialField?: {
-    value: any
-    data?: any[]
-  }
-  inputType?: InputType
-  responsive?: Breakpoint[]
-}
 
 interface Props<T extends ItemWithKeyAndTitleType> extends React.HTMLAttributes<HTMLElement> {
   item: T

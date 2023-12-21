@@ -33,7 +33,6 @@ const ProductPage: React.FC = () => {
     setDataSource,
     setDeleteKey,
     dateCreation,
-    // handleStartSaveEditing,
     setDateCreation,
     handleStartEditing,
     handleStartDeleting,
@@ -54,10 +53,6 @@ const ProductPage: React.FC = () => {
   const { message } = AntApp.useApp()
 
   const { width } = useDevice()
-
-  useEffect(() => {
-    loadData()
-  }, [productNew, productColorNew, productGroupNew, printablePlaceNew])
 
   const loadData = async () => {
     await productService.getListItems(defaultRequestBody, setLoading, (meta) => {
@@ -81,6 +76,10 @@ const ProductPage: React.FC = () => {
       }
     })
   }
+
+  useEffect(() => {
+    loadData()
+  }, [productNew, productColorNew, productGroupNew, printablePlaceNew])
 
   useEffect(() => {
     selfConvertDataSource(products, productColors, productGroups, printablePlaces)
@@ -124,86 +123,57 @@ const ProductPage: React.FC = () => {
             dateInputNPL: row.dateInputNPL,
             dateOutputFCR: row.dateOutputFCR
           },
-          setLoading
-          // (meta, msg) => {
-          //   if (meta?.success) {
-          //     const productNew = meta.data as Product
-          //     handleStartSaveEditing(item.key!, { ...productNew })
-          //     message.success(msg)
-          //   } else {
-          //     message.error(msg)
-          //   }
-          // }
+          setLoading,
+          (meta) => {
+            if (!meta?.success) {
+              throw new Error('API update Product failed')
+            }
+          }
         )
       }
-      if (row.colorID !== item.productColor?.colorID) {
+      if (row.colorID && row.colorID !== item.productColor?.colorID) {
         console.log('Product color progressing...')
         await productColorService.createOrUpdateItemBy(
           { field: 'productID', key: item.key! },
           { colorID: row.colorID },
-          setLoading
-          // (meta, msg) => {
-          //   if (meta?.success) {
-          //     const productColorUpdated = meta.data as ProductColor
-          //     handleStartSaveEditing(item.key!, {
-          //       productColor: {
-          //         ...productColorUpdated,
-          //         color: colors.find((i) => i.id === row.colorID)
-          //       }
-          //     })
-          //     message.success(msg)
-          //   } else {
-          //     message.error(msg)
-          //   }
-          // }
+          setLoading,
+          (meta) => {
+            if (!meta?.success) {
+              throw new Error('API update ProductColor failed')
+            }
+          }
         )
       }
-      if (row.groupID !== item.productGroup?.groupID) {
+      if (row.groupID && row.groupID !== item.productGroup?.groupID) {
         console.log('ProductGroup progressing...')
         await productGroupService.createOrUpdateItemBy(
           { field: 'productID', key: item.key! },
           { groupID: row.groupID },
-          setLoading
-          // (meta, msg) => {
-          //   if (meta?.success) {
-          //     const productGroupUpdated = meta.data as ProductGroup
-          //     handleStartSaveEditing(item.key!, {
-          //       productGroup: {
-          //         ...productGroupUpdated,
-          //         group: groups.find((i) => i.id === row.groupID)
-          //       }
-          //     })
-          //     message.success(msg)
-          //   } else {
-          //     message.error(msg)
-          //   }
-          // }
+          setLoading,
+          (meta) => {
+            if (!meta?.success) {
+              throw new Error('API update ProductGroup failed')
+            }
+          }
         )
       }
-      if (row.printID !== item.printablePlace?.printID) {
+      if (row.printID && row.printID !== item.printablePlace?.printID) {
         console.log('PrintablePlace progressing...')
         await printablePlaceService.createOrUpdateItemBy(
           { field: 'productID', key: item.key! },
           { printID: row.printID },
-          setLoading
-          // (meta, msg) => {
-          //   if (meta?.success) {
-          //     const printablePlaceUpdated = meta.data as PrintablePlace
-          //     handleStartSaveEditing(item.key!, {
-          //       printablePlace: {
-          //         ...printablePlaceUpdated,
-          //         print: prints.find((i) => i.id === row.printID)
-          //       }
-          //     })
-          //     message.success(msg)
-          //   } else {
-          //     message.error(msg)
-          //   }
-          // }
+          setLoading,
+          (meta) => {
+            if (!meta?.success) {
+              throw new Error('API update PrintablePlace failed')
+            }
+          }
         )
       }
+      message.success('Success!')
     } catch (error) {
       console.error(error)
+      message.error('Failed')
     } finally {
       setLoading(false)
       handleConfirmCancelEditing()
@@ -269,7 +239,7 @@ const ProductPage: React.FC = () => {
             }
             message.success(msg)
           } else {
-            console.log(msg)
+            console.log('Errr')
             message.error(msg)
           }
         }

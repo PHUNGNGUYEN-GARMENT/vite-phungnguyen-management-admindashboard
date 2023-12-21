@@ -31,8 +31,7 @@ const ProgressBar: React.FC<Props> = ({ count, total, ...props }) => {
         className={props.className}
         percent={per}
         strokeColor={genColor(per)}
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        format={(percent, _successPer) => {
+        format={(percent) => {
           return <>{formatAsPercentage(percent ?? 0)}</>
         }}
       />

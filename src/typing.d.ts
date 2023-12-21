@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export type Role =
   | 'admin'
   | 'importation' // Xuất nhập khẩu
@@ -14,6 +15,20 @@ export type SortDirection = 'asc' | 'desc'
 export type ItemStatusType = 'draft' | 'active' | 'closed' | 'archived' | 'deleted'
 
 export type InputType = 'number' | 'text' | 'colorpicker' | 'select' | 'datepicker'
+
+export type ItemWithKeyAndTitleType = {
+  key?: React.Key
+  title?: string | React.ReactNode
+  desc?: string | React.ReactNode
+  editable?: boolean
+  dataIndex: string
+  initialField?: {
+    value: any
+    data?: any[]
+  }
+  inputType?: InputType
+  responsive?: Breakpoint[]
+}
 
 export type StepRound = {
   name: string

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ColorPicker, Flex, List, Table, Typography } from 'antd'
+import { ColorPicker, Flex, Table, Typography } from 'antd'
 import type { ColumnType } from 'antd/es/table'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
@@ -7,15 +7,14 @@ import { ResponseDataType, defaultRequestBody } from '~/api/client'
 import ColorAPI from '~/api/services/ColorAPI'
 import GroupAPI from '~/api/services/GroupAPI'
 import PrintAPI from '~/api/services/PrintAPI'
-import ProgressBar from '~/components/ui/ProgressBar'
 import EditableCellNew from '~/components/ui/Table/EditableCellNew'
 import ItemAction from '~/components/ui/Table/ItemAction'
-import ListableExpandedRow from '~/components/ui/Table/ListableExpandedRow'
 import useAPIService from '~/hooks/useAPIService'
 import { RootState } from '~/store/store'
 import { Color, Group, Print } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import { ProductTableDataType } from '../type'
+import ProductProgressStatus from './ProductProgressStatus'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
   loading: boolean
@@ -105,12 +104,10 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
         return (
           <>
             <EditableCellNew
-              editing={props.isEditing(record.key!)}
+              isEditing={props.isEditing(record.key!)}
               dataIndex='productCode'
               title='Mã hàng'
               inputType='text'
-              record={record}
-              index={0}
               required={true}
               initialField={{ value: record.productCode }}
             >
@@ -130,12 +127,10 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
         return (
           <>
             <EditableCellNew
-              editing={props.isEditing(record.key!)}
+              isEditing={props.isEditing(record.key!)}
               dataIndex='quantityPO'
               title='Số lượng PO'
               inputType='number'
-              record={record}
-              index={0}
               required={true}
               initialField={{ value: record.quantityPO }}
             >
@@ -153,24 +148,21 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
         return (
           <>
             <EditableCellNew
-              editing={props.isEditing(record.key!)}
+              isEditing={props.isEditing(record.key!)}
               dataIndex='colorID'
               title='Màu'
               inputType='select'
-              record={record}
-              index={0}
               required={true}
-              initialField={{ value: record.productColor?.colorID, data: colors }}
+              initialField={{
+                value: record.productColor?.colorID,
+                selectItems: colors.map((i) => {
+                  return { label: i.name, value: i.id, optionData: i.hexColor }
+                })
+              }}
             >
-              <Flex className='' align='center' vertical gap={5}>
-                <span>{record.productColor?.color?.name}</span>
-                <ColorPicker
-                  size='middle'
-                  format='hex'
-                  value={record.productColor?.color?.hexColor}
-                  disabled
-                  showText
-                />
+              <Flex className='' justify='space-between' align='center' gap={10}>
+                <Typography.Text>{record.productColor?.color?.name}</Typography.Text>
+                <ColorPicker size='middle' format='hex' value={record.productColor?.color?.hexColor} disabled />
               </Flex>
             </EditableCellNew>
           </>
@@ -186,14 +178,17 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
         return (
           <>
             <EditableCellNew
-              editing={props.isEditing(Number(record.productGroup?.groupID))}
+              isEditing={props.isEditing(record.key!)}
               dataIndex='groupID'
               title='Nhóm'
               inputType='select'
-              record={record}
-              index={0}
               required={true}
-              initialField={{ value: record.productGroup?.groupID, data: groups }}
+              initialField={{
+                value: record.productGroup?.groupID,
+                selectItems: groups.map((i) => {
+                  return { label: i.name, value: i.id, optionData: i.id }
+                })
+              }}
             >
               <span>{record.productGroup?.group?.name}</span>
             </EditableCellNew>
@@ -210,14 +205,17 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
         return (
           <>
             <EditableCellNew
-              editing={props.isEditing(record.key!)}
+              isEditing={props.isEditing(record.key!)}
               dataIndex='printID'
               title='Nơi in'
               inputType='select'
-              record={record}
-              index={0}
               required={true}
-              initialField={{ value: record.printablePlace?.printID, data: prints }}
+              initialField={{
+                value: record.printablePlace?.printID,
+                selectItems: prints.map((i) => {
+                  return { label: i.name, value: i.id, optionData: i.id }
+                })
+              }}
             >
               <span>{record.printablePlace?.print?.name}</span>
             </EditableCellNew>
@@ -231,45 +229,7 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
       responsive: ['xxl'],
       width: 'auto',
       render: (_value: any, record: ProductTableDataType) => {
-        const progressArr: { task: string; quantity: number }[] = [
-          {
-            task: 'May',
-            quantity: record.progress?.sewing ?? 0
-          },
-          {
-            task: 'Ủi',
-            quantity: record.progress?.iron ?? 0
-          },
-          {
-            task: 'Kiểm',
-            quantity: record.progress?.check ?? 0
-          },
-          {
-            task: 'Hoàn thành',
-            quantity: record.progress?.pack ?? 0
-          }
-        ]
-        return (
-          <Flex vertical>
-            <List className='list-none'>
-              {progressArr.map((item, index) => {
-                return (
-                  <List.Item key={index} className='m-0 p-0'>
-                    <Flex className='m-0 w-full p-0'>
-                      <Typography.Text className='m-0 w-16 flex-shrink-0 p-0'>{item.task}</Typography.Text>
-                      <Flex className='w-full' align='center' vertical>
-                        <ProgressBar count={item.quantity ?? 0} total={record.quantityPO ?? 0} />
-                        <Typography.Text type='secondary' className='w-24 font-medium'>
-                          {item.quantity ?? 0}/{record.quantityPO ?? 0}
-                        </Typography.Text>
-                      </Flex>
-                    </Flex>
-                  </List.Item>
-                )
-              })}
-            </List>
-          </Flex>
-        )
+        return <ProductProgressStatus collapse={false} record={record} />
       }
     },
     {
@@ -281,12 +241,10 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
         return (
           <>
             <EditableCellNew
-              editing={props.isEditing(record.key!)}
+              isEditing={props.isEditing(record.key!)}
               dataIndex='dateInputNPL'
               title='NPL'
               inputType='datepicker'
-              record={record}
-              index={0}
               required={true}
               initialField={{ value: DayJS(record.dateInputNPL) }}
             >
@@ -304,12 +262,10 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
         return (
           <>
             <EditableCellNew
-              editing={props.isEditing(record.key!)}
+              isEditing={props.isEditing(record.key!)}
               dataIndex='dateOutputFCR'
               title='FCR'
               inputType='datepicker'
-              record={record}
-              index={0}
               required={true}
               initialField={{ value: DayJS(record.dateOutputFCR) }}
             >
@@ -351,106 +307,26 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
     <>
       <Table
         loading={props.loading}
-        dataSource={props.dataSource}
         bordered
-        expandable={{
-          expandedRowRender: (record: ProductTableDataType) => {
-            const progressArr: { task: string; quantity: number }[] = [
-              {
-                task: 'May',
-                quantity: record.progress?.sewing ?? 0
-              },
-              {
-                task: 'Ủi',
-                quantity: record.progress?.iron ?? 0
-              },
-              {
-                task: 'Kiểm',
-                quantity: record.progress?.check ?? 0
-              },
-              {
-                task: 'Hoàn thành',
-                quantity: record.progress?.pack ?? 0
-              }
-            ]
-            return (
-              <ListableExpandedRow
-                items={[
-                  {
-                    ...record,
-                    key: record.key,
-                    title: 'Nơi in / thêu',
-                    editable: true,
-                    dataIndex: 'printID',
-                    initialField: { value: record.printablePlace?.print?.name, data: prints },
-                    desc: record.printablePlace?.print?.name,
-                    responsive: ['xxl'],
-                    inputType: 'select'
-                  },
-                  {
-                    ...record,
-                    key: record.key,
-                    title: 'Ngày nhập NPL',
-                    editable: true,
-                    dataIndex: 'dateInputNPL',
-                    initialField: { value: DayJS(record.dateInputNPL) },
-                    desc: DayJS(record.dateInputNPL).format(DatePattern.display),
-                    responsive: ['lg'],
-                    inputType: 'datepicker'
-                  },
-                  {
-                    ...record,
-                    key: Number(Number(record.key) * 3.14),
-                    editable: false,
-                    title: 'Tiến trình',
-                    dataIndex: 'progress',
-                    desc: (
-                      <>
-                        <Flex vertical className='w-full 2xl:hidden'>
-                          <List className='w-full list-none'>
-                            {progressArr.map((item, index) => {
-                              return (
-                                <List.Item key={index} className='m-0 w-full p-0'>
-                                  <Flex className='m-0 w-full p-0'>
-                                    <Typography.Text className='m-0 w-16 flex-shrink-0 p-0'>
-                                      {item.task}
-                                    </Typography.Text>
-                                    <Flex className='m-0 w-full p-0' align='center' vertical>
-                                      <ProgressBar
-                                        className='m-0 p-0'
-                                        count={item.quantity ?? 0}
-                                        total={record.quantityPO ?? 0}
-                                      />
-                                      <Typography.Text type='secondary' className='m-0 w-24 p-0 font-medium'>
-                                        {item.quantity ?? 0} / {record.quantityPO ?? 0}
-                                      </Typography.Text>
-                                    </Flex>
-                                  </Flex>
-                                </List.Item>
-                              )
-                            })}
-                          </List>
-                        </Flex>
-                      </>
-                    ),
-                    responsive: ['xxl'],
-                    inputType: 'datepicker'
-                  }
-                ]}
-                isEditing={props.isEditing(record.key!)}
-                loading={props.loading}
-              />
-            )
-          },
-          columnWidth: '1%',
-          showExpandColumn: innerWidth < 1536
-        }}
         columns={user.isAdmin ? adminColumns : staffColumns}
+        dataSource={props.dataSource}
+        rowClassName='editable-row'
         pagination={{
           onChange: props.onPageChange,
           current: props.metaData?.page,
           pageSize: 5,
           total: props.metaData?.total
+        }}
+        expandable={{
+          expandedRowRender: (record: ProductTableDataType) => {
+            return (
+              <Flex className='w-full'>
+                <ProductProgressStatus record={record} />
+              </Flex>
+            )
+          },
+          columnWidth: '1%',
+          showExpandColumn: innerWidth < 1536
         }}
       />
     </>

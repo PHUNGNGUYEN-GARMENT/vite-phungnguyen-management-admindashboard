@@ -52,7 +52,7 @@ const ItemAction: React.FC<Props> = ({
         ) : (
           <Flex gap={10}>
             {user.isAdmin && (
-              <Button type='primary' disabled={editingKey !== ''} onClick={onClickStartEditing}>
+              <Button type='dashed' disabled={editingKey !== ''} onClick={onClickStartEditing}>
                 Edit
               </Button>
             )}
