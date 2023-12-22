@@ -3,7 +3,6 @@ import { Flex, Form, Input, InputNumber, Typography } from 'antd'
 import { memo } from 'react'
 import { TableItemWithKey } from '~/components/hooks/useTable'
 import ListItem from '~/components/ui/Table/ListItem'
-import { ImportationTableDataType } from '../type'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
   data: TableItemWithKey<ImportationTableDataType>

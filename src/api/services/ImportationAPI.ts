@@ -25,8 +25,7 @@ export default {
   },
   createOrUpdateItemByPk: async (id: number, item: Importation): Promise<ResponseDataType | undefined> => {
     return await client
-      .post(`${NAMESPACE}/createOrUpdate`, {
-        id: id,
+      .post(`${NAMESPACE}/createOrUpdate/${id}`, {
         quantity: item.quantity,
         dateImported: item.dateImported,
         status: item.status ?? 'active'
@@ -41,13 +40,12 @@ export default {
         errorFormatter(error)
       })
   },
-  createOrUpdateItemByProductID: async (
-    productID: number,
+  createOrUpdateItemBy: async (
+    query: { field: string; key: React.Key },
     item: Importation
   ): Promise<ResponseDataType | undefined> => {
     return await client
-      .post(`${NAMESPACE}/createOrUpdate/productID`, {
-        productID: productID,
+      .post(`${NAMESPACE}/createOrUpdate/${query.field}/${query.key}`, {
         quantity: item.quantity,
         dateImported: item.dateImported,
         status: item.status ?? 'active'

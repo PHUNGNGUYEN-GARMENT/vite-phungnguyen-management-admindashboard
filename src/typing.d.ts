@@ -45,7 +45,7 @@ export type TableListDataType<T> = {
   data: T
 }
 
-export type User = {
+export interface User {
   id?: number
   email?: string
   fullName?: string
@@ -55,7 +55,7 @@ export type User = {
   updatedAt?: string
 }
 
-export type Product = {
+export interface Product {
   id?: number
   productCode?: string
   quantityPO?: number
@@ -72,7 +72,7 @@ export type Product = {
   updatedAt?: string
 }
 
-export type Color = {
+export interface Color {
   id?: number
   name?: string
   hexColor?: string
@@ -82,7 +82,7 @@ export type Color = {
   orderNumber?: number
 }
 
-export type ProductColor = {
+export interface ProductColor {
   id?: number
   colorID?: number
   productID?: number
@@ -93,7 +93,7 @@ export type ProductColor = {
   updatedAt?: string
 }
 
-export type Group = {
+export interface Group {
   id?: number
   name?: string
   status?: ItemStatusType
@@ -102,7 +102,7 @@ export type Group = {
   orderNumber?: number
 }
 
-export type Print = {
+export interface Print {
   id?: number
   name?: string
   status?: ItemStatusType
@@ -111,7 +111,7 @@ export type Print = {
   orderNumber?: number
 }
 
-export type PrintablePlace = {
+export interface PrintablePlace {
   id?: number
   printID?: number
   productID?: number
@@ -122,7 +122,7 @@ export type PrintablePlace = {
   updatedAt?: string
 }
 
-export type ProductGroup = {
+export interface ProductGroup {
   id?: number
   groupID?: number
   productID?: number
@@ -134,7 +134,7 @@ export type ProductGroup = {
   group?: Group
 }
 
-export type GarmentAccessory = {
+export interface GarmentAccessory {
   id?: number
   productID?: number
   accessoryNoteIDs?: number[]
@@ -147,7 +147,7 @@ export type GarmentAccessory = {
   updatedAt?: string
 }
 
-export type AccessoryNote = {
+export interface AccessoryNote {
   id?: number
   title?: string
   summary?: string
@@ -156,7 +156,7 @@ export type AccessoryNote = {
   updatedAt?: string
 }
 
-export type Importation = {
+export interface Importation {
   id?: number
   productID?: number
   quantity?: number
@@ -167,7 +167,7 @@ export type Importation = {
   updatedAt?: string
 }
 
-export type SampleSewing = {
+export interface SampleSewing {
   id?: number
   productID?: number
   dateSewingNPL?: string
@@ -176,7 +176,7 @@ export type SampleSewing = {
   product?: Product
 }
 
-export type DateSendSampleSewing = {
+export interface DateSendSampleSewing {
   dateSampleSewingID: number
   productID: number
   dateSend: string
@@ -185,7 +185,7 @@ export type DateSendSampleSewing = {
   orderNumber: number
 }
 
-export type CuttingGroup = {
+export interface CuttingGroup {
   productID: number
   quantityRealCut: number
   amountRemaining: number
@@ -197,7 +197,7 @@ export type CuttingGroup = {
   orderNumber: number
 }
 
-export type EmbroideredDelivery = {
+export interface EmbroideredDelivery {
   embroideredDeliveryID: number
   productID: number
   quantitySewingOut: number
@@ -207,7 +207,7 @@ export type EmbroideredDelivery = {
   orderNumber: number
 }
 
-export type SewingLineDelivery = {
+export interface SewingLineDelivery {
   id?: number
   productID?: number
   sewingLineID?: number
@@ -219,7 +219,7 @@ export type SewingLineDelivery = {
   sewingLine?: SewingLine
 }
 
-export type SewingLine = {
+export interface SewingLine {
   id?: number
   sewingLineName?: string
   status?: ItemStatusType

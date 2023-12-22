@@ -278,7 +278,7 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
     try {
       setLoading?.(true)
       const meta = await apiService.createOrUpdateItemBy?.(query, item)
-      console.log(meta)
+      console.info(meta)
       onDataSuccess?.(meta, meta?.message)
       setMetaData(meta)
     } catch (err) {
