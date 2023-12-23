@@ -2,7 +2,7 @@
 import { Flex, Form, Input, List, Typography } from 'antd'
 import React, { memo } from 'react'
 import { useSelector } from 'react-redux'
-import ItemAction from '~/components/sky-ui/Table/ItemAction'
+import ItemAction from '~/components/sky-ui/SkyTable/ItemAction'
 import { RootState } from '~/store/store'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 

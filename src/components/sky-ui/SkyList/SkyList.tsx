@@ -14,6 +14,7 @@ const SkyList = <T extends { key?: React.Key }>({ ...props }: SkyListProps<T>) =
       className={props.className}
       itemLayout='vertical'
       size='large'
+      loading={props.loading}
       pagination={{
         onChange: props.onPageChange,
         current: props.metaData?.page,

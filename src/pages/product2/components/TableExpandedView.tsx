@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { List, ListProps } from 'antd'
-import { ItemWithKeyAndTitleType } from '~/components/sky-ui/Table/ListableExpandedRowItem'
+import { ItemWithKeyAndTitleType } from '~/components/sky-ui/SkyTable/ListableExpandedRowItem'
 
 interface Props<T extends ItemWithKeyAndTitleType> extends ListProps<T> {
   items: T[]

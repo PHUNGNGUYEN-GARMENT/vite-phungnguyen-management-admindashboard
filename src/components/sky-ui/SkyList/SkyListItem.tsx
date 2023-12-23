@@ -5,17 +5,18 @@ import { RootState } from '~/store/store'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import ActionRow, { ActionRowProps } from '../ActionRow'
 
-export interface SkyListItemProps<T extends { key?: React.Key }> extends ActionRowProps {
+export interface SkyListItemProps<T extends { key?: React.Key; createdAt?: string; updatedAt?: string }>
+  extends ActionRowProps {
   record: T
   label?: string
   labelEditing?: boolean
   labelName?: string
   isDateCreation?: boolean
-  createdAt?: string
-  updatedAt?: string
 }
 
-const SkyListItem = <T extends { key?: React.Key }>({ ...props }: SkyListItemProps<T>) => {
+const SkyListItem = <T extends { key?: React.Key; createdAt?: string; updatedAt?: string }>({
+  ...props
+}: SkyListItemProps<T>) => {
   const user = useSelector((state: RootState) => state.user)
 
   return (
@@ -55,7 +56,7 @@ const SkyListItem = <T extends { key?: React.Key }>({ ...props }: SkyListItemPro
               <Input
                 name='createdAt'
                 className='w-full'
-                defaultValue={DayJS(props.createdAt).format(DatePattern.display)}
+                defaultValue={DayJS(props.record.createdAt).format(DatePattern.display)}
                 readOnly
               />
             </Flex>
@@ -66,7 +67,7 @@ const SkyListItem = <T extends { key?: React.Key }>({ ...props }: SkyListItemPro
               <Input
                 name='createdAt'
                 className='w-full'
-                defaultValue={DayJS(props.updatedAt).format(DatePattern.display)}
+                defaultValue={DayJS(props.record.updatedAt).format(DatePattern.display)}
                 readOnly
               />
             </Flex>

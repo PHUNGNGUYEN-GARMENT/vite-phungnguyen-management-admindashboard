@@ -2,7 +2,7 @@
 import { ColorPicker, Flex, Form, Typography } from 'antd'
 import React, { memo } from 'react'
 import { TableItemWithKey } from '~/components/hooks/useTable'
-import ListItem from '~/components/sky-ui/Table/ListItem'
+import ListItem from '~/components/sky-ui/SkyTable/ListItem'
 import { ColorTableDataType } from '../type'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
