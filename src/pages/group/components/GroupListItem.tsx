@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { memo } from 'react'
 import { TableItemWithKey } from '~/components/hooks/useTable'
-import ListItem from '~/components/ui/Table/ListItem'
+import ListItem from '~/components/sky-ui/Table/ListItem'
 import { GroupTableDataType } from '../type'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {

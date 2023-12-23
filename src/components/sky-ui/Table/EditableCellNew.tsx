@@ -90,7 +90,7 @@ function EditableCellNew({
           style={{ margin: 0 }}
           rules={[
             {
-              required: true,
+              required: required,
               message: `Please Input ${title}!`
             }
           ]}

@@ -2,7 +2,7 @@
 import { Flex, Form, Input, InputNumber, Typography } from 'antd'
 import { memo } from 'react'
 import { TableItemWithKey } from '~/components/hooks/useTable'
-import ListItem from '~/components/ui/Table/ListItem'
+import ListItem from '~/components/sky-ui/Table/ListItem'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
   data: TableItemWithKey<ImportationTableDataType>

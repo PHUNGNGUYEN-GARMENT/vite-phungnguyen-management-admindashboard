@@ -40,7 +40,7 @@ export default function useTable<T extends { key?: React.Key }>(initValue: Table
     setEditingKey(key)
   }
 
-  const handleStartDeleting = (key: React.Key, onSuccess: (row: TableItemWithKey<T>) => void) => {
+  const handleStartDeleting = (key: React.Key, onSuccess: (itemDelete: TableItemWithKey<T>) => void) => {
     setLoading(true)
     const itemFound = dataSource.find((item) => item.key === key)
     if (itemFound) {

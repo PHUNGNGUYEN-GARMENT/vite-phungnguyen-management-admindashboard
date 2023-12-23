@@ -2,7 +2,7 @@
 import { ColorPicker, Flex, Form, Input, Modal, Typography } from 'antd'
 import type { Color as AntColor } from 'antd/es/color-picker'
 import React, { memo } from 'react'
-import AddNewTitle from '~/components/ui/AddNewTitle'
+import AddNewTitle from '~/components/sky-ui/AddNewTitle'
 import { Color } from '~/typing'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {

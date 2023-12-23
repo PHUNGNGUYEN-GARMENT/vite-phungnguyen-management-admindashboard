@@ -25,6 +25,7 @@ const ListItemRow = ({ value, children, ...props }: Props) => {
         title={props.title ? (typeof props.label === 'string' ? props.label : '') : ''}
         inputType={props.inputType}
         initialField={props.initialField}
+        required={props.required}
       >
         {children ? (
           children

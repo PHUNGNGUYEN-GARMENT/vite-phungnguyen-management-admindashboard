@@ -5,46 +5,24 @@ import { defaultRequestBody } from '~/api/client'
 import ColorAPI from '~/api/services/ColorAPI'
 import GroupAPI from '~/api/services/GroupAPI'
 import PrintAPI from '~/api/services/PrintAPI'
-import { TableItemWithKey } from '~/components/hooks/useTable'
-import ListItem from '~/components/sky-ui/Table/ListItem'
+import SkyListItem, { SkyListItemProps } from '~/components/sky-ui/SkyList/SkyListItem'
 import ListItemRow from '~/components/sky-ui/Table/ListItemRow'
 import { Color, Group, Print } from '~/typing'
 import DayJS from '~/utils/date-formatter'
 import { ProductTableDataType } from '../type'
 import ProductProgressStatus from './ProductProgressStatus'
 
-interface Props extends React.HTMLAttributes<HTMLElement> {
-  data: TableItemWithKey<ProductTableDataType>
-  isEditing: boolean
-  editingKey: React.Key
-  dateCreation: boolean
-  onSaveClick?: React.MouseEventHandler<HTMLElement> | undefined
-  onClickStartEditing?: React.MouseEventHandler<HTMLElement> | undefined
-  onConfirmCancelEditing?: (e?: React.MouseEvent<HTMLElement>) => void
-  onConfirmCancelDeleting?: (e?: React.MouseEvent<HTMLElement>) => void
-  onConfirmDelete?: (e?: React.MouseEvent<HTMLElement>) => void
-  onStartDeleting?: (key: React.Key) => void
+interface Props extends SkyListItemProps<ProductTableDataType> {
+  record: ProductTableDataType
 }
 
-const ProductListItem: React.FC<Props> = ({
-  data,
-  isEditing,
-  editingKey,
-  dateCreation,
-  onSaveClick,
-  onClickStartEditing,
-  onConfirmCancelEditing,
-  onConfirmCancelDeleting,
-  onConfirmDelete,
-  onStartDeleting,
-  ...props
-}) => {
+const ProductListItem: React.FC<Props> = ({ record, ...props }) => {
   const [colors, setColors] = useState<Color[]>([])
   const [groups, setGroups] = useState<Group[]>([])
   const [prints, setPrints] = useState<Print[]>([])
 
   useEffect(() => {
-    if (isEditing) {
+    if (props.isEditing) {
       ColorAPI.getItems(defaultRequestBody).then((meta) => {
         if (meta?.success) {
           const items = meta.data as Color[]
@@ -64,25 +42,23 @@ const ProductListItem: React.FC<Props> = ({
         }
       })
     }
-  }, [isEditing])
+  }, [props.isEditing])
 
   return (
-    <ListItem
-      itemId={data.key ?? data.id!}
-      isEditing={isEditing}
-      createdAt={data.createdAt}
-      updatedAt={data.updatedAt}
-      editingKey={editingKey}
-      dateCreation={dateCreation}
-      onSaveClick={onSaveClick}
-      onClickStartEditing={onClickStartEditing}
-      onConfirmCancelEditing={onConfirmCancelEditing}
-      onConfirmCancelDeleting={onConfirmCancelDeleting}
-      onConfirmDelete={onConfirmDelete}
-      onStartDeleting={onStartDeleting}
-      label={data.productCode}
-      name='productCode'
-      {...props}
+    <SkyListItem
+      label={record.productCode}
+      labelName='productCode'
+      record={record}
+      key={record.key}
+      isDateCreation={props.isDateCreation}
+      editingKey={props.editingKey}
+      isEditing={props.isEditing}
+      onSave={props.onSave}
+      onEdit={props.onEdit}
+      onDelete={props.onDelete}
+      onConfirmCancelEditing={props.onConfirmCancelEditing}
+      onConfirmCancelDeleting={props.onConfirmCancelDeleting}
+      onConfirmDelete={props.onConfirmDelete}
     >
       <Collapse
         className=''
@@ -99,54 +75,54 @@ const ProductListItem: React.FC<Props> = ({
                 <Space className='flex gap-0' split={<Divider className='my-3' />} direction='vertical'>
                   <ListItemRow
                     label='Màu'
-                    isEditing={isEditing}
+                    isEditing={props.isEditing}
                     dataIndex='colorID'
                     inputType='select'
                     initialField={{
-                      value: data.productColor?.colorID,
+                      value: record.productColor?.colorID,
                       selectItems: colors.map((i) => {
                         return { label: i.name, value: i.id, optionData: i.hexColor }
                       })
                     }}
-                    value={data.productColor?.color?.name}
+                    value={record.productColor?.color?.name}
                   />
                   <ListItemRow
                     label='Số lượng PO'
-                    isEditing={isEditing}
+                    isEditing={props.isEditing}
                     dataIndex='quantityPO'
                     inputType='number'
                     initialField={{
-                      value: data.quantityPO
+                      value: record.quantityPO
                     }}
-                    value={data.quantityPO}
+                    value={record.quantityPO}
                   />
                   <ListItemRow
                     label='Ngày nhập NPL'
-                    isEditing={isEditing}
+                    isEditing={props.isEditing}
                     dataIndex='dateInputNPL'
                     inputType='datepicker'
                     initialField={{
-                      value: DayJS(data.dateInputNPL)
+                      value: DayJS(record.dateInputNPL)
                     }}
-                    value={DayJS(data.dateInputNPL).format('DD/MM/YYYY')}
+                    value={DayJS(record.dateInputNPL).format('DD/MM/YYYY')}
                   />
                   <ListItemRow
                     label='Ngày xuất FCR'
-                    isEditing={isEditing}
+                    isEditing={props.isEditing}
                     dataIndex='dateOutputFCR'
                     inputType='datepicker'
                     initialField={{
-                      value: DayJS(data.dateOutputFCR)
+                      value: DayJS(record.dateOutputFCR)
                     }}
-                    value={DayJS(data.dateOutputFCR).format('DD/MM/YYYY')}
+                    value={DayJS(record.dateOutputFCR).format('DD/MM/YYYY')}
                   />
                   <ListItemRow
                     label='Nhóm'
-                    isEditing={isEditing}
+                    isEditing={props.isEditing}
                     dataIndex='groupID'
                     inputType='select'
                     initialField={{
-                      value: data.productGroup?.groupID,
+                      value: record.productGroup?.groupID,
                       selectItems: groups.map((item) => {
                         return {
                           label: item.name,
@@ -155,15 +131,16 @@ const ProductListItem: React.FC<Props> = ({
                         }
                       })
                     }}
-                    value={data.productGroup?.group?.name}
+                    value={record.productGroup?.group?.name}
                   />
                   <ListItemRow
                     label='Nơi in'
-                    isEditing={isEditing}
+                    isEditing={props.isEditing}
                     dataIndex='printID'
                     inputType='select'
+                    required={false}
                     initialField={{
-                      value: data.printablePlace?.printID,
+                      value: record.printablePlace?.printID,
                       selectItems: prints.map((item) => {
                         return {
                           label: item.name,
@@ -172,16 +149,16 @@ const ProductListItem: React.FC<Props> = ({
                         }
                       })
                     }}
-                    value={data.printablePlace?.print?.name}
+                    value={record.printablePlace?.print?.name}
                   />
                 </Space>
-                <ProductProgressStatus collapse record={data} />
+                <ProductProgressStatus collapse record={record} />
               </Space>
             )
           }
         ]}
       />
-    </ListItem>
+    </SkyListItem>
   )
 }
 
