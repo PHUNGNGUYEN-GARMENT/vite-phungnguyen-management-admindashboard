@@ -6,7 +6,7 @@ import { ResponseDataType } from '~/api/client'
 import { ProductTableDataType } from '~/pages/product2/type'
 import { RootState } from '~/store/store'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
-import ActionRow from '../ActionRow'
+import ActionRow, { ActionButtonProps } from '../ActionRow'
 
 export interface SkyTableProps<T extends { key?: React.Key; createdAt?: string; updatedAt?: string }>
   extends TableProps<T> {
@@ -17,9 +17,10 @@ export interface SkyTableProps<T extends { key?: React.Key; createdAt?: string; 
   editingKey: React.Key
   disableEditing?: boolean
   disableDeleting?: boolean
-  onSave: (record: T) => void
-  onEdit: (key?: React.Key) => void
-  onDelete?: (e: React.MouseEvent<HTMLElement, MouseEvent>) => void
+  onAdd?: ActionButtonProps<T>
+  onSave: ActionButtonProps<T>
+  onEdit: ActionButtonProps<T>
+  onDelete?: ActionButtonProps<T>
   onConfirmCancelEditing: (e: React.MouseEvent<HTMLElement, MouseEvent> | undefined) => void
   onConfirmCancelDeleting: (e: React.MouseEvent<HTMLElement, MouseEvent> | undefined) => void
   onConfirmDelete: (record: T) => void
@@ -41,11 +42,26 @@ const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: s
             <ActionRow
               isEditing={record.key === props.editingKey}
               editingKey={props.editingKey}
-              disableEditing={props.disableEditing ?? props.editingKey !== ''}
-              disableDeleting={props.disableDeleting ?? props.editingKey !== ''}
-              onSave={() => props.onSave(record)}
-              onEdit={() => props.onEdit(record.key!)}
-              onDelete={props.onDelete}
+              onAdd={{
+                onClick: (e) => props.onAdd?.onClick(e, record),
+                disabled: props.disableEditing ?? props.editingKey !== '',
+                isShow: props.onAdd?.isShow ?? true
+              }}
+              onSave={{
+                onClick: (e) => props.onSave?.onClick(e, record),
+                disabled: props.onSave?.disabled,
+                isShow: props.onSave?.isShow ?? true
+              }}
+              onEdit={{
+                onClick: (e) => props.onEdit?.onClick(e, record),
+                disabled: props.disableEditing ?? props.editingKey !== '',
+                isShow: props.onEdit?.isShow ?? true
+              }}
+              onDelete={{
+                onClick: (e) => props.onDelete?.onClick(e, record),
+                disabled: props.disableDeleting ?? props.editingKey !== '',
+                isShow: props.onDelete?.isShow ?? true
+              }}
               onConfirmCancelEditing={props.onConfirmCancelEditing}
               onConfirmCancelDeleting={props.onConfirmCancelDeleting}
               onConfirmDelete={() => props.onConfirmDelete(record)}

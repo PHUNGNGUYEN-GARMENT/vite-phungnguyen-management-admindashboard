@@ -1,159 +1,252 @@
-import { FormInstance } from 'antd'
-import { useState } from 'react'
-import {
-  RequestBodyType,
-  ResponseDataType,
-  defaultRequestBody
-} from '~/api/client'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { App as AntApp } from 'antd'
+import { useEffect, useState } from 'react'
+import { RequestBodyType, ResponseDataType, defaultRequestBody } from '~/api/client'
 import ImportationAPI from '~/api/services/ImportationAPI'
-import { Importation, SortDirection } from '~/typing'
+import ProductAPI from '~/api/services/ProductAPI'
+import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
+import useAPIService from '~/hooks/useAPIService'
+import { Importation, Product } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
+import { ImportationTableDataType } from '../ImportationPage'
 
 export default function useImportation() {
-  const [metaData, setMetaData] = useState<ResponseDataType>()
+  const productService = useAPIService<Product>(ProductAPI)
+  const importationService = useAPIService<Importation>(ImportationAPI)
+
+  const { message } = AntApp.useApp()
+
+  const {
+    form,
+    isEditing,
+    editingKey,
+    dataSource,
+    loading,
+    setLoading,
+    setDataSource,
+    setDeleteKey,
+    dateCreation,
+    setDateCreation,
+    handleStartAddNew,
+    handleStartEditing,
+    handleStartDeleting,
+    handleConfirmCancelEditing,
+    handleConfirmCancelDeleting
+  } = useTable<ImportationTableDataType>([])
   const [openModal, setOpenModal] = useState<boolean>(false)
-  const [searchText, setSearchText] = useState<string>('')
-  const [loading, setLoading] = useState<boolean>(false)
-  const [dateCreation, setDateCreation] = useState<boolean>(true)
+  const [products, setProducts] = useState<Product[]>([])
+  const [importations, setImportations] = useState<Importation[]>([])
 
-  const handleAddNew = async (
-    form: FormInstance<Importation>,
-    onSuccess?: (data: ResponseDataType) => void
-  ) => {
-    setLoading(true)
-    const row = await form.validateFields()
-    const newRow: Importation = {
-      ...row,
-      status: 'active'
-    }
-    console.log(row)
-    await ImportationAPI.createNewItem(newRow)
-      .then((meta) => {
-        setLoading(true)
-        if (meta?.success) {
-          onSuccess?.(meta)
-          setOpenModal(false)
-        }
-      })
-      .finally(() => {
-        setLoading(false)
-      })
-    setLoading(false)
-  }
+  const [importationNew, setImportationNew] = useState<Importation | undefined>(undefined)
 
-  const getDataList = async (
-    params: RequestBodyType,
-    onSuccess?: (data: ResponseDataType) => void
-  ) => {
-    setLoading(true)
-    const body: RequestBodyType = {
-      ...defaultRequestBody,
-      ...params
-    }
-    await ImportationAPI.getItems(body)
-      .then((data) => {
-        console.log(data)
-        if (data?.success) {
-          setMetaData(data)
-          onSuccess?.(data)
-        }
-      })
-      .finally(() => {
-        setLoading(false)
-      })
-    setLoading(false)
-  }
-
-  const handleSorted = async (
-    direction: SortDirection,
-    onSuccess?: (meta: ResponseDataType) => void
-  ) => {
-    const body: RequestBodyType = {
-      ...defaultRequestBody,
-      sorting: {
-        column: 'id',
-        direction: direction
-      }
-    }
-    await getDataList(body, (meta) => {
+  const loadData = async () => {
+    await productService.getListItems(defaultRequestBody, setLoading, (meta) => {
       if (meta?.success) {
-        onSuccess?.(meta)
+        setProducts(meta.data as Product[])
+      }
+    })
+    await importationService.getListItems(defaultRequestBody, setLoading, (meta) => {
+      if (meta?.success) {
+        setImportations(meta.data as Importation[])
       }
     })
   }
 
-  const handleSaveUpdateItem = async (
-    key: number,
-    row: Importation,
-    onSuccess?: (meta: ResponseDataType | undefined) => void
-  ) => {
-    try {
-      console.log({
-        ...row,
-        date: DayJS(row.dateImported).format(DatePattern.display)
+  useEffect(() => {
+    loadData()
+  }, [importationNew])
+
+  useEffect(() => {
+    selfConvertDataSource(products, importations)
+  }, [products, importations])
+
+  const selfConvertDataSource = (_products: Product[], _importations?: Importation[]) => {
+    setDataSource(
+      _products.map((item) => {
+        return {
+          ...item,
+          importation: (_importations ? _importations : importations).find((i) => i.productID === item.id),
+          key: item.id
+        } as ImportationTableDataType
       })
+    )
+  }
 
-      const itemFound = await ImportationAPI.getItemByProductID(key)
-
-      const importationData = {
-        quantity: row.quantity,
-        dateImported: DayJS(row.dateImported).format(DatePattern.iso8601)
+  const handleSaveClick = async (item: TableItemWithKey<ImportationTableDataType>) => {
+    const row = (await form.validateFields()) as any
+    console.log({ row: row, item: item })
+    try {
+      if (
+        (row.quantity && row.quantity !== item.importation?.quantity) ||
+        (row.dateImported && DayJS(row.dateImported).diff(DayJS(item.importation?.dateImported)))
+      ) {
+        console.log('Importation progressing...')
+        await importationService.createOrUpdateItemBy(
+          { field: 'productID', key: item.key! },
+          {
+            quantity: row.quantity,
+            dateImported: row.dateImported && DayJS(row.dateImported).format(DatePattern.iso8601)
+          },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              const itemNew = meta.data as Importation
+              setImportationNew(itemNew)
+            } else {
+              throw new Error('API update Importation failed')
+            }
+          }
+        )
       }
-
-      if (itemFound) {
-        const importationFound: Importation = itemFound.data
-        ImportationAPI.updateItemByID(
-          importationFound.id!,
-          importationData
-        ).then((meta) => onSuccess?.(meta))
-      } else {
-        ImportationAPI.createNewItem({
-          ...importationData,
-          productID: key,
-          status: 'active'
-        }).then((meta) => onSuccess?.(meta))
-      }
+      message.success('Success!')
     } catch (error) {
-      // Xử lý lỗi nếu cần
       console.error(error)
+      message.error('Failed')
     } finally {
       setLoading(false)
+      handleConfirmCancelEditing()
+      loadData()
     }
   }
 
-  const handleDeleteItem = async (
-    id: number,
-    onSuccess?: (meta: ResponseDataType | undefined) => void
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleAddNewItem = async (formAddNew: any) => {
+    try {
+      console.log(formAddNew)
+      setLoading(true)
+      // await productService.createNewItem(
+      //   {
+      //     productCode: formAddNew.productCode,
+      //     quantityPO: formAddNew.quantityPO,
+      //     dateInputNPL: DayJS(formAddNew.dateInputNPL).format(DatePattern.iso8601),
+      //     dateOutputFCR: DayJS(formAddNew.dateOutputFCR).format(DatePattern.iso8601)
+      //   },
+      //   setLoading,
+      //   async (meta, msg) => {
+      //     if (meta?.data) {
+      //       const productNew = meta.data as Product
+      //       setProductNew(productNew)
+      //       if (formAddNew.colorID) {
+      //         console.log('Product color created')
+      //         await productColorService.createNewItem(
+      //           { productID: productNew.id!, colorID: formAddNew.colorID },
+      //           setLoading,
+      //           (meta) => {
+      //             if (meta?.success) {
+      //               const productColorNew = meta.data as ProductColor
+      //               setProductColorNew(productColorNew)
+      //             }
+      //           }
+      //         )
+      //       }
+      //       if (formAddNew.groupID) {
+      //         console.log('Product group created')
+      //         await productGroupService.createNewItem(
+      //           { productID: productNew.id!, groupID: formAddNew.groupID },
+      //           setLoading,
+      //           (meta) => {
+      //             if (meta?.success) {
+      //               const productGroupNew = meta.data as ProductGroup
+      //               setProductGroupNew(productGroupNew)
+      //             }
+      //           }
+      //         )
+      //       }
+      //       if (formAddNew.printID) {
+      //         console.log('Product print created')
+      //         await printablePlaceService.createNewItem(
+      //           { productID: productNew.id!, printID: formAddNew.printID },
+      //           setLoading,
+      //           (meta) => {
+      //             if (meta?.success) {
+      //               const printablePlaceNew = meta.data as PrintablePlace
+      //               setPrintablePlaceNew(printablePlaceNew)
+      //             }
+      //           }
+      //         )
+      //       }
+      //       message.success(msg)
+      //     } else {
+      //       console.log('Errr')
+      //       message.error(msg)
+      //     }
+      //   }
+      // )
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setLoading(false)
+      setOpenModal(false)
+    }
+  }
+
+  const handleConfirmDelete = async (
+    record: TableItemWithKey<ImportationTableDataType>,
+    onDataSuccess?: (meta: ResponseDataType | undefined) => void
   ) => {
-    setLoading(true)
-    await ImportationAPI.updateItemByID(id, { status: 'deleted' })
-      .then((meta) => {
-        if (meta?.success) {
-          setLoading(true)
-          onSuccess?.(meta)
+    await importationService.deleteItemByPk(record.importation!.id!, setLoading, (meta, msg) => {
+      if (meta) {
+        if (meta.success) {
+          // handleStartDeleting(record.id!, () => {})
+          message.success(msg)
         }
-      })
-      .finally(() => {
-        setLoading(false)
-      })
-    setLoading(false)
+      } else {
+        message.error(msg)
+      }
+      onDataSuccess?.(meta)
+    })
+  }
+
+  const handlePageChange = async (_page: number) => {
+    productService.setPage(_page)
+    const body: RequestBodyType = {
+      ...defaultRequestBody,
+      paginator: {
+        page: _page,
+        pageSize: 5
+      },
+      search: {
+        field: 'productCode',
+        term: form.getFieldValue('search') ?? ''
+      }
+    }
+    await productService.getListItems(body, setLoading, (meta) => {
+      if (meta?.success) {
+        selfConvertDataSource(meta?.data as Product[])
+      }
+    })
+    await importationService.getListItems(defaultRequestBody, setLoading, (meta) => {
+      if (meta?.success) {
+        setImportations(meta.data as Importation[])
+      }
+    })
   }
 
   return {
-    metaData,
-    setMetaData,
-    dateCreation,
-    setDateCreation,
+    form,
     loading,
-    setLoading,
     openModal,
+    loadData,
+    isEditing,
+    editingKey,
+    dataSource,
+    setLoading,
     setOpenModal,
-    searchText,
-    setSearchText,
-    getDataList,
-    handleSaveUpdateItem,
-    handleDeleteItem,
-    handleAddNew,
-    handleSorted
+    setDeleteKey,
+    dateCreation,
+    setDataSource,
+    productService,
+    setDateCreation,
+    handleSaveClick,
+    handleAddNewItem,
+    handlePageChange,
+    handleStartAddNew,
+    handleStartEditing,
+    handleStartDeleting,
+    importationService,
+    handleConfirmDelete,
+    selfConvertDataSource,
+    handleConfirmCancelEditing,
+    handleConfirmCancelDeleting
   }
 }

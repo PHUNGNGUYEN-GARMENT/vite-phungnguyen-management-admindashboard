@@ -1,47 +1,37 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Table, Typography } from 'antd'
+import { Form, Typography } from 'antd'
 import type { ColumnType } from 'antd/es/table'
-import { useSelector } from 'react-redux'
-import { TableModelProps } from '~/components/hooks/useTable'
+import { defaultRequestBody } from '~/api/client'
+import BaseLayout from '~/components/layout/BaseLayout'
 import EditableCellNew from '~/components/sky-ui/SkyTable/EditableCellNew'
-import ItemAction from '~/components/sky-ui/SkyTable/ItemAction'
-import { RootState } from '~/store/store'
+import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
+import { Product } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import { ImportationTableDataType } from '../ImportationPage'
+import useImportation from '../hooks/useImportation'
 
-const ImportationTable: React.FC<TableModelProps<ImportationTableDataType>> = ({ ...props }) => {
-  const user = useSelector((state: RootState) => state.user)
-  console.log('Importation page loading...')
+const ImportationTable: React.FC = () => {
+  const {
+    form,
+    isEditing,
+    editingKey,
+    dataSource,
+    loading,
+    setLoading,
+    dateCreation,
+    setDateCreation,
+    handleStartEditing,
+    handleConfirmCancelEditing,
+    handleConfirmCancelDeleting,
+    selfConvertDataSource,
+    handleSaveClick,
+    handleConfirmDelete,
+    handleStartAddNew,
+    handlePageChange,
+    productService
+  } = useImportation()
 
-  const actionsCols: ColumnType<ImportationTableDataType>[] = [
-    {
-      title: 'Operation',
-      width: '1%',
-      dataIndex: 'operation',
-      render: (_value: any, item: ImportationTableDataType) => {
-        return (
-          <>
-            <ItemAction
-              isEditing={props.isEditing(item.key!)}
-              editingKey={props.editingKey}
-              onSaveClick={() => {
-                console.log(item)
-                props.onSaveClick(item)
-              }}
-              deleteDisabled={item.importation?.id === undefined}
-              onClickStartEditing={() => props.onStartEditing(item.key!)}
-              onConfirmCancelEditing={() => props.onConfirmCancelEditing()}
-              onConfirmCancelDeleting={() => props.onConfirmCancelDeleting()}
-              onConfirmDelete={() => props.onConfirmDelete(item)}
-              onStartDeleting={() => props.setDeleteKey(item.key!)}
-            />
-          </>
-        )
-      }
-    }
-  ]
-
-  const commonCols: ColumnType<ImportationTableDataType>[] = [
+  const columns: ColumnType<ImportationTableDataType>[] = [
     {
       title: 'Mã hàng',
       dataIndex: 'productCode',
@@ -50,7 +40,7 @@ const ImportationTable: React.FC<TableModelProps<ImportationTableDataType>> = ({
         return (
           <>
             <EditableCellNew
-              isEditing={props.isEditing(record.key!)}
+              isEditing={isEditing(record.key!)}
               dataIndex='productCode'
               title='Mã hàng'
               inputType='text'
@@ -71,7 +61,7 @@ const ImportationTable: React.FC<TableModelProps<ImportationTableDataType>> = ({
         return (
           <>
             <EditableCellNew
-              isEditing={props.isEditing(record.key!)}
+              isEditing={isEditing(record.key!)}
               dataIndex='quantity'
               title='Lô nhập'
               inputType='number'
@@ -85,7 +75,7 @@ const ImportationTable: React.FC<TableModelProps<ImportationTableDataType>> = ({
       }
     },
     {
-      title: 'Nhày nhập',
+      title: 'Ngày nhập',
       dataIndex: 'dateImported',
       width: '10%',
       responsive: ['lg'],
@@ -93,12 +83,12 @@ const ImportationTable: React.FC<TableModelProps<ImportationTableDataType>> = ({
         return (
           <>
             <EditableCellNew
-              isEditing={props.isEditing(record.key!)}
+              isEditing={isEditing(record.key!)}
               dataIndex='dateImported'
               title='NPL'
               inputType='datepicker'
               required={true}
-              initialField={{ value: DayJS(record.importation?.dateImported) }}
+              initialField={{ value: record.importation?.dateImported && DayJS(record.importation?.dateImported) }}
             >
               <span>
                 {record.importation?.dateImported &&
@@ -111,47 +101,77 @@ const ImportationTable: React.FC<TableModelProps<ImportationTableDataType>> = ({
     }
   ]
 
-  const dateCreationColumns: ColumnType<ImportationTableDataType>[] = [
-    {
-      title: 'Created date',
-      dataIndex: 'createdAt',
-      width: '5%',
-      render: (_value: any, record: ImportationTableDataType) => {
-        return <span>{DayJS(record.createdAt).format(DatePattern.display)}</span>
-      }
-    },
-    {
-      title: 'Updated date',
-      dataIndex: 'updatedAt',
-      width: '5%',
-      responsive: ['md'],
-      render: (_value: any, record: ImportationTableDataType) => {
-        return <span>{DayJS(record.updatedAt).format(DatePattern.display)}</span>
-      }
-    }
-  ]
-
-  const adminColumns: ColumnType<ImportationTableDataType>[] = props.dateCreation
-    ? [...commonCols, ...dateCreationColumns, ...actionsCols]
-    : [...commonCols, ...actionsCols]
-
-  const staffColumns: ColumnType<ImportationTableDataType>[] = [...commonCols]
-
   return (
     <>
-      <Table
-        loading={props.loading}
-        bordered
-        columns={user.isAdmin ? adminColumns : staffColumns}
-        dataSource={props.dataSource}
-        rowClassName='editable-row'
-        pagination={{
-          onChange: props.onPageChange,
-          current: props.metaData?.page,
-          pageSize: 5,
-          total: props.metaData?.total
-        }}
-      />
+      <Form form={form}>
+        <BaseLayout
+          onDateCreationChange={(enable) => setDateCreation(enable)}
+          onSearch={async (value) => {
+            if (value.length > 0) {
+              await productService.getListItems(
+                {
+                  ...defaultRequestBody,
+                  search: {
+                    field: 'productCode',
+                    term: value
+                  }
+                },
+                setLoading,
+                (meta) => {
+                  if (meta?.success) {
+                    selfConvertDataSource(meta?.data as Product[])
+                  }
+                }
+              )
+            }
+          }}
+          onSortChange={async (val) => {
+            await productService.sortedListItems(val ? 'asc' : 'desc', setLoading, (meta) => {
+              if (meta?.success) {
+                selfConvertDataSource(meta?.data as Product[])
+              }
+            })
+          }}
+          onResetClick={async () => {
+            form.setFieldValue('search', '')
+            await productService.getListItems(defaultRequestBody, setLoading, (meta) => {
+              if (meta?.success) {
+                selfConvertDataSource(meta?.data as Product[])
+              }
+            })
+          }}
+        >
+          <SkyTable
+            bordered
+            loading={loading}
+            columns={columns}
+            dataSource={dataSource}
+            rowClassName='editable-row'
+            metaData={productService.metaData}
+            onPageChange={handlePageChange}
+            editingKey={editingKey}
+            isDateCreation={dateCreation}
+            onEdit={{
+              onClick: (_e, record) => {
+                handleStartEditing(record!.key!)
+              }
+            }}
+            onAdd={{
+              onClick: (_e, record) => {
+                console.log(record)
+                // handleStartAddNew(record!)
+              },
+              isShow: false
+            }}
+            onSave={{
+              onClick: (_e, record) => handleSaveClick(record!)
+            }}
+            onConfirmCancelEditing={handleConfirmCancelEditing}
+            onConfirmCancelDeleting={handleConfirmCancelDeleting}
+            onConfirmDelete={(record) => handleConfirmDelete(record)}
+          />
+        </BaseLayout>
+      </Form>
     </>
   )
 }
