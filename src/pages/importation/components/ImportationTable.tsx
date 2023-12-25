@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Form, Typography } from 'antd'
+import { ColorPicker, Flex, Form, Typography } from 'antd'
 import type { ColumnType } from 'antd/es/table'
 import { defaultRequestBody } from '~/api/client'
 import BaseLayout from '~/components/layout/BaseLayout'
@@ -26,7 +26,6 @@ const ImportationTable: React.FC = () => {
     selfConvertDataSource,
     handleSaveClick,
     handleConfirmDelete,
-    handleStartAddNew,
     handlePageChange,
     productService
   } = useImportation()
@@ -40,14 +39,94 @@ const ImportationTable: React.FC = () => {
         return (
           <>
             <EditableCellNew
-              isEditing={isEditing(record.key!)}
+              isEditing={false}
               dataIndex='productCode'
               title='Mã hàng'
               inputType='text'
               required={true}
-              initialField={{ value: record.productCode }}
+              initialField={{ value: record.product?.productCode }}
             >
-              <Typography.Text className='text-md flex-shrink-0 font-bold'>{record.productCode}</Typography.Text>
+              <Typography.Text className='text-md flex-shrink-0 font-bold'>
+                {record.product?.productCode}
+              </Typography.Text>
+            </EditableCellNew>
+          </>
+        )
+      }
+    },
+    {
+      title: 'Số lượng PO',
+      dataIndex: 'quantityPO',
+      width: '10%',
+      render: (_value: any, record: ImportationTableDataType) => {
+        return (
+          <>
+            <EditableCellNew
+              isEditing={false}
+              dataIndex='quantityPO'
+              title='Số lượng PO'
+              inputType='number'
+              required={true}
+              initialField={{ value: record.product?.quantityPO }}
+            >
+              <span>{record.product?.quantityPO}</span>
+            </EditableCellNew>
+          </>
+        )
+      }
+    },
+    {
+      title: 'Màu',
+      dataIndex: 'colorID',
+      width: '10%',
+      render: (_value: any, record: ImportationTableDataType) => {
+        return (
+          <>
+            <EditableCellNew
+              isEditing={false}
+              dataIndex='colorID'
+              title='Màu'
+              inputType='select'
+              required={false}
+              initialField={{
+                value: record.productColors.find((item) => item.productID === record.product?.id)?.colorID
+              }}
+            >
+              <Flex className='' justify='space-between' align='center' gap={10}>
+                <Typography.Text>
+                  {record.productColors.find((item) => item.productID === record.product?.id)?.color?.name}
+                </Typography.Text>
+                <ColorPicker
+                  size='middle'
+                  format='hex'
+                  value={record.productColors.find((item) => item.productID === record.product?.id)?.color?.hexColor}
+                  disabled
+                />
+              </Flex>
+            </EditableCellNew>
+          </>
+        )
+      }
+    },
+    {
+      title: 'Nhóm',
+      dataIndex: 'groupID',
+      width: '10%',
+      responsive: ['xl'],
+      render: (_value: any, record: ImportationTableDataType) => {
+        return (
+          <>
+            <EditableCellNew
+              isEditing={false}
+              dataIndex='groupID'
+              title='Nhóm'
+              inputType='select'
+              required={false}
+              initialField={{
+                value: record.productGroups.find((item) => item.productID === record.product?.id)?.groupID
+              }}
+            >
+              <span>{record.productGroups.find((item) => item.productID === record.product?.id)?.group?.name}</span>
             </EditableCellNew>
           </>
         )
@@ -66,9 +145,9 @@ const ImportationTable: React.FC = () => {
               title='Lô nhập'
               inputType='number'
               required={true}
-              initialField={{ value: record.importation?.quantity }}
+              initialField={{ value: record?.quantity }}
             >
-              <span>{record.importation?.quantity}</span>
+              <span>{record?.quantity}</span>
             </EditableCellNew>
           </>
         )
@@ -88,12 +167,9 @@ const ImportationTable: React.FC = () => {
               title='NPL'
               inputType='datepicker'
               required={true}
-              initialField={{ value: record.importation?.dateImported && DayJS(record.importation?.dateImported) }}
+              initialField={{ value: record?.dateImported && DayJS(record?.dateImported) }}
             >
-              <span>
-                {record.importation?.dateImported &&
-                  DayJS(record.importation?.dateImported).format(DatePattern.display)}
-              </span>
+              <span>{record?.dateImported && DayJS(record?.dateImported).format(DatePattern.display)}</span>
             </EditableCellNew>
           </>
         )

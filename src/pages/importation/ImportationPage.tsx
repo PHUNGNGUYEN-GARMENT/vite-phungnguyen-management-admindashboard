@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import useDevice from '~/components/hooks/useDevice'
-import { Importation, Product } from '~/typing'
+import { Importation, ProductColor, ProductGroup } from '~/typing'
 import ImportationList from './components/ImportationList'
 import ImportationTable from './components/ImportationTable'
 
-export interface ImportationTableDataType extends Product {
+export interface ImportationTableDataType extends Importation {
   key?: React.Key
-  importation?: Importation
+  productColors: ProductColor[]
+  productGroups: ProductGroup[]
 }
 
 function ImportationPage() {

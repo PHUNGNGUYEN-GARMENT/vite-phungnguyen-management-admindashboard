@@ -300,11 +300,15 @@ const ProductTable: React.FC = () => {
             onPageChange={handlePageChange}
             editingKey={editingKey}
             isDateCreation={dateCreation}
-            onEdit={(key) => {
-              setEditable((prev) => !prev)
-              handleStartEditing(key!)
+            onEdit={{
+              onClick: (_e, record) => {
+                setEditable((prev) => !prev)
+                handleStartEditing(record!.key!)
+              }
             }}
-            onSave={(record) => handleSaveClick(record)}
+            onSave={{
+              onClick: (_e, record) => handleSaveClick(record!)
+            }}
             onConfirmCancelEditing={handleConfirmCancelEditing}
             onConfirmCancelDeleting={handleConfirmCancelDeleting}
             onConfirmDelete={(record) => handleConfirmDelete(record)}
