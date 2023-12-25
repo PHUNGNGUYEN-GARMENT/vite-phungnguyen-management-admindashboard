@@ -6,7 +6,7 @@ import { ResponseDataType } from '~/api/client'
 import { ProductTableDataType } from '~/pages/product2/type'
 import { RootState } from '~/store/store'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
-import ActionRow, { ActionButtonProps } from '../ActionRow'
+import ActionRow, { ActionProps } from '../ActionRow'
 
 export interface SkyTableProps<T extends { key?: React.Key; createdAt?: string; updatedAt?: string }>
   extends TableProps<T> {
@@ -15,15 +15,7 @@ export interface SkyTableProps<T extends { key?: React.Key; createdAt?: string; 
   columns: ColumnType<T>[]
   isDateCreation?: boolean
   editingKey: React.Key
-  disableEditing?: boolean
-  disableDeleting?: boolean
-  onAdd?: ActionButtonProps<T>
-  onSave: ActionButtonProps<T>
-  onEdit: ActionButtonProps<T>
-  onDelete?: ActionButtonProps<T>
-  onConfirmCancelEditing: (e: React.MouseEvent<HTMLElement, MouseEvent> | undefined) => void
-  onConfirmCancelDeleting: (e: React.MouseEvent<HTMLElement, MouseEvent> | undefined) => void
-  onConfirmDelete: (record: T) => void
+  actions?: ActionProps<T>
 }
 
 const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: string }>({
@@ -43,28 +35,28 @@ const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: s
               isEditing={record.key === props.editingKey}
               editingKey={props.editingKey}
               onAdd={{
-                onClick: (e) => props.onAdd?.onClick(e, record),
-                disabled: props.disableEditing ?? props.editingKey !== '',
-                isShow: props.onAdd?.isShow ?? true
+                onClick: (e) => props.actions?.onAdd?.onClick?.(e, record),
+                disabled: props.actions?.onAdd?.disabled ?? props.editingKey !== '',
+                isShow: props.actions?.onAdd ? props.actions.onAdd.isShow ?? true : false
               }}
               onSave={{
-                onClick: (e) => props.onSave?.onClick(e, record),
-                disabled: props.onSave?.disabled,
-                isShow: props.onSave?.isShow ?? true
+                onClick: (e) => props.actions?.onSave?.onClick?.(e, record),
+                disabled: props.actions?.onSave?.disabled ?? props.editingKey !== '',
+                isShow: props.actions?.onSave ? props.actions.onSave.isShow ?? true : false
               }}
               onEdit={{
-                onClick: (e) => props.onEdit?.onClick(e, record),
-                disabled: props.disableEditing ?? props.editingKey !== '',
-                isShow: props.onEdit?.isShow ?? true
+                onClick: (e) => props.actions?.onEdit?.onClick?.(e, record),
+                disabled: props.actions?.onEdit?.disabled ?? props.editingKey !== '',
+                isShow: props.actions?.onEdit ? props.actions.onEdit.isShow ?? true : false
               }}
               onDelete={{
-                onClick: (e) => props.onDelete?.onClick(e, record),
-                disabled: props.disableDeleting ?? props.editingKey !== '',
-                isShow: props.onDelete?.isShow ?? true
+                onClick: (e) => props.actions?.onDelete?.onClick?.(e, record),
+                disabled: props.actions?.onDelete?.disabled ?? props.editingKey !== '',
+                isShow: props.actions?.onDelete ? props.actions.onDelete.isShow ?? true : false
               }}
-              onConfirmCancelEditing={props.onConfirmCancelEditing}
-              onConfirmCancelDeleting={props.onConfirmCancelDeleting}
-              onConfirmDelete={() => props.onConfirmDelete(record)}
+              onConfirmCancelEditing={props.actions?.onConfirmCancelEditing}
+              onConfirmCancelDeleting={props.actions?.onConfirmCancelDeleting}
+              onConfirmDelete={() => props.actions?.onConfirmDelete?.(record)}
             />
           </>
         )
@@ -93,8 +85,12 @@ const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: s
   ]
 
   const adminColumns: ColumnType<T>[] = props.isDateCreation
-    ? [...props.columns, ...dateCreationColumns, ...actionsCols]
-    : [...props.columns, ...actionsCols]
+    ? props.actions?.isShow
+      ? [...props.columns, ...dateCreationColumns, ...actionsCols]
+      : [...props.columns, ...dateCreationColumns]
+    : props.actions?.isShow
+      ? [...props.columns, ...actionsCols]
+      : [...props.columns]
 
   const staffColumns: ColumnType<T>[] = [...props.columns]
 
@@ -106,12 +102,14 @@ const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: s
         columns={user.isAdmin ? adminColumns : staffColumns}
         dataSource={props.dataSource}
         rowClassName='editable-row'
-        pagination={{
-          onChange: props.onPageChange,
-          current: props.metaData?.page,
-          pageSize: 5,
-          total: props.metaData?.total
-        }}
+        pagination={
+          props.pagination ?? {
+            onChange: props.onPageChange,
+            current: props.metaData?.page,
+            pageSize: 5,
+            total: props.metaData?.total
+          }
+        }
         expandable={props.expandable}
       />
     </>

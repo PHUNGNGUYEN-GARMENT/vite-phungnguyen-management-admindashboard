@@ -33,6 +33,7 @@ export default function useProduct() {
     setDateCreation,
     handleStartEditing,
     handleStartDeleting,
+    handleConfirmDeleting,
     handleConfirmCancelEditing,
     handleConfirmCancelDeleting
   } = useTable<ProductTableDataType>([])
@@ -252,7 +253,7 @@ export default function useProduct() {
     await productService.deleteItemByPk(item.id!, setLoading, (meta, msg) => {
       if (meta) {
         if (meta.success) {
-          handleStartDeleting(item.id!, () => {})
+          handleConfirmDeleting(item.id!)
           message.success(msg)
         }
       } else {

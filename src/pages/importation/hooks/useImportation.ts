@@ -9,7 +9,6 @@ import ProductGroupAPI from '~/api/services/ProductGroupAPI'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
 import { Importation, Product, ProductColor, ProductGroup } from '~/typing'
-import DayJS, { DatePattern } from '~/utils/date-formatter'
 import { ImportationTableDataType } from '../ImportationPage'
 
 export default function useImportation() {
@@ -38,7 +37,7 @@ export default function useImportation() {
     handleConfirmCancelDeleting
   } = useTable<ImportationTableDataType>([])
   const [openModal, setOpenModal] = useState<boolean>(false)
-  // const [products, setProducts] = useState<Product[]>([])
+  const [products, setProducts] = useState<Product[]>([])
   const [importations, setImportations] = useState<Importation[]>([])
   const [productColors, setProductColors] = useState<ProductColor[]>([])
   const [productGroups, setProductGroups] = useState<ProductGroup[]>([])
@@ -46,11 +45,11 @@ export default function useImportation() {
   const [importationNew, setImportationNew] = useState<Importation | undefined>(undefined)
 
   const loadData = async () => {
-    // await productService.getListItems(defaultRequestBody, setLoading, (meta) => {
-    //   if (meta?.success) {
-    //     setProducts(meta.data as Product[])
-    //   }
-    // })
+    await productService.getListItems(defaultRequestBody, setLoading, (meta) => {
+      if (meta?.success) {
+        setProducts(meta.data as Product[])
+      }
+    })
     await importationService.getListItems(defaultRequestBody, setLoading, (meta) => {
       if (meta?.success) {
         setImportations(meta.data as Importation[])
@@ -83,18 +82,19 @@ export default function useImportation() {
   }, [importations, productColors, productGroups])
 
   const selfConvertDataSource = (
+    _products?: Product[],
     _importations?: Importation[],
     _productColors?: ProductColor[],
     _productGroups?: ProductGroup[]
   ) => {
     setDataSource(
-      (_importations ? _importations : importations).map((item) => {
+      products.map((item) => {
         return {
           ...item,
-          // importation: (_importations ? _importations : importations).find((i) => i.productID === item.id),
           key: item.id,
-          productColors: _productColors ? _productColors : productColors.find((i) => i.product?.id === item.productID),
-          productGroups: _productGroups ? _productGroups : productGroups.find((i) => i.product?.id === item.productID)
+          importations: _importations ? _importations : importations,
+          productColor: _productColors ? _productColors : productColors.find((i) => i.productID === item.id),
+          productGroup: _productGroups ? _productGroups : productGroups.find((i) => i.productID === item.id)
         } as ImportationTableDataType
       })
     )
@@ -103,38 +103,38 @@ export default function useImportation() {
   const handleSaveClick = async (item: TableItemWithKey<ImportationTableDataType>) => {
     const row = (await form.validateFields()) as any
     console.log({ row: row, item: item })
-    try {
-      if (
-        (row.quantity && row.quantity !== item?.quantity) ||
-        (row.dateImported && DayJS(row.dateImported).diff(DayJS(item?.dateImported)))
-      ) {
-        console.log('Importation progressing...')
-        await importationService.createOrUpdateItemByPk(
-          item.id!,
-          {
-            quantity: row.quantity,
-            dateImported: row.dateImported && DayJS(row.dateImported).format(DatePattern.iso8601)
-          },
-          setLoading,
-          (meta) => {
-            if (meta?.success) {
-              const itemNew = meta.data as Importation
-              setImportationNew(itemNew)
-            } else {
-              throw new Error('API update Importation failed')
-            }
-          }
-        )
-      }
-      message.success('Success!')
-    } catch (error) {
-      console.error(error)
-      message.error('Failed')
-    } finally {
-      setLoading(false)
-      handleConfirmCancelEditing()
-      loadData()
-    }
+    // try {
+    //   if (
+    //     (row.quantity && row.quantity !== item?.quantity) ||
+    //     (row.dateImported && DayJS(row.dateImported).diff(DayJS(item?.dateImported)))
+    //   ) {
+    //     console.log('Importation progressing...')
+    //     await importationService.createOrUpdateItemByPk(
+    //       item.id!,
+    //       {
+    //         quantity: row.quantity,
+    //         dateImported: row.dateImported && DayJS(row.dateImported).format(DatePattern.iso8601)
+    //       },
+    //       setLoading,
+    //       (meta) => {
+    //         if (meta?.success) {
+    //           const itemNew = meta.data as Importation
+    //           setImportationNew(itemNew)
+    //         } else {
+    //           throw new Error('API update Importation failed')
+    //         }
+    //       }
+    //     )
+    //   }
+    //   message.success('Success!')
+    // } catch (error) {
+    //   console.error(error)
+    //   message.error('Failed')
+    // } finally {
+    //   setLoading(false)
+    //   handleConfirmCancelEditing()
+    //   loadData()
+    // }
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

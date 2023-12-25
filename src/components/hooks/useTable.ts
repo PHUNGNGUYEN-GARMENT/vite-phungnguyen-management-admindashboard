@@ -40,13 +40,17 @@ export default function useTable<T extends { key?: React.Key }>(initValue: Table
     setEditingKey(key)
   }
 
-  const handleStartDeleting = (key: React.Key, onSuccess: (itemDelete: TableItemWithKey<T>) => void) => {
+  const handleStartDeleting = (key: React.Key) => {
+    setDeleteKey(key)
+  }
+
+  const handleConfirmDeleting = (key: React.Key, onDataSuccess?: (deletedItem: TableItemWithKey<T>) => void) => {
     setLoading(true)
     const itemFound = dataSource.find((item) => item.key === key)
     if (itemFound) {
       const dataSourceRemovedItem = dataSource.filter((item) => item.key !== key)
       setDataSource(dataSourceRemovedItem)
-      onSuccess(itemFound)
+      onDataSuccess?.(itemFound)
     }
     setLoading(false)
   }
@@ -59,7 +63,7 @@ export default function useTable<T extends { key?: React.Key }>(initValue: Table
     setDeleteKey('')
   }
 
-  const handleStartSaveEditing = async (key: React.Key, itemToUpdate: T, onDataSuccess?: (row: T) => void) => {
+  const handleStartSaveEditing = async (key: React.Key, itemToUpdate: T, onDataSuccess?: (updatedItem: T) => void) => {
     try {
       setLoading(true)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -118,6 +122,7 @@ export default function useTable<T extends { key?: React.Key }>(initValue: Table
     handleStartSaveEditing,
     handleConfirmCancelEditing,
     handleConfirmCancelDeleting,
+    handleConfirmDeleting,
     handleConvertDataSource
   }
 }

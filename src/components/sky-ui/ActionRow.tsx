@@ -6,9 +6,21 @@ import { useSelector } from 'react-redux'
 import { RootState } from '~/store/store'
 
 export interface ActionButtonProps<T extends { key?: React.Key }> extends BaseButtonProps {
-  onClick: (e: React.MouseEvent<HTMLElement, MouseEvent>, record?: T) => void
+  onClick?: (e: React.MouseEvent<HTMLElement, MouseEvent>, record?: T) => void
   isShow?: boolean | true
   disabled?: boolean
+}
+
+export interface ActionProps<T extends { key?: React.Key }> extends BaseButtonProps {
+  isShow?: boolean
+  disabled?: boolean
+  onAdd?: ActionButtonProps<T>
+  onSave?: ActionButtonProps<T>
+  onEdit?: ActionButtonProps<T>
+  onDelete?: ActionButtonProps<T>
+  onConfirmDelete?: (record: T) => void
+  onConfirmCancelEditing?: (e: React.MouseEvent<HTMLElement, MouseEvent> | undefined) => void
+  onConfirmCancelDeleting?: (e: React.MouseEvent<HTMLElement, MouseEvent> | undefined) => void
 }
 
 export interface ActionRowProps<T extends { key?: React.Key }> extends HTMLAttributes<HTMLElement> {
@@ -18,9 +30,9 @@ export interface ActionRowProps<T extends { key?: React.Key }> extends HTMLAttri
   onSave: ActionButtonProps<T>
   onEdit: ActionButtonProps<T>
   onDelete?: ActionButtonProps<T>
-  onConfirmCancelEditing: (e: React.MouseEvent<HTMLElement, MouseEvent> | undefined) => void
-  onConfirmCancelDeleting: (e: React.MouseEvent<HTMLElement, MouseEvent> | undefined) => void
-  onConfirmDelete: (e?: React.MouseEvent<HTMLElement>) => void
+  onConfirmCancelEditing?: (e: React.MouseEvent<HTMLElement, MouseEvent> | undefined) => void
+  onConfirmCancelDeleting?: (e: React.MouseEvent<HTMLElement, MouseEvent> | undefined) => void
+  onConfirmDelete?: (e?: React.MouseEvent<HTMLElement>) => void
 }
 
 const ActionRow = <T extends { key?: React.Key }>({ ...props }: ActionRowProps<T>) => {
@@ -51,7 +63,7 @@ const ActionRow = <T extends { key?: React.Key }>({ ...props }: ActionRowProps<T
         ) : (
           <Flex gap={10}>
             {props.onAdd?.isShow && (
-              <Button type='dashed' disabled={props.onAdd.disabled} onClick={(e) => props.onAdd?.onClick(e)}>
+              <Button type='dashed' disabled={props.onAdd.disabled} onClick={(e) => props.onAdd?.onClick?.(e)}>
                 Add
               </Button>
             )}

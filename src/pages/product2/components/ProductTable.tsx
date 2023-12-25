@@ -28,6 +28,7 @@ const ProductTable: React.FC = () => {
     dateCreation,
     setDateCreation,
     handleStartEditing,
+    handleStartDeleting,
     handleConfirmCancelEditing,
     handleConfirmCancelDeleting,
     openModal,
@@ -300,18 +301,24 @@ const ProductTable: React.FC = () => {
             onPageChange={handlePageChange}
             editingKey={editingKey}
             isDateCreation={dateCreation}
-            onEdit={{
-              onClick: (_e, record) => {
-                setEditable((prev) => !prev)
-                handleStartEditing(record!.key!)
-              }
+            actions={{
+              onEdit: {
+                onClick: (_e, record) => {
+                  setEditable((prev) => !prev)
+                  handleStartEditing(record!.key!)
+                }
+              },
+              onSave: {
+                onClick: (_e, record) => handleSaveClick(record!)
+              },
+              onDelete: {
+                onClick: (_e, record) => handleStartDeleting(record!.key!)
+              },
+              onConfirmCancelEditing: () => handleConfirmCancelEditing(),
+              onConfirmCancelDeleting: () => handleConfirmCancelDeleting(),
+              onConfirmDelete: (record) => handleConfirmDelete(record),
+              isShow: true
             }}
-            onSave={{
-              onClick: (_e, record) => handleSaveClick(record!)
-            }}
-            onConfirmCancelEditing={handleConfirmCancelEditing}
-            onConfirmCancelDeleting={handleConfirmCancelDeleting}
-            onConfirmDelete={(record) => handleConfirmDelete(record)}
             expandable={{
               expandedRowRender: (record: ProductTableDataType) => {
                 return (
