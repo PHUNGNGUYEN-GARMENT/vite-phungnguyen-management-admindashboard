@@ -1,63 +1,134 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { List } from 'antd'
 import React from 'react'
-import { ResponseDataType } from '~/api/client'
-import { TableItemWithKey } from '~/components/hooks/useTable'
+import { defaultRequestBody } from '~/api/client'
+import BaseLayout from '~/components/layout/BaseLayout'
+import SkyList from '~/components/sky-ui/SkyList/SkyList'
+import { Product } from '~/typing'
+import useProduct from '../hooks/useProduct'
 import { ProductTableDataType } from '../type'
+import ModalAddNewProduct from './ModalAddNewProduct'
 import ProductListItem from './ProductListItem'
 
-interface Props extends React.HTMLAttributes<HTMLElement> {
-  loading: boolean
-  setLoading: (enable: boolean) => void
-  metaData: ResponseDataType | undefined
-  dataSource: TableItemWithKey<ProductTableDataType>[]
-  dateCreation: boolean
-  editingKey: React.Key
-  isEditing: (key: React.Key) => boolean
-  onPageChange: (page: number, pageSize: number) => void
-  onConfirmDelete: (item: TableItemWithKey<ProductTableDataType>) => void
-  setDeleteKey: (value: React.SetStateAction<React.Key>) => void
-  onSaveClick: (item: TableItemWithKey<ProductTableDataType>) => void
-  onStartEditing: (key: React.Key) => void
-  onConfirmCancelEditing: () => void
-  onConfirmCancelDeleting: () => void
-}
+const ProductList: React.FC = () => {
+  const {
+    isEditing,
+    dataSource,
+    loading,
+    setLoading,
+    searchText,
+    setSearchText,
+    dateCreation,
+    setDateCreation,
+    handleStartEditing,
+    handleStartDeleting,
+    handleConfirmCancelEditing,
+    handleConfirmCancelDeleting,
+    openModal,
+    newRecord,
+    setNewRecord,
+    setOpenModal,
+    selfConvertDataSource,
+    handleSaveClick,
+    handleAddNewItem,
+    handleConfirmDelete,
+    handlePageChange,
+    productService
+  } = useProduct()
 
-const ProductList: React.FC<Props> = ({ ...props }) => {
-  console.log('Load ProductList')
   return (
     <>
-      <List
-        className={props.className}
-        itemLayout='vertical'
-        size='large'
-        pagination={{
-          onChange: props.onPageChange,
-          current: props.metaData?.page,
-          pageSize: 5,
-          total: props.metaData?.total
+      <BaseLayout
+        onDateCreationChange={(enable) => setDateCreation(enable)}
+        onSearch={async (value) => {
+          if (value.length > 0) {
+            await productService.getListItems(
+              {
+                ...defaultRequestBody,
+                search: {
+                  field: 'productCode',
+                  term: value
+                }
+              },
+              setLoading,
+              (meta) => {
+                if (meta?.success) {
+                  selfConvertDataSource(meta?.data as Product[])
+                }
+              }
+            )
+          }
         }}
-        loading={props.loading}
-        dataSource={props.dataSource}
-        renderItem={(item: TableItemWithKey<ProductTableDataType>) => (
-          <ProductListItem
-            data={item}
-            key={item.key}
-            dateCreation={props.dateCreation}
-            editingKey={props.editingKey}
-            isEditing={props.isEditing(item.key!)}
-            onSaveClick={() => {
-              console.log(item)
-              props.onSaveClick(item)
-            }}
-            onClickStartEditing={() => props.onStartEditing(item.key!)}
-            onConfirmCancelEditing={() => props.onConfirmCancelEditing()}
-            onConfirmCancelDeleting={() => props.onConfirmCancelDeleting()}
-            onConfirmDelete={() => props.onConfirmDelete(item)}
-            onStartDeleting={() => props.setDeleteKey(item.key!)}
-          />
-        )}
-      />
+        onSortChange={async (val) => {
+          await productService.sortedListItems(
+            val ? 'asc' : 'desc',
+            setLoading,
+            (meta) => {
+              if (meta?.success) {
+                selfConvertDataSource(meta?.data as Product[])
+              }
+            },
+            { field: 'productCode', term: searchText }
+          )
+        }}
+        onResetClick={async () => {
+          setSearchText('')
+          await productService.getListItems(defaultRequestBody, setLoading, (meta) => {
+            if (meta?.success) {
+              selfConvertDataSource(meta?.data as Product[])
+            }
+          })
+        }}
+        onAddNewClick={() => setOpenModal(true)}
+      >
+        <SkyList
+          itemLayout='vertical'
+          size='large'
+          loading={loading}
+          dataSource={dataSource}
+          metaData={productService.metaData}
+          onPageChange={handlePageChange}
+          renderItem={(record: ProductTableDataType) => (
+            <ProductListItem
+              record={record}
+              newRecord={newRecord}
+              setNewRecord={setNewRecord}
+              isDateCreation={dateCreation}
+              isEditing={isEditing(record.key!)}
+              actions={{
+                onSave: {
+                  onClick: () => {
+                    setNewRecord(record)
+                    handleSaveClick(record, newRecord)
+                  }
+                },
+                onEdit: {
+                  onClick: () => handleStartEditing(record.key!)
+                },
+                onDelete: {
+                  onClick: () => handleStartDeleting(record.key!)
+                },
+                onConfirmCancelEditing: () => handleConfirmCancelEditing(),
+                onConfirmCancelDeleting: () => handleConfirmCancelDeleting(),
+                onConfirmDelete: () =>
+                  handleConfirmDelete(record, (meta) => {
+                    if (meta?.success) {
+                      handleStartDeleting(record.key!)
+                    }
+                  })
+              }}
+            />
+          )}
+        />
+      </BaseLayout>
+      {openModal && (
+        <ModalAddNewProduct
+          setLoading={setLoading}
+          loading={loading}
+          openModal={openModal}
+          setOpenModal={setOpenModal}
+          onAddNew={handleAddNewItem}
+        />
+      )}
     </>
   )
 }

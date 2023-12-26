@@ -3,18 +3,22 @@ import { Flex, Form, Input, List, Typography } from 'antd'
 import { useSelector } from 'react-redux'
 import { RootState } from '~/store/store'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
-import ActionRow, { ActionRowProps } from '../ActionRow'
+import ActionRow, { ActionProps } from '../ActionRow'
 
-export interface SkyListItemProps<T extends { key?: React.Key; createdAt?: string; updatedAt?: string }>
-  extends ActionRowProps {
+export interface SkyListItemProps<T extends { key?: React.Key; createdAt?: string; updatedAt?: string }> {
   record: T
   label?: string
+  isEditing: boolean
   labelEditing?: boolean
   labelName?: string
   isDateCreation?: boolean
+  actions?: ActionProps<T>
+  children?: React.ReactNode
 }
 
 const SkyListItem = <T extends { key?: React.Key; createdAt?: string; updatedAt?: string }>({
+  record,
+  children,
   ...props
 }: SkyListItemProps<T>) => {
   const user = useSelector((state: RootState) => state.user)
@@ -35,18 +39,32 @@ const SkyListItem = <T extends { key?: React.Key; createdAt?: string; updatedAt?
 
           <ActionRow
             isEditing={props.isEditing}
-            editingKey={props.editingKey}
-            disableEditing={props.disableEditing ?? props.editingKey !== ''}
-            disableDeleting={props.disableDeleting ?? props.editingKey !== ''}
-            onSave={props.onSave}
-            onEdit={props.onEdit}
-            onDelete={props.onDelete}
-            onConfirmCancelEditing={props.onConfirmCancelEditing}
-            onConfirmCancelDeleting={props.onConfirmCancelDeleting}
-            onConfirmDelete={props.onConfirmDelete}
+            onAdd={{
+              onClick: (e) => props.actions?.onAdd?.onClick?.(e, record),
+              disabled: props.actions?.onAdd?.disabled ?? props.isEditing,
+              isShow: props.actions?.onAdd ? props.actions.onAdd.isShow ?? true : false
+            }}
+            onSave={{
+              onClick: (e) => props.actions?.onSave?.onClick?.(e, record),
+              disabled: props.actions?.onSave?.disabled ?? props.isEditing,
+              isShow: props.actions?.onSave ? props.actions.onSave.isShow ?? true : false
+            }}
+            onEdit={{
+              onClick: (e) => props.actions?.onEdit?.onClick?.(e, record),
+              disabled: props.actions?.onEdit?.disabled ?? props.isEditing,
+              isShow: props.actions?.onEdit ? props.actions.onEdit.isShow ?? true : false
+            }}
+            onDelete={{
+              onClick: (e) => props.actions?.onDelete?.onClick?.(e, record),
+              disabled: props.actions?.onDelete?.disabled ?? props.isEditing,
+              isShow: props.actions?.onDelete ? props.actions.onDelete.isShow ?? true : false
+            }}
+            onConfirmCancelEditing={props.actions?.onConfirmCancelEditing}
+            onConfirmCancelDeleting={props.actions?.onConfirmCancelDeleting}
+            onConfirmDelete={() => props.actions?.onConfirmDelete?.(record)}
           />
         </Flex>
-        {props.children}
+        {children}
         {user.isAdmin && props.isDateCreation && (
           <Flex vertical gap={10}>
             <Flex className='w-full' align='center' justify='start' gap={5}>
@@ -56,7 +74,7 @@ const SkyListItem = <T extends { key?: React.Key; createdAt?: string; updatedAt?
               <Input
                 name='createdAt'
                 className='w-full'
-                defaultValue={DayJS(props.record.createdAt).format(DatePattern.display)}
+                defaultValue={record?.createdAt && DayJS(record.createdAt).format(DatePattern.display)}
                 readOnly
               />
             </Flex>
@@ -67,7 +85,7 @@ const SkyListItem = <T extends { key?: React.Key; createdAt?: string; updatedAt?
               <Input
                 name='createdAt'
                 className='w-full'
-                defaultValue={DayJS(props.record.updatedAt).format(DatePattern.display)}
+                defaultValue={record?.updatedAt && DayJS(record.updatedAt).format(DatePattern.display)}
                 readOnly
               />
             </Flex>

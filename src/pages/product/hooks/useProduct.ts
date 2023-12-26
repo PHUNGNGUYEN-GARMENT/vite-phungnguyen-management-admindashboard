@@ -1,174 +1,321 @@
-import { FormInstance } from 'antd'
-import { useState } from 'react'
-import {
-  RequestBodyType,
-  ResponseDataType,
-  defaultRequestBody
-} from '~/api/client'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { App as AntApp } from 'antd'
+import { useEffect, useState } from 'react'
+import { RequestBodyType, ResponseDataType, defaultRequestBody } from '~/api/client'
+import PrintablePlaceAPI from '~/api/services/PrintablePlaceAPI'
 import ProductAPI from '~/api/services/ProductAPI'
 import ProductColorAPI from '~/api/services/ProductColorAPI'
-import { Product, SortDirection } from '~/typing'
+import ProductGroupAPI from '~/api/services/ProductGroupAPI'
+import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
+import useAPIService from '~/hooks/useAPIService'
+import { ProductTableDataType } from '~/pages/product/type'
+import { Color, Group, PrintablePlace, Product, ProductColor, ProductGroup } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 
 export default function useProduct() {
-  const [metaData, setMetaData] = useState<ResponseDataType>()
+  const productService = useAPIService<Product>(ProductAPI)
+  const productColorService = useAPIService<ProductColor>(ProductColorAPI)
+  const productGroupService = useAPIService<ProductGroup>(ProductGroupAPI)
+  const printablePlaceService = useAPIService<PrintablePlace>(PrintablePlaceAPI)
+
+  const { message } = AntApp.useApp()
+
+  const {
+    isEditing,
+    editingKey,
+    dataSource,
+    loading,
+    setLoading,
+    setDataSource,
+    setDeleteKey,
+    dateCreation,
+    setDateCreation,
+    handleStartEditing,
+    handleStartDeleting,
+    handleConfirmDeleting,
+    handleConfirmCancelEditing,
+    handleConfirmCancelDeleting
+  } = useTable<ProductTableDataType>([])
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [searchText, setSearchText] = useState<string>('')
-  const [loading, setLoading] = useState<boolean>(false)
+  const [newRecord, setNewRecord] = useState<any>({})
 
-  const handleAddNewProduct = async (
-    form: FormInstance<Product>,
-    onSuccess?: (data: ResponseDataType) => void,
-    onFailed?: (error: Error) => void
+  const [products, setProducts] = useState<Product[]>([])
+  const [productColors, setProductColors] = useState<ProductColor[]>([])
+  const [productGroups, setProductGroups] = useState<ProductGroup[]>([])
+  const [printablePlaces, setPrintablePlaces] = useState<PrintablePlace[]>([])
+
+  const [productNew, setProductNew] = useState<Product | undefined>(undefined)
+  const [productColorNew, setProductColorNew] = useState<Color | undefined>(undefined)
+  const [productGroupNew, setProductGroupNew] = useState<Group | undefined>(undefined)
+  const [printablePlaceNew, setPrintablePlaceNew] = useState<PrintablePlace | undefined>(undefined)
+
+  const loadData = async () => {
+    await productService.getListItems(defaultRequestBody, setLoading, (meta) => {
+      if (meta?.success) {
+        setProducts(meta.data as Product[])
+      }
+    })
+    await productColorService.getListItems(defaultRequestBody, setLoading, (meta) => {
+      if (meta?.success) {
+        setProductColors(meta.data as ProductColor[])
+      }
+    })
+    await productGroupService.getListItems(defaultRequestBody, setLoading, (meta) => {
+      if (meta?.success) {
+        setProductGroups(meta.data as ProductGroup[])
+      }
+    })
+    await printablePlaceService.getListItems(defaultRequestBody, setLoading, (meta) => {
+      if (meta?.success) {
+        setPrintablePlaces(meta.data as PrintablePlace[])
+      }
+    })
+  }
+
+  useEffect(() => {
+    loadData()
+  }, [productNew, productColorNew, productGroupNew, printablePlaceNew])
+
+  useEffect(() => {
+    selfConvertDataSource(products, productColors, productGroups, printablePlaces)
+  }, [products, productColors, productGroups, printablePlaces])
+
+  const selfConvertDataSource = (
+    _products: Product[],
+    _productColors?: ProductColor[],
+    _productGroups?: ProductGroup[],
+    _printablePlaces?: PrintablePlace[]
   ) => {
-    setLoading(true)
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const row: any = await form.validateFields()
-      // setLoading(true)
-      const productConverted = {
-        ...row,
-        status: 'active',
-        dateOutputFCR: DayJS(row.dateOutputFCR).format(DatePattern.iso8601),
-        dateInputNPL: DayJS(row.dateOutputFCR).format(DatePattern.iso8601)
-      } as Product
-      console.log(row)
-      ProductAPI.createNewItem(productConverted)
-        .then((meta) => {
-          const productNew: Product = meta?.data
-          setLoading(true)
-          if (meta?.success) {
-            ProductColorAPI.createNewItem({
-              productID: productNew.id,
-              colorID: row.colorID
-            }).then((metaProductColor) => {
-              if (metaProductColor?.success) {
-                onSuccess?.(meta)
-                setOpenModal(false)
-              } else {
-                onFailed?.({
-                  message:
-                    metaProductColor?.message ??
-                    'Failed to create ProductColor',
-                  name: 'ProductColor'
-                })
+    setDataSource(
+      _products.map((item) => {
+        return {
+          ...item,
+          productColor: (_productColors ? _productColors : productColors).find((i) => i.productID === item.id),
+          productGroup: (_productGroups ? _productGroups : productGroups).find((i) => i.productID === item.id),
+          printablePlace: (_printablePlaces ? _printablePlaces : printablePlaces).find((i) => i.productID === item.id),
+          key: item.id
+        } as ProductTableDataType
+      })
+    )
+  }
+
+  const handleSaveClick = async (record: TableItemWithKey<ProductTableDataType>, newRecord: any) => {
+    // const row = (await form.validateFields()) as any
+    console.log({ old: record, new: newRecord })
+    if (newRecord) {
+      try {
+        if (
+          (newRecord.productCode && newRecord.productCode !== record.productCode) ||
+          (newRecord.quantityPO && newRecord.quantityPO !== record.quantityPO) ||
+          (newRecord.dateInputNPL && DayJS(newRecord.dateInputNPL).diff(DayJS(record.dateInputNPL))) ||
+          (newRecord.dateOutputFCR && DayJS(newRecord.dateOutputFCR).diff(DayJS(record.dateOutputFCR)))
+        ) {
+          console.log('Product progressing...')
+          await productService.updateItemByPk(
+            Number(record.id!),
+            {
+              productCode: newRecord.productCode,
+              quantityPO: newRecord.quantityPO,
+              dateInputNPL: newRecord.dateInputNPL && DayJS(newRecord.dateInputNPL).format(DatePattern.iso8601),
+              dateOutputFCR: newRecord.dateOutputFCR && DayJS(newRecord.dateOutputFCR).format(DatePattern.iso8601)
+            },
+            setLoading,
+            (meta) => {
+              if (!meta?.success) {
+                throw new Error('API update Product failed')
               }
-            })
+            }
+          )
+        }
+        if (newRecord.colorID && newRecord.colorID !== record.productColor?.colorID) {
+          console.log('Product color progressing...')
+          await productColorService.createOrUpdateItemBy(
+            { field: 'productID', key: record.key! },
+            { colorID: newRecord.colorID },
+            setLoading,
+            (meta) => {
+              if (!meta?.success) {
+                throw new Error('API update ProductColor failed')
+              }
+            }
+          )
+        }
+        if (newRecord.groupID && newRecord.groupID !== record.productGroup?.groupID) {
+          console.log('ProductGroup progressing...')
+          await productGroupService.createOrUpdateItemBy(
+            { field: 'productID', key: record.key! },
+            { groupID: newRecord.groupID },
+            setLoading,
+            (meta) => {
+              if (!meta?.success) {
+                throw new Error('API update ProductGroup failed')
+              }
+            }
+          )
+        }
+        if (newRecord.printID && newRecord.printID !== record.printablePlace?.printID) {
+          console.log('PrintablePlace progressing...')
+          await printablePlaceService.createOrUpdateItemBy(
+            { field: 'productID', key: record.key! },
+            { printID: newRecord.printID },
+            setLoading,
+            (meta) => {
+              if (!meta?.success) {
+                throw new Error('API update PrintablePlace failed')
+              }
+            }
+          )
+        }
+        message.success('Success!')
+      } catch (error) {
+        console.error(error)
+        message.error('Failed')
+      } finally {
+        setLoading(false)
+        handleConfirmCancelEditing()
+        loadData()
+      }
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleAddNewItem = async (formAddNew: any) => {
+    try {
+      console.log(formAddNew)
+      setLoading(true)
+      await productService.createNewItem(
+        {
+          productCode: formAddNew.productCode,
+          quantityPO: formAddNew.quantityPO,
+          dateInputNPL: DayJS(formAddNew.dateInputNPL).format(DatePattern.iso8601),
+          dateOutputFCR: DayJS(formAddNew.dateOutputFCR).format(DatePattern.iso8601)
+        },
+        setLoading,
+        async (meta, msg) => {
+          if (meta?.data) {
+            const productNew = meta.data as Product
+            setProductNew(productNew)
+            if (formAddNew.colorID) {
+              console.log('Product color created')
+              await productColorService.createNewItem(
+                { productID: productNew.id!, colorID: formAddNew.colorID },
+                setLoading,
+                (meta) => {
+                  if (meta?.success) {
+                    const productColorNew = meta.data as ProductColor
+                    setProductColorNew(productColorNew)
+                  }
+                }
+              )
+            }
+            if (formAddNew.groupID) {
+              console.log('Product group created')
+              await productGroupService.createNewItem(
+                { productID: productNew.id!, groupID: formAddNew.groupID },
+                setLoading,
+                (meta) => {
+                  if (meta?.success) {
+                    const productGroupNew = meta.data as ProductGroup
+                    setProductGroupNew(productGroupNew)
+                  }
+                }
+              )
+            }
+            if (formAddNew.printID) {
+              console.log('Product print created')
+              await printablePlaceService.createNewItem(
+                { productID: productNew.id!, printID: formAddNew.printID },
+                setLoading,
+                (meta) => {
+                  if (meta?.success) {
+                    const printablePlaceNew = meta.data as PrintablePlace
+                    setPrintablePlaceNew(printablePlaceNew)
+                  }
+                }
+              )
+            }
+            message.success(msg)
           } else {
-            onFailed?.({
-              message: meta?.message ?? 'Failed to create Product',
-              name: 'Product'
-            })
+            console.log('Errr')
+            message.error(msg)
           }
-        })
-        .catch((err) => {
-          onFailed?.(err)
-        })
-        .finally(() => {
-          setLoading(false)
-        })
+        }
+      )
     } catch (error) {
-      console.log('HandleAddNew with error: ', error)
+      console.error(error)
     } finally {
       setLoading(false)
+      setOpenModal(false)
     }
   }
 
-  const getProductList = async (
-    params: RequestBodyType,
-    onSuccess?: (data: ResponseDataType) => void
+  const handleConfirmDelete = async (
+    item: TableItemWithKey<ProductTableDataType>,
+    onDataSuccess?: (meta: ResponseDataType | undefined) => void
   ) => {
-    setLoading(true)
-    const body: RequestBodyType = {
-      ...defaultRequestBody,
-      ...params
-    }
-    await ProductAPI.getItems(body)
-      .then((data) => {
-        console.log(data)
-        if (data?.success) {
-          setMetaData(data)
-          onSuccess?.(data)
+    await productService.deleteItemByPk(item.id!, setLoading, (meta, msg) => {
+      if (meta) {
+        if (meta.success) {
+          handleConfirmDeleting(item.id!)
+          message.success(msg)
         }
-      })
-      .finally(() => {
-        setLoading(false)
-      })
-    setLoading(false)
+      } else {
+        message.error(msg)
+      }
+      onDataSuccess?.(meta)
+    })
   }
 
-  const handleSorted = async (
-    direction: SortDirection,
-    onSuccess?: (meta: ResponseDataType) => void
-  ) => {
+  const handlePageChange = async (_page: number) => {
+    productService.setPage(_page)
     const body: RequestBodyType = {
       ...defaultRequestBody,
-      sorting: {
-        column: 'id',
-        direction: direction
+      paginator: {
+        page: _page,
+        pageSize: 5
+      },
+      search: {
+        field: 'productCode',
+        term: searchText
       }
     }
-    await getProductList(body, (meta) => {
+    await productService.getListItems(body, setLoading, (meta) => {
       if (meta?.success) {
-        onSuccess?.(meta)
+        selfConvertDataSource(meta?.data as Product[])
       }
     })
-  }
-
-  const handleUpdateProductItem = async (
-    id: number,
-    productToUpdate: Product,
-    onSuccess?: (data: ResponseDataType) => void
-  ) => {
-    console.log({
-      id: id,
-      productToUpdate
-    })
-    setLoading(true)
-    await ProductAPI.updateItemByPk(id, productToUpdate)
-      .then((meta) => {
-        if (meta?.success) {
-          setLoading(true)
-          onSuccess?.(meta)
-        }
-      })
-      .finally(() => {
-        setLoading(false)
-      })
-    setLoading(false)
-  }
-
-  const handleDeleteProductItem = async (
-    id: number,
-    onSuccess?: (meta: ResponseDataType) => void
-  ) => {
-    setLoading(true)
-    await ProductAPI.updateItemByPk(id, { status: 'deleted' })
-      .then((meta) => {
-        if (meta?.success) {
-          setLoading(true)
-          onSuccess?.(meta)
-        }
-      })
-      .finally(() => {
-        setLoading(false)
-      })
-    setLoading(false)
   }
 
   return {
-    metaData,
-    setMetaData,
-    loading,
-    setLoading,
-    handleAddNewProduct,
-    openModal,
-    setOpenModal,
     searchText,
     setSearchText,
-    getProductList,
-    handleUpdateProductItem,
-    handleDeleteProductItem,
-    handleSorted
+    loading,
+    openModal,
+    loadData,
+    newRecord,
+    setNewRecord,
+    isEditing,
+    editingKey,
+    dataSource,
+    setLoading,
+    setOpenModal,
+    setDeleteKey,
+    dateCreation,
+    setDataSource,
+    productService,
+    setDateCreation,
+    handleSaveClick,
+    handleAddNewItem,
+    handlePageChange,
+    handleStartEditing,
+    handleStartDeleting,
+    productColorService,
+    productGroupService,
+    handleConfirmDelete,
+    printablePlaceService,
+    selfConvertDataSource,
+    handleConfirmCancelEditing,
+    handleConfirmCancelDeleting
   }
 }

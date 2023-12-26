@@ -1,159 +1,196 @@
-import { useState } from 'react'
-import {
-  RequestBodyType,
-  ResponseDataType,
-  defaultRequestBody
-} from '~/api/client'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { App as AntApp } from 'antd'
+import { useEffect, useState } from 'react'
+import { RequestBodyType, ResponseDataType, defaultRequestBody } from '~/api/client'
 import ColorAPI from '~/api/services/ColorAPI'
-import { Color, SortDirection } from '~/typing'
+import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
+import useAPIService from '~/hooks/useAPIService'
+import { ProductTableDataType } from '~/pages/product/type'
+import { Color, Product } from '~/typing'
+import { ColorTableDataType } from '../ColorPage'
 
 export default function useColor() {
-  const [metaData, setMetaData] = useState<ResponseDataType>()
+  const colorService = useAPIService<Color>(ColorAPI)
+
+  const { message } = AntApp.useApp()
+
+  const {
+    isEditing,
+    editingKey,
+    dataSource,
+    loading,
+    setLoading,
+    setDataSource,
+    setDeleteKey,
+    dateCreation,
+    setDateCreation,
+    handleStartEditing,
+    handleStartDeleting,
+    handleConfirmDeleting,
+    handleConfirmCancelEditing,
+    handleConfirmCancelDeleting
+  } = useTable<ColorTableDataType>([])
   const [openModal, setOpenModal] = useState<boolean>(false)
-  const [loading, setLoading] = useState<boolean>(false)
-  const [page, setPage] = useState<number>(1)
-  const [dateCreation, setDateCreation] = useState<boolean>(true)
+  const [searchText, setSearchText] = useState<string>('')
+  const [newRecord, setNewRecord] = useState<any>({})
 
-  const handleAddNewItem = async (
-    itemNew: Color,
-    onDataSuccess?: (
-      data: ResponseDataType | undefined,
-      status: boolean
-    ) => void
-  ) => {
-    setLoading(true)
-    await ColorAPI.createNewItem(itemNew)
-      .then((meta) => {
-        if (meta?.success) {
-          onDataSuccess?.(meta, true)
-        } else {
-          onDataSuccess?.(undefined, false)
-        }
-      })
-      .catch((err) => {
-        console.log(err)
-        onDataSuccess?.(undefined, false)
-      })
-      .finally(() => {
-        setLoading(false)
-        setOpenModal(false)
-      })
+  const [colors, setColors] = useState<Color[]>([])
+
+  const [colorNew, setColorNew] = useState<Color | undefined>(undefined)
+
+  const loadData = async () => {
+    await colorService.getListItems(defaultRequestBody, setLoading, (meta) => {
+      if (meta?.success) {
+        setColors(meta.data as Product[])
+      }
+    })
   }
 
-  const getDataList = async (
-    params: RequestBodyType,
-    onDataSuccess?: (
-      data: ResponseDataType | undefined,
-      status: boolean
-    ) => void
-  ) => {
-    setLoading(true)
-    const body: RequestBodyType = {
-      ...defaultRequestBody,
-      ...params
+  useEffect(() => {
+    loadData()
+  }, [colorNew])
+
+  useEffect(() => {
+    selfConvertDataSource(colors)
+  }, [colors])
+
+  const selfConvertDataSource = (_colors: Color[]) => {
+    const items = _colors ? _colors : colors
+    setDataSource(
+      items.map((item) => {
+        return {
+          ...item,
+          key: item.id
+        } as ColorTableDataType
+      })
+    )
+  }
+
+  const handleSaveClick = async (record: TableItemWithKey<ColorTableDataType>, newRecord: any) => {
+    // const row = (await form.validateFields()) as any
+    console.log({ old: record, new: newRecord })
+    if (newRecord) {
+      try {
+        if (
+          (newRecord.name && newRecord.name !== record.name) ||
+          (newRecord.hexColor && newRecord.hexColor !== record.hexColor)
+        ) {
+          console.log('Color progressing...')
+          await colorService.updateItemByPk(
+            record.id!,
+            { name: newRecord.name, hexColor: newRecord.hexColor },
+            setLoading,
+            (meta) => {
+              if (!meta?.success) {
+                throw new Error('API update Color failed')
+              }
+            }
+          )
+        }
+        message.success('Success!')
+      } catch (error) {
+        console.error(error)
+        message.error('Failed')
+      } finally {
+        setLoading(false)
+        handleConfirmCancelEditing()
+        loadData()
+      }
     }
-    await ColorAPI.getItems(body)
-      .then((meta) => {
-        if (meta?.success) {
-          console.log(meta)
-          setMetaData(meta)
-          onDataSuccess?.(meta, true)
-        }
-      })
-      .catch((err) => {
-        console.log(err)
-        onDataSuccess?.(undefined, false)
-      })
-      .finally(() => {
-        setLoading(false)
-      })
   }
 
-  const handleSorted = async (
-    direction: SortDirection,
-    onDataSuccess?: (
-      data: ResponseDataType | undefined,
-      status: boolean
-    ) => void
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleAddNewItem = async (formAddNew: any) => {
+    try {
+      console.log(formAddNew)
+      setLoading(true)
+      await colorService.createNewItem(
+        {
+          name: formAddNew.name,
+          hexColor: formAddNew.hexColor
+        },
+        setLoading,
+        async (meta, msg) => {
+          if (meta?.data) {
+            setColorNew(meta.data as Color)
+            message.success(msg)
+          } else {
+            console.log('Errr')
+            message.error(msg)
+          }
+        }
+      )
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setLoading(false)
+      setOpenModal(false)
+    }
+  }
+
+  const handleConfirmDelete = async (
+    item: TableItemWithKey<ProductTableDataType>,
+    onDataSuccess?: (meta: ResponseDataType | undefined) => void
   ) => {
+    await colorService.deleteItemByPk(item.id!, setLoading, (meta, msg) => {
+      if (meta) {
+        if (meta.success) {
+          handleConfirmDeleting(item.id!)
+          message.success(msg)
+        }
+      } else {
+        message.error(msg)
+      }
+      onDataSuccess?.(meta)
+    })
+  }
+
+  const handlePageChange = async (_page: number) => {
+    colorService.setPage(_page)
     const body: RequestBodyType = {
       ...defaultRequestBody,
       paginator: {
-        page: page,
+        page: _page,
         pageSize: 5
       },
-      sorting: {
-        column: 'id',
-        direction: direction
+      search: {
+        field: 'productCode',
+        term: searchText
       }
     }
-    await getDataList(body, onDataSuccess)
-  }
-
-  const handleUpdateItem = async (
-    id: number,
-    itemToUpdate: Color,
-    onDataSuccess?: (
-      data: ResponseDataType | undefined,
-      status: boolean
-    ) => void
-  ) => {
-    setLoading(true)
-    ColorAPI.updateItemByPk(id, itemToUpdate)
-      .then((data) => {
-        if (data?.success) {
-          setMetaData(data)
-          onDataSuccess?.(data, true)
-        }
-      })
-      .catch((err) => {
-        console.log(err)
-        onDataSuccess?.(undefined, false)
-      })
-      .finally(() => {
-        setLoading(false)
-      })
-  }
-
-  const handleDeleteItem = async (
-    id: number,
-    onDataSuccess?: (
-      data: ResponseDataType | undefined,
-      status: boolean
-    ) => void
-  ) => {
-    setLoading(true)
-    await ColorAPI.updateItemByPk(id, { status: 'deleted' })
-      .then((data) => {
-        if (data?.success) {
-          setMetaData(data)
-          onDataSuccess?.(data, true)
-        }
-      })
-      .catch((err) => {
-        console.log(err)
-        onDataSuccess?.(undefined, false)
-      })
-      .finally(() => {
-        setLoading(false)
-      })
+    await colorService.getListItems(body, setLoading, (meta) => {
+      if (meta?.success) {
+        selfConvertDataSource(meta?.data as Color[])
+      }
+    })
   }
 
   return {
-    page,
-    setPage,
-    metaData,
-    setMetaData,
-    dateCreation,
-    setDateCreation,
+    searchText,
+    setSearchText,
     loading,
-    setLoading,
     openModal,
+    loadData,
+    newRecord,
+    setNewRecord,
+    isEditing,
+    editingKey,
+    dataSource,
+    setLoading,
     setOpenModal,
-    getDataList,
-    handleUpdateItem,
-    handleDeleteItem,
+    setDeleteKey,
+    dateCreation,
+    setDataSource,
+    colorService,
+    setDateCreation,
+    handleSaveClick,
     handleAddNewItem,
-    handleSorted
+    handlePageChange,
+    handleStartEditing,
+    handleStartDeleting,
+    handleConfirmDelete,
+    selfConvertDataSource,
+    handleConfirmCancelEditing,
+    handleConfirmCancelDeleting
   }
 }

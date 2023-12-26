@@ -1,99 +1,90 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ColorPicker, Flex, Form, Typography } from 'antd'
+import { Button, Collapse, Flex, Typography } from 'antd'
 import type { ColumnType } from 'antd/es/table'
-import { defaultRequestBody } from '~/api/client'
-import BaseLayout from '~/components/layout/BaseLayout'
-import EditableCellNew from '~/components/sky-ui/SkyTable/EditableCellNew'
+import { Plus } from 'lucide-react'
+import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
-import { Product } from '~/typing'
-import { ImportationTableDataType } from '../ImportationPage'
+import { ProductTableDataType } from '~/pages/product/type'
+import { Importation } from '~/typing'
+import DayJS, { DatePattern } from '~/utils/date-formatter'
 import useImportation from '../hooks/useImportation'
+import ModalAddNewImportation from './ModalAddNewImportation'
 
-const ImportationTable: React.FC = () => {
+interface Props {
+  productRecord: ProductTableDataType
+}
+
+export interface ImportationTableDataType extends Importation {
+  key?: React.Key
+}
+
+const ImportationTable: React.FC<Props> = ({ productRecord }) => {
   const {
-    form,
     isEditing,
-    editingKey,
     dataSource,
     loading,
     setLoading,
+    openModal,
+    setOpenModal,
+    importationService,
     dateCreation,
-    setDateCreation,
     handleStartEditing,
     handleConfirmCancelEditing,
     handleConfirmCancelDeleting,
-    selfConvertDataSource,
+    handleAddNewItem,
+    newRecord,
+    setNewRecord,
+    amountQuantity,
+    handleStartDeleting,
     handleSaveClick,
-    handleConfirmDelete,
-    handlePageChange,
-    productService
-  } = useImportation()
+    handleConfirmDelete
+  } = useImportation(productRecord)
 
   const columns: ColumnType<ImportationTableDataType>[] = [
     {
-      title: 'Mã hàng',
-      dataIndex: 'productCode',
+      title: 'Lô nhập',
+      dataIndex: 'quantity',
       width: '10%',
       render: (_value: any, record: ImportationTableDataType) => {
         return (
           <>
-            <EditableCellNew
-              isEditing={false}
-              dataIndex='productCode'
-              title='Mã hàng'
-              inputType='text'
-              required={true}
-              initialField={{ value: record.productCode }}
-            >
-              <Typography.Text className='text-md flex-shrink-0 font-bold'>{record.productCode}</Typography.Text>
-            </EditableCellNew>
-          </>
-        )
-      }
-    },
-    {
-      title: 'Số lượng PO',
-      dataIndex: 'quantityPO',
-      width: '10%',
-      render: (_value: any, record: ImportationTableDataType) => {
-        return (
-          <>
-            <EditableCellNew
-              isEditing={false}
-              dataIndex='quantityPO'
-              title='Số lượng PO'
+            <EditableStateCell
+              isEditing={isEditing(record.key!)}
+              dataIndex='quantity'
+              title='Lô nhập'
               inputType='number'
               required={true}
-              initialField={{ value: record.quantityPO }}
+              initialValue={record.quantity}
+              value={newRecord.quantity}
+              onValueChange={(val: number) => setNewRecord({ ...newRecord, quantity: val })}
             >
-              <span>{record.quantityPO}</span>
-            </EditableCellNew>
+              <span>{record.quantity}</span>
+            </EditableStateCell>
           </>
         )
       }
     },
     {
-      title: 'Màu',
-      dataIndex: 'colorID',
+      title: 'Ngày nhập',
+      dataIndex: 'dateImported',
       width: '10%',
       render: (_value: any, record: ImportationTableDataType) => {
         return (
           <>
-            <EditableCellNew
-              isEditing={false}
-              dataIndex='colorID'
-              title='Màu'
-              inputType='select'
-              required={false}
-              initialField={{
-                value: record.productColor?.colorID
-              }}
+            <EditableStateCell
+              isEditing={isEditing(record.key!)}
+              dataIndex='dateImported'
+              title='Ngày nhập'
+              inputType='datepicker'
+              required={true}
+              initialValue={DayJS(record.dateImported)}
+              value={DayJS(newRecord.dateImported)}
+              onValueChange={(val: any) =>
+                setNewRecord({ ...newRecord, dateImported: DayJS(val).format(DatePattern.iso8601) })
+              }
             >
-              <Flex className='' justify='space-between' align='center' gap={10}>
-                <Typography.Text>{record.productColor?.color?.name}</Typography.Text>
-                <ColorPicker size='middle' format='hex' value={record.productColor?.color?.hexColor} disabled />
-              </Flex>
-            </EditableCellNew>
+              <span>{DayJS(record.dateImported).format(DatePattern.display)}</span>
+            </EditableStateCell>
           </>
         )
       }
@@ -102,101 +93,80 @@ const ImportationTable: React.FC = () => {
 
   return (
     <>
-      <Form form={form}>
-        <BaseLayout
-          onDateCreationChange={(enable) => setDateCreation(enable)}
-          onSearch={async (value) => {
-            if (value.length > 0) {
-              await productService.getListItems(
-                {
-                  ...defaultRequestBody,
-                  search: {
-                    field: 'productCode',
-                    term: value
-                  }
-                },
-                setLoading,
-                (meta) => {
-                  if (meta?.success) {
-                    selfConvertDataSource(meta?.data as Product[])
-                  }
-                }
-              )
-            }
+      <Collapse
+        className='w-full'
+        items={[
+          {
+            key: '1',
+            label: (
+              <Typography.Title className='m-0' level={5} type='secondary'>
+                Nhập khẩu
+              </Typography.Title>
+            ),
+            children: (
+              <Flex vertical gap={10}>
+                <Flex className='w-full' align='center' justify='space-between'>
+                  <Typography.Text type='secondary'>
+                    {amountQuantity + ' / ' + productRecord.quantityPO}
+                  </Typography.Text>
+                  <Button
+                    onClick={() => setOpenModal(true)}
+                    className='flex w-fit items-center'
+                    type='primary'
+                    icon={<Plus size={20} />}
+                    disabled={amountQuantity >= productRecord.quantityPO!}
+                  >
+                    New
+                  </Button>
+                </Flex>
+                <SkyTable
+                  bordered
+                  loading={loading}
+                  columns={columns}
+                  dataSource={dataSource}
+                  rowClassName='editable-row'
+                  metaData={importationService.metaData}
+                  pagination={false}
+                  isDateCreation={dateCreation}
+                  actions={{
+                    onEdit: {
+                      onClick: (_e, record) => {
+                        handleStartEditing(record!.key!)
+                      }
+                    },
+                    onDelete: {
+                      onClick: (_e, record) => {
+                        handleStartDeleting(record!.key!)
+                      }
+                    },
+                    onSave: {
+                      onClick: (_e, record) => {
+                        handleSaveClick(record!, newRecord!)
+                      }
+                    },
+                    onConfirmCancelEditing: () => handleConfirmCancelEditing(),
+                    onConfirmCancelDeleting: () => handleConfirmCancelDeleting(),
+                    onConfirmDelete: (record) => handleConfirmDelete(record),
+                    isShow: true
+                  }}
+                />
+              </Flex>
+            )
+          }
+        ]}
+      />
+      {openModal && (
+        <ModalAddNewImportation
+          productRecord={productRecord}
+          openModal={openModal}
+          setOpenModal={setOpenModal}
+          onAddNew={(record) => {
+            handleAddNewItem({ ...record, productID: productRecord.id! })
           }}
-          onSortChange={async (val) => {
-            await productService.sortedListItems(val ? 'asc' : 'desc', setLoading, (meta) => {
-              if (meta?.success) {
-                selfConvertDataSource(meta?.data as Product[])
-              }
-            })
-          }}
-          onResetClick={async () => {
-            form.setFieldValue('search', '')
-            await productService.getListItems(defaultRequestBody, setLoading, (meta) => {
-              if (meta?.success) {
-                selfConvertDataSource(meta?.data as Product[])
-              }
-            })
-          }}
-        >
-          <SkyTable
-            bordered
-            loading={loading}
-            columns={columns}
-            dataSource={dataSource}
-            rowClassName='editable-row'
-            metaData={productService.metaData}
-            onPageChange={handlePageChange}
-            editingKey={editingKey}
-            isDateCreation={dateCreation}
-            actions={{
-              onEdit: {
-                onClick: (_e, record) => {
-                  handleStartEditing(record!.key!)
-                }
-              },
-              onAdd: {
-                onClick: (_e, record) => {
-                  console.log(record)
-                  // handleStartAddNew(record!)
-                },
-                isShow: true
-              },
-              onSave: {
-                onClick: (_e, record) => handleSaveClick(record!)
-              },
-              isShow: true
-            }}
-            onConfirmCancelEditing={handleConfirmCancelEditing}
-            onConfirmCancelDeleting={handleConfirmCancelDeleting}
-            onConfirmDelete={(record) => handleConfirmDelete(record)}
-            expandable={{
-              expandedRowRender: (record) => {
-                return (
-                  <SkyTable
-                    bordered
-                    loading={loading}
-                    columns={columns}
-                    dataSource={dataSource}
-                    rowClassName='editable-row'
-                    metaData={productService.metaData}
-                    pagination={false}
-                    onPageChange={handlePageChange}
-                    editingKey={editingKey}
-                    showHeader={false}
-                    isDateCreation={dateCreation}
-                    onConfirmCancelEditing={handleConfirmCancelEditing}
-                    onConfirmCancelDeleting={handleConfirmCancelDeleting}
-                    onConfirmDelete={(record) => handleConfirmDelete(record)}
-                  />
-                )
-              },
-              columnWidth: '0.001%'
-            }}
-          />
-        </BaseLayout>
-      </Form>
+          loading={false}
+          setLoading={setLoading}
+        />
+      )}
     </>
   )
 }

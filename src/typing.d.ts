@@ -14,7 +14,7 @@ export type SortDirection = 'asc' | 'desc'
 
 export type ItemStatusType = 'draft' | 'active' | 'closed' | 'archived' | 'deleted'
 
-export type InputType = 'number' | 'text' | 'colorpicker' | 'select' | 'datepicker'
+export type InputType = 'number' | 'text' | 'colorpicker' | 'select' | 'datepicker' | 'colorselector'
 
 export type ItemWithKeyAndTitleType = {
   key?: React.Key

@@ -1,102 +1,161 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ColorPicker, Flex, Table, Typography } from 'antd'
+import { ColorPicker, Flex, Typography } from 'antd'
 import type { ColumnType } from 'antd/es/table'
 import { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
-import { ResponseDataType, defaultRequestBody } from '~/api/client'
+import { defaultRequestBody } from '~/api/client'
 import ColorAPI from '~/api/services/ColorAPI'
 import GroupAPI from '~/api/services/GroupAPI'
 import PrintAPI from '~/api/services/PrintAPI'
-import EditableCellNew from '~/components/sky-ui/SkyTable/EditableCellNew'
-import ItemAction from '~/components/sky-ui/SkyTable/ItemAction'
-import ListItemRow from '~/components/sky-ui/SkyTable/ListItemRow'
-import useAPIService from '~/hooks/useAPIService'
-import { RootState } from '~/store/store'
-import { Color, Group, Print } from '~/typing'
+import useDevice from '~/components/hooks/useDevice'
+import BaseLayout from '~/components/layout/BaseLayout'
+import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
+import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
+import ImportationTable from '~/pages/importation/components/ImportationTable'
+import { Color, Group, Print, Product } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
+import useProduct from '../hooks/useProduct'
 import { ProductTableDataType } from '../type'
+import ModalAddNewProduct from './ModalAddNewProduct'
 import ProductProgressStatus from './ProductProgressStatus'
 
-interface Props extends React.HTMLAttributes<HTMLElement> {
-  loading: boolean
-  setLoading: (enable: boolean) => void
-  metaData: ResponseDataType | undefined
-  dataSource: ProductTableDataType[]
-  dateCreation: boolean
-  editingKey: React.Key
-  isEditing: (key: React.Key) => boolean
-  onPageChange: (page: number, pageSize: number) => void
-  onConfirmDelete: (item: ProductTableDataType) => void
-  setDeleteKey: (value: React.SetStateAction<React.Key>) => void
-  onSaveClick: (item: ProductTableDataType) => void
-  onStartEditing: (key: React.Key) => void
-  onConfirmCancelEditing: () => void
-  onConfirmCancelDeleting: () => void
-}
-
-const ProductTable: React.FC<Props> = ({ ...props }) => {
-  const user = useSelector((state: RootState) => state.user)
-  console.log('Product page loading...')
-
-  const colorService = useAPIService<Color>(ColorAPI)
-  const groupService = useAPIService<Group>(GroupAPI)
-  const printService = useAPIService<Print>(PrintAPI)
+const ProductTable: React.FC = () => {
+  const {
+    isEditing,
+    dataSource,
+    loading,
+    setLoading,
+    searchText,
+    setSearchText,
+    newRecord,
+    setNewRecord,
+    dateCreation,
+    setDateCreation,
+    handleStartEditing,
+    handleStartDeleting,
+    handleConfirmCancelEditing,
+    handleConfirmCancelDeleting,
+    openModal,
+    setOpenModal,
+    selfConvertDataSource,
+    handleSaveClick,
+    handleAddNewItem,
+    handleConfirmDelete,
+    handlePageChange,
+    productService
+  } = useProduct()
+  const { width } = useDevice()
+  const [editable, setEditable] = useState<boolean>(false)
 
   const [colors, setColors] = useState<Color[]>([])
   const [groups, setGroups] = useState<Group[]>([])
   const [prints, setPrints] = useState<Print[]>([])
 
   useEffect(() => {
-    const loadData = async () => {
-      if (props.editingKey !== '') {
-        await colorService.getListItems(defaultRequestBody, props.setLoading, (meta) => {
-          if (meta?.success) {
-            setColors(meta.data as Color[])
-          }
-        })
-        await groupService.getListItems(defaultRequestBody, props.setLoading, (meta) => {
-          if (meta?.success) {
-            setGroups(meta.data as Group[])
-          }
-        })
-        await printService.getListItems(defaultRequestBody, props.setLoading, (meta) => {
-          if (meta?.success) {
-            setPrints(meta.data as Print[])
-          }
-        })
-      }
+    if (editable) {
+      ColorAPI.getItems(defaultRequestBody).then((meta) => {
+        if (meta?.success) {
+          const items = meta.data as Color[]
+          setColors(items)
+        }
+      })
+      GroupAPI.getItems(defaultRequestBody).then((meta) => {
+        if (meta?.success) {
+          const items = meta.data as Group[]
+          setGroups(items)
+        }
+      })
+      PrintAPI.getItems(defaultRequestBody).then((meta) => {
+        if (meta?.success) {
+          const items = meta.data as Print[]
+          setPrints(items)
+        }
+      })
     }
-    loadData()
-  }, [props.editingKey])
+  }, [editable])
 
-  const actionsCols: ColumnType<ProductTableDataType>[] = [
-    {
-      title: 'Operation',
-      width: '1%',
-      dataIndex: 'operation',
-      render: (_value: any, item: ProductTableDataType) => {
-        return (
-          <>
-            <ItemAction
-              isEditing={props.isEditing(item.key!)}
-              editingKey={props.editingKey}
-              onSaveClick={() => {
-                console.log(item)
-                props.onSaveClick(item)
-              }}
-              onClickStartEditing={() => props.onStartEditing(item.key!)}
-              onConfirmCancelEditing={() => props.onConfirmCancelEditing()}
-              onConfirmCancelDeleting={() => props.onConfirmCancelDeleting()}
-              onConfirmDelete={() => props.onConfirmDelete(item)}
-              onStartDeleting={() => props.setDeleteKey(item.key!)}
-            />
-          </>
-        )
-      }
+  const groupCol: ColumnType<ProductTableDataType> = {
+    title: 'Nhóm',
+    dataIndex: 'groupID',
+    width: '10%',
+    render: (_value: any, record: ProductTableDataType) => {
+      return (
+        <>
+          <EditableStateCell
+            isEditing={isEditing(record.key!)}
+            dataIndex='groupID'
+            title='Nhóm'
+            inputType='select'
+            required={false}
+            initialValue={record.productGroup?.groupID}
+            value={newRecord.groupID}
+            onValueChange={(val) => {
+              setNewRecord({ ...newRecord, groupID: val })
+            }}
+            selectItems={groups.map((i) => {
+              return { label: i.name, value: i.id, optionData: i.id }
+            })}
+          >
+            <span>{record.productGroup?.group?.name}</span>
+          </EditableStateCell>
+        </>
+      )
     }
-  ]
+  }
 
-  const commonCols: ColumnType<ProductTableDataType>[] = [
+  const printCol: ColumnType<ProductTableDataType> = {
+    title: 'Nơi in',
+    dataIndex: 'printID',
+    width: '10%',
+    render: (_value: any, record: ProductTableDataType) => {
+      return (
+        <>
+          <EditableStateCell
+            isEditing={isEditing(record.key!)}
+            dataIndex='printID'
+            title='Nơi in'
+            inputType='select'
+            required={true}
+            initialValue={record.printablePlace?.printID}
+            value={newRecord.printID}
+            onValueChange={(val: any) => setNewRecord({ ...newRecord, printID: val })}
+            selectItems={prints.map((i) => {
+              return { label: i.name, value: i.id, optionData: i.id }
+            })}
+          >
+            <span>{record.printablePlace?.print?.name}</span>
+          </EditableStateCell>
+        </>
+      )
+    }
+  }
+
+  const dateInputNPLCol: ColumnType<ProductTableDataType> = {
+    title: 'NPL',
+    dataIndex: 'dateInputNPL',
+    width: '10%',
+    render: (_value: any, record: ProductTableDataType) => {
+      return (
+        <>
+          <EditableStateCell
+            isEditing={isEditing(record.key!)}
+            dataIndex='dateInputNPL'
+            title='NPL'
+            inputType='datepicker'
+            required={true}
+            initialValue={DayJS(record.dateInputNPL)}
+            value={DayJS(newRecord.dateInputNPL)}
+            onValueChange={(val: any) =>
+              setNewRecord({ ...newRecord, dateInputNPL: DayJS(val).format(DatePattern.iso8601) })
+            }
+          >
+            <span>{DayJS(record.dateInputNPL).format(DatePattern.display)}</span>
+          </EditableStateCell>
+        </>
+      )
+    }
+  }
+
+  const columns: ColumnType<ProductTableDataType>[] = [
     {
       title: 'Mã hàng',
       dataIndex: 'productCode',
@@ -104,16 +163,18 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
       render: (_value: any, record: ProductTableDataType) => {
         return (
           <>
-            <EditableCellNew
-              isEditing={props.isEditing(record.key!)}
+            <EditableStateCell
+              isEditing={isEditing(record.key!)}
               dataIndex='productCode'
               title='Mã hàng'
               inputType='text'
               required={true}
-              initialField={{ value: record.productCode }}
+              initialValue={record.productCode}
+              value={newRecord.productCode}
+              onValueChange={(val) => setNewRecord({ ...newRecord, productCode: val })}
             >
               <Typography.Text className='text-md flex-shrink-0 font-bold'>{record.productCode}</Typography.Text>
-            </EditableCellNew>
+            </EditableStateCell>
           </>
         )
       }
@@ -125,16 +186,18 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
       render: (_value: any, record: ProductTableDataType) => {
         return (
           <>
-            <EditableCellNew
-              isEditing={props.isEditing(record.key!)}
+            <EditableStateCell
+              isEditing={isEditing(record.key!)}
               dataIndex='quantityPO'
               title='Số lượng PO'
               inputType='number'
               required={true}
-              initialField={{ value: record.quantityPO }}
+              initialValue={record.quantityPO}
+              value={newRecord.quantityPO}
+              onValueChange={(val) => setNewRecord({ ...newRecord, quantityPO: val })}
             >
               <span>{record.quantityPO}</span>
-            </EditableCellNew>
+            </EditableStateCell>
           </>
         )
       }
@@ -146,113 +209,42 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
       render: (_value: any, record: ProductTableDataType) => {
         return (
           <>
-            <EditableCellNew
-              isEditing={props.isEditing(record.key!)}
+            <EditableStateCell
+              isEditing={isEditing(record.key!)}
               dataIndex='colorID'
               title='Màu'
-              inputType='select'
-              required={true}
-              initialField={{
-                value: record.productColor?.colorID,
-                selectItems: colors.map((i) => {
-                  return { label: i.name, value: i.id, optionData: i.hexColor }
-                })
-              }}
+              inputType='colorselector'
+              required={false}
+              initialValue={record.productColor?.colorID}
+              value={newRecord.colorID}
+              onValueChange={(val) => setNewRecord({ ...newRecord, colorID: val })}
+              selectItems={colors.map((i) => {
+                return { label: i.name, value: i.id, optionData: i.hexColor }
+              })}
             >
               <Flex className='' justify='space-between' align='center' gap={10}>
                 <Typography.Text>{record.productColor?.color?.name}</Typography.Text>
-                <ColorPicker size='middle' format='hex' value={record.productColor?.color?.hexColor} disabled />
+                {record.productColor && (
+                  <ColorPicker size='middle' format='hex' value={record.productColor?.color?.hexColor} disabled />
+                )}
               </Flex>
-            </EditableCellNew>
+            </EditableStateCell>
           </>
         )
       }
     },
-    {
-      title: 'Nhóm',
-      dataIndex: 'groupID',
-      width: '10%',
-      responsive: ['xl'],
-      render: (_value: any, record: ProductTableDataType) => {
-        return (
-          <>
-            <EditableCellNew
-              isEditing={props.isEditing(record.key!)}
-              dataIndex='groupID'
-              title='Nhóm'
-              inputType='select'
-              required={true}
-              initialField={{
-                value: record.productGroup?.groupID,
-                selectItems: groups.map((i) => {
-                  return { label: i.name, value: i.id, optionData: i.id }
-                })
-              }}
-            >
-              <span>{record.productGroup?.group?.name}</span>
-            </EditableCellNew>
-          </>
-        )
-      }
-    },
-    {
-      title: 'Nơi in',
-      dataIndex: 'printID',
-      width: '10%',
-      responsive: ['xxl'],
-      render: (_value: any, record: ProductTableDataType) => {
-        return (
-          <>
-            <EditableCellNew
-              isEditing={props.isEditing(record.key!)}
-              dataIndex='printID'
-              title='Nơi in'
-              inputType='select'
-              required={true}
-              initialField={{
-                value: record.printablePlace?.printID,
-                selectItems: prints.map((i) => {
-                  return { label: i.name, value: i.id, optionData: i.id }
-                })
-              }}
-            >
-              <span>{record.printablePlace?.print?.name}</span>
-            </EditableCellNew>
-          </>
-        )
-      }
-    },
-    {
-      title: 'Tiến trình',
-      dataIndex: 'progress',
-      responsive: ['xxl'],
-      width: 'auto',
-      render: (_value: any, record: ProductTableDataType) => {
-        return <ProductProgressStatus collapse={false} record={record} />
-      }
-    },
-    {
-      title: 'NPL',
-      dataIndex: 'dateInputNPL',
-      width: '10%',
-      responsive: ['lg'],
-      render: (_value: any, record: ProductTableDataType) => {
-        return (
-          <>
-            <EditableCellNew
-              isEditing={props.isEditing(record.key!)}
-              dataIndex='dateInputNPL'
-              title='NPL'
-              inputType='datepicker'
-              required={true}
-              initialField={{ value: DayJS(record.dateInputNPL) }}
-            >
-              <span>{DayJS(record.dateInputNPL).format(DatePattern.display)}</span>
-            </EditableCellNew>
-          </>
-        )
-      }
-    },
+    { ...groupCol, responsive: ['xxl'] },
+    { ...printCol, responsive: ['xxl'] },
+    // {
+    //   title: 'Tiến trình',
+    //   dataIndex: 'progress',
+    //   responsive: ['xxl'],
+    //   width: 'auto',
+    //   render: (_value: any, record: ProductTableDataType) => {
+    //     return <ProductProgressStatus collapse={false} record={record} />
+    //   }
+    // },
+    { ...dateInputNPLCol, responsive: ['xl'] },
     {
       title: 'FCR',
       dataIndex: 'dateOutputFCR',
@@ -260,102 +252,138 @@ const ProductTable: React.FC<Props> = ({ ...props }) => {
       render: (_value: any, record: ProductTableDataType) => {
         return (
           <>
-            <EditableCellNew
-              isEditing={props.isEditing(record.key!)}
+            <EditableStateCell
+              isEditing={isEditing(record.key!)}
               dataIndex='dateOutputFCR'
               title='FCR'
               inputType='datepicker'
               required={true}
-              initialField={{ value: DayJS(record.dateOutputFCR) }}
+              initialValue={DayJS(record.dateOutputFCR)}
+              value={DayJS(newRecord.dateOutputFCR)}
+              onValueChange={(val: any) =>
+                setNewRecord({ ...newRecord, dateOutputFCR: DayJS(val).format(DatePattern.iso8601) })
+              }
             >
               <span>{DayJS(record.dateOutputFCR).format(DatePattern.display)}</span>
-            </EditableCellNew>
+            </EditableStateCell>
           </>
         )
       }
     }
   ]
 
-  const dateCreationColumns: ColumnType<ProductTableDataType>[] = [
-    {
-      title: 'Created date',
-      dataIndex: 'createdAt',
-      width: '5%',
-      render: (_value: any, record: ProductTableDataType) => {
-        return <span>{DayJS(record.createdAt).format(DatePattern.display)}</span>
-      }
-    },
-    {
-      title: 'Updated date',
-      dataIndex: 'updatedAt',
-      width: '5%',
-      responsive: ['md'],
-      render: (_value: any, record: ProductTableDataType) => {
-        return <span>{DayJS(record.updatedAt).format(DatePattern.display)}</span>
-      }
-    }
-  ]
-
-  const adminColumns: ColumnType<ProductTableDataType>[] = props.dateCreation
-    ? [...commonCols, ...dateCreationColumns, ...actionsCols]
-    : [...commonCols, ...actionsCols]
-
-  const staffColumns: ColumnType<ProductTableDataType>[] = [...commonCols]
+  const expandableColumns: ColumnType<ProductTableDataType>[] =
+    width < 1600 ? (width < 1200 ? [groupCol, printCol, dateInputNPLCol] : [groupCol, printCol]) : []
 
   return (
     <>
-      <Table
-        loading={props.loading}
-        bordered
-        columns={user.isAdmin ? adminColumns : staffColumns}
-        dataSource={props.dataSource}
-        rowClassName='editable-row'
-        pagination={{
-          onChange: props.onPageChange,
-          current: props.metaData?.page,
-          pageSize: 5,
-          total: props.metaData?.total
-        }}
-        expandable={{
-          expandedRowRender: (record: ProductTableDataType) => {
-            return (
-              <Flex className='w-1/2' vertical gap={20}>
-                <ListItemRow
-                  label='Nhóm'
-                  isEditing={props.isEditing(record.key!)}
-                  dataIndex='groupID'
-                  inputType='select'
-                  initialField={{
-                    value: record.productGroup?.groupID,
-                    selectItems: groups.map((i) => {
-                      return { label: i.name, value: i.id, optionData: i.id }
-                    })
-                  }}
-                  className='xl:hidden'
-                  value={record.productGroup?.group?.name}
-                />
-                <ListItemRow
-                  label='Nơi in'
-                  isEditing={props.isEditing(record.key!)}
-                  dataIndex='printID'
-                  inputType='select'
-                  initialField={{
-                    value: record.printablePlace?.printID,
-                    selectItems: prints.map((i) => {
-                      return { label: i.name, value: i.id, optionData: i.id }
-                    })
-                  }}
-                  className='2xl:hidden'
-                  value={record.printablePlace?.print?.name}
-                />
-                <ProductProgressStatus collapse className='w-full 2xl:hidden' record={record} />
-              </Flex>
+      <BaseLayout
+        onDateCreationChange={(enable) => setDateCreation(enable)}
+        searchValue={searchText}
+        onSearchChange={(e) => setSearchText(e.target.value)}
+        onSearch={async (value) => {
+          if (value.length > 0) {
+            await productService.getListItems(
+              {
+                ...defaultRequestBody,
+                search: {
+                  field: 'productCode',
+                  term: value
+                }
+              },
+              setLoading,
+              (meta) => {
+                if (meta?.success) {
+                  selfConvertDataSource(meta?.data as Product[])
+                }
+              }
             )
-          },
-          columnWidth: '1%',
-          showExpandColumn: innerWidth < 1536
+          }
         }}
-      />
+        onSortChange={async (val) => {
+          await productService.sortedListItems(
+            val ? 'asc' : 'desc',
+            setLoading,
+            (meta) => {
+              if (meta?.success) {
+                selfConvertDataSource(meta?.data as Product[])
+              }
+            },
+            { field: 'productCode', term: searchText }
+          )
+        }}
+        onResetClick={async () => {
+          setSearchText('')
+          await productService.getListItems(defaultRequestBody, setLoading, (meta) => {
+            if (meta?.success) {
+              selfConvertDataSource(meta?.data as Product[])
+            }
+          })
+        }}
+        onAddNewClick={() => setOpenModal(true)}
+      >
+        <SkyTable
+          bordered
+          loading={loading}
+          columns={columns}
+          dataSource={dataSource}
+          rowClassName='editable-row'
+          metaData={productService.metaData}
+          onPageChange={handlePageChange}
+          isDateCreation={dateCreation}
+          actions={{
+            onEdit: {
+              onClick: (_e, record) => {
+                setNewRecord(record)
+                setEditable((prev) => !prev)
+                handleStartEditing(record!.key!)
+              }
+            },
+            onSave: {
+              onClick: (_e, record) => handleSaveClick(record!, newRecord)
+            },
+            onDelete: {
+              onClick: (_e, record) => handleStartDeleting(record!.key!)
+            },
+            onConfirmCancelEditing: () => handleConfirmCancelEditing(),
+            onConfirmCancelDeleting: () => handleConfirmCancelDeleting(),
+            onConfirmDelete: (record) => handleConfirmDelete(record),
+            isShow: true
+          }}
+          expandable={{
+            expandedRowRender: (record: ProductTableDataType) => {
+              return (
+                <Flex vertical gap={10}>
+                  {width < 1600 && (
+                    <SkyTable
+                      bordered
+                      loading={loading}
+                      columns={expandableColumns}
+                      dataSource={dataSource.filter((item) => item.id === record.id)}
+                      rowClassName='editable-row'
+                      metaData={productService.metaData}
+                      pagination={false}
+                      isDateCreation={dateCreation}
+                    />
+                  )}
+                  <ProductProgressStatus collapse record={record} />
+                  <ImportationTable productRecord={record} />
+                </Flex>
+              )
+            },
+            columnWidth: '0.001%'
+          }}
+        />
+      </BaseLayout>
+      {openModal && (
+        <ModalAddNewProduct
+          setLoading={setLoading}
+          loading={loading}
+          openModal={openModal}
+          setOpenModal={setOpenModal}
+          onAddNew={handleAddNewItem}
+        />
+      )}
     </>
   )
 }

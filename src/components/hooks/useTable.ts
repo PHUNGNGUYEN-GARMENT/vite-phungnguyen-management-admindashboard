@@ -1,4 +1,3 @@
-import { Form } from 'antd'
 import { useState } from 'react'
 import { ResponseDataType } from '~/api/client'
 
@@ -13,7 +12,7 @@ export interface TableCellProps {
 }
 
 export default function useTable<T extends { key?: React.Key }>(initValue: TableItemWithKey<T>[]) {
-  const [form] = Form.useForm()
+  // const [form] = Form.useForm()
   const [dataSource, setDataSource] = useState<TableItemWithKey<T>[]>(initValue)
   const [loading, setLoading] = useState<boolean>(false)
   const [editingKey, setEditingKey] = useState<React.Key>('')
@@ -103,7 +102,7 @@ export default function useTable<T extends { key?: React.Key }>(initValue: Table
   }
 
   return {
-    form,
+    // form,
     isDelete,
     isEditing,
     deleteKey,

@@ -1,50 +1,31 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-refresh/only-export-components */
-import { Collapse, Divider, Space, Typography } from 'antd'
+import { Collapse, ColorPicker, Divider, Flex, Space, Typography } from 'antd'
 import React, { memo, useEffect, useState } from 'react'
 import { defaultRequestBody } from '~/api/client'
 import ColorAPI from '~/api/services/ColorAPI'
 import GroupAPI from '~/api/services/GroupAPI'
 import PrintAPI from '~/api/services/PrintAPI'
-import { TableItemWithKey } from '~/components/hooks/useTable'
-import ListItem from '~/components/sky-ui/SkyTable/ListItem'
+import SkyListItem, { SkyListItemProps } from '~/components/sky-ui/SkyList/SkyListItem'
 import ListItemRow from '~/components/sky-ui/SkyTable/ListItemRow'
+import ImportationTable from '~/pages/importation/components/ImportationTable'
 import { Color, Group, Print } from '~/typing'
-import DayJS from '~/utils/date-formatter'
+import DayJS, { DatePattern } from '~/utils/date-formatter'
 import { ProductTableDataType } from '../type'
 import ProductProgressStatus from './ProductProgressStatus'
 
-interface Props extends React.HTMLAttributes<HTMLElement> {
-  data: TableItemWithKey<ProductTableDataType>
-  isEditing: boolean
-  editingKey: React.Key
-  dateCreation: boolean
-  onSaveClick?: React.MouseEventHandler<HTMLElement> | undefined
-  onClickStartEditing?: React.MouseEventHandler<HTMLElement> | undefined
-  onConfirmCancelEditing?: (e?: React.MouseEvent<HTMLElement>) => void
-  onConfirmCancelDeleting?: (e?: React.MouseEvent<HTMLElement>) => void
-  onConfirmDelete?: (e?: React.MouseEvent<HTMLElement>) => void
-  onStartDeleting?: (key: React.Key) => void
+interface Props extends SkyListItemProps<ProductTableDataType> {
+  newRecord: any
+  setNewRecord: (newRecord: any) => void
 }
 
-const ProductListItem: React.FC<Props> = ({
-  data,
-  isEditing,
-  editingKey,
-  dateCreation,
-  onSaveClick,
-  onClickStartEditing,
-  onConfirmCancelEditing,
-  onConfirmCancelDeleting,
-  onConfirmDelete,
-  onStartDeleting,
-  ...props
-}) => {
+const ProductListItem: React.FC<Props> = ({ record, newRecord, setNewRecord, ...props }) => {
   const [colors, setColors] = useState<Color[]>([])
   const [groups, setGroups] = useState<Group[]>([])
   const [prints, setPrints] = useState<Print[]>([])
 
   useEffect(() => {
-    if (isEditing) {
+    if (props.isEditing) {
       ColorAPI.getItems(defaultRequestBody).then((meta) => {
         if (meta?.success) {
           const items = meta.data as Color[]
@@ -64,25 +45,17 @@ const ProductListItem: React.FC<Props> = ({
         }
       })
     }
-  }, [isEditing])
+  }, [props.isEditing])
 
   return (
-    <ListItem
-      itemId={data.key ?? data.id!}
-      isEditing={isEditing}
-      createdAt={data.createdAt}
-      updatedAt={data.updatedAt}
-      editingKey={editingKey}
-      dateCreation={dateCreation}
-      onSaveClick={onSaveClick}
-      onClickStartEditing={onClickStartEditing}
-      onConfirmCancelEditing={onConfirmCancelEditing}
-      onConfirmCancelDeleting={onConfirmCancelDeleting}
-      onConfirmDelete={onConfirmDelete}
-      onStartDeleting={onStartDeleting}
-      label={data.productCode}
-      name='productCode'
-      {...props}
+    <SkyListItem
+      label={record.productCode}
+      labelName='productCode'
+      record={record}
+      key={record.key}
+      isEditing={props.isEditing}
+      isDateCreation={props.isDateCreation}
+      actions={props.actions}
     >
       <Collapse
         className=''
@@ -98,90 +71,123 @@ const ProductListItem: React.FC<Props> = ({
               <Space direction='vertical' className='w-full gap-4'>
                 <Space className='flex gap-0' split={<Divider className='my-3' />} direction='vertical'>
                   <ListItemRow
+                    {...props}
                     label='Màu'
-                    isEditing={isEditing}
+                    isEditing={props.isEditing}
                     dataIndex='colorID'
                     inputType='select'
-                    initialField={{
-                      value: data.productColor?.colorID,
-                      selectItems: colors.map((i) => {
-                        return { label: i.name, value: i.id, optionData: i.hexColor }
-                      })
-                    }}
-                    value={data.productColor?.color?.name}
-                  />
+                    selectItems={colors.map((i) => {
+                      return { label: i.name, value: i.id, optionData: i.hexColor }
+                    })}
+                    initialValue={record.productColor?.colorID}
+                    value={newRecord.colorID}
+                    onValueChange={(val) => setNewRecord({ ...newRecord, colorID: val })}
+                  >
+                    <Flex className='w-full' justify='space-between' align='center' gap={10}>
+                      <Typography.Text type='secondary'>{record.productColor?.color?.name}</Typography.Text>
+                      {record.productColor && (
+                        <ColorPicker size='middle' format='hex' value={record.productColor?.color?.hexColor} disabled />
+                      )}
+                    </Flex>
+                  </ListItemRow>
                   <ListItemRow
+                    {...props}
                     label='Số lượng PO'
-                    isEditing={isEditing}
+                    isEditing={props.isEditing}
                     dataIndex='quantityPO'
                     inputType='number'
-                    initialField={{
-                      value: data.quantityPO
-                    }}
-                    value={data.quantityPO}
-                  />
+                    initialValue={record.quantityPO}
+                    value={newRecord.quantityPO}
+                    onValueChange={(val) => setNewRecord({ ...newRecord, quantityPO: val })}
+                  >
+                    <Typography.Text type='secondary' className='w-full font-medium'>
+                      {record.quantityPO}
+                    </Typography.Text>
+                  </ListItemRow>
                   <ListItemRow
+                    {...props}
                     label='Ngày nhập NPL'
-                    isEditing={isEditing}
+                    isEditing={props.isEditing}
                     dataIndex='dateInputNPL'
                     inputType='datepicker'
-                    initialField={{
-                      value: DayJS(data.dateInputNPL)
-                    }}
-                    value={DayJS(data.dateInputNPL).format('DD/MM/YYYY')}
-                  />
+                    initialValue={DayJS(record.dateInputNPL)}
+                    value={DayJS(newRecord.dateInputNPL)}
+                    onValueChange={(val) =>
+                      setNewRecord({ ...newRecord, dateInputNPL: DayJS(val).format(DatePattern.iso8601) })
+                    }
+                  >
+                    <Typography.Text type='secondary' className='w-full font-medium'>
+                      {DayJS(record.dateInputNPL).format(DatePattern.display)}
+                    </Typography.Text>
+                  </ListItemRow>
                   <ListItemRow
+                    {...props}
                     label='Ngày xuất FCR'
-                    isEditing={isEditing}
+                    isEditing={props.isEditing}
                     dataIndex='dateOutputFCR'
                     inputType='datepicker'
-                    initialField={{
-                      value: DayJS(data.dateOutputFCR)
-                    }}
-                    value={DayJS(data.dateOutputFCR).format('DD/MM/YYYY')}
-                  />
+                    initialValue={DayJS(record.dateOutputFCR)}
+                    value={DayJS(newRecord.dateOutputFCR)}
+                    onValueChange={(val) =>
+                      setNewRecord({ ...newRecord, dateOutputFCR: DayJS(val).format(DatePattern.iso8601) })
+                    }
+                  >
+                    <Typography.Text type='secondary' className='w-full font-medium'>
+                      {DayJS(record.dateOutputFCR).format(DatePattern.display)}
+                    </Typography.Text>
+                  </ListItemRow>
                   <ListItemRow
+                    {...props}
                     label='Nhóm'
-                    isEditing={isEditing}
+                    isEditing={props.isEditing}
                     dataIndex='groupID'
                     inputType='select'
-                    initialField={{
-                      value: data.productGroup?.groupID,
-                      selectItems: groups.map((item) => {
-                        return {
-                          label: item.name,
-                          value: item.id,
-                          optionData: item.id
-                        }
-                      })
-                    }}
-                    value={data.productGroup?.group?.name}
-                  />
+                    initialValue={record.productGroup?.groupID}
+                    selectItems={groups.map((item) => {
+                      return {
+                        label: item.name,
+                        value: item.id,
+                        optionData: item.id
+                      }
+                    })}
+                    value={newRecord.groupID}
+                    onValueChange={(val) => setNewRecord({ ...newRecord, groupID: val })}
+                  >
+                    <Typography.Text type='secondary' className='w-full font-medium'>
+                      {record.productGroup?.group?.name}
+                    </Typography.Text>
+                  </ListItemRow>
                   <ListItemRow
+                    {...props}
                     label='Nơi in'
-                    isEditing={isEditing}
+                    isEditing={props.isEditing}
                     dataIndex='printID'
                     inputType='select'
-                    initialField={{
-                      value: data.printablePlace?.printID,
-                      selectItems: prints.map((item) => {
-                        return {
-                          label: item.name,
-                          value: item.id,
-                          optionData: item.id
-                        }
-                      })
-                    }}
-                    value={data.printablePlace?.print?.name}
-                  />
+                    required={false}
+                    initialValue={record.printablePlace?.printID}
+                    selectItems={prints.map((item) => {
+                      return {
+                        label: item.name,
+                        value: item.id,
+                        optionData: item.id
+                      }
+                    })}
+                    value={newRecord.printID}
+                    onValueChange={(val) => setNewRecord({ ...newRecord, printID: val })}
+                  >
+                    <Typography.Text type='secondary' className='w-full font-medium'>
+                      {record.printablePlace?.print?.name}
+                    </Typography.Text>
+                  </ListItemRow>
                 </Space>
-                <ProductProgressStatus collapse record={data} />
+                <ProductProgressStatus collapse record={record} />
+                <ImportationTable productRecord={record} />
               </Space>
             )
           }
         ]}
       />
-    </ListItem>
+    </SkyListItem>
   )
 }
 

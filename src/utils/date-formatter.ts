@@ -15,10 +15,7 @@ export const DatePattern = {
 
 export type DateType = 'display' | 'iso8601'
 
-export const dateFormatter = (
-  timeStamp: Date | string,
-  formatType?: DateType
-): string => {
+export const dateFormatter = (timeStamp: Date | string, formatType?: DateType): string => {
   const dayjsLocal = DayJS(timeStamp)
   if (formatType) {
     switch (formatType) {

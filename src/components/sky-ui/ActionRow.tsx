@@ -24,8 +24,7 @@ export interface ActionProps<T extends { key?: React.Key }> extends BaseButtonPr
 }
 
 export interface ActionRowProps<T extends { key?: React.Key }> extends HTMLAttributes<HTMLElement> {
-  isEditing: boolean
-  editingKey: React.Key
+  isEditing?: boolean
   onAdd?: ActionButtonProps<T>
   onSave: ActionButtonProps<T>
   onEdit: ActionButtonProps<T>

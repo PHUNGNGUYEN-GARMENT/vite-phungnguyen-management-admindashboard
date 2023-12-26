@@ -2,16 +2,16 @@
 /* eslint-disable react-refresh/only-export-components */
 import { Flex, Typography } from 'antd'
 import React, { memo } from 'react'
+import DayJS, { DatePattern } from '~/utils/date-formatter'
 import { cn } from '~/utils/helpers'
-import EditableCellNew, { EditableCellNewProps } from './EditableCellNew'
+import EditableStateCell, { EditableStateCellProps } from './EditableStateCell'
 
-interface Props extends EditableCellNewProps {
+interface Props extends EditableStateCellProps {
   label: string | React.ReactNode
-  value?: any
   children?: React.ReactNode
 }
 
-const ListItemRow = ({ value, children, ...props }: Props) => {
+const ListItemRow = ({ ...props }: Props) => {
   return (
     <Flex className={cn('w-full', props.className)} align='center' justify='start' gap={5}>
       {typeof props.label !== 'string' ? (
@@ -19,22 +19,15 @@ const ListItemRow = ({ value, children, ...props }: Props) => {
       ) : (
         <Typography.Text className='w-full font-semibold'>{props.label}</Typography.Text>
       )}
-      <EditableCellNew
-        isEditing={props.isEditing}
-        dataIndex={props.dataIndex}
-        title={props.title ? (typeof props.label === 'string' ? props.label : '') : ''}
-        inputType={props.inputType}
-        initialField={props.initialField}
-        required={props.required}
-      >
-        {children ? (
-          children
+      <EditableStateCell {...props} title={props.title ? (typeof props.label === 'string' ? props.label : '') : ''}>
+        {props.children ? (
+          props.children
         ) : (
           <Typography.Text type='secondary' className='w-full font-medium'>
-            {value}
+            {props.inputType !== 'datepicker' ? props.value : DayJS(props.value).format(DatePattern.display)}
           </Typography.Text>
         )}
-      </EditableCellNew>
+      </EditableStateCell>
     </Flex>
   )
 }

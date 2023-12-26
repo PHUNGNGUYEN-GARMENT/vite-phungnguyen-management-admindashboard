@@ -10,7 +10,7 @@ import { cn } from '~/utils/helpers'
 
 export type EditableCellRequiredType = { key?: React.Key; name?: string; id?: number }
 
-export interface EditableCellNewProps extends HTMLAttributes<HTMLElement> {
+export interface EditableFormCellNewProps extends HTMLAttributes<HTMLElement> {
   isEditing: boolean
   dataIndex: string
   inputType?: InputType
@@ -25,7 +25,7 @@ export interface EditableCellNewProps extends HTMLAttributes<HTMLElement> {
 
 export type EditableTableProps = Parameters<typeof Table>[0]
 
-function EditableCellNew({
+function EditableFormCellNew({
   isEditing,
   dataIndex,
   title,
@@ -33,7 +33,7 @@ function EditableCellNew({
   initialField,
   inputType,
   ...restProps
-}: EditableCellNewProps) {
+}: EditableFormCellNewProps) {
   const inputNode = ((): React.ReactNode => {
     switch (inputType) {
       case 'colorpicker':
@@ -104,4 +104,4 @@ function EditableCellNew({
   )
 }
 
-export default memo(EditableCellNew)
+export default memo(EditableFormCellNew)

@@ -129,7 +129,11 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
   const sortedListItems = async (
     direction: SortDirection,
     setLoading?: (enable: boolean) => void,
-    onDataSuccess?: (data: ResponseDataType | undefined, message?: string) => void
+    onDataSuccess?: (data: ResponseDataType | undefined, message?: string) => void,
+    search?: {
+      field: string
+      term: string
+    }
   ) => {
     try {
       const body: RequestBodyType = {
@@ -141,7 +145,8 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
         sorting: {
           column: 'id',
           direction: direction
-        }
+        },
+        search: search
       }
       await getListItems(body, setLoading, onDataSuccess)
     } catch (err) {
@@ -278,7 +283,6 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
     try {
       setLoading?.(true)
       const meta = await apiService.createOrUpdateItemBy?.(query, item)
-      console.info(meta)
       onDataSuccess?.(meta, meta?.message)
       setMetaData(meta)
     } catch (err) {
