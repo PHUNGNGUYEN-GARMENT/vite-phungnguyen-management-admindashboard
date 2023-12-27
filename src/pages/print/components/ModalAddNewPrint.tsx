@@ -1,12 +1,13 @@
 /* eslint-disable react-refresh/only-export-components */
 import { Flex, Form, Input, Modal, Typography } from 'antd'
 import React, { memo } from 'react'
-import { Print } from '~/typing'
+import AddNewTitle from '~/components/sky-ui/AddNewTitle'
+import { Color } from '~/typing'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
   openModal: boolean
   setOpenModal: (enable: boolean) => void
-  onAddNew: (itemToAddNew: Print) => void
+  onAddNew: (itemToAddNew: Color) => void
 }
 
 const ModalAddNewPrint: React.FC<Props> = ({ openModal, setOpenModal, onAddNew, ...props }) => {
@@ -17,7 +18,6 @@ const ModalAddNewPrint: React.FC<Props> = ({ openModal, setOpenModal, onAddNew, 
     onAddNew({
       name: row.name
     })
-    setOpenModal(false)
   }
 
   function handleCancel() {
@@ -26,18 +26,17 @@ const ModalAddNewPrint: React.FC<Props> = ({ openModal, setOpenModal, onAddNew, 
 
   return (
     <Modal
-      {...props}
-      title='Thêm mới nơi in'
+      title={<AddNewTitle title='Add new' />}
       open={openModal}
       onOk={handleOk}
       onCancel={handleCancel}
       centered
       width='auto'
     >
-      <Form form={form}>
-        <Flex vertical gap={10} className='w-full'>
-          <Flex align='center' gap={5} className='w-auto'>
-            <Typography.Text className='w-12 flex-shrink-0'>Nơi in:</Typography.Text>
+      <Form form={form} {...props}>
+        <Flex vertical gap={10}>
+          <Flex align='center' gap={5}>
+            <Typography.Text className='w-24 flex-shrink-0'>Name:</Typography.Text>
             <Form.Item
               rules={[
                 {
@@ -48,7 +47,7 @@ const ModalAddNewPrint: React.FC<Props> = ({ openModal, setOpenModal, onAddNew, 
               name='name'
               className='m-0'
             >
-              <Input className='w-52' allowClear placeholder='Tên' />
+              <Input className='w-52' allowClear placeholder='G13+, G1-4,...' />
             </Form.Item>
           </Flex>
         </Flex>
