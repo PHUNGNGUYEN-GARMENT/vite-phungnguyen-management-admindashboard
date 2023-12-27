@@ -1,7 +1,18 @@
 import { Flex } from 'antd'
 import useDevice from '~/components/hooks/useDevice'
+import { ItemStatusType } from '~/typing'
 import GroupList from './components/GroupList'
 import GroupTable from './components/GroupTable'
+
+export type GroupTableDataType = {
+  key?: React.Key
+  id?: number
+  name?: string
+  status?: ItemStatusType
+  createdAt?: string
+  updatedAt?: string
+  orderNumber?: number
+}
 
 const GroupPage = () => {
   const { width } = useDevice()

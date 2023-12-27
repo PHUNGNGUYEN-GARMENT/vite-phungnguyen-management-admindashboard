@@ -2,12 +2,12 @@
 import { Flex, Form, Input, Modal, Typography } from 'antd'
 import React, { memo } from 'react'
 import AddNewTitle from '~/components/sky-ui/AddNewTitle'
-import { Group } from '~/typing'
+import { Color } from '~/typing'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
   openModal: boolean
   setOpenModal: (enable: boolean) => void
-  onAddNew: (itemToAddNew: Group) => void
+  onAddNew: (itemToAddNew: Color) => void
 }
 
 const ModalAddNewGroup: React.FC<Props> = ({ openModal, setOpenModal, onAddNew, ...props }) => {
@@ -47,7 +47,7 @@ const ModalAddNewGroup: React.FC<Props> = ({ openModal, setOpenModal, onAddNew, 
               name='name'
               className='m-0'
             >
-              <Input allowClear placeholder='Orange' />
+              <Input className='w-52' allowClear placeholder='G13+, G1-4,...' />
             </Form.Item>
           </Flex>
         </Flex>

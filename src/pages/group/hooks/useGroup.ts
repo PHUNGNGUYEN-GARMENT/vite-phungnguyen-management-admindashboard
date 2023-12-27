@@ -1,184 +1,213 @@
-import { useState } from 'react'
-import {
-  RequestBodyType,
-  ResponseDataType,
-  defaultRequestBody
-} from '~/api/client'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { App as AntApp } from 'antd'
+import { useEffect, useState } from 'react'
+import { RequestBodyType, ResponseDataType, defaultRequestBody } from '~/api/client'
 import GroupAPI from '~/api/services/GroupAPI'
-import { Group, SortDirection } from '~/typing'
+import { TableItemWithKey, UseTableProps } from '~/components/hooks/useTable'
+import useAPIService from '~/hooks/useAPIService'
+import { Group } from '~/typing'
+import { GroupTableDataType } from '../GroupPage'
 
-export default function useGroup() {
-  const [metaData, setMetaData] = useState<ResponseDataType>()
+export default function useGroup(table: UseTableProps<GroupTableDataType>) {
+  const { setLoading, setDataSource, handleConfirmCancelEditing, handleConfirmDeleting } = table
+
+  // Services
+  const groupService = useAPIService<Group>(GroupAPI)
+
+  // UI
+  const { message } = AntApp.useApp()
+
+  // State changes
   const [openModal, setOpenModal] = useState<boolean>(false)
-  const [loading, setLoading] = useState<boolean>(false)
-  const [page, setPage] = useState<number>(1)
-  const [dateCreation, setDateCreation] = useState<boolean>(true)
+  const [searchText, setSearchText] = useState<string>('')
+  const [newRecord, setNewRecord] = useState<any>({})
 
-  const handleAddNewItem = async (
-    itemNew: Group,
-    onDataSuccess?: (
-      data: ResponseDataType | undefined,
-      status: boolean
-    ) => void
-  ) => {
-    setLoading(true)
-    await GroupAPI.createNewItem(itemNew)
-      .then((meta) => {
-        if (meta?.success) {
-          onDataSuccess?.(meta, true)
-        } else {
-          onDataSuccess?.(undefined, false)
-        }
-      })
-      .catch((err) => {
-        console.log(err)
-        onDataSuccess?.(undefined, false)
-      })
-      .finally(() => {
-        setLoading(false)
-        setOpenModal(false)
-      })
+  // List
+  const [groups, setGroups] = useState<Group[]>([])
+
+  // New
+  const [groupNew, setGroupNew] = useState<Group | undefined>(undefined)
+
+  const loadData = async () => {
+    await groupService.getListItems(defaultRequestBody, setLoading, (meta) => {
+      if (meta?.success) {
+        setGroups(meta.data as Group[])
+      }
+    })
   }
 
-  const getDataList = async (
-    params: RequestBodyType,
-    onDataSuccess?: (
-      data: ResponseDataType | undefined,
-      status: boolean
-    ) => void
-  ) => {
-    setLoading(true)
-    const body: RequestBodyType = {
-      ...defaultRequestBody,
-      ...params
+  useEffect(() => {
+    loadData()
+  }, [groupNew])
+
+  useEffect(() => {
+    selfConvertDataSource(groups)
+  }, [groups])
+
+  const selfConvertDataSource = (_groups: Group[]) => {
+    const items = _groups ? _groups : groups
+    setDataSource(
+      items.map((item) => {
+        return {
+          ...item,
+          key: item.id
+        } as GroupTableDataType
+      })
+    )
+  }
+
+  const handleSaveClick = async (record: TableItemWithKey<GroupTableDataType>, newRecord: any) => {
+    // const row = (await form.validateFields()) as any
+    console.log({ old: record, new: newRecord })
+    if (newRecord) {
+      try {
+        if (newRecord.name && newRecord.name !== record.name) {
+          console.log('Group progressing...')
+          await groupService.updateItemByPk(record.id!, { name: newRecord.name }, setLoading, (meta) => {
+            if (!meta?.success) {
+              throw new Error('API update group failed')
+            }
+          })
+        }
+        message.success('Success!')
+      } catch (error) {
+        console.error(error)
+        message.error('Failed')
+      } finally {
+        setLoading(false)
+        handleConfirmCancelEditing()
+        loadData()
+      }
     }
-    await GroupAPI.getItems(body)
-      .then((meta) => {
-        if (meta?.success) {
-          console.log(meta)
-          setMetaData(meta)
-          onDataSuccess?.(meta, true)
-        }
-      })
-      .catch((err) => {
-        console.log(err)
-        onDataSuccess?.(undefined, false)
-      })
-      .finally(() => {
-        setLoading(false)
-      })
   }
 
-  const handleSorted = async (
-    direction: SortDirection,
-    onDataSuccess?: (
-      data: ResponseDataType | undefined,
-      status: boolean
-    ) => void
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleAddNewItem = async (formAddNew: any) => {
+    try {
+      console.log(formAddNew)
+      setLoading(true)
+      await groupService.createNewItem(
+        {
+          name: formAddNew.name,
+        },
+        setLoading,
+        async (meta, msg) => {
+          if (meta?.data) {
+            setGroupNew(meta.data as Group)
+            message.success(msg)
+          } else {
+            console.log('Errr')
+            message.error(msg)
+          }
+        }
+      )
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setLoading(false)
+      setOpenModal(false)
+    }
+  }
+
+  const handleConfirmDelete = async (
+    record: TableItemWithKey<GroupTableDataType>,
+    onDataSuccess?: (meta: ResponseDataType | undefined) => void
   ) => {
+    console.log(record)
+    await groupService.deleteItemByPk(record.id!, setLoading, (meta, msg) => {
+      if (meta) {
+        if (meta.success) {
+          handleConfirmDeleting(record.id!)
+          message.success(msg)
+        }
+      } else {
+        message.error(msg)
+      }
+      onDataSuccess?.(meta)
+    })
+  }
+
+  const handlePageChange = async (_page: number) => {
+    groupService.setPage(_page)
     const body: RequestBodyType = {
       ...defaultRequestBody,
       paginator: {
-        page: page,
+        page: _page,
         pageSize: 5
       },
-      sorting: {
-        column: 'id',
-        direction: direction
+      search: {
+        field: 'name',
+        term: searchText
       }
     }
-    await getDataList(body, onDataSuccess)
+    await groupService.getListItems(body, setLoading, (meta) => {
+      if (meta?.success) {
+        selfConvertDataSource(meta?.data as Group[])
+      }
+    })
   }
 
-  const handleUpdateItem = async (
-    id: number,
-    itemToUpdate: Group,
-    onDataSuccess?: (
-      data: ResponseDataType | undefined,
-      status: boolean
-    ) => void
-  ) => {
-    setLoading(true)
-    GroupAPI.updateItemByPk(id, itemToUpdate)
-      .then((data) => {
-        if (data?.success) {
-          setMetaData(data)
-          onDataSuccess?.(data, true)
-        }
-      })
-      .catch((err) => {
-        console.log(err)
-        onDataSuccess?.(undefined, false)
-      })
-      .finally(() => {
-        setLoading(false)
-      })
+  const handleResetClick = async () => {
+    setSearchText('')
+    await groupService.getListItems(defaultRequestBody, setLoading, (meta) => {
+      if (meta?.success) {
+        selfConvertDataSource(meta?.data as Group[])
+      }
+    })
   }
 
-  const handleDeleteItem = async (
-    id: number,
-    onDataSuccess?: (
-      data: ResponseDataType | undefined,
-      status: boolean
-    ) => void
-  ) => {
-    setLoading(true)
-    await GroupAPI.updateItemByPk(id, { status: 'deleted' })
-      .then((data) => {
-        if (data?.success) {
-          setMetaData(data)
-          onDataSuccess?.(data, true)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleSortChange = async (checked: boolean, _event: React.MouseEvent<HTMLButtonElement>) => {
+    await groupService.sortedListItems(
+      checked ? 'asc' : 'desc',
+      setLoading,
+      (meta) => {
+        if (meta?.success) {
+          selfConvertDataSource(meta?.data as Group[])
         }
-      })
-      .catch((err) => {
-        console.log(err)
-        onDataSuccess?.(undefined, false)
-      })
-      .finally(() => {
-        setLoading(false)
-      })
+      },
+      { field: 'name', term: searchText }
+    )
   }
 
-  const handlePermanentlyDeleteItem = async (
-    id: number,
-    onDataSuccess?: (
-      data: ResponseDataType | undefined,
-      status: boolean
-    ) => void
-  ) => {
-    setLoading(true)
-    await GroupAPI.deleteItemByPk(id)
-      .then((data) => {
-        if (data?.success) {
-          setMetaData(data)
-          onDataSuccess?.(data, true)
+  const handleSearch = async (value: string) => {
+    if (value.length > 0) {
+      await groupService.getListItems(
+        {
+          ...defaultRequestBody,
+          search: {
+            field: 'name',
+            term: value
+          }
+        },
+        setLoading,
+        (meta) => {
+          if (meta?.success) {
+            selfConvertDataSource(meta?.data as Group[])
+          }
         }
-      })
-      .catch((err) => {
-        console.log(err)
-        onDataSuccess?.(undefined, false)
-      })
-      .finally(() => {
-        setLoading(false)
-      })
+      )
+    }
   }
 
   return {
-    page,
-    setPage,
-    metaData,
-    setMetaData,
-    dateCreation,
-    setDateCreation,
-    loading,
-    setLoading,
+    searchText,
+    setSearchText,
     openModal,
+    loadData,
+    newRecord,
+    setNewRecord,
+    setLoading,
     setOpenModal,
-    getDataList,
-    handleUpdateItem,
-    handleDeleteItem,
+    setDataSource,
+    groupService,
+    handleSaveClick,
     handleAddNewItem,
-    handleSorted,
-    handlePermanentlyDeleteItem
+    handleConfirmDelete,
+    selfConvertDataSource,
+    handlePageChange,
+    handleSortChange,
+    handleResetClick,
+    handleSearch
   }
 }
