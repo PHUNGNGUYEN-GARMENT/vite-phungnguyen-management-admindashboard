@@ -6,13 +6,15 @@ import PrintablePlaceAPI from '~/api/services/PrintablePlaceAPI'
 import ProductAPI from '~/api/services/ProductAPI'
 import ProductColorAPI from '~/api/services/ProductColorAPI'
 import ProductGroupAPI from '~/api/services/ProductGroupAPI'
-import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
+import { TableItemWithKey, UseTableProps } from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
 import { ProductTableDataType } from '~/pages/product/type'
 import { Color, Group, PrintablePlace, Product, ProductColor, ProductGroup } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 
-export default function useProduct() {
+export default function useProduct(table: UseTableProps<ProductTableDataType>) {
+  const { setLoading, setDataSource, handleConfirmCancelEditing, handleConfirmDeleting } = table
+
   const productService = useAPIService<Product>(ProductAPI)
   const productColorService = useAPIService<ProductColor>(ProductColorAPI)
   const productGroupService = useAPIService<ProductGroup>(ProductGroupAPI)
@@ -20,22 +22,6 @@ export default function useProduct() {
 
   const { message } = AntApp.useApp()
 
-  const {
-    isEditing,
-    editingKey,
-    dataSource,
-    loading,
-    setLoading,
-    setDataSource,
-    setDeleteKey,
-    dateCreation,
-    setDateCreation,
-    handleStartEditing,
-    handleStartDeleting,
-    handleConfirmDeleting,
-    handleConfirmCancelEditing,
-    handleConfirmCancelDeleting
-  } = useTable<ProductTableDataType>([])
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [searchText, setSearchText] = useState<string>('')
   const [newRecord, setNewRecord] = useState<any>({})
@@ -287,35 +273,71 @@ export default function useProduct() {
     })
   }
 
+  const handleResetClick = async () => {
+    setSearchText('')
+    await productService.getListItems(defaultRequestBody, setLoading, (meta) => {
+      if (meta?.success) {
+        selfConvertDataSource(meta?.data as Product[])
+      }
+    })
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleSortChange = async (checked: boolean, _event: React.MouseEvent<HTMLButtonElement>) => {
+    await productService.sortedListItems(
+      checked ? 'asc' : 'desc',
+      setLoading,
+      (meta) => {
+        if (meta?.success) {
+          selfConvertDataSource(meta?.data as Product[])
+        }
+      },
+      { field: 'productCode', term: searchText }
+    )
+  }
+
+  const handleSearch = async (value: string) => {
+    if (value.length > 0) {
+      await productService.getListItems(
+        {
+          ...defaultRequestBody,
+          search: {
+            field: 'productCode',
+            term: value
+          }
+        },
+        setLoading,
+        (meta) => {
+          if (meta?.success) {
+            selfConvertDataSource(meta?.data as Product[])
+          }
+        }
+      )
+    }
+  }
+
   return {
     searchText,
     setSearchText,
-    loading,
     openModal,
     loadData,
     newRecord,
     setNewRecord,
-    isEditing,
-    editingKey,
-    dataSource,
     setLoading,
     setOpenModal,
-    setDeleteKey,
-    dateCreation,
     setDataSource,
     productService,
-    setDateCreation,
     handleSaveClick,
+    handleResetClick,
+    handleSortChange,
+    handleSearch,
     handleAddNewItem,
     handlePageChange,
-    handleStartEditing,
-    handleStartDeleting,
     productColorService,
     productGroupService,
     handleConfirmDelete,
     printablePlaceService,
     selfConvertDataSource,
-    handleConfirmCancelEditing,
-    handleConfirmCancelDeleting
+    handleConfirmCancelEditing
   }
 }

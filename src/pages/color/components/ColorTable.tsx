@@ -1,62 +1,46 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { App as AntApp, ColorPicker, Typography } from 'antd'
+import { ColorPicker, Typography } from 'antd'
 import type { Color as AntColor } from 'antd/es/color-picker'
-import { useSelector } from 'react-redux'
-import { defaultRequestBody } from '~/api/client'
-import { TableCellProps, TableItemWithKey } from '~/components/hooks/useTable'
+import { ColumnType } from 'antd/es/table'
+import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
-import { default as EditableStateCell, EditableTableProps } from '~/components/sky-ui/SkyTable/EditableStateCell'
+import { default as EditableStateCell } from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
-import { RootState } from '~/store/store'
-import { Color } from '~/typing'
 import { ColorTableDataType } from '../ColorPage'
 import useColor from '../hooks/useColor'
 import ModalAddNewColor from './ModalAddNewColor'
 
-type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>
-
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 const ColorTable: React.FC<Props> = () => {
+  const table = useTable<ColorTableDataType>([])
+
   const {
-    isEditing,
-    editingKey,
-    dataSource,
-    loading,
-    setLoading,
     searchText,
     setSearchText,
     newRecord,
     setNewRecord,
-    dateCreation,
-    setDateCreation,
-    handleStartEditing,
-    handleStartDeleting,
-    handleConfirmCancelEditing,
-    handleConfirmCancelDeleting,
     openModal,
     setOpenModal,
-    selfConvertDataSource,
+    handleResetClick,
+    handleSortChange,
+    handleSearch,
     handleSaveClick,
     handleAddNewItem,
     handleConfirmDelete,
     handlePageChange,
     colorService
-  } = useColor()
+  } = useColor(table)
 
-  const user = useSelector((state: RootState) => state.user)
-  const { message } = AntApp.useApp()
-
-  const cols: (ColumnTypes[number] & TableCellProps)[] = [
+  const columns: ColumnType<ColorTableDataType>[] = [
     {
-      title: 'Color Name',
+      title: 'Tên màu',
       dataIndex: 'name',
       width: '15%',
-      editable: user.isAdmin,
-      render: (_, record: TableItemWithKey<ColorTableDataType>) => {
+      render: (_value: any, record: TableItemWithKey<ColorTableDataType>) => {
         return (
           <EditableStateCell
-            isEditing={isEditing(record.key!)}
+            isEditing={table.isEditing(record.key!)}
             dataIndex='name'
             title='Tên màu'
             inputType='text'
@@ -74,11 +58,10 @@ const ColorTable: React.FC<Props> = () => {
       title: 'Mã màu',
       dataIndex: 'hexColor',
       width: '15%',
-      editable: true,
       render: (_, record: TableItemWithKey<ColorTableDataType>) => {
         return (
           <EditableStateCell
-            isEditing={isEditing(record.key!)}
+            isEditing={table.isEditing(record.key!)}
             dataIndex='hexColor'
             title='Mã màu'
             inputType='colorpicker'
@@ -105,70 +88,38 @@ const ColorTable: React.FC<Props> = () => {
     <>
       <BaseLayout
         searchValue={searchText}
-        onSearch={(value) => {
-          if (value.length > 0) {
-            colorService.getListItems(
-              {
-                ...defaultRequestBody,
-                search: {
-                  field: 'name',
-                  term: value
-                }
-              },
-              setLoading,
-              (meta) => {
-                if (meta?.success) {
-                  selfConvertDataSource(meta.data as Color[])
-                }
-              }
-            )
-          }
-        }}
-        onSortChange={(val) => {
-          colorService.sortedListItems(val ? 'asc' : 'desc', setLoading, (meta) => {
-            if (meta?.success) {
-              selfConvertDataSource(meta.data as Color[])
-            }
-          })
-        }}
-        onResetClick={() => {
-          setSearchText('')
-          colorService.getListItems(defaultRequestBody, setLoading, (meta) => {
-            if (meta?.success) {
-              selfConvertDataSource(meta.data as Color[])
-              message.success('Reloaded!')
-            }
-          })
-        }}
-        dateCreation={dateCreation}
-        onDateCreationChange={setDateCreation}
+        onDateCreationChange={(enable) => table.setDateCreation(enable)}
+        onSearchChange={(e) => setSearchText(e.target.value)}
+        onSearch={(value) => handleSearch(value)}
+        onSortChange={(checked, e) => handleSortChange(checked, e)}
+        onResetClick={() => handleResetClick()}
         onAddNewClick={() => setOpenModal(true)}
       >
         <SkyTable
           bordered
-          loading={loading}
-          columns={cols}
-          dataSource={dataSource}
+          loading={table.loading}
+          columns={columns}
+          editingKey={table.editingKey}
+          dataSource={table.dataSource}
           rowClassName='editable-row'
           metaData={colorService.metaData}
           onPageChange={handlePageChange}
-          editingKey={editingKey}
-          isDateCreation={dateCreation}
+          isDateCreation={table.dateCreation}
           actions={{
             onEdit: {
               onClick: (_e, record) => {
                 setNewRecord(record)
-                handleStartEditing(record!.key!)
+                table.handleStartEditing(record!.key!)
               }
             },
             onSave: {
               onClick: (_e, record) => handleSaveClick(record!, newRecord)
             },
             onDelete: {
-              onClick: (_e, record) => handleStartDeleting(record!.key!)
+              onClick: (_e, record) => table.handleStartDeleting(record!.key!)
             },
-            onConfirmCancelEditing: () => handleConfirmCancelEditing(),
-            onConfirmCancelDeleting: () => handleConfirmCancelDeleting(),
+            onConfirmCancelEditing: () => table.handleConfirmCancelEditing(),
+            onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),
             onConfirmDelete: (record) => handleConfirmDelete(record),
             isShow: true
           }}

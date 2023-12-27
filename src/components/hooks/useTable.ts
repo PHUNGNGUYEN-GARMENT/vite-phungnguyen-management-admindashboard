@@ -2,24 +2,39 @@ import { useState } from 'react'
 import { ResponseDataType } from '~/api/client'
 
 export type TableItemWithKey<T> = T & { key?: React.Key }
-type TableItemWithId<T> = T & { id?: number }
-export interface TableCellProps {
-  editable?: boolean
-  dataIndex: string
-  required?: boolean
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  initialValue?: any
+export type TableItemWithId<T> = T & { id?: number }
+
+export interface UseTableProps<T extends { key?: React.Key }> {
+  loading: boolean
+  setLoading: (state: boolean) => void
+  editingKey: React.Key
+  setEditingKey: (key: React.Key) => void
+  setDeletingKey: (key: React.Key) => void
+  deletingKey: React.Key
+  dateCreation: boolean
+  setDateCreation: (enable: boolean) => void
+  dataSource: TableItemWithKey<T>[]
+  setDataSource: (newDataSource: TableItemWithKey<T>[]) => void
+  isEditing: (key?: React.Key) => boolean
+  isDelete: (key?: React.Key) => boolean
+  handleStartEditing: (key: React.Key) => void
+  handleStartDeleting: (key: React.Key) => void
+  handleStartSaveEditing: (key: React.Key, itemToUpdate: T, onDataSuccess?: (updatedItem: T) => void) => void
+  handleStartAddNew: (item: TableItemWithKey<T>) => void
+  handleConfirmDeleting: (key: React.Key, onDataSuccess?: (deletedItem: TableItemWithKey<T>) => void) => void
+  handleConfirmCancelEditing: () => void
+  handleConfirmCancelDeleting: () => void
+  handleConvertDataSource: (meta: ResponseDataType) => void
 }
 
-export default function useTable<T extends { key?: React.Key }>(initValue: TableItemWithKey<T>[]) {
-  // const [form] = Form.useForm()
-  const [dataSource, setDataSource] = useState<TableItemWithKey<T>[]>(initValue)
+export default function useTable<T extends { key?: React.Key }>(initValue: TableItemWithKey<T>[]): UseTableProps<T> {
   const [loading, setLoading] = useState<boolean>(false)
+  const [dataSource, setDataSource] = useState<TableItemWithKey<T>[]>(initValue)
   const [editingKey, setEditingKey] = useState<React.Key>('')
-  const [deleteKey, setDeleteKey] = useState<React.Key>('')
+  const [deletingKey, setDeletingKey] = useState<React.Key>('')
   const [dateCreation, setDateCreation] = useState<boolean>(false)
-  const isEditing = (key: React.Key) => key === editingKey
-  const isDelete = (key: React.Key) => key === deleteKey
+  const isEditing = (key?: React.Key) => key === editingKey
+  const isDelete = (key?: React.Key) => key === deletingKey
 
   const handleConvertDataSource = (meta: ResponseDataType) => {
     setLoading(true)
@@ -40,7 +55,7 @@ export default function useTable<T extends { key?: React.Key }>(initValue: Table
   }
 
   const handleStartDeleting = (key: React.Key) => {
-    setDeleteKey(key)
+    setDeletingKey(key)
   }
 
   const handleConfirmDeleting = (key: React.Key, onDataSuccess?: (deletedItem: TableItemWithKey<T>) => void) => {
@@ -59,7 +74,7 @@ export default function useTable<T extends { key?: React.Key }>(initValue: Table
   }
 
   const handleConfirmCancelDeleting = () => {
-    setDeleteKey('')
+    setDeletingKey('')
   }
 
   const handleStartSaveEditing = async (key: React.Key, itemToUpdate: T, onDataSuccess?: (updatedItem: T) => void) => {
@@ -102,19 +117,18 @@ export default function useTable<T extends { key?: React.Key }>(initValue: Table
   }
 
   return {
-    // form,
-    isDelete,
-    isEditing,
-    deleteKey,
     loading,
     setLoading,
-    setDeleteKey,
-    editingKey,
-    setEditingKey,
-    dataSource,
-    setDataSource,
     dateCreation,
     setDateCreation,
+    isDelete,
+    isEditing,
+    editingKey,
+    deletingKey,
+    setEditingKey,
+    setDeletingKey,
+    dataSource,
+    setDataSource,
     handleStartAddNew,
     handleStartEditing,
     handleStartDeleting,

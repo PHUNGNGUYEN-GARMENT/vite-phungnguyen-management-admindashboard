@@ -1,82 +1,45 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-refresh/only-export-components */
-import { ColorPicker, Flex, Form, Typography } from 'antd'
+import { ColorPicker, Flex, Typography } from 'antd'
 import React, { memo } from 'react'
-import { TableItemWithKey } from '~/components/hooks/useTable'
-import ListItem from '~/components/sky-ui/SkyTable/ListItem'
-import { ColorTableDataType } from '../type'
+import SkyListItem, { SkyListItemProps } from '~/components/sky-ui/SkyList/SkyListItem'
+import ListItemRow from '~/components/sky-ui/SkyTable/ListItemRow'
+import { ColorTableDataType } from '../ColorPage'
 
-interface Props extends React.HTMLAttributes<HTMLElement> {
-  data: TableItemWithKey<ColorTableDataType>
-  isEditing: boolean
-  editingKey: React.Key
-  dateCreation: boolean
-  onSaveClick?: React.MouseEventHandler<HTMLElement> | undefined
-  onClickStartEditing?: React.MouseEventHandler<HTMLElement> | undefined
-  onConfirmCancelEditing?: (e?: React.MouseEvent<HTMLElement>) => void
-  onConfirmCancelDeleting?: (e?: React.MouseEvent<HTMLElement>) => void
-  onConfirmDelete?: (e?: React.MouseEvent<HTMLElement>) => void
-  onStartDeleting?: (key: React.Key) => void
+interface Props extends SkyListItemProps<ColorTableDataType> {
+  newRecord: any
+  setNewRecord: (newRecord: any) => void
 }
 
-const ColorListItem: React.FC<Props> = ({
-  data,
-  isEditing,
-  editingKey,
-  dateCreation,
-  onSaveClick,
-  onClickStartEditing,
-  onConfirmCancelEditing,
-  onConfirmCancelDeleting,
-  onConfirmDelete,
-  onStartDeleting,
-  ...props
-}) => {
+const ColorListItem: React.FC<Props> = ({ record, newRecord, setNewRecord, ...props }) => {
   return (
-    <>
-      <ListItem
-        itemId={data.key ?? data.id!}
-        isEditing={isEditing}
-        createdAt={data.createdAt}
-        updatedAt={data.updatedAt}
-        editingKey={editingKey}
-        dateCreation={dateCreation}
-        onSaveClick={onSaveClick}
-        onClickStartEditing={onClickStartEditing}
-        onConfirmCancelEditing={onConfirmCancelEditing}
-        onConfirmCancelDeleting={onConfirmCancelDeleting}
-        onConfirmDelete={onConfirmDelete}
-        onStartDeleting={onStartDeleting}
-        label={`${data.name}`}
-        name='name'
-        {...props}
-      >
-        <Flex className='w-full' align='center' justify='start' gap={5}>
-          <Typography.Text type='secondary' className='w-40 font-medium'>
-            Mã màu
-          </Typography.Text>
-          {isEditing ? (
-            <Form.Item name='hexColor' initialValue={data.hexColor} className='m-0 w-full'>
-              <ColorPicker
-                size='middle'
-                className='w-full'
-                format='hex'
-                defaultFormat='hex'
-                disabled={editingKey !== data.key}
-                showText
-              />
-            </Form.Item>
-          ) : (
-            <ColorPicker
-              className='w-full'
-              defaultValue={data.hexColor}
-              size='middle'
-              disabled={editingKey !== data.key}
-              showText
-            />
-          )}
-        </Flex>
-      </ListItem>
-    </>
+    <SkyListItem
+      label='Tên màu'
+      labelName='name'
+      record={record}
+      key={record.key}
+      isEditing={props.isEditing}
+      isDateCreation={props.isDateCreation}
+      actions={props.actions}
+    >
+      <Flex className='w-full' align='center' justify='start' gap={5}>
+        <ListItemRow
+          {...props}
+          label='Mã màu'
+          isEditing={props.isEditing}
+          dataIndex='hexColor'
+          inputType='colorpicker'
+          initialValue={record.hexColor}
+          value={record.hexColor}
+          onValueChange={(val) => setNewRecord({ ...newRecord, colorID: val })}
+        >
+          <Flex className='w-full' justify='space-between' align='center' gap={10}>
+            <Typography.Text type='secondary'>{record.hexColor}</Typography.Text>
+            {record.hexColor && <ColorPicker size='middle' format='hex' value={record.hexColor} disabled />}
+          </Flex>
+        </ListItemRow>
+      </Flex>
+    </SkyListItem>
   )
 }
 

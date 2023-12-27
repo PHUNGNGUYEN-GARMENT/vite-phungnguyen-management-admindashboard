@@ -3,39 +3,29 @@ import { App as AntApp } from 'antd'
 import { useEffect, useState } from 'react'
 import { RequestBodyType, ResponseDataType, defaultRequestBody } from '~/api/client'
 import ColorAPI from '~/api/services/ColorAPI'
-import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
+import { TableItemWithKey, UseTableProps } from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
-import { ProductTableDataType } from '~/pages/product/type'
 import { Color, Product } from '~/typing'
 import { ColorTableDataType } from '../ColorPage'
 
-export default function useColor() {
+export default function useColor(table: UseTableProps<ColorTableDataType>) {
+  const { setLoading, setDataSource, handleConfirmCancelEditing, handleConfirmDeleting } = table
+
+  // Services
   const colorService = useAPIService<Color>(ColorAPI)
 
+  // UI
   const { message } = AntApp.useApp()
 
-  const {
-    isEditing,
-    editingKey,
-    dataSource,
-    loading,
-    setLoading,
-    setDataSource,
-    setDeleteKey,
-    dateCreation,
-    setDateCreation,
-    handleStartEditing,
-    handleStartDeleting,
-    handleConfirmDeleting,
-    handleConfirmCancelEditing,
-    handleConfirmCancelDeleting
-  } = useTable<ColorTableDataType>([])
+  // State changes
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [searchText, setSearchText] = useState<string>('')
   const [newRecord, setNewRecord] = useState<any>({})
 
+  // List
   const [colors, setColors] = useState<Color[]>([])
 
+  // New
   const [colorNew, setColorNew] = useState<Color | undefined>(undefined)
 
   const loadData = async () => {
@@ -129,13 +119,14 @@ export default function useColor() {
   }
 
   const handleConfirmDelete = async (
-    item: TableItemWithKey<ProductTableDataType>,
+    record: TableItemWithKey<ColorTableDataType>,
     onDataSuccess?: (meta: ResponseDataType | undefined) => void
   ) => {
-    await colorService.deleteItemByPk(item.id!, setLoading, (meta, msg) => {
+    console.log(record)
+    await colorService.deleteItemByPk(record.id!, setLoading, (meta, msg) => {
       if (meta) {
         if (meta.success) {
-          handleConfirmDeleting(item.id!)
+          handleConfirmDeleting(record.id!)
           message.success(msg)
         }
       } else {
@@ -154,7 +145,7 @@ export default function useColor() {
         pageSize: 5
       },
       search: {
-        field: 'productCode',
+        field: 'name',
         term: searchText
       }
     }
@@ -165,32 +156,67 @@ export default function useColor() {
     })
   }
 
+  const handleResetClick = async () => {
+    setSearchText('')
+    await colorService.getListItems(defaultRequestBody, setLoading, (meta) => {
+      if (meta?.success) {
+        selfConvertDataSource(meta?.data as Color[])
+      }
+    })
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleSortChange = async (checked: boolean, _event: React.MouseEvent<HTMLButtonElement>) => {
+    await colorService.sortedListItems(
+      checked ? 'asc' : 'desc',
+      setLoading,
+      (meta) => {
+        if (meta?.success) {
+          selfConvertDataSource(meta?.data as Color[])
+        }
+      },
+      { field: 'name', term: searchText }
+    )
+  }
+
+  const handleSearch = async (value: string) => {
+    if (value.length > 0) {
+      await colorService.getListItems(
+        {
+          ...defaultRequestBody,
+          search: {
+            field: 'name',
+            term: value
+          }
+        },
+        setLoading,
+        (meta) => {
+          if (meta?.success) {
+            selfConvertDataSource(meta?.data as Color[])
+          }
+        }
+      )
+    }
+  }
+
   return {
     searchText,
     setSearchText,
-    loading,
     openModal,
     loadData,
     newRecord,
     setNewRecord,
-    isEditing,
-    editingKey,
-    dataSource,
     setLoading,
     setOpenModal,
-    setDeleteKey,
-    dateCreation,
     setDataSource,
     colorService,
-    setDateCreation,
     handleSaveClick,
     handleAddNewItem,
-    handlePageChange,
-    handleStartEditing,
-    handleStartDeleting,
     handleConfirmDelete,
     selfConvertDataSource,
-    handleConfirmCancelEditing,
-    handleConfirmCancelDeleting
+    handlePageChange,
+    handleSortChange,
+    handleResetClick,
+    handleSearch
   }
 }

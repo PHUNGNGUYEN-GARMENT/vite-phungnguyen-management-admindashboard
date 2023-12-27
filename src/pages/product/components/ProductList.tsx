@@ -1,90 +1,49 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react'
-import { defaultRequestBody } from '~/api/client'
+import useTable from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import SkyList from '~/components/sky-ui/SkyList/SkyList'
-import { Product } from '~/typing'
 import useProduct from '../hooks/useProduct'
 import { ProductTableDataType } from '../type'
 import ModalAddNewProduct from './ModalAddNewProduct'
 import ProductListItem from './ProductListItem'
 
 const ProductList: React.FC = () => {
+  const table = useTable<ProductTableDataType>([])
+
   const {
-    isEditing,
-    dataSource,
-    loading,
-    setLoading,
     searchText,
     setSearchText,
-    dateCreation,
-    setDateCreation,
-    handleStartEditing,
-    handleStartDeleting,
-    handleConfirmCancelEditing,
-    handleConfirmCancelDeleting,
-    openModal,
     newRecord,
     setNewRecord,
+    openModal,
     setOpenModal,
-    selfConvertDataSource,
+    handleResetClick,
+    handleSortChange,
+    handleSearch,
     handleSaveClick,
     handleAddNewItem,
     handleConfirmDelete,
     handlePageChange,
     productService
-  } = useProduct()
+  } = useProduct(table)
 
   return (
     <>
       <BaseLayout
-        onDateCreationChange={(enable) => setDateCreation(enable)}
-        onSearch={async (value) => {
-          if (value.length > 0) {
-            await productService.getListItems(
-              {
-                ...defaultRequestBody,
-                search: {
-                  field: 'productCode',
-                  term: value
-                }
-              },
-              setLoading,
-              (meta) => {
-                if (meta?.success) {
-                  selfConvertDataSource(meta?.data as Product[])
-                }
-              }
-            )
-          }
-        }}
-        onSortChange={async (val) => {
-          await productService.sortedListItems(
-            val ? 'asc' : 'desc',
-            setLoading,
-            (meta) => {
-              if (meta?.success) {
-                selfConvertDataSource(meta?.data as Product[])
-              }
-            },
-            { field: 'productCode', term: searchText }
-          )
-        }}
-        onResetClick={async () => {
-          setSearchText('')
-          await productService.getListItems(defaultRequestBody, setLoading, (meta) => {
-            if (meta?.success) {
-              selfConvertDataSource(meta?.data as Product[])
-            }
-          })
-        }}
+        searchValue={searchText}
+        onDateCreationChange={(enable) => table.setDateCreation(enable)}
+        onSearchChange={(e) => setSearchText(e.target.value)}
+        onSearch={(value) => handleSearch(value)}
+        onSortChange={(checked, e) => handleSortChange(checked, e)}
+        onResetClick={() => handleResetClick()}
         onAddNewClick={() => setOpenModal(true)}
       >
         <SkyList
           itemLayout='vertical'
           size='large'
-          loading={loading}
-          dataSource={dataSource}
+          loading={table.loading}
+          dataSource={table.dataSource}
           metaData={productService.metaData}
           onPageChange={handlePageChange}
           renderItem={(record: ProductTableDataType) => (
@@ -92,8 +51,8 @@ const ProductList: React.FC = () => {
               record={record}
               newRecord={newRecord}
               setNewRecord={setNewRecord}
-              isDateCreation={dateCreation}
-              isEditing={isEditing(record.key!)}
+              isDateCreation={table.dateCreation}
+              isEditing={table.isEditing(record.key!)}
               actions={{
                 onSave: {
                   onClick: () => {
@@ -102,19 +61,17 @@ const ProductList: React.FC = () => {
                   }
                 },
                 onEdit: {
-                  onClick: () => handleStartEditing(record.key!)
+                  onClick: () => {
+                    setNewRecord(record)
+                    table.handleStartEditing(record!.key!)
+                  }
                 },
                 onDelete: {
-                  onClick: () => handleStartDeleting(record.key!)
+                  onClick: () => table.handleStartDeleting(record.key!)
                 },
-                onConfirmCancelEditing: () => handleConfirmCancelEditing(),
-                onConfirmCancelDeleting: () => handleConfirmCancelDeleting(),
-                onConfirmDelete: () =>
-                  handleConfirmDelete(record, (meta) => {
-                    if (meta?.success) {
-                      handleStartDeleting(record.key!)
-                    }
-                  })
+                onConfirmCancelEditing: () => table.handleConfirmCancelEditing(),
+                onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),
+                onConfirmDelete: () => handleConfirmDelete(record)
               }}
             />
           )}
@@ -122,8 +79,8 @@ const ProductList: React.FC = () => {
       </BaseLayout>
       {openModal && (
         <ModalAddNewProduct
-          setLoading={setLoading}
-          loading={loading}
+          setLoading={table.setLoading}
+          loading={table.loading}
           openModal={openModal}
           setOpenModal={setOpenModal}
           onAddNew={handleAddNewItem}

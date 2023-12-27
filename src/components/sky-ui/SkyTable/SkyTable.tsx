@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Table } from 'antd'
 import type { ColumnType, TableProps } from 'antd/es/table'
-import { useState } from 'react'
 import { useSelector } from 'react-redux'
 import { ResponseDataType } from '~/api/client'
 import { ProductTableDataType } from '~/pages/product/type'
@@ -16,6 +15,7 @@ export interface SkyTableProps<T extends { key?: React.Key; createdAt?: string; 
   onPageChange?: (page: number, pageSize: number) => void
   columns: ColumnType<T>[]
   isDateCreation?: boolean
+  editingKey: React.Key
   actions?: ActionProps<T>
 }
 
@@ -23,10 +23,9 @@ const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: s
   ...props
 }: SkyTableProps<T>) => {
   const user = useSelector((state: RootState) => state.user)
-  const [editingKey, setEditingKey] = useState<React.Key | undefined>(undefined)
 
   const isEditing = (key?: React.Key): boolean => {
-    return editingKey === key
+    return props.editingKey === key
   }
 
   const actionsCols: ColumnType<T>[] = [
@@ -51,7 +50,6 @@ const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: s
               }}
               onEdit={{
                 onClick: (e) => {
-                  setEditingKey(record.key)
                   props.actions?.onEdit?.onClick?.(e, record)
                 },
                 disabled: props.actions?.onEdit?.disabled ?? isEditing(record.key),
@@ -62,10 +60,7 @@ const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: s
                 disabled: props.actions?.onDelete?.disabled ?? isEditing(record.key),
                 isShow: props.actions?.onDelete ? props.actions.onDelete.isShow ?? true : false
               }}
-              onConfirmCancelEditing={(e) => {
-                setEditingKey('')
-                props.actions?.onConfirmCancelEditing?.(e)
-              }}
+              onConfirmCancelEditing={(e) => props.actions?.onConfirmCancelEditing?.(e)}
               onConfirmCancelDeleting={props.actions?.onConfirmCancelDeleting}
               onConfirmDelete={() => props.actions?.onConfirmDelete?.(record)}
             />

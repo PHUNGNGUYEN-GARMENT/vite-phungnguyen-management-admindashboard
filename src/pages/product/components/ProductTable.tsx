@@ -7,11 +7,12 @@ import ColorAPI from '~/api/services/ColorAPI'
 import GroupAPI from '~/api/services/GroupAPI'
 import PrintAPI from '~/api/services/PrintAPI'
 import useDevice from '~/components/hooks/useDevice'
+import useTable from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import ImportationTable from '~/pages/importation/components/ImportationTable'
-import { Color, Group, Print, Product } from '~/typing'
+import { Color, Group, Print } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import useProduct from '../hooks/useProduct'
 import { ProductTableDataType } from '../type'
@@ -19,30 +20,24 @@ import ModalAddNewProduct from './ModalAddNewProduct'
 import ProductProgressStatus from './ProductProgressStatus'
 
 const ProductTable: React.FC = () => {
+  const table = useTable<ProductTableDataType>([])
+
   const {
-    isEditing,
-    dataSource,
-    loading,
-    setLoading,
     searchText,
     setSearchText,
     newRecord,
     setNewRecord,
-    dateCreation,
-    setDateCreation,
-    handleStartEditing,
-    handleStartDeleting,
-    handleConfirmCancelEditing,
-    handleConfirmCancelDeleting,
     openModal,
     setOpenModal,
-    selfConvertDataSource,
+    handleResetClick,
+    handleSortChange,
+    handleSearch,
     handleSaveClick,
     handleAddNewItem,
     handleConfirmDelete,
     handlePageChange,
     productService
-  } = useProduct()
+  } = useProduct(table)
   const { width } = useDevice()
   const [editable, setEditable] = useState<boolean>(false)
 
@@ -81,7 +76,7 @@ const ProductTable: React.FC = () => {
       return (
         <>
           <EditableStateCell
-            isEditing={isEditing(record.key!)}
+            isEditing={table.isEditing(record.key!)}
             dataIndex='groupID'
             title='Nhóm'
             inputType='select'
@@ -110,7 +105,7 @@ const ProductTable: React.FC = () => {
       return (
         <>
           <EditableStateCell
-            isEditing={isEditing(record.key!)}
+            isEditing={table.isEditing(record.key!)}
             dataIndex='printID'
             title='Nơi in'
             inputType='select'
@@ -137,7 +132,7 @@ const ProductTable: React.FC = () => {
       return (
         <>
           <EditableStateCell
-            isEditing={isEditing(record.key!)}
+            isEditing={table.isEditing(record.key!)}
             dataIndex='dateInputNPL'
             title='NPL'
             inputType='datepicker'
@@ -164,7 +159,7 @@ const ProductTable: React.FC = () => {
         return (
           <>
             <EditableStateCell
-              isEditing={isEditing(record.key!)}
+              isEditing={table.isEditing(record.key!)}
               dataIndex='productCode'
               title='Mã hàng'
               inputType='text'
@@ -187,7 +182,7 @@ const ProductTable: React.FC = () => {
         return (
           <>
             <EditableStateCell
-              isEditing={isEditing(record.key!)}
+              isEditing={table.isEditing(record.key!)}
               dataIndex='quantityPO'
               title='Số lượng PO'
               inputType='number'
@@ -210,7 +205,7 @@ const ProductTable: React.FC = () => {
         return (
           <>
             <EditableStateCell
-              isEditing={isEditing(record.key!)}
+              isEditing={table.isEditing(record.key!)}
               dataIndex='colorID'
               title='Màu'
               inputType='colorselector'
@@ -253,7 +248,7 @@ const ProductTable: React.FC = () => {
         return (
           <>
             <EditableStateCell
-              isEditing={isEditing(record.key!)}
+              isEditing={table.isEditing(record.key!)}
               dataIndex='dateOutputFCR'
               title='FCR'
               inputType='datepicker'
@@ -278,75 +273,40 @@ const ProductTable: React.FC = () => {
   return (
     <>
       <BaseLayout
-        onDateCreationChange={(enable) => setDateCreation(enable)}
         searchValue={searchText}
+        onDateCreationChange={(enable) => table.setDateCreation(enable)}
         onSearchChange={(e) => setSearchText(e.target.value)}
-        onSearch={async (value) => {
-          if (value.length > 0) {
-            await productService.getListItems(
-              {
-                ...defaultRequestBody,
-                search: {
-                  field: 'productCode',
-                  term: value
-                }
-              },
-              setLoading,
-              (meta) => {
-                if (meta?.success) {
-                  selfConvertDataSource(meta?.data as Product[])
-                }
-              }
-            )
-          }
-        }}
-        onSortChange={async (val) => {
-          await productService.sortedListItems(
-            val ? 'asc' : 'desc',
-            setLoading,
-            (meta) => {
-              if (meta?.success) {
-                selfConvertDataSource(meta?.data as Product[])
-              }
-            },
-            { field: 'productCode', term: searchText }
-          )
-        }}
-        onResetClick={async () => {
-          setSearchText('')
-          await productService.getListItems(defaultRequestBody, setLoading, (meta) => {
-            if (meta?.success) {
-              selfConvertDataSource(meta?.data as Product[])
-            }
-          })
-        }}
+        onSearch={(value) => handleSearch(value)}
+        onSortChange={(checked, e) => handleSortChange(checked, e)}
+        onResetClick={() => handleResetClick()}
         onAddNewClick={() => setOpenModal(true)}
       >
         <SkyTable
           bordered
-          loading={loading}
+          loading={table.loading}
           columns={columns}
-          dataSource={dataSource}
+          editingKey={table.editingKey}
+          dataSource={table.dataSource}
           rowClassName='editable-row'
           metaData={productService.metaData}
           onPageChange={handlePageChange}
-          isDateCreation={dateCreation}
+          isDateCreation={table.dateCreation}
           actions={{
             onEdit: {
               onClick: (_e, record) => {
                 setNewRecord(record)
                 setEditable((prev) => !prev)
-                handleStartEditing(record!.key!)
+                table.handleStartEditing(record!.key!)
               }
             },
             onSave: {
               onClick: (_e, record) => handleSaveClick(record!, newRecord)
             },
             onDelete: {
-              onClick: (_e, record) => handleStartDeleting(record!.key!)
+              onClick: (_e, record) => table.handleStartDeleting(record!.key!)
             },
-            onConfirmCancelEditing: () => handleConfirmCancelEditing(),
-            onConfirmCancelDeleting: () => handleConfirmCancelDeleting(),
+            onConfirmCancelEditing: () => table.handleConfirmCancelEditing(),
+            onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),
             onConfirmDelete: (record) => handleConfirmDelete(record),
             isShow: true
           }}
@@ -357,13 +317,14 @@ const ProductTable: React.FC = () => {
                   {width < 1600 && (
                     <SkyTable
                       bordered
-                      loading={loading}
+                      loading={table.loading}
                       columns={expandableColumns}
-                      dataSource={dataSource.filter((item) => item.id === record.id)}
+                      dataSource={table.dataSource.filter((item: ProductTableDataType) => item.id === record.id)}
                       rowClassName='editable-row'
                       metaData={productService.metaData}
                       pagination={false}
-                      isDateCreation={dateCreation}
+                      isDateCreation={table.dateCreation}
+                      editingKey={table.editingKey}
                     />
                   )}
                   <ProductProgressStatus collapse record={record} />
@@ -377,8 +338,8 @@ const ProductTable: React.FC = () => {
       </BaseLayout>
       {openModal && (
         <ModalAddNewProduct
-          setLoading={setLoading}
-          loading={loading}
+          setLoading={table.setLoading}
+          loading={table.loading}
           openModal={openModal}
           setOpenModal={setOpenModal}
           onAddNew={handleAddNewItem}
