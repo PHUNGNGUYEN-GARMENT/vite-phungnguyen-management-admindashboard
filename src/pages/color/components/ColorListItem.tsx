@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-refresh/only-export-components */
-import { ColorPicker, Flex, Typography } from 'antd'
+import { ColorPicker, Flex } from 'antd'
+import type { Color as AntColor } from 'antd/es/color-picker'
 import React, { memo } from 'react'
 import SkyListItem, { SkyListItemProps } from '~/components/sky-ui/SkyList/SkyListItem'
 import ListItemRow from '~/components/sky-ui/SkyTable/ListItemRow'
@@ -14,10 +15,14 @@ interface Props extends SkyListItemProps<ColorTableDataType> {
 const ColorListItem: React.FC<Props> = ({ record, newRecord, setNewRecord, ...props }) => {
   return (
     <SkyListItem
-      label='Tên màu'
+      label={record.name}
       labelName='name'
       record={record}
       key={record.key}
+      labelEditing
+      value={newRecord.name}
+      onChange={(e) => setNewRecord({ ...newRecord, name: e.target.value })}
+      defaultValue={record.name}
       isEditing={props.isEditing}
       isDateCreation={props.isDateCreation}
       actions={props.actions}
@@ -30,12 +35,11 @@ const ColorListItem: React.FC<Props> = ({ record, newRecord, setNewRecord, ...pr
           dataIndex='hexColor'
           inputType='colorpicker'
           initialValue={record.hexColor}
-          value={record.hexColor}
-          onValueChange={(val) => setNewRecord({ ...newRecord, colorID: val })}
+          value={newRecord.hexColor}
+          onValueChange={(val: AntColor) => setNewRecord({ ...newRecord, hexColor: val.toHexString() })}
         >
           <Flex className='w-full' justify='space-between' align='center' gap={10}>
-            <Typography.Text type='secondary'>{record.hexColor}</Typography.Text>
-            {record.hexColor && <ColorPicker size='middle' format='hex' value={record.hexColor} disabled />}
+            {record.hexColor && <ColorPicker size='middle' format='hex' value={record.hexColor} disabled showText />}
           </Flex>
         </ListItemRow>
       </Flex>

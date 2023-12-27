@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-types */
-import { Flex, Form, Input, List, Typography } from 'antd'
+import { Flex, Input, List, Typography } from 'antd'
 import { useSelector } from 'react-redux'
 import { RootState } from '~/store/store'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
@@ -13,6 +14,9 @@ export interface SkyListItemProps<T extends { key?: React.Key; createdAt?: strin
   labelName?: string
   isDateCreation?: boolean
   actions?: ActionProps<T>
+  value?: any
+  onChange?: React.ChangeEventHandler<HTMLInputElement> | undefined
+  defaultValue?: string | number | readonly string[] | undefined
   children?: React.ReactNode
 }
 
@@ -27,10 +31,14 @@ const SkyListItem = <T extends { key?: React.Key; createdAt?: string; updatedAt?
     <List.Item className='mb-5 w-full rounded-sm bg-white'>
       <Flex vertical className='w-full' gap={10}>
         <Flex align='center' justify='space-between' gap={10}>
-          {props.labelEditing && user.isAdmin ? (
-            <Form.Item name={props.labelName} initialValue={props.label} className='m-0'>
-              <Input size='large' className='text-lg font-medium' />
-            </Form.Item>
+          {props.labelEditing && props.isEditing && user.isAdmin ? (
+            <Input
+              size='large'
+              defaultValue={props.defaultValue}
+              onChange={props.onChange}
+              value={props.value}
+              className='text-lg font-medium'
+            />
           ) : (
             <Typography.Title className='m-0 h-fit p-0' level={4}>
               {props.label}
