@@ -19,10 +19,13 @@ const ImportationListItem: React.FC<Props> = ({ record, newRecord, setNewRecord,
       labelName='quantity'
       record={record}
       key={record.key}
+      labelEditing={false}
+      value={newRecord.quantity}
+      defaultValue={record.quantity}
+      onChange={(e) => setNewRecord({ ...newRecord, quantity: e.target.value })}
       isEditing={props.isEditing}
       isDateCreation={props.isDateCreation}
       actions={props.actions}
-      
     >
       <Collapse
         className=''

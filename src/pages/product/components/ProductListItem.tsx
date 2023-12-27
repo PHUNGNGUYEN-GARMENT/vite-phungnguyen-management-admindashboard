@@ -56,6 +56,10 @@ const ProductListItem: React.FC<Props> = ({ record, newRecord, setNewRecord, ...
       labelName='productCode'
       record={record}
       key={record.key}
+      labelEditing
+      value={newRecord.productCode}
+      defaultValue={record.productCode}
+      onChange={(e) => setNewRecord({ ...newRecord, productCode: e.target.value })}
       isEditing={props.isEditing}
       isDateCreation={props.isDateCreation}
       actions={props.actions}
