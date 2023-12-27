@@ -221,7 +221,7 @@ export interface SewingLineDelivery {
 
 export interface SewingLine {
   id?: number
-  sewingLineName?: string
+  name?: string
   status?: ItemStatusType
   createdAt?: string
   updatedAt?: string

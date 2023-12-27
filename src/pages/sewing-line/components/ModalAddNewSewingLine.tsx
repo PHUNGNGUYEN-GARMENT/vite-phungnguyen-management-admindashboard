@@ -3,7 +3,6 @@ import { Flex, Form, Input, Modal, Typography } from 'antd'
 import React, { memo } from 'react'
 import AddNewTitle from '~/components/sky-ui/AddNewTitle'
 import { SewingLine } from '~/typing'
-import { SewingLineTableDataType } from '../type'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
   openModal: boolean
@@ -12,12 +11,12 @@ interface Props extends React.HTMLAttributes<HTMLElement> {
 }
 
 const ModalAddNewSewingLine: React.FC<Props> = ({ openModal, setOpenModal, onAddNew, ...props }) => {
-  const [form] = Form.useForm<SewingLineTableDataType>()
+  const [form] = Form.useForm()
 
   async function handleOk() {
     const row = await form.validateFields()
     onAddNew({
-      sewingLineName: row.sewingLineName
+      name: row.name
     })
   }
 
@@ -37,18 +36,18 @@ const ModalAddNewSewingLine: React.FC<Props> = ({ openModal, setOpenModal, onAdd
       <Form form={form} {...props}>
         <Flex vertical gap={10}>
           <Flex align='center' gap={5}>
-            <Typography.Text className='w-24 flex-shrink-0'>Sewing line:</Typography.Text>
+            <Typography.Text className='w-24 flex-shrink-0'>Tên chuyền:</Typography.Text>
             <Form.Item
               rules={[
                 {
                   required: true,
-                  message: `Please Input SEWING LINE!`
+                  message: `Please input this field!`
                 }
               ]}
-              name='sewingLineName'
+              name='name'
               className='m-0'
             >
-              <Input allowClear placeholder='Orange' />
+              <Input className='w-52' allowClear placeholder='C1, C2,...' />
             </Form.Item>
           </Flex>
         </Flex>

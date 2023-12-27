@@ -8,7 +8,7 @@ export default {
   createNewItem: async (item: Partial<SewingLine>): Promise<ResponseDataType | undefined> => {
     return await client
       .post(`${NAMESPACE}`, {
-        sewingLineName: item.sewingLineName,
+        name: item.name,
         status: item.status ?? 'active'
       })
       .then((res) => {
