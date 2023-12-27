@@ -24,7 +24,7 @@ const SkyListItem = <T extends { key?: React.Key; createdAt?: string; updatedAt?
   const user = useSelector((state: RootState) => state.user)
 
   return (
-    <List.Item className='mb-5 rounded-sm bg-white '>
+    <List.Item className='mb-5 w-full rounded-sm bg-white'>
       <Flex vertical className='w-full' gap={10}>
         <Flex align='center' justify='space-between' gap={10}>
           {props.labelEditing && user.isAdmin ? (

@@ -3,35 +3,22 @@ import { App as AntApp } from 'antd'
 import { useEffect, useState } from 'react'
 import { RequestBodyType, ResponseDataType, defaultRequestBody } from '~/api/client'
 import ImportationAPI from '~/api/services/ImportationAPI'
-import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
+import { TableItemWithKey, UseTableProps } from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
 import { ProductTableDataType } from '~/pages/product/type'
 import { Importation } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import { ImportationTableDataType } from '../components/ImportationTable'
 
-export default function useImportation(productRecord: ProductTableDataType) {
+export default function useImportation(
+  productRecord: ProductTableDataType,
+  table: UseTableProps<ImportationTableDataType>
+) {
+  const { dataSource, setLoading, setDataSource, handleConfirmCancelEditing, handleConfirmDeleting } = table
   const importationService = useAPIService<Importation>(ImportationAPI)
 
   const { message } = AntApp.useApp()
 
-  const {
-    isEditing,
-    editingKey,
-    dataSource,
-    loading,
-    setLoading,
-    setDataSource,
-    setDeleteKey,
-    dateCreation,
-    setDateCreation,
-    handleStartAddNew,
-    handleStartEditing,
-    handleStartDeleting,
-    handleConfirmDeleting,
-    handleConfirmCancelEditing,
-    handleConfirmCancelDeleting
-  } = useTable<ImportationTableDataType>([])
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [importations, setImportations] = useState<Importation[]>([])
   const [importationNew, setImportationNew] = useState<Importation | undefined>(undefined)
@@ -42,11 +29,15 @@ export default function useImportation(productRecord: ProductTableDataType) {
   const amountQuantity = dataSource.reduce((acc, current) => acc + (current.quantity ?? 0), 0)
 
   const loadData = async () => {
-    await importationService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        setImportations(meta.data as Importation[])
+    await importationService.getListItems(
+      { ...defaultRequestBody, search: { field: 'productID', term: `${productRecord.id}` } },
+      setLoading,
+      (meta) => {
+        if (meta?.success) {
+          setImportations(meta.data as Importation[])
+        }
       }
-    })
+    )
   }
 
   useEffect(() => {
@@ -59,13 +50,14 @@ export default function useImportation(productRecord: ProductTableDataType) {
 
   const selfConvertDataSource = (_importations?: Importation[]) => {
     const items = _importations ? _importations : importations
-    const convertDataSource = items.map((item) => {
-      return {
-        ...item,
-        key: item.id
-      } as ImportationTableDataType
-    })
-    setDataSource(convertDataSource.filter((item) => item.productID === productRecord.id))
+    setDataSource(
+      items.map((item) => {
+        return {
+          ...item,
+          key: item.id
+        } as ImportationTableDataType
+      })
+    )
   }
 
   const handleSaveClick = async (
@@ -178,18 +170,12 @@ export default function useImportation(productRecord: ProductTableDataType) {
   }
 
   return {
-    loading,
     openModal,
     loadData,
-    isEditing,
-    editingKey,
     dataSource,
     setLoading,
     setOpenModal,
-    setDeleteKey,
-    dateCreation,
     setDataSource,
-    setDateCreation,
     handleSaveClick,
     newRecord,
     amountQuantity,
@@ -198,13 +184,9 @@ export default function useImportation(productRecord: ProductTableDataType) {
     setNewRecord,
     handlePageChange,
     handleAddNewItem,
-    handleStartAddNew,
-    handleStartEditing,
-    handleStartDeleting,
     importationService,
     handleConfirmDelete,
     selfConvertDataSource,
-    handleConfirmCancelEditing,
-    handleConfirmCancelDeleting
+    handleConfirmCancelEditing
   }
 }

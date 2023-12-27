@@ -1,10 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Button, Collapse, Flex, Typography } from 'antd'
+import { Button, Collapse, Flex, Switch, Typography } from 'antd'
 import type { ColumnType } from 'antd/es/table'
 import { Plus } from 'lucide-react'
+import { useSelector } from 'react-redux'
+import useTable from '~/components/hooks/useTable'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import { ProductTableDataType } from '~/pages/product/type'
+import { RootState } from '~/store/store'
 import { Importation } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import useImportation from '../hooks/useImportation'
@@ -19,27 +22,20 @@ export interface ImportationTableDataType extends Importation {
 }
 
 const ImportationTable: React.FC<Props> = ({ productRecord }) => {
+  const table = useTable<ImportationTableDataType>([])
   const {
-    isEditing,
-    dataSource,
-    loading,
-    setLoading,
-    openModal,
-    setOpenModal,
-    importationService,
-    dateCreation,
-    handleStartEditing,
-    handleConfirmCancelEditing,
-    handleConfirmCancelDeleting,
-    handleAddNewItem,
     newRecord,
     setNewRecord,
+    openModal,
+    setOpenModal,
     amountQuantity,
-    handleStartDeleting,
     handleSaveClick,
-    handleConfirmDelete
-  } = useImportation(productRecord)
-
+    handleAddNewItem,
+    handleConfirmDelete,
+    handlePageChange,
+    importationService
+  } = useImportation(productRecord, table)
+  const user = useSelector((state: RootState) => state.user)
   const columns: ColumnType<ImportationTableDataType>[] = [
     {
       title: 'Lô nhập',
@@ -49,7 +45,7 @@ const ImportationTable: React.FC<Props> = ({ productRecord }) => {
         return (
           <>
             <EditableStateCell
-              isEditing={isEditing(record.key!)}
+              isEditing={table.isEditing(record.key!)}
               dataIndex='quantity'
               title='Lô nhập'
               inputType='number'
@@ -72,7 +68,7 @@ const ImportationTable: React.FC<Props> = ({ productRecord }) => {
         return (
           <>
             <EditableStateCell
-              isEditing={isEditing(record.key!)}
+              isEditing={table.isEditing(record.key!)}
               dataIndex='dateImported'
               title='Ngày nhập'
               inputType='datepicker'
@@ -106,9 +102,19 @@ const ImportationTable: React.FC<Props> = ({ productRecord }) => {
             children: (
               <Flex vertical gap={10}>
                 <Flex className='w-full' align='center' justify='space-between'>
-                  <Typography.Text type='secondary'>
-                    {amountQuantity + ' / ' + productRecord.quantityPO}
-                  </Typography.Text>
+                  <Flex gap={10}>
+                    <Typography.Text type='secondary'>
+                      {amountQuantity + ' / ' + productRecord.quantityPO}
+                    </Typography.Text>
+                    {user.isAdmin && (
+                      <Switch
+                        checkedChildren='DateCreation'
+                        unCheckedChildren='DateCreation'
+                        defaultChecked={table.dateCreation}
+                        onChange={(state) => table.setDateCreation(state)}
+                      />
+                    )}
+                  </Flex>
                   <Button
                     onClick={() => setOpenModal(true)}
                     className='flex w-fit items-center'
@@ -121,31 +127,31 @@ const ImportationTable: React.FC<Props> = ({ productRecord }) => {
                 </Flex>
                 <SkyTable
                   bordered
-                  loading={loading}
+                  loading={table.loading}
                   columns={columns}
-                  dataSource={dataSource}
+                  editingKey={table.editingKey}
+                  dataSource={table.dataSource}
                   rowClassName='editable-row'
                   metaData={importationService.metaData}
-                  pagination={false}
-                  isDateCreation={dateCreation}
+                  onPageChange={handlePageChange}
+                  isDateCreation={table.dateCreation}
                   actions={{
                     onEdit: {
                       onClick: (_e, record) => {
-                        handleStartEditing(record!.key!)
+                        setNewRecord(record)
+                        table.handleStartEditing(record!.key!)
                       }
                     },
                     onDelete: {
-                      onClick: (_e, record) => {
-                        handleStartDeleting(record!.key!)
-                      }
+                      onClick: (_e, record) => table.handleStartDeleting(record!.key!)
                     },
                     onSave: {
                       onClick: (_e, record) => {
                         handleSaveClick(record!, newRecord!)
                       }
                     },
-                    onConfirmCancelEditing: () => handleConfirmCancelEditing(),
-                    onConfirmCancelDeleting: () => handleConfirmCancelDeleting(),
+                    onConfirmCancelEditing: () => table.handleConfirmCancelEditing(),
+                    onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),
                     onConfirmDelete: (record) => handleConfirmDelete(record),
                     isShow: true
                   }}
@@ -160,11 +166,9 @@ const ImportationTable: React.FC<Props> = ({ productRecord }) => {
           productRecord={productRecord}
           openModal={openModal}
           setOpenModal={setOpenModal}
-          onAddNew={(record) => {
-            handleAddNewItem({ ...record, productID: productRecord.id! })
-          }}
+          onAddNew={(record) => handleAddNewItem({ ...record, productID: productRecord.id! })}
           loading={false}
-          setLoading={setLoading}
+          setLoading={table.setLoading}
         />
       )}
     </>

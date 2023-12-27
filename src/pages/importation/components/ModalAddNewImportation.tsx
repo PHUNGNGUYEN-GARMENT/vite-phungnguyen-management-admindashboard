@@ -58,7 +58,7 @@ const ModalAddNewImportation: React.FC<Props> = ({ openModal, setOpenModal, onAd
                 }
               ]}
             >
-              <InputNumber className='w-full' placeholder='Số lượng..' />
+              <InputNumber min={0} className='w-full' placeholder='Số lượng..' />
             </Form.Item>
           </Flex>
           <Flex className='w-full' align='center'>
