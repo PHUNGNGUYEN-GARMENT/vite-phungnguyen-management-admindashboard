@@ -2,12 +2,12 @@
 import { Flex, Form, Input, Modal, Typography } from 'antd'
 import React, { memo } from 'react'
 import AddNewTitle from '~/components/sky-ui/AddNewTitle'
-import { Color } from '~/typing'
+import { SewingLine } from '~/typing'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
   openModal: boolean
   setOpenModal: (enable: boolean) => void
-  onAddNew: (itemToAddNew: Color) => void
+  onAddNew: (itemToAddNew: SewingLine) => void
 }
 
 const ModalAddNewPrint: React.FC<Props> = ({ openModal, setOpenModal, onAddNew, ...props }) => {
@@ -36,7 +36,7 @@ const ModalAddNewPrint: React.FC<Props> = ({ openModal, setOpenModal, onAddNew, 
       <Form form={form} {...props}>
         <Flex vertical gap={10}>
           <Flex align='center' gap={5}>
-            <Typography.Text className='w-24 flex-shrink-0'>Name:</Typography.Text>
+            <Typography.Text className='w-24 flex-shrink-0'>Nơi in:</Typography.Text>
             <Form.Item
               rules={[
                 {
@@ -47,7 +47,7 @@ const ModalAddNewPrint: React.FC<Props> = ({ openModal, setOpenModal, onAddNew, 
               name='name'
               className='m-0'
             >
-              <Input className='w-52' allowClear placeholder='G13+, G1-4,...' />
+              <Input className='w-52' allowClear placeholder='' />
             </Form.Item>
           </Flex>
         </Flex>

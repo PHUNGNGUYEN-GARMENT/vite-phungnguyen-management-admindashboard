@@ -9,6 +9,7 @@ import PrintAPI from '~/api/services/PrintAPI'
 import useDevice from '~/components/hooks/useDevice'
 import SkyListItem, { SkyListItemProps } from '~/components/sky-ui/SkyList/SkyListItem'
 import ListItemRow from '~/components/sky-ui/SkyTable/ListItemRow'
+import SkyTableTypography from '~/components/sky-ui/SkyTableTypography'
 import ImportationList from '~/pages/importation/components/ImportationList'
 import ImportationTable from '~/pages/importation/components/ImportationTable'
 import { Color, Group, Print } from '~/typing'
@@ -91,7 +92,9 @@ const ProductListItem: React.FC<Props> = ({ record, newRecord, setNewRecord, ...
                     onValueChange={(val) => setNewRecord({ ...newRecord, colorID: val })}
                   >
                     <Flex className='w-full' justify='space-between' align='center' gap={10}>
-                      <Typography.Text type='secondary'>{record.productColor?.color?.name}</Typography.Text>
+                      <SkyTableTypography status={record.productColor?.color?.status}>
+                        {record.productColor?.color?.name}
+                      </SkyTableTypography>
                       {record.productColor && (
                         <ColorPicker size='middle' format='hex' value={record.productColor?.color?.hexColor} disabled />
                       )}
@@ -107,9 +110,7 @@ const ProductListItem: React.FC<Props> = ({ record, newRecord, setNewRecord, ...
                     value={newRecord.quantityPO}
                     onValueChange={(val) => setNewRecord({ ...newRecord, quantityPO: val })}
                   >
-                    <Typography.Text type='secondary' className='w-full font-medium'>
-                      {record.quantityPO}
-                    </Typography.Text>
+                    <SkyTableTypography status={'active'}>{record.quantityPO}</SkyTableTypography>
                   </ListItemRow>
                   <ListItemRow
                     {...props}
@@ -123,9 +124,9 @@ const ProductListItem: React.FC<Props> = ({ record, newRecord, setNewRecord, ...
                       setNewRecord({ ...newRecord, dateInputNPL: DayJS(val).format(DatePattern.iso8601) })
                     }
                   >
-                    <Typography.Text type='secondary' className='w-full font-medium'>
+                    <SkyTableTypography status={'active'}>
                       {DayJS(record.dateInputNPL).format(DatePattern.display)}
-                    </Typography.Text>
+                    </SkyTableTypography>
                   </ListItemRow>
                   <ListItemRow
                     {...props}
@@ -139,9 +140,9 @@ const ProductListItem: React.FC<Props> = ({ record, newRecord, setNewRecord, ...
                       setNewRecord({ ...newRecord, dateOutputFCR: DayJS(val).format(DatePattern.iso8601) })
                     }
                   >
-                    <Typography.Text type='secondary' className='w-full font-medium'>
+                    <SkyTableTypography status={'active'}>
                       {DayJS(record.dateOutputFCR).format(DatePattern.display)}
-                    </Typography.Text>
+                    </SkyTableTypography>
                   </ListItemRow>
                   <ListItemRow
                     {...props}
@@ -160,9 +161,9 @@ const ProductListItem: React.FC<Props> = ({ record, newRecord, setNewRecord, ...
                     value={newRecord.groupID}
                     onValueChange={(val) => setNewRecord({ ...newRecord, groupID: val })}
                   >
-                    <Typography.Text type='secondary' className='w-full font-medium'>
+                    <SkyTableTypography status={record.productGroup?.group?.status}>
                       {record.productGroup?.group?.name}
-                    </Typography.Text>
+                    </SkyTableTypography>
                   </ListItemRow>
                   <ListItemRow
                     {...props}
@@ -182,9 +183,9 @@ const ProductListItem: React.FC<Props> = ({ record, newRecord, setNewRecord, ...
                     value={newRecord.printID}
                     onValueChange={(val) => setNewRecord({ ...newRecord, printID: val })}
                   >
-                    <Typography.Text type='secondary' className='w-full font-medium'>
+                    <SkyTableTypography status={record.printablePlace?.print?.status}>
                       {record.printablePlace?.print?.name}
-                    </Typography.Text>
+                    </SkyTableTypography>
                   </ListItemRow>
                 </Space>
                 <ProductProgressStatus collapse record={record} />

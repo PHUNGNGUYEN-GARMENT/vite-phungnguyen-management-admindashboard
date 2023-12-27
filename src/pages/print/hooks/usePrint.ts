@@ -114,11 +114,11 @@ export default function usePrint(table: UseTableProps<PrintTableDataType>) {
     onDataSuccess?: (meta: ResponseDataType | undefined) => void
   ) => {
     console.log(record)
-    await printService.deleteItemByPk(record.id!, setLoading, (meta, msg) => {
+    await printService.updateItemByPk(record.id!, { status: 'deleted' }, setLoading, (meta, msg) => {
       if (meta) {
         if (meta.success) {
           handleConfirmDeleting(record.id!)
-          message.success(msg)
+          message.success('Deleted!')
         }
       } else {
         message.error(msg)

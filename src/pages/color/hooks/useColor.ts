@@ -123,11 +123,11 @@ export default function useColor(table: UseTableProps<ColorTableDataType>) {
     onDataSuccess?: (meta: ResponseDataType | undefined) => void
   ) => {
     console.log(record)
-    await colorService.deleteItemByPk(record.id!, setLoading, (meta, msg) => {
+    await colorService.updateItemByPk(record.id!, { status: 'deleted' }, setLoading, (meta, msg) => {
       if (meta) {
         if (meta.success) {
           handleConfirmDeleting(record.id!)
-          message.success(msg)
+          message.success('Deleted!')
         }
       } else {
         message.error(msg)

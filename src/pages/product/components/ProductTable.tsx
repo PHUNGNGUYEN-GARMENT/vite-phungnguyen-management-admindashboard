@@ -11,6 +11,7 @@ import useTable from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
+import SkyTableTypography from '~/components/sky-ui/SkyTableTypography'
 import ImportationTable from '~/pages/importation/components/ImportationTable'
 import { Color, Group, Print } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
@@ -90,7 +91,9 @@ const ProductTable: React.FC = () => {
               return { label: i.name, value: i.id, optionData: i.id }
             })}
           >
-            <span>{record.productGroup?.group?.name}</span>
+            <SkyTableTypography status={record.productGroup?.group?.status}>
+              {record.productGroup?.group?.name}
+            </SkyTableTypography>
           </EditableStateCell>
         </>
       )
@@ -117,7 +120,9 @@ const ProductTable: React.FC = () => {
               return { label: i.name, value: i.id, optionData: i.id }
             })}
           >
-            <span>{record.printablePlace?.print?.name}</span>
+            <SkyTableTypography status={record.printablePlace?.print?.status}>
+              {record.printablePlace?.print?.name}
+            </SkyTableTypography>
           </EditableStateCell>
         </>
       )
@@ -218,7 +223,9 @@ const ProductTable: React.FC = () => {
               })}
             >
               <Flex className='' justify='space-between' align='center' gap={10}>
-                <Typography.Text>{record.productColor?.color?.name}</Typography.Text>
+                <SkyTableTypography status={record.productColor?.color?.status}>
+                  {record.productColor?.color?.name}
+                </SkyTableTypography>
                 {record.productColor && (
                   <ColorPicker size='middle' format='hex' value={record.productColor?.color?.hexColor} disabled />
                 )}

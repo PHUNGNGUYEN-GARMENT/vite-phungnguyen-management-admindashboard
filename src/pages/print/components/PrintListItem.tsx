@@ -1,55 +1,29 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-refresh/only-export-components */
 import React, { memo } from 'react'
-import { TableItemWithKey } from '~/components/hooks/useTable'
-import ListItem from '~/components/sky-ui/SkyTable/ListItem'
-import { PrintTableDataType } from './PrintTable'
+import SkyListItem, { SkyListItemProps } from '~/components/sky-ui/SkyList/SkyListItem'
+import { PrintTableDataType } from '../PrintPage'
 
-interface Props extends React.HTMLAttributes<HTMLElement> {
-  data: TableItemWithKey<PrintTableDataType>
-  isEditing: boolean
-  editingKey: React.Key
-  dateCreation: boolean
-  onSaveClick?: React.MouseEventHandler<HTMLElement> | undefined
-  onClickStartEditing?: React.MouseEventHandler<HTMLElement> | undefined
-  onConfirmCancelEditing?: (e?: React.MouseEvent<HTMLElement>) => void
-  onConfirmCancelDeleting?: (e?: React.MouseEvent<HTMLElement>) => void
-  onConfirmDelete?: (e?: React.MouseEvent<HTMLElement>) => void
-  onStartDeleting?: (key: React.Key) => void
+interface Props extends SkyListItemProps<PrintTableDataType> {
+  newRecord: any
+  setNewRecord: (newRecord: any) => void
 }
 
-const PrintListItem: React.FC<Props> = ({
-  data,
-  isEditing,
-  editingKey,
-  dateCreation,
-  onSaveClick,
-  onClickStartEditing,
-  onConfirmCancelEditing,
-  onConfirmCancelDeleting,
-  onConfirmDelete,
-  onStartDeleting,
-  ...props
-}) => {
+const PrintListItem: React.FC<Props> = ({ record, newRecord, setNewRecord, ...props }) => {
   return (
-    <>
-      <ListItem
-        itemId={data.key ?? data.id!}
-        isEditing={isEditing}
-        createdAt={data.createdAt}
-        updatedAt={data.updatedAt}
-        editingKey={editingKey}
-        dateCreation={dateCreation}
-        onSaveClick={onSaveClick}
-        onClickStartEditing={onClickStartEditing}
-        onConfirmCancelEditing={onConfirmCancelEditing}
-        onConfirmCancelDeleting={onConfirmCancelDeleting}
-        onConfirmDelete={onConfirmDelete}
-        onStartDeleting={onStartDeleting}
-        label={`${data.name}`}
-        name='name'
-        {...props}
-      />
-    </>
+    <SkyListItem
+      label={record.name}
+      labelName='name'
+      record={record}
+      key={record.key}
+      labelEditing
+      value={newRecord.name}
+      onChange={(e) => setNewRecord({ ...newRecord, name: e.target.value })}
+      defaultValue={record.name}
+      isEditing={props.isEditing}
+      isDateCreation={props.isDateCreation}
+      actions={props.actions}
+    />
   )
 }
 
