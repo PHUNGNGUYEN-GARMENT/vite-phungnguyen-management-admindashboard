@@ -5,9 +5,7 @@ import { errorFormatter } from '~/utils/promise-formatter'
 const NAMESPACE = 'sewing-line-deliveries'
 
 export default {
-  createNewItem: async (
-    item: SewingLineDelivery
-  ): Promise<ResponseDataType | undefined> => {
+  createNewItem: async (item: SewingLineDelivery): Promise<ResponseDataType | undefined> => {
     return await client
       .post(`${NAMESPACE}`, {
         sewingLineID: item.sewingLineID,
@@ -40,9 +38,7 @@ export default {
         errorFormatter(error)
       })
   },
-  getItems: async (
-    bodyRequest: RequestBodyType
-  ): Promise<ResponseDataType | undefined> => {
+  getItems: async (bodyRequest: RequestBodyType): Promise<ResponseDataType | undefined> => {
     return await client
       .post(`${NAMESPACE}/find`, {
         ...bodyRequest
@@ -57,10 +53,7 @@ export default {
         errorFormatter(error)
       })
   },
-  updateItemByPk: async (
-    id: number,
-    item: SewingLineDelivery
-  ): Promise<ResponseDataType | undefined> => {
+  updateItemByPk: async (id: number, item: SewingLineDelivery): Promise<ResponseDataType | undefined> => {
     return client
       .put(`${NAMESPACE}/${id}`, {
         ...item

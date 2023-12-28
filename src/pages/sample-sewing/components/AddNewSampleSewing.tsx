@@ -15,9 +15,7 @@ const AddNewSampleSewing: React.FC<Props> = () => {
     <Flex vertical gap={20}>
       <Typography.Title level={2}>Add new sample sewing</Typography.Title>
       <Flex align='center' gap={5}>
-        <Typography.Text className='w-24 flex-shrink-0'>
-          Print place:
-        </Typography.Text>
+        <Typography.Text className='w-24 flex-shrink-0'>Print place:</Typography.Text>
       </Flex>
     </Flex>
   )

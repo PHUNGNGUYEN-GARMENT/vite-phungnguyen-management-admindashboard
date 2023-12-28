@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Typography } from 'antd'
 import { ColumnType } from 'antd/es/table'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
+import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import { GroupTableDataType } from '../GroupPage'
 import useGroup from '../hooks/useGroup'
 import ModalAddNewGroup from './ModalAddNewGroup'
@@ -48,7 +48,7 @@ const GroupTable: React.FC<Props> = () => {
             value={newRecord.name}
             onValueChange={(val) => setNewRecord({ ...newRecord, name: val })}
           >
-            <Typography.Text className='text-md flex-shrink-0 font-bold'>{record.name}</Typography.Text>
+            <SkyTableTypography status={record.status}>{record.name}</SkyTableTypography>
           </EditableStateCell>
         )
       }

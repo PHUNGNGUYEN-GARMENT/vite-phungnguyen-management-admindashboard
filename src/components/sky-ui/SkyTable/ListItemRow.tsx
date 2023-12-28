@@ -2,13 +2,17 @@
 /* eslint-disable react-refresh/only-export-components */
 import { Flex, Typography } from 'antd'
 import React, { memo } from 'react'
+import { ItemStatusType } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import { cn } from '~/utils/helpers'
 import EditableStateCell, { EditableStateCellProps } from './EditableStateCell'
+import SkyTableTypography from './SkyTableTypography'
 
 interface Props extends EditableStateCellProps {
-  label: string | React.ReactNode
+  label?: string | React.ReactNode
   children?: React.ReactNode
+  status?: ItemStatusType
+  render?: string | React.ReactNode
 }
 
 const ListItemRow = ({ ...props }: Props) => {
@@ -23,9 +27,13 @@ const ListItemRow = ({ ...props }: Props) => {
         {props.children ? (
           props.children
         ) : (
-          <Typography.Text type='secondary' className='w-full font-medium'>
-            {props.inputType !== 'datepicker' ? props.value : DayJS(props.value).format(DatePattern.display)}
-          </Typography.Text>
+          <SkyTableTypography status={props.status}>
+            {props.render
+              ? props.render
+              : props.inputType !== 'datepicker'
+                ? props.value
+                : DayJS(props.value).format(DatePattern.display)}
+          </SkyTableTypography>
         )}
       </EditableStateCell>
     </Flex>

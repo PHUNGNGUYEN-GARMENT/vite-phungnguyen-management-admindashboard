@@ -1,9 +1,11 @@
 import { Typography } from 'antd'
 import { BlockProps } from 'antd/es/typography/Base'
 import { ItemStatusType } from '~/typing'
+import DotRequired from '../DotRequired'
 
 export interface SkyTableTypographyProps extends BlockProps {
   status?: ItemStatusType
+  required?: boolean
 }
 
 const SkyTableTypography = ({ status, ...props }: SkyTableTypographyProps) => {
@@ -14,7 +16,7 @@ const SkyTableTypography = ({ status, ...props }: SkyTableTypographyProps) => {
         className='w-full font-medium'
         type={status === 'deleted' ? 'danger' : undefined}
       >
-        {props.children}
+        {props.children} {props.required && <DotRequired />}
       </Typography.Text>
     </>
   )

@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ColorPicker, Typography } from 'antd'
+import { ColorPicker } from 'antd'
 import type { Color as AntColor } from 'antd/es/color-picker'
 import { ColumnType } from 'antd/es/table'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import { default as EditableStateCell } from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
+import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import { ColorTableDataType } from '../ColorPage'
 import useColor from '../hooks/useColor'
 import ModalAddNewColor from './ModalAddNewColor'
@@ -49,7 +50,7 @@ const ColorTable: React.FC<Props> = () => {
             value={newRecord.name}
             onValueChange={(val) => setNewRecord({ ...newRecord, name: val })}
           >
-            <Typography.Text className='text-md flex-shrink-0 font-bold'>{record.name}</Typography.Text>
+            <SkyTableTypography status={record.status}>{record.name}</SkyTableTypography>
           </EditableStateCell>
         )
       }

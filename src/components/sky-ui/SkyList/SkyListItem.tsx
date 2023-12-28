@@ -3,10 +3,14 @@
 import { Flex, Input, List, Typography } from 'antd'
 import { useSelector } from 'react-redux'
 import { RootState } from '~/store/store'
+import { ItemStatusType } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import ActionRow, { ActionProps } from '../ActionRow'
+import SkyTableTypography from '../SkyTable/SkyTableTypography'
 
-export interface SkyListItemProps<T extends { key?: React.Key; createdAt?: string; updatedAt?: string }> {
+export interface SkyListItemProps<
+  T extends { key?: React.Key; status?: ItemStatusType; createdAt?: string; updatedAt?: string }
+> {
   record: T
   label?: string
   isEditing: boolean
@@ -20,7 +24,7 @@ export interface SkyListItemProps<T extends { key?: React.Key; createdAt?: strin
   children?: React.ReactNode
 }
 
-const SkyListItem = <T extends { key?: React.Key; createdAt?: string; updatedAt?: string }>({
+const SkyListItem = <T extends { key?: React.Key; status?: ItemStatusType; createdAt?: string; updatedAt?: string }>({
   record,
   children,
   ...props
@@ -40,9 +44,7 @@ const SkyListItem = <T extends { key?: React.Key; createdAt?: string; updatedAt?
               className='text-lg font-medium'
             />
           ) : (
-            <Typography.Title className='m-0 h-fit p-0' level={4}>
-              {props.label}
-            </Typography.Title>
+            <SkyTableTypography status={record.status}>{props.label}</SkyTableTypography>
           )}
 
           <ActionRow

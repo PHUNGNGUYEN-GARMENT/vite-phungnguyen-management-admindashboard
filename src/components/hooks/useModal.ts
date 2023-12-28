@@ -16,8 +16,7 @@ export const useModal = create<ModalState>()((set) => ({
   confirmLoading: false,
   modalText: '',
   setOpen: (status: boolean) => set(() => ({ open: status })),
-  setConfirmLoading: (status: boolean) =>
-    set(() => ({ confirmLoading: status })),
+  setConfirmLoading: (status: boolean) => set(() => ({ confirmLoading: status })),
   setModalText: (text: string) => set(() => ({ modalText: text })),
   handleOk: () =>
     set(() => ({

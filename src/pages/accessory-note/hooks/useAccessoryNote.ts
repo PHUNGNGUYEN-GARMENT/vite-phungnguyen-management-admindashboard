@@ -2,17 +2,17 @@
 import { App as AntApp } from 'antd'
 import { useEffect, useState } from 'react'
 import { RequestBodyType, ResponseDataType, defaultRequestBody } from '~/api/client'
-import GroupAPI from '~/api/services/GroupAPI'
+import AccessoryNoteAPI from '~/api/services/AccessoryNoteAPI'
 import { TableItemWithKey, UseTableProps } from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
-import { Group } from '~/typing'
-import { GroupTableDataType } from '../GroupPage'
+import { AccessoryNote } from '~/typing'
+import { AccessoryNoteTableDataType } from '../type'
 
-export default function useGroup(table: UseTableProps<GroupTableDataType>) {
+export default function useAccessoryNote(table: UseTableProps<AccessoryNoteTableDataType>) {
   const { setLoading, setDataSource, handleConfirmCancelEditing, handleConfirmDeleting } = table
 
   // Services
-  const groupService = useAPIService<Group>(GroupAPI)
+  const accessoryNoteService = useAPIService<AccessoryNote>(AccessoryNoteAPI)
 
   // UI
   const { message } = AntApp.useApp()
@@ -20,54 +20,59 @@ export default function useGroup(table: UseTableProps<GroupTableDataType>) {
   // State changes
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [searchText, setSearchText] = useState<string>('')
-  const [newRecord, setNewRecord] = useState<any>({})
+  const [newRecord, setNewRecord] = useState<AccessoryNoteTableDataType>({})
 
   // List
-  const [groups, setGroups] = useState<Group[]>([])
+  const [accessoryNotes, setAccessoryNotes] = useState<AccessoryNote[]>([])
 
   // New
-  const [groupNew, setGroupNew] = useState<Group | undefined>(undefined)
+  const [accessoryNoteNew, setAccessoryNoteNew] = useState<AccessoryNote | undefined>(undefined)
 
   const loadData = async () => {
-    await groupService.getListItems(defaultRequestBody, setLoading, (meta) => {
+    await accessoryNoteService.getListItems(defaultRequestBody, setLoading, (meta) => {
       if (meta?.success) {
-        setGroups(meta.data as Group[])
+        setAccessoryNotes(meta.data as AccessoryNote[])
       }
     })
   }
 
   useEffect(() => {
     loadData()
-  }, [groupNew])
+  }, [accessoryNoteNew])
 
   useEffect(() => {
-    selfConvertDataSource(groups)
-  }, [groups])
+    selfConvertDataSource(accessoryNotes)
+  }, [accessoryNotes])
 
-  const selfConvertDataSource = (_groups: Group[]) => {
-    const items = _groups ? _groups : groups
+  const selfConvertDataSource = (_accessoryNotes: AccessoryNote[]) => {
+    const items = _accessoryNotes ? _accessoryNotes : accessoryNotes
     setDataSource(
       items.map((item) => {
         return {
           ...item,
           key: item.id
-        } as GroupTableDataType
+        } as AccessoryNoteTableDataType
       })
     )
   }
 
-  const handleSaveClick = async (record: TableItemWithKey<GroupTableDataType>, newRecord: any) => {
+  const handleSaveClick = async (record: TableItemWithKey<AccessoryNoteTableDataType>, newRecord: any) => {
     // const row = (await form.validateFields()) as any
     console.log({ old: record, new: newRecord })
     if (newRecord) {
       try {
-        if (newRecord.name && newRecord.name !== record.name) {
-          console.log('Group progressing...')
-          await groupService.updateItemByPk(record.id!, { name: newRecord.name }, setLoading, (meta) => {
-            if (!meta?.success) {
-              throw new Error('API update group failed')
+        if (newRecord.title !== record.title || newRecord.summary !== record.summary) {
+          console.log('AccessoryNote progressing...')
+          await accessoryNoteService.updateItemByPk(
+            record.id!,
+            { title: newRecord.title, summary: newRecord.summary },
+            setLoading,
+            (meta) => {
+              if (!meta?.success) {
+                throw new Error('API update group failed')
+              }
             }
-          })
+          )
         }
         message.success('Success!')
       } catch (error) {
@@ -86,14 +91,15 @@ export default function useGroup(table: UseTableProps<GroupTableDataType>) {
     try {
       console.log(formAddNew)
       setLoading(true)
-      await groupService.createNewItem(
+      await accessoryNoteService.createNewItem(
         {
-          name: formAddNew.name
+          title: formAddNew.title,
+          summary: formAddNew.summary
         },
         setLoading,
         async (meta, msg) => {
           if (meta?.data) {
-            setGroupNew(meta.data as Group)
+            setAccessoryNoteNew(meta.data as AccessoryNote)
             message.success(msg)
           } else {
             console.log('Errr')
@@ -110,11 +116,11 @@ export default function useGroup(table: UseTableProps<GroupTableDataType>) {
   }
 
   const handleConfirmDelete = async (
-    record: TableItemWithKey<GroupTableDataType>,
+    record: TableItemWithKey<AccessoryNoteTableDataType>,
     onDataSuccess?: (meta: ResponseDataType | undefined) => void
   ) => {
     console.log(record)
-    await groupService.deleteItemByPk(record.id!, setLoading, (meta, msg) => {
+    await accessoryNoteService.deleteItemByPk(record.id!, setLoading, (meta, msg) => {
       if (meta) {
         if (meta.success) {
           handleConfirmDeleting(record.id!)
@@ -128,7 +134,7 @@ export default function useGroup(table: UseTableProps<GroupTableDataType>) {
   }
 
   const handlePageChange = async (_page: number) => {
-    groupService.setPage(_page)
+    accessoryNoteService.setPage(_page)
     const body: RequestBodyType = {
       ...defaultRequestBody,
       paginator: {
@@ -140,30 +146,30 @@ export default function useGroup(table: UseTableProps<GroupTableDataType>) {
         term: searchText
       }
     }
-    await groupService.getListItems(body, setLoading, (meta) => {
+    await accessoryNoteService.getListItems(body, setLoading, (meta) => {
       if (meta?.success) {
-        selfConvertDataSource(meta?.data as Group[])
+        selfConvertDataSource(meta?.data as AccessoryNote[])
       }
     })
   }
 
   const handleResetClick = async () => {
     setSearchText('')
-    await groupService.getListItems(defaultRequestBody, setLoading, (meta) => {
+    await accessoryNoteService.getListItems(defaultRequestBody, setLoading, (meta) => {
       if (meta?.success) {
-        selfConvertDataSource(meta?.data as Group[])
+        selfConvertDataSource(meta?.data as AccessoryNote[])
       }
     })
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleSortChange = async (checked: boolean, _event: React.MouseEvent<HTMLButtonElement>) => {
-    await groupService.sortedListItems(
+    await accessoryNoteService.sortedListItems(
       checked ? 'asc' : 'desc',
       setLoading,
       (meta) => {
         if (meta?.success) {
-          selfConvertDataSource(meta?.data as Group[])
+          selfConvertDataSource(meta?.data as AccessoryNote[])
         }
       },
       { field: 'name', term: searchText }
@@ -172,7 +178,7 @@ export default function useGroup(table: UseTableProps<GroupTableDataType>) {
 
   const handleSearch = async (value: string) => {
     if (value.length > 0) {
-      await groupService.getListItems(
+      await accessoryNoteService.getListItems(
         {
           ...defaultRequestBody,
           search: {
@@ -183,7 +189,7 @@ export default function useGroup(table: UseTableProps<GroupTableDataType>) {
         setLoading,
         (meta) => {
           if (meta?.success) {
-            selfConvertDataSource(meta?.data as Group[])
+            selfConvertDataSource(meta?.data as AccessoryNote[])
           }
         }
       )
@@ -200,7 +206,7 @@ export default function useGroup(table: UseTableProps<GroupTableDataType>) {
     setLoading,
     setOpenModal,
     setDataSource,
-    groupService,
+    accessoryNoteService,
     handleSaveClick,
     handleAddNewItem,
     handleConfirmDelete,

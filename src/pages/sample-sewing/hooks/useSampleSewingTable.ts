@@ -22,14 +22,10 @@ export default function useSampleSewingTable() {
     })
   }, [])
 
-  const isEditing = (record: SampleSewingTableDataType) =>
-    record.key === editingKey
-  const isDelete = (record: SampleSewingTableDataType) =>
-    record.key === deleteKey
+  const isEditing = (record: SampleSewingTableDataType) => record.key === editingKey
+  const isDelete = (record: SampleSewingTableDataType) => record.key === deleteKey
 
-  const handleEdit = (
-    record: Partial<SampleSewingTableDataType> & { key: React.Key }
-  ) => {
+  const handleEdit = (record: Partial<SampleSewingTableDataType> & { key: React.Key }) => {
     form.setFieldsValue({
       productID: '',
       dateSewingNPL: '',
@@ -103,9 +99,7 @@ export default function useSampleSewingTable() {
     const itemFound = dataSource.find((item) => item.key === key)
     if (itemFound) {
       SampleSewingAPI.deleteItem(itemFound.sampleSewingID).then(() => {
-        const dataSourceRemovedItem = dataSource.filter(
-          (item) => item.sampleSewingID !== key
-        )
+        const dataSourceRemovedItem = dataSource.filter((item) => item.sampleSewingID !== key)
         setDataSource(dataSourceRemovedItem)
       })
     }

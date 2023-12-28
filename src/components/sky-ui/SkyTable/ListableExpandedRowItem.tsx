@@ -4,7 +4,7 @@ import { Breakpoint, Divider, Flex, Typography } from 'antd'
 import React, { memo, useEffect, useState } from 'react'
 import { ItemWithKeyAndTitleType } from '~/typing'
 import { cn } from '~/utils/helpers'
-import EditableCellNew from './EditableFormCellNew'
+import EditableCellNew from './EditableFormCell'
 
 interface Props<T extends ItemWithKeyAndTitleType> extends React.HTMLAttributes<HTMLElement> {
   item: T

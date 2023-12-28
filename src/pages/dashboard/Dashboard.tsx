@@ -113,28 +113,14 @@ const Dashboard = () => {
           placeholder='ProFormText'
           rules={[{ required: true, message: '这是必填项' }]}
         />
-        <ProFormText
-          width='md'
-          name='company'
-          label='ProFormText'
-          placeholder='ProFormText'
-        />
+        <ProFormText width='md' name='company' label='ProFormText' placeholder='ProFormText' />
       </ProForm.Group>
       <ProForm.Group>
         <ProFormDigit name='count' label='ProForm.Group' width='lg' />
       </ProForm.Group>
       <ProForm.Group>
-        <ProFormText
-          name={['contract', 'name']}
-          width='md'
-          label='ProFormText'
-          placeholder='ProFormText'
-        />
-        <ProFormDateRangePicker
-          width='md'
-          name={['contract', 'createTime']}
-          label='ProFormDateRangePicker'
-        />
+        <ProFormText name={['contract', 'name']} width='md' label='ProFormText' placeholder='ProFormText' />
+        <ProFormDateRangePicker width='md' name={['contract', 'createTime']} label='ProFormDateRangePicker' />
       </ProForm.Group>
       <ProForm.Group>
         <ProFormSelect
@@ -182,21 +168,9 @@ const Dashboard = () => {
         />
       </ProForm.Group>
       <ProFormText width='sm' name='id' label='id' />
-      <ProFormText
-        name='project'
-        width='md'
-        disabled
-        label='ProFormText'
-        initialValue='xxxx项目'
-      />
+      <ProFormText name='project' width='md' disabled label='ProFormText' initialValue='xxxx项目' />
       <ProFormTextArea colProps={{ span: 24 }} name='address' label='address' />
-      <ProFormText
-        width='xs'
-        name='mangerName'
-        disabled
-        label='ProFormText'
-        initialValue='启途'
-      />
+      <ProFormText width='xs' name='mangerName' disabled label='ProFormText' initialValue='启途' />
       <ProFormCascader
         width='md'
         request={async () => [

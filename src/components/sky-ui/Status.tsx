@@ -9,10 +9,7 @@ interface Props extends React.HTMLAttributes<HTMLElement> {
 
 const Status: React.FC<Props> = ({ ...props }) => {
   return (
-    <div
-      {...props}
-      className={cn('flex flex-row items-center gap-2', props.className)}
-    >
+    <div {...props} className={cn('flex flex-row items-center gap-2', props.className)}>
       <span
         className={cn('h-[6px] w-[6px] rounded-full', {
           'bg-success': props.type === 'success',

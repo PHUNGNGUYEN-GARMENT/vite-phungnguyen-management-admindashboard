@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ColorPicker, Flex, Typography } from 'antd'
+import { ColorPicker, Flex } from 'antd'
 import type { ColumnType } from 'antd/es/table'
 import { useEffect, useState } from 'react'
 import { defaultRequestBody } from '~/api/client'
@@ -11,7 +11,7 @@ import useTable from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
-import SkyTableTypography from '~/components/sky-ui/SkyTableTypography'
+import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import ImportationTable from '~/pages/importation/components/ImportationTable'
 import { Color, Group, Print } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
@@ -148,7 +148,9 @@ const ProductTable: React.FC = () => {
               setNewRecord({ ...newRecord, dateInputNPL: DayJS(val).format(DatePattern.iso8601) })
             }
           >
-            <span>{DayJS(record.dateInputNPL).format(DatePattern.display)}</span>
+            <SkyTableTypography status={'active'}>
+              {DayJS(record.dateInputNPL).format(DatePattern.display)}
+            </SkyTableTypography>
           </EditableStateCell>
         </>
       )
@@ -173,7 +175,7 @@ const ProductTable: React.FC = () => {
               value={newRecord.productCode}
               onValueChange={(val) => setNewRecord({ ...newRecord, productCode: val })}
             >
-              <Typography.Text className='text-md flex-shrink-0 font-bold'>{record.productCode}</Typography.Text>
+              <SkyTableTypography status={'active'}>{record.productCode}</SkyTableTypography>
             </EditableStateCell>
           </>
         )
@@ -196,7 +198,7 @@ const ProductTable: React.FC = () => {
               value={newRecord.quantityPO}
               onValueChange={(val) => setNewRecord({ ...newRecord, quantityPO: val })}
             >
-              <span>{record.quantityPO}</span>
+              <SkyTableTypography status={'active'}>{record.quantityPO}</SkyTableTypography>
             </EditableStateCell>
           </>
         )
@@ -223,7 +225,7 @@ const ProductTable: React.FC = () => {
               })}
             >
               <Flex className='' justify='space-between' align='center' gap={10}>
-                <SkyTableTypography status={record.productColor?.color?.status}>
+                <SkyTableTypography status={record.productColor?.color?.status} className='w-fit'>
                   {record.productColor?.color?.name}
                 </SkyTableTypography>
                 {record.productColor && (
@@ -266,7 +268,9 @@ const ProductTable: React.FC = () => {
                 setNewRecord({ ...newRecord, dateOutputFCR: DayJS(val).format(DatePattern.iso8601) })
               }
             >
-              <span>{DayJS(record.dateOutputFCR).format(DatePattern.display)}</span>
+              <SkyTableTypography status={'active'}>
+                {DayJS(record.dateOutputFCR).format(DatePattern.display)}
+              </SkyTableTypography>
             </EditableStateCell>
           </>
         )

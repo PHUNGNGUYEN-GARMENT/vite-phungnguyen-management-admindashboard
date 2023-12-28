@@ -1,9 +1,5 @@
 import { useState } from 'react'
-import {
-  RequestBodyType,
-  ResponseDataType,
-  defaultRequestBody
-} from '~/api/client'
+import { RequestBodyType, ResponseDataType, defaultRequestBody } from '~/api/client'
 import SewingLineDeliveryAPI from '~/api/services/SewingLineDeliveryAPI'
 import { SewingLineDelivery, SortDirection } from '~/typing'
 
@@ -16,10 +12,7 @@ export default function useSewingLineDelivery() {
 
   const handleAddNewItem = async (
     itemNew: SewingLineDelivery,
-    onDataSuccess?: (
-      data: ResponseDataType | undefined,
-      status: boolean
-    ) => void
+    onDataSuccess?: (data: ResponseDataType | undefined, status: boolean) => void
   ) => {
     setLoading(true)
     await SewingLineDeliveryAPI.createNewItem(itemNew)
@@ -42,10 +35,7 @@ export default function useSewingLineDelivery() {
 
   const getDataList = async (
     params: RequestBodyType,
-    onDataSuccess?: (
-      data: ResponseDataType | undefined,
-      status: boolean
-    ) => void
+    onDataSuccess?: (data: ResponseDataType | undefined, status: boolean) => void
   ) => {
     setLoading(true)
     const body: RequestBodyType = {
@@ -71,10 +61,7 @@ export default function useSewingLineDelivery() {
 
   const handleSorted = async (
     direction: SortDirection,
-    onDataSuccess?: (
-      data: ResponseDataType | undefined,
-      status: boolean
-    ) => void
+    onDataSuccess?: (data: ResponseDataType | undefined, status: boolean) => void
   ) => {
     const body: RequestBodyType = {
       ...defaultRequestBody,
@@ -93,10 +80,7 @@ export default function useSewingLineDelivery() {
   const handleUpdateItem = async (
     id: number,
     itemToUpdate: SewingLineDelivery,
-    onDataSuccess?: (
-      data: ResponseDataType | undefined,
-      status: boolean
-    ) => void
+    onDataSuccess?: (data: ResponseDataType | undefined, status: boolean) => void
   ) => {
     setLoading(true)
     SewingLineDeliveryAPI.updateItemByPk(id, itemToUpdate)
@@ -117,10 +101,7 @@ export default function useSewingLineDelivery() {
 
   const handleDeleteItem = async (
     id: number,
-    onDataSuccess?: (
-      data: ResponseDataType | undefined,
-      status: boolean
-    ) => void
+    onDataSuccess?: (data: ResponseDataType | undefined, status: boolean) => void
   ) => {
     setLoading(true)
     await SewingLineDeliveryAPI.updateItemByPk(id, { status: 'deleted' })
