@@ -16,12 +16,13 @@ const ColorListItem: React.FC<Props> = ({ record, newRecord, setNewRecord, ...pr
   return (
     <SkyListItem
       label={record.name}
-      labelName='name'
+      dataIndex='name'
       record={record}
       key={record.key}
       labelEditing
+      inputType='text'
       value={newRecord.name}
-      onChange={(e) => setNewRecord({ ...newRecord, name: e.target.value })}
+      onValueChange={(e) => setNewRecord({ ...newRecord, name: e })}
       defaultValue={record.name}
       isEditing={props.isEditing}
       isDateCreation={props.isDateCreation}

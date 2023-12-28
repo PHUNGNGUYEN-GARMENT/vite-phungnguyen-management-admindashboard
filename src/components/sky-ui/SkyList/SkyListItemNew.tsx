@@ -6,21 +6,27 @@ import { RootState } from '~/store/store'
 import { ItemStatusType } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import ActionRow, { ActionProps } from '../ActionRow'
-import EditableStateCell, { EditableStateCellProps } from '../SkyTable/EditableStateCell'
 import SkyTableTypography from '../SkyTable/SkyTableTypography'
 
 export interface SkyListItemProps<
   T extends { key?: React.Key; status?: ItemStatusType; createdAt?: string; updatedAt?: string }
-> extends EditableStateCellProps {
+> {
   record: T
   label?: string
+  isEditing: boolean
   labelEditing?: boolean
+  labelName?: string
   isDateCreation?: boolean
   actions?: ActionProps<T>
+  value?: any
+  onChange?: React.ChangeEventHandler<HTMLInputElement> | undefined
+  defaultValue?: string | number | readonly string[] | undefined
   children?: React.ReactNode
 }
 
-const SkyListItem = <T extends { key?: React.Key; status?: ItemStatusType; createdAt?: string; updatedAt?: string }>({
+const SkyListItemNew = <
+  T extends { key?: React.Key; status?: ItemStatusType; createdAt?: string; updatedAt?: string }
+>({
   record,
   children,
   ...props
@@ -31,16 +37,17 @@ const SkyListItem = <T extends { key?: React.Key; status?: ItemStatusType; creat
     <List.Item className='mb-5 w-full rounded-sm bg-white'>
       <Flex vertical className='w-full' gap={10}>
         <Flex align='center' justify='space-between' gap={10}>
-          <EditableStateCell
-            {...props}
-            inputType={props.inputType}
-            onChange={(e: any) => {
-              console.log(e)
-            }}
-            isEditing={(props.labelEditing && props.isEditing && user.isAdmin) ?? false}
-          >
+          {props.labelEditing && props.isEditing && user.isAdmin ? (
+            <Input
+              size='large'
+              defaultValue={props.defaultValue}
+              onChange={props.onChange}
+              value={props.value}
+              className='text-lg font-medium'
+            />
+          ) : (
             <SkyTableTypography status={record.status}>{props.label}</SkyTableTypography>
-          </EditableStateCell>
+          )}
 
           <ActionRow
             isEditing={props.isEditing}
@@ -101,4 +108,4 @@ const SkyListItem = <T extends { key?: React.Key; status?: ItemStatusType; creat
   )
 }
 
-export default SkyListItem
+export default SkyListItemNew

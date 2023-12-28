@@ -16,11 +16,13 @@ const AccessoryNoteListItem: React.FC<Props> = ({ record, newRecord, setNewRecor
   return (
     <SkyListItem
       label={record.title}
-      labelName='title'
+      dataIndex='title'
       record={record}
+      labelEditing
+      inputType='textarea'
       key={record.key}
       value={newRecord.title}
-      onChange={(e) => setNewRecord({ ...newRecord, title: e.target.value })}
+      onValueChange={(e) => setNewRecord({ ...newRecord, title: e })}
       defaultValue={record.title}
       isEditing={props.isEditing}
       isDateCreation={props.isDateCreation}
@@ -36,7 +38,9 @@ const AccessoryNoteListItem: React.FC<Props> = ({ record, newRecord, setNewRecor
           value={newRecord.summary}
           onValueChange={(val) => setNewRecord({ ...newRecord, summary: val })}
         >
-          <SkyTableTypography status={record.status}>{record.title}</SkyTableTypography>
+          <SkyTableTypography type='secondary' status={record.status}>
+            {record.summary}
+          </SkyTableTypography>
         </ListItemRow>
       </Flex>
     </SkyListItem>

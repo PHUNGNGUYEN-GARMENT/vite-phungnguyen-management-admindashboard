@@ -54,7 +54,7 @@ const AccessoryNoteTable: React.FC<Props> = () => {
       }
     },
     {
-      title: 'Chi tiết',
+      title: 'Mô tả',
       dataIndex: 'summary',
       width: '15%',
       render: (_value: any, record: TableItemWithKey<AccessoryNoteTableDataType>) => {
@@ -62,7 +62,7 @@ const AccessoryNoteTable: React.FC<Props> = () => {
           <EditableStateCell
             isEditing={table.isEditing(record.key!)}
             dataIndex='summary'
-            title='Chi tiết'
+            title='Mô tả'
             inputType='textarea'
             initialValue={record.summary}
             value={newRecord?.summary}

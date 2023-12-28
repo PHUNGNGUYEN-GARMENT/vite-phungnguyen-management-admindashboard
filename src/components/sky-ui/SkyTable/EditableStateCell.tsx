@@ -10,8 +10,8 @@ import { cn } from '~/utils/helpers'
 
 export interface EditableStateCellProps extends HTMLAttributes<HTMLElement> {
   isEditing: boolean
-  dataIndex: string
-  value: any
+  dataIndex?: string
+  value?: any
   initialValue?: any
   onValueChange?: (value: any, option?: any) => void
   selectItems?: (DefaultOptionType & { optionData?: any })[]
@@ -52,6 +52,15 @@ function EditableStateCell({
           <InputNumber
             value={value}
             onChange={(val) => onValueChange?.(val)}
+            defaultValue={initialValue}
+            className={cn('w-full', restProps.className)}
+          />
+        )
+      case 'textarea':
+        return (
+          <Input.TextArea
+            value={value}
+            onChange={(val) => onValueChange?.(val.target.value)}
             defaultValue={initialValue}
             className={cn('w-full', restProps.className)}
           />
