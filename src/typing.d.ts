@@ -167,10 +167,18 @@ export interface Importation {
   updatedAt?: string
 }
 
-export interface SampleSewing {
+export type SampleSewing = {
   id?: number
   productID?: number
-  dateSewingNPL?: string
+  dateSubmissionNPL?: string | null
+  dateApprovalSO?: string | null
+  dateApprovalPP?: string | null
+  dateSubmissionFirstTime?: string | null
+  dateSubmissionSecondTime?: string | null
+  dateSubmissionThirdTime?: string | null
+  dateSubmissionForthTime?: string | null
+  dateSubmissionFifthTime?: string | null
+  status?: ItemStatusType
   createdAt?: string
   updatedAt?: string
   product?: Product

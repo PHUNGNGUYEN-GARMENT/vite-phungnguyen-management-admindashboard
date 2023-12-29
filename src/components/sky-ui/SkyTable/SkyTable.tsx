@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Table } from 'antd'
 import type { ColumnType, TableProps } from 'antd/es/table'
+import { useState } from 'react'
 import { useSelector } from 'react-redux'
 import { ResponseDataType } from '~/api/client'
 import { ProductTableDataType } from '~/pages/product/type'
@@ -16,6 +17,7 @@ export interface SkyTableProps<T extends { key?: React.Key; createdAt?: string; 
   columns: ColumnType<T>[]
   isDateCreation?: boolean
   editingKey: React.Key
+  deletingKey: React.Key
   actions?: ActionProps<T>
 }
 
@@ -23,10 +25,15 @@ const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: s
   ...props
 }: SkyTableProps<T>) => {
   const user = useSelector((state: RootState) => state.user)
-
+  const [editKey, setEditKey] = useState<React.Key>('-1')
+  // const [deleteKey, setDeleteKey] = useState<React.Key>('-1')
   const isEditing = (key?: React.Key): boolean => {
     return props.editingKey === key
   }
+
+  // const isDeleting = (key?: React.Key): boolean => {
+  //   return props.deletingKey === key
+  // }
 
   const actionsCols: ColumnType<T>[] = [
     {
@@ -40,24 +47,28 @@ const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: s
               isEditing={isEditing(record.key)}
               onAdd={{
                 onClick: (e) => props.actions?.onAdd?.onClick?.(e, record),
-                disabled: props.actions?.onAdd?.disabled ?? isEditing(record.key),
+                disabled: props.actions?.onAdd?.disabled ?? isEditing(editKey),
                 isShow: props.actions?.onAdd ? props.actions.onAdd.isShow ?? true : false
               }}
               onSave={{
                 onClick: (e) => props.actions?.onSave?.onClick?.(e, record),
-                disabled: props.actions?.onSave?.disabled ?? isEditing(record.key),
+                disabled: props.actions?.onSave?.disabled ?? isEditing(editKey),
                 isShow: props.actions?.onSave ? props.actions.onSave.isShow ?? true : false
               }}
               onEdit={{
                 onClick: (e) => {
+                  setEditKey(record.key!)
                   props.actions?.onEdit?.onClick?.(e, record)
                 },
-                disabled: props.actions?.onEdit?.disabled ?? isEditing(record.key),
+                disabled: props.actions?.onEdit?.disabled ?? isEditing(editKey),
                 isShow: props.actions?.onEdit ? props.actions.onEdit.isShow ?? true : false
               }}
               onDelete={{
-                onClick: (e) => props.actions?.onDelete?.onClick?.(e, record),
-                disabled: props.actions?.onDelete?.disabled ?? isEditing(record.key),
+                onClick: (e) => {
+                  // setDeleteKey(record.key!)
+                  props.actions?.onDelete?.onClick?.(e, record)
+                },
+                disabled: props.actions?.onDelete?.disabled ?? isEditing(editKey),
                 isShow: props.actions?.onDelete ? props.actions.onDelete.isShow ?? true : false
               }}
               onConfirmCancelEditing={(e) => props.actions?.onConfirmCancelEditing?.(e)}

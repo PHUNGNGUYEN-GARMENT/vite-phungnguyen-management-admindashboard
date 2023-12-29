@@ -9,7 +9,14 @@ export default {
     return await client
       .post(`${NAMESPACE}`, {
         productID: item.productID,
-        dateSewingNPL: item.dateSewingNPL,
+        dateSubmissionNPL: item.dateSubmissionNPL,
+        dateApprovalPP: item.dateApprovalPP,
+        dateApprovalSO: item.dateApprovalSO,
+        dateSubmissionFirstTime: item.dateSubmissionFirstTime,
+        dateSubmissionSecondTime: item.dateSubmissionSecondTime,
+        dateSubmissionThirdTime: item.dateSubmissionThirdTime,
+        dateSubmissionForthTime: item.dateSubmissionForthTime,
+        dateSubmissionFifthTime: item.dateSubmissionFifthTime,
         status: 'active'
       })
       .then((res) => {
@@ -63,10 +70,10 @@ export default {
         errorFormatter(error)
       })
   },
-  updateItemByPk: async (id: number, item: SampleSewing): Promise<ResponseDataType | undefined> => {
+  updateItemByPk: async (id: number, itemToUpdate: SampleSewing): Promise<ResponseDataType | undefined> => {
     return client
       .put(`${NAMESPACE}/${id}`, {
-        ...item
+        ...itemToUpdate
       })
       .then((res) => {
         if (res.data) {
@@ -83,11 +90,11 @@ export default {
       field: string
       key: React.Key
     },
-    item: SampleSewing
+    itemToUpdate: SampleSewing
   ): Promise<ResponseDataType | undefined> => {
     return client
       .put(`${NAMESPACE}/${query.field}/${query.key}`, {
-        ...item
+        ...itemToUpdate
       })
       .then((res) => {
         if (res.data) {

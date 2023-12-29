@@ -31,15 +31,10 @@ const SkyListItem = <T extends { key?: React.Key; status?: ItemStatusType; creat
     <List.Item className='mb-5 w-full rounded-sm bg-white'>
       <Flex vertical className='w-full' gap={10}>
         <Flex align='center' justify='space-between' gap={10}>
-          <EditableStateCell
-            {...props}
-            inputType={props.inputType}
-            onChange={(e: any) => {
-              console.log(e)
-            }}
-            isEditing={(props.labelEditing && props.isEditing && user.isAdmin) ?? false}
-          >
-            <SkyTableTypography status={record.status}>{props.label}</SkyTableTypography>
+          <EditableStateCell {...props} isEditing={(props.labelEditing && props.isEditing && user.isAdmin) ?? false}>
+            <SkyTableTypography className='text-lg font-semibold' status={record.status}>
+              {props.label}
+            </SkyTableTypography>
           </EditableStateCell>
 
           <ActionRow

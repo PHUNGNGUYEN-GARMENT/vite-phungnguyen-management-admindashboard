@@ -55,6 +55,7 @@ const BaseLayout: React.FC<Props> = ({
           placeholder={searchPlaceHolder ? searchPlaceHolder : 'Search...'}
           size='middle'
           enterButton
+          name='search'
           allowClear
           value={searchValue}
           defaultValue={defaultSearchValue}

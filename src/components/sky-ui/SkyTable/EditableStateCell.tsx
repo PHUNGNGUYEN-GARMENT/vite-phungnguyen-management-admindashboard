@@ -50,6 +50,7 @@ function EditableStateCell({
       case 'number':
         return (
           <InputNumber
+            name={dataIndex}
             value={value}
             onChange={(val) => onValueChange?.(val)}
             defaultValue={initialValue}
@@ -59,6 +60,7 @@ function EditableStateCell({
       case 'textarea':
         return (
           <Input.TextArea
+            name={dataIndex}
             value={value}
             onChange={(val) => onValueChange?.(val.target.value)}
             defaultValue={initialValue}
@@ -138,6 +140,7 @@ function EditableStateCell({
       case 'datepicker':
         return (
           <DatePicker
+            name={dataIndex}
             onChange={(val) => onValueChange?.(val)}
             defaultValue={initialValue}
             value={value}
@@ -148,6 +151,7 @@ function EditableStateCell({
       default:
         return (
           <Input
+            name={dataIndex}
             onChange={(event) => onValueChange?.(event.target.value)}
             defaultValue={initialValue}
             value={value}

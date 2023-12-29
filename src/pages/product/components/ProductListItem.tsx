@@ -54,7 +54,7 @@ const ProductListItem: React.FC<Props> = ({ record, newRecord, setNewRecord, ...
   return (
     <SkyListItem
       label={record.productCode}
-      labelName='productCode'
+      dataIndex='productCode'
       record={record}
       key={record.key}
       labelEditing

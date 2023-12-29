@@ -12,8 +12,6 @@ import {
   PrintIcon,
   SewingMachineIcon
 } from '~/assets/icons'
-import SampleSewingPage from '~/pages/sample-sewing/SampleSewingPage'
-import SewingLinePage from '~/pages/sewing-line/SewingLinePage'
 const Dashboard = lazy(() => import('~/pages/dashboard/Dashboard'))
 const Cutting = lazy(() => import('~/pages/cutting/Cutting'))
 const ColorPage = lazy(() => import('~/pages/color/ColorPage'))
@@ -22,6 +20,8 @@ const NotePage = lazy(() => import('~/pages/accessory-note/AccessoryNotePage'))
 const AccessoryPage = lazy(() => import('~/pages/accessory/AccessoryPage'))
 const PrintPage = lazy(() => import('~/pages/print/PrintPage'))
 const ProductPage = lazy(() => import('~/pages/product/ProductPage'))
+const SampleSewingPage = lazy(() => import('~/pages/sample-sewing/SampleSewingPage'))
+const SewingLinePage = lazy(() => import('~/pages/sewing-line/SewingLinePage'))
 const SewingLineDeliveryPage = lazy(() => import('~/pages/sewing-line-delivery/SewingLineDeliveryPage'))
 const FinishPage = lazy(() => import('~/pages/Finish/Finish'))
 
@@ -58,7 +58,7 @@ export const appRoutes: SideType[] = [
   {
     key: '3',
     name: 'May mẫu',
-    path: 'sewing',
+    path: 'sample-sewing',
     component: SampleSewingPage,
     isGroup: false,
     icon: SewingMachineIcon

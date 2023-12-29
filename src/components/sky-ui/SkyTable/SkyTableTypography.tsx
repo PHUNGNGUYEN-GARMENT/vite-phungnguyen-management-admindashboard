@@ -15,7 +15,7 @@ const SkyTableTypography = ({ status, ...props }: SkyTableTypographyProps) => {
       <Typography.Text
         {...props}
         delete={status === 'deleted'}
-        className={cn('w-full font-medium', props.className)}
+        className={cn('w-full flex-shrink-0', props.className)}
         type={props.type ? props.type : status === 'deleted' ? 'danger' : undefined}
       >
         {props.children} {props.required && <DotRequired />}
