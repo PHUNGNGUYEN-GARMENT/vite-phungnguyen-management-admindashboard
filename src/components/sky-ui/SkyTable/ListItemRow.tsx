@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-refresh/only-export-components */
-import { Flex, Typography } from 'antd'
+import { Flex } from 'antd'
 import React, { memo } from 'react'
 import { ItemStatusType } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
@@ -21,7 +21,7 @@ const ListItemRow = ({ ...props }: Props) => {
       {typeof props.label !== 'string' ? (
         props.label
       ) : (
-        <Typography.Text className='w-full font-semibold'>{props.label}</Typography.Text>
+        <SkyTableTypography className='w-1/2 font-semibold'>{props.label}:</SkyTableTypography>
       )}
       <EditableStateCell {...props} title={props.title ? (typeof props.label === 'string' ? props.label : '') : ''}>
         {props.children ? (

@@ -73,7 +73,7 @@ const SampleSewingListItem: React.FC<Props> = ({ record, newRecord, setNewRecord
                     initialValue={record.productColor?.colorID}
                     onValueChange={(val) => setNewRecord({ ...newRecord, colorID: val })}
                   >
-                    <Flex className='w-full' justify='space-between' align='center' gap={10}>
+                    <Flex className='' justify='space-between' align='center' gap={10}>
                       <SkyTableTypography status={record.productColor?.color?.status}>
                         {record.productColor?.color?.name}
                       </SkyTableTypography>

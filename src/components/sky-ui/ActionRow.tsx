@@ -4,6 +4,7 @@ import { BaseButtonProps } from 'antd/es/button/button'
 import React, { HTMLAttributes } from 'react'
 import { useSelector } from 'react-redux'
 import { RootState } from '~/store/store'
+import { cn } from '~/utils/helpers'
 
 export interface ActionButtonProps<T extends { key?: React.Key }> extends BaseButtonProps {
   onClick?: (e: React.MouseEvent<HTMLElement, MouseEvent>, record?: T) => void
@@ -25,6 +26,7 @@ export interface ActionProps<T extends { key?: React.Key }> extends BaseButtonPr
 
 export interface ActionRowProps<T extends { key?: React.Key }> extends HTMLAttributes<HTMLElement> {
   isEditing?: boolean
+  vertical?: boolean
   onAdd?: ActionButtonProps<T>
   onSave: ActionButtonProps<T>
   onEdit: ActionButtonProps<T>
@@ -38,10 +40,10 @@ const ActionRow = <T extends { key?: React.Key }>({ ...props }: ActionRowProps<T
   const user = useSelector((state: RootState) => state.user)
 
   return (
-    <Flex className=''>
+    <Flex className={props.className}>
       <Flex align='center' justify='space-between'>
         {props.isEditing && props.onSave.isShow ? (
-          <Flex gap={5}>
+          <Flex className={cn('flex-col', props.className)} gap={5}>
             <Button type='primary' onClick={props.onSave.onClick}>
               Save
             </Button>
@@ -60,7 +62,7 @@ const ActionRow = <T extends { key?: React.Key }>({ ...props }: ActionRowProps<T
             </PopConfirm>
           </Flex>
         ) : (
-          <Flex gap={10}>
+          <Flex gap={10} className={cn('flex-col', props.className)} justify='center'>
             {props.onAdd?.isShow && (
               <Button type='dashed' disabled={props.onAdd.disabled} onClick={(e) => props.onAdd?.onClick?.(e)}>
                 Add

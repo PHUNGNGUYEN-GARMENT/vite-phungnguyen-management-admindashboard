@@ -87,7 +87,7 @@ const SampleSewingTable: React.FC<Props> = () => {
                 return { label: i.name, value: i.id, optionData: i.hexColor }
               })}
             >
-              <Flex className='flex-wrap' justify='space-between' align='center' gap={10}>
+              <Flex justify='center' align='center' gap={10}>
                 <SkyTableTypography status={record.productColor?.color?.status} className='w-fit'>
                   {record.productColor?.color?.name}
                 </SkyTableTypography>
