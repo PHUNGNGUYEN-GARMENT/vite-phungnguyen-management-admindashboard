@@ -91,29 +91,22 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
     console.log({ old: record, new: newRecord })
     if (newRecord) {
       try {
-        if (
-          (newRecord.productCode && newRecord.productCode !== record.productCode) ||
-          (newRecord.quantityPO && newRecord.quantityPO !== record.quantityPO) ||
-          (newRecord.dateInputNPL && DayJS(newRecord.dateInputNPL).diff(DayJS(record.dateInputNPL))) ||
-          (newRecord.dateOutputFCR && DayJS(newRecord.dateOutputFCR).diff(DayJS(record.dateOutputFCR)))
-        ) {
-          console.log('Product progressing...')
-          await productService.updateItemByPk(
-            Number(record.id!),
-            {
-              productCode: newRecord.productCode,
-              quantityPO: newRecord.quantityPO,
-              dateInputNPL: newRecord.dateInputNPL && DayJS(newRecord.dateInputNPL).format(DatePattern.iso8601),
-              dateOutputFCR: newRecord.dateOutputFCR && DayJS(newRecord.dateOutputFCR).format(DatePattern.iso8601)
-            },
-            setLoading,
-            (meta) => {
-              if (!meta?.success) {
-                throw new Error('API update Product failed')
-              }
+        console.log('Product progressing...')
+        await productService.updateItemByPk(
+          Number(record.id!),
+          {
+            productCode: newRecord.productCode,
+            quantityPO: newRecord.quantityPO,
+            dateInputNPL: newRecord.dateInputNPL,
+            dateOutputFCR: newRecord.dateOutputFCR
+          },
+          setLoading,
+          (meta) => {
+            if (!meta?.success) {
+              throw new Error('API update Product failed')
             }
-          )
-        }
+          }
+        )
         if (newRecord.colorID && newRecord.colorID !== record.productColor?.colorID) {
           console.log('Product color progressing...')
           await productColorService.createOrUpdateItemBy(

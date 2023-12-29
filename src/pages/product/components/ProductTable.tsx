@@ -142,14 +142,13 @@ const ProductTable: React.FC = () => {
             title='NPL'
             inputType='datepicker'
             required={true}
-            initialValue={DayJS(record.dateInputNPL)}
-            value={DayJS(newRecord.dateInputNPL)}
+            initialValue={record.dateInputNPL ? DayJS(record.dateInputNPL) : ''}
             onValueChange={(val: any) =>
-              setNewRecord({ ...newRecord, dateInputNPL: DayJS(val).format(DatePattern.iso8601) })
+              setNewRecord({ ...newRecord, dateInputNPL: val ? DayJS(val).format(DatePattern.iso8601) : null })
             }
           >
             <SkyTableTypography status={'active'}>
-              {DayJS(record.dateInputNPL).format(DatePattern.display)}
+              {record.dateInputNPL ? DayJS(record.dateInputNPL).format(DatePattern.display) : ''}
             </SkyTableTypography>
           </EditableStateCell>
         </>
@@ -218,7 +217,7 @@ const ProductTable: React.FC = () => {
               inputType='colorselector'
               required={false}
               initialValue={record.productColor?.colorID}
-              value={newRecord.colorID}
+              // value={newRecord.colorID}
               onValueChange={(val) => setNewRecord({ ...newRecord, colorID: val })}
               selectItems={colors.map((i) => {
                 return { label: i.name, value: i.id, optionData: i.hexColor }
@@ -262,14 +261,13 @@ const ProductTable: React.FC = () => {
               title='FCR'
               inputType='datepicker'
               required={true}
-              initialValue={DayJS(record.dateOutputFCR)}
-              value={DayJS(newRecord.dateOutputFCR)}
+              initialValue={record.dateOutputFCR ? DayJS(record.dateOutputFCR) : ''}
               onValueChange={(val: any) =>
-                setNewRecord({ ...newRecord, dateOutputFCR: DayJS(val).format(DatePattern.iso8601) })
+                setNewRecord({ ...newRecord, dateOutputFCR: val ? DayJS(val).format(DatePattern.iso8601) : null })
               }
             >
               <SkyTableTypography status={'active'}>
-                {DayJS(record.dateOutputFCR).format(DatePattern.display)}
+                {record.dateOutputFCR ? DayJS(record.dateOutputFCR).format(DatePattern.display) : ''}
               </SkyTableTypography>
             </EditableStateCell>
           </>
@@ -297,6 +295,7 @@ const ProductTable: React.FC = () => {
           loading={table.loading}
           columns={columns}
           editingKey={table.editingKey}
+          deletingKey={table.deletingKey}
           dataSource={table.dataSource}
           rowClassName='editable-row'
           metaData={productService.metaData}
@@ -336,6 +335,7 @@ const ProductTable: React.FC = () => {
                       pagination={false}
                       isDateCreation={table.dateCreation}
                       editingKey={table.editingKey}
+                      deletingKey={table.deletingKey}
                     />
                   )}
                   <ProductProgressStatus collapse record={record} />

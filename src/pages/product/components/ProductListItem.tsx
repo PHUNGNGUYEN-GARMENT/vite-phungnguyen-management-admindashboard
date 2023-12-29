@@ -60,7 +60,7 @@ const ProductListItem: React.FC<Props> = ({ record, newRecord, setNewRecord, ...
       labelEditing
       value={newRecord.productCode}
       defaultValue={record.productCode}
-      onChange={(e) => setNewRecord({ ...newRecord, productCode: e.target.value })}
+      onValueChange={(val) => setNewRecord({ ...newRecord, productCode: val })}
       isEditing={props.isEditing}
       isDateCreation={props.isDateCreation}
       actions={props.actions}
@@ -118,8 +118,7 @@ const ProductListItem: React.FC<Props> = ({ record, newRecord, setNewRecord, ...
                     isEditing={props.isEditing}
                     dataIndex='dateInputNPL'
                     inputType='datepicker'
-                    initialValue={DayJS(record.dateInputNPL)}
-                    value={DayJS(newRecord.dateInputNPL)}
+                    initialValue={record.dateInputNPL ? DayJS(record.dateInputNPL) : ''}
                     onValueChange={(val) =>
                       setNewRecord({ ...newRecord, dateInputNPL: DayJS(val).format(DatePattern.iso8601) })
                     }
@@ -134,8 +133,7 @@ const ProductListItem: React.FC<Props> = ({ record, newRecord, setNewRecord, ...
                     isEditing={props.isEditing}
                     dataIndex='dateOutputFCR'
                     inputType='datepicker'
-                    initialValue={DayJS(record.dateOutputFCR)}
-                    value={DayJS(newRecord.dateOutputFCR)}
+                    initialValue={record.dateOutputFCR ? DayJS(record.dateOutputFCR) : ''}
                     onValueChange={(val) =>
                       setNewRecord({ ...newRecord, dateOutputFCR: DayJS(val).format(DatePattern.iso8601) })
                     }
