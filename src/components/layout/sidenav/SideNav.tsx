@@ -8,7 +8,10 @@ import { appRoutes } from '~/utils/route'
 import SideIcon from './SideIcon'
 import SideItem from './SideItem'
 
-export interface Props extends React.HTMLAttributes<HTMLElement> {}
+export interface Props extends React.HTMLAttributes<HTMLElement> {
+  openDrawer: boolean
+  setOpenDrawer: (enable: boolean) => void
+}
 
 type MenuItem = Required<MenuProps>['items'][number]
 
@@ -30,7 +33,7 @@ const items: MenuProps['items'] = appRoutes.map((route) => {
 })
 
 // eslint-disable-next-line no-empty-pattern
-const SideNav: React.FC<Props> = ({ ...props }) => {
+const SideNav: React.FC<Props> = ({ openDrawer, setOpenDrawer, ...props }) => {
   const { pathname } = useLocation()
   const [selectedKey, setSelectedKey] = useState<string>(appRoutes[0].key)
 
@@ -49,6 +52,7 @@ const SideNav: React.FC<Props> = ({ ...props }) => {
 
   const onClick: MenuProps['onClick'] = (e) => {
     setSelectedKey(e.key)
+    setOpenDrawer(!openDrawer)
   }
 
   return (

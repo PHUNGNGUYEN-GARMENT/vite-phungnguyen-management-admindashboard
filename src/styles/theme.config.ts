@@ -6,10 +6,12 @@ const theme: ThemeConfig = {
   },
   components: {
     Layout: {
-      siderBg: '#fff'
+      siderBg: '#ffffff',
+      headerBg: 'var(--background)'
     },
     Button: {
-      defaultColor: '#000'
+      defaultColor: '#000000',
+      textHoverBg: '#ffffff'
     }
   }
 }

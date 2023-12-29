@@ -5,7 +5,7 @@ import Footer from './Footer'
 import Header from './Header'
 import SideNav from './sidenav/SideNav'
 
-const { Sider, Header: AntHeader, Content } = Layout
+const { Sider, Content } = Layout
 
 const Main: React.FC = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -25,15 +25,14 @@ const Main: React.FC = () => {
       >
         <Layout>
           <Sider trigger={null}>
-            <SideNav />
+            <SideNav openDrawer={openDrawer} setOpenDrawer={setOpenDrawer} />
           </Sider>
         </Layout>
       </Drawer>
-      <Sider
+      {/* <Sider
         breakpoint='lg'
         collapsedWidth={0}
         collapsible
-        // collapsed={collapsed}
         trigger={null}
         width={100}
         style={{
@@ -46,16 +45,13 @@ const Main: React.FC = () => {
         }}
       >
         <SideNav />
-      </Sider>
-      <Layout className='lg:ml-[100px]'>
-        <AntHeader className='h-fit p-0'>
-          <Header
-            // collapsed={collapsed}
-            onMenuClick={() => {
-              setOpenDrawer(!openDrawer)
-            }}
-          />
-        </AntHeader>
+      </Sider> */}
+      <Layout>
+        <Header
+          onMenuClick={() => {
+            setOpenDrawer(!openDrawer)
+          }}
+        />
         <Content className='min-h-screen bg-background p-5'>
           <Outlet />
         </Content>
