@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Table } from 'antd'
-import type { ColumnType, TableProps } from 'antd/es/table'
+import type { ColumnsType, TableProps } from 'antd/es/table'
 import { useState } from 'react'
 import { useSelector } from 'react-redux'
 import { ResponseDataType } from '~/api/client'
@@ -14,7 +14,6 @@ export interface SkyTableProps<T extends { key?: React.Key; createdAt?: string; 
   extends TableProps<T> {
   metaData: ResponseDataType | undefined
   onPageChange?: (page: number, pageSize: number) => void
-  columns: ColumnType<T>[]
   isDateCreation?: boolean
   editingKey: React.Key
   deletingKey: React.Key
@@ -35,7 +34,7 @@ const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: s
   //   return props.deletingKey === key
   // }
 
-  const actionsCols: ColumnType<T>[] = [
+  const actionsCols: ColumnsType<T> = [
     {
       title: 'Operation',
       width: '1%',
@@ -81,7 +80,7 @@ const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: s
     }
   ]
 
-  const dateCreationColumns: ColumnType<T>[] = [
+  const dateCreationColumns: ColumnsType<T> = [
     {
       title: 'Created date',
       dataIndex: 'createdAt',
@@ -101,15 +100,23 @@ const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: s
     }
   ]
 
-  const adminColumns: ColumnType<T>[] = props.isDateCreation
+  const adminColumns: ColumnsType<T> = props.isDateCreation
     ? props.actions?.isShow
-      ? [...props.columns, ...dateCreationColumns, ...actionsCols]
-      : [...props.columns, ...dateCreationColumns]
+      ? props.columns
+        ? [...props.columns, ...dateCreationColumns, ...actionsCols]
+        : [...dateCreationColumns, ...actionsCols]
+      : props.columns
+        ? [...props.columns, ...dateCreationColumns]
+        : [...dateCreationColumns]
     : props.actions?.isShow
-      ? [...props.columns, ...actionsCols]
-      : [...props.columns]
+      ? props.columns
+        ? [...props.columns, ...actionsCols]
+        : [...actionsCols]
+      : props.columns
+        ? [...props.columns!]
+        : []
 
-  const staffColumns: ColumnType<T>[] = [...props.columns]
+  const staffColumns: ColumnsType<T> = [...props.columns!]
 
   return (
     <>
@@ -146,7 +153,7 @@ const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: s
 //   editingKey: React.Key,
 //   newRecord: any,
 //   setNewRecord: (newRecord: any) => void
-// ): ColumnType<T>[] => {
+// ): ColumnsType<T>[] => {
 //   return cols.map((item) => {
 //     return {
 //       title: item.title,

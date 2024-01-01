@@ -1,16 +1,16 @@
 import client, { RequestBodyType, ResponseDataType } from '~/api/client'
-import { GarmentAccessory } from '~/typing'
+import { GarmentAccessoryNote } from '~/typing'
 import { errorFormatter } from '~/utils/promise-formatter'
 
-const NAMESPACE = 'garment-accessories'
+const NAMESPACE = 'garment-accessory-notes'
 
 export default {
-  createNewItem: async (item: GarmentAccessory): Promise<ResponseDataType | undefined> => {
+  createNewItem: async (item: GarmentAccessoryNote): Promise<ResponseDataType | undefined> => {
     return await client
       .post(`${NAMESPACE}`, {
-        productID: item.productID,
-        amountCutting: item.amountCutting,
-        passingDeliveryDate: item.passingDeliveryDate,
+        accessoryNoteID: item.accessoryNoteID,
+        garmentAccessoryID: item.garmentAccessoryID,
+        noteStatus: item.noteStatus,
         status: item.status ?? 'active'
       })
       .then((res) => {
@@ -64,7 +64,7 @@ export default {
         errorFormatter(error)
       })
   },
-  updateItemByPk: async (id: number, item: GarmentAccessory): Promise<ResponseDataType | undefined> => {
+  updateItemByPk: async (id: number, item: GarmentAccessoryNote): Promise<ResponseDataType | undefined> => {
     return client
       .put(`${NAMESPACE}/${id}`, {
         ...item
@@ -84,7 +84,7 @@ export default {
       field: string
       key: React.Key
     },
-    item: GarmentAccessory
+    item: GarmentAccessoryNote
   ): Promise<ResponseDataType | undefined> => {
     return client
       .put(`${NAMESPACE}/${query.field}/${query.key}`, {

@@ -17,7 +17,7 @@ const Cutting = lazy(() => import('~/pages/cutting/Cutting'))
 const ColorPage = lazy(() => import('~/pages/color/ColorPage'))
 const GroupPage = lazy(() => import('~/pages/group/GroupPage'))
 const NotePage = lazy(() => import('~/pages/accessory-note/AccessoryNotePage'))
-const AccessoryPage = lazy(() => import('~/pages/accessory/AccessoryPage'))
+const GarmentAccessoryPage = lazy(() => import('~/pages/garment-accessory/GarmentAccessoryPage'))
 const PrintPage = lazy(() => import('~/pages/print/PrintPage'))
 const ProductPage = lazy(() => import('~/pages/product/ProductPage'))
 const SampleSewingPage = lazy(() => import('~/pages/sample-sewing/SampleSewingPage'))
@@ -67,7 +67,7 @@ export const appRoutes: SideType[] = [
     key: '14',
     name: 'Phụ liệu',
     path: 'accessory',
-    component: AccessoryPage,
+    component: GarmentAccessoryPage,
     isGroup: false,
     icon: SewingMachineIcon
   },

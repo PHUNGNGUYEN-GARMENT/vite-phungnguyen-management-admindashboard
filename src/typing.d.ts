@@ -14,7 +14,18 @@ export type SortDirection = 'asc' | 'desc'
 
 export type ItemStatusType = 'draft' | 'active' | 'closed' | 'archived' | 'deleted'
 
-export type InputType = 'number' | 'text' | 'colorpicker' | 'select' | 'datepicker' | 'colorselector' | 'textarea'
+export type NoteItemStatusType = 'lake' | 'enough' | 'arrived' | 'not_arrived'
+
+export type InputType =
+  | 'number'
+  | 'text'
+  | 'colorpicker'
+  | 'select'
+  | 'datepicker'
+  | 'colorselector'
+  | 'textarea'
+  | 'checkbox'
+  | 'noteselectmultiple'
 
 export type ItemWithKeyAndTitleType = {
   key?: React.Key
@@ -59,8 +70,8 @@ export interface Product {
   id?: number
   productCode?: string
   quantityPO?: number
-  dateInputNPL?: string
-  dateOutputFCR?: string
+  dateInputNPL?: string | null
+  dateOutputFCR?: string | null
   progress?: {
     sewing?: number
     iron?: number
@@ -137,12 +148,10 @@ export interface ProductGroup {
 export interface GarmentAccessory {
   id?: number
   productID?: number
-  accessoryNoteIDs?: number[]
-  cuttingAccessoryDate?: string
-  amountCuttingAccessory?: number
+  amountCutting?: number
+  passingDeliveryDate?: string | null
   status?: ItemStatusType
   product?: Product
-  accessoryNotes?: AccessoryNote[]
   createdAt?: string
   updatedAt?: string
 }
@@ -156,12 +165,26 @@ export interface AccessoryNote {
   updatedAt?: string
 }
 
+export interface GarmentAccessoryNote {
+  id?: number
+  productID?: number
+  product?: Product
+  accessoryNoteID?: number
+  accessoryNote?: AccessoryNote
+  garmentAccessoryID?: number
+  garmentAccessory?: GarmentAccessory
+  noteStatus?: NoteItemStatusType
+  status?: ItemStatusType
+  createdAt?: string
+  updatedAt?: string
+}
+
 export interface Importation {
   id?: number
   productID?: number
   quantity?: number
   status?: ItemStatusType
-  dateImported?: string
+  dateImported?: string | null
   product?: Product
   createdAt?: string
   updatedAt?: string
@@ -187,7 +210,7 @@ export type SampleSewing = {
 export interface DateSendSampleSewing {
   dateSampleSewingID: number
   productID: number
-  dateSend: string
+  dateSend: string | null
   createdAt: string
   updatedAt: string
   orderNumber: number
@@ -197,7 +220,7 @@ export interface CuttingGroup {
   productID: number
   quantityRealCut: number
   amountRemaining: number
-  dateSendEmbroideredPrint: string
+  dateSendEmbroideredPrint: string | null
   quantityEmbroideredPrintArrived: number
   quantityDeliveredBTP: number
   createdAt: string
@@ -209,7 +232,7 @@ export interface EmbroideredDelivery {
   embroideredDeliveryID: number
   productID: number
   quantitySewingOut: number
-  dateExpectedCompletion: string
+  dateExpectedCompletion: string | null
   createdAt: string
   updatedAt: string
   orderNumber: number
@@ -221,7 +244,7 @@ export interface SewingLineDelivery {
   sewingLineID?: number
   quantityOrigin?: number
   quantitySewed?: number
-  expiredDate?: string
+  expiredDate?: string | null
   status?: ItemStatusType
   product?: Product
   sewingLine?: SewingLine

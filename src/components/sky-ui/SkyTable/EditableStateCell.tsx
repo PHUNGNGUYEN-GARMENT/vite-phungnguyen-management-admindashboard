@@ -1,12 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-refresh/only-export-components */
-import { ColorPicker, DatePicker, Flex, Input, InputNumber, Select, Table, Typography } from 'antd'
+import { Checkbox, ColorPicker, DatePicker, Flex, Input, InputNumber, Select, Table, Typography } from 'antd'
+import { ItemType } from 'antd/es/menu/hooks/useItems'
 import { DefaultOptionType } from 'antd/es/select'
-import { HTMLAttributes, memo } from 'react'
+import { HTMLAttributes, memo, useState } from 'react'
 import { InputType } from '~/typing'
 import { DatePattern } from '~/utils/date-formatter'
 import { cn } from '~/utils/helpers'
+import SelectMultipleItem from '../SelectMultipleItem'
 
 export interface EditableStateCellProps extends HTMLAttributes<HTMLElement> {
   isEditing: boolean
@@ -18,6 +20,10 @@ export interface EditableStateCellProps extends HTMLAttributes<HTMLElement> {
   inputType?: InputType
   required?: boolean
   title?: string
+  disabled?: boolean
+  isShowDropdown?: boolean
+  dropdownItems?: ItemType[]
+  dropdownInitialValue?: string
 }
 
 export type EditableTableProps = Parameters<typeof Table>[0]
@@ -32,8 +38,17 @@ function EditableStateCell({
   onValueChange,
   required,
   inputType,
+  disabled,
+  isShowDropdown,
+  dropdownItems,
+  dropdownInitialValue,
   ...restProps
 }: EditableStateCellProps) {
+  const [itemSelected, setItemSelected] = useState<{ key: React.Key; values: string }>({
+    key: '',
+    values: ''
+  })
+
   const inputNode = ((): React.ReactNode => {
     switch (inputType) {
       case 'colorpicker':
@@ -44,6 +59,17 @@ function EditableStateCell({
             defaultValue={initialValue}
             value={value}
             showText
+            disabled={disabled}
+            className={cn('w-full', restProps.className)}
+          />
+        )
+      case 'checkbox':
+        return (
+          <Checkbox
+            name={dataIndex}
+            checked={value}
+            disabled={disabled}
+            onChange={(val) => onValueChange?.(val)}
             className={cn('w-full', restProps.className)}
           />
         )
@@ -52,6 +78,7 @@ function EditableStateCell({
           <InputNumber
             name={dataIndex}
             value={value}
+            disabled={disabled}
             onChange={(val) => onValueChange?.(val)}
             defaultValue={initialValue}
             className={cn('w-full', restProps.className)}
@@ -62,6 +89,7 @@ function EditableStateCell({
           <Input.TextArea
             name={dataIndex}
             value={value}
+            disabled={disabled}
             onChange={(val) => onValueChange?.(val.target.value)}
             defaultValue={initialValue}
             className={cn('w-full', restProps.className)}
@@ -81,6 +109,7 @@ function EditableStateCell({
                 } as DefaultOptionType
               })
             }
+            disabled={disabled}
             defaultValue={initialValue}
             onChange={(val, option) => onValueChange?.(val, option)}
             value={value}
@@ -102,6 +131,28 @@ function EditableStateCell({
             className={cn('w-full', restProps.className)}
           />
         )
+      case 'noteselectmultiple':
+        return (
+          <SelectMultipleItem
+            disabled={disabled}
+            defaultValue={initialValue}
+            options={
+              selectItems &&
+              selectItems.map((item) => {
+                return {
+                  label: item.label,
+                  value: item.value,
+                  key: item.optionData
+                } as DefaultOptionType
+              })
+            }
+            value={value}
+            onChange={(val, option) => onValueChange?.(val as number, option)}
+            isShowDropdown={isShowDropdown}
+            dropdownItems={dropdownItems}
+            dropdownInitialValue={dropdownInitialValue}
+          />
+        )
       case 'colorselector':
         return (
           <Select
@@ -116,6 +167,7 @@ function EditableStateCell({
                 } as DefaultOptionType
               })
             }
+            disabled={disabled}
             defaultValue={initialValue}
             onChange={(val, option) => onValueChange?.(val as number, option)}
             value={value}
@@ -144,6 +196,7 @@ function EditableStateCell({
             onChange={(val) => onValueChange?.(val)}
             defaultValue={initialValue}
             value={value}
+            disabled={disabled}
             format={DatePattern.display}
             className={cn('w-full', restProps.className)}
           />
@@ -155,6 +208,7 @@ function EditableStateCell({
             onChange={(event) => onValueChange?.(event.target.value)}
             defaultValue={initialValue}
             value={value}
+            disabled={disabled}
             className={cn('w-full', restProps.className)}
           />
         )

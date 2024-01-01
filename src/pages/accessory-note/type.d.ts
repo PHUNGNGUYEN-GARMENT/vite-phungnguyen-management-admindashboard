@@ -1,11 +1,5 @@
-import { ItemStatusType } from '~/typing'
+import { AccessoryNote } from '~/typing'
 
-export type AccessoryNoteTableDataType = {
+export interface AccessoryNoteTableDataType extends AccessoryNote {
   key?: React.Key
-  id?: number
-  title?: string
-  summary?: string
-  status?: ItemStatusType
-  createdAt?: string
-  updatedAt?: string
 }
