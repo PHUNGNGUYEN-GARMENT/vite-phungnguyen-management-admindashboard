@@ -1,20 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-refresh/only-export-components */
-import {
-  Checkbox,
-  ColorPicker,
-  DatePicker,
-  Divider,
-  Flex,
-  Input,
-  InputNumber,
-  Select,
-  Space,
-  Table,
-  Tag,
-  Typography
-} from 'antd'
+import { Checkbox, ColorPicker, DatePicker, Flex, Input, InputNumber, Select, Table, Typography } from 'antd'
 import { DefaultOptionType } from 'antd/es/select'
 import { HTMLAttributes, memo } from 'react'
 import { InputType } from '~/typing'
@@ -171,34 +158,12 @@ function EditableStateCell({
                 return {
                   label: item.label,
                   value: item.value,
-                  key: item.optionData
+                  key: item.value
                 } as DefaultOptionType
               })
             }
             value={value}
             onChange={(val: number[], option) => onValueChange?.(val, option)}
-            tagRender={(props) => {
-              const { label, value, closable, onClose } = props
-              const onPreventMouseDown = (event: React.MouseEvent<HTMLSpanElement>) => {
-                event.preventDefault()
-                event.stopPropagation()
-              }
-              return (
-                <Tag
-                  color={'default'}
-                  onMouseDown={onPreventMouseDown}
-                  closable={closable}
-                  onClose={onClose}
-                  className='m-[2px]'
-                >
-                  <Space size='small' align='center' className='p-1'>
-                    <Typography.Text>{label}</Typography.Text>
-                    <Divider className='m-0' type='vertical' />
-                    <Typography.Text>{value}</Typography.Text>
-                  </Space>
-                </Tag>
-              )
-            }}
             className='w-full'
           />
         )

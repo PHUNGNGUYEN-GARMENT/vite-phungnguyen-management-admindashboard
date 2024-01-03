@@ -11,7 +11,7 @@ export default {
         productID: item.productID,
         accessoryNoteID: item.accessoryNoteID,
         garmentAccessoryID: item.garmentAccessoryID,
-        garmentNoteStatusID: item.garmentNoteStatusID,
+        noteStatus: item.noteStatus,
         status: item.status ?? 'active'
       })
       .then((res) => {
@@ -33,7 +33,7 @@ export default {
             productID: item.productID,
             accessoryNoteID: item.accessoryNoteID,
             garmentAccessoryID: item.garmentAccessoryID,
-            garmentNoteStatusID: item.garmentNoteStatusID,
+            noteStatus: item.noteStatus,
             status: item.status ?? 'active'
           }
         })
@@ -54,7 +54,7 @@ export default {
         productID: item.productID,
         garmentAccessoryID: item.garmentAccessoryID,
         accessoryNoteID: item.accessoryNoteID,
-        garmentNoteStatusID: item.garmentNoteStatusID,
+        noteStatus: item.noteStatus,
         status: item.status ?? 'active'
       })
       .then((res) => {
@@ -75,7 +75,7 @@ export default {
       .post(`${NAMESPACE}/createOrUpdate/productID/${productID}`, {
         garmentAccessoryID: item.garmentAccessoryID,
         accessoryNoteID: item.accessoryNoteID,
-        garmentNoteStatusID: item.garmentNoteStatusID,
+        noteStatus: item.noteStatus,
         status: item.status ?? 'active'
       })
       .then((res) => {

@@ -173,8 +173,7 @@ export interface GarmentAccessoryNote {
   accessoryNote?: AccessoryNote
   garmentAccessoryID?: number
   garmentAccessory?: GarmentAccessory
-  garmentNoteStatusID?: number
-  garmentNoteStatus?: GarmentNoteStatus
+  noteStatus?: NoteItemStatusType
   status?: ItemStatusType
   createdAt?: string
   updatedAt?: string

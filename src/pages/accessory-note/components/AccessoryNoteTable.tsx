@@ -5,7 +5,6 @@ import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import GarmentNoteStatusTable from '~/pages/garment-note-status/components/GarmentNoteStatusTable'
 import useAccessoryNote from '../hooks/useAccessoryNote'
 import { AccessoryNoteTableDataType } from '../type'
 import ModalAddNewAccessoryNote from './ModalAddNewAccessoryNote'
@@ -117,7 +116,6 @@ const AccessoryNoteTable: React.FC<Props> = () => {
             isShow: true
           }}
         />
-        <GarmentNoteStatusTable />
       </BaseLayout>
       {openModal && (
         <ModalAddNewAccessoryNote openModal={openModal} setOpenModal={setOpenModal} onAddNew={handleAddNewItem} />

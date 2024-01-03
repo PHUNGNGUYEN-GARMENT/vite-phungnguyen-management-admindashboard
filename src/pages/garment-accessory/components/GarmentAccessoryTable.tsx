@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ColorPicker, Flex } from 'antd'
+import { ColorPicker, Flex, Space } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
+import { GarmentAccessoryNote } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import useGarmentAccessory from '../hooks/useGarmentAccessory'
 import { GarmentAccessoryTableDataType } from '../type'
@@ -194,41 +195,63 @@ const GarmentAccessoryTable: React.FC<Props> = () => {
               selectItems={accessoryNotes.map((item) => {
                 return {
                   value: item.id,
-                  label: item.title,
-                  optionData:
-                    record.garmentAccessoryNotes &&
-                    record.garmentAccessoryNotes.find((i) => i.accessoryNoteID === item.id)?.garmentNoteStatusID
+                  label: item.title
                 }
               })}
               initialValue={
-                record.garmentAccessoryNotes
-                  ? record.garmentAccessoryNotes.map((item) => {
-                      return { value: item.id, label: item.accessoryNote?.title, optionData: item.id }
-                    })
-                  : ''
+                record.garmentAccessoryNotes &&
+                record.garmentAccessoryNotes.map((item) => {
+                  return {
+                    value: item.accessoryNote?.id ?? -1,
+                    label: item.accessoryNote?.title ?? ''
+                  }
+                })
               }
-              onValueChange={(val) => {
+              onValueChange={(val: number[]) => {
                 setNewRecord({
                   ...newRecord,
-                  garmentAccessoryNotes: val
+                  garmentAccessoryNotes: val.map((item) => {
+                    return { accessoryNoteID: item, noteStatus: 'enough' } as GarmentAccessoryNote
+                  })
                 })
               }}
+              // tagRender={(props) => {
+              //   const { label, value, closable, onClose } = props
+              //   const onPreventMouseDown = (event: React.MouseEvent<HTMLSpanElement>) => {
+              //     event.preventDefault()
+              //     event.stopPropagation()
+              //   }
+              //   return (
+              //     <Tag
+              //       color={'default'}
+              //       onMouseDown={onPreventMouseDown}
+              //       closable={closable}
+              //       onClose={onClose}
+              //       className='m-[2px]'
+              //     >
+              //       <Space size='small' align='center' className='p-1'>
+              //         <Typography.Text>{label}</Typography.Text>
+              //         <Divider className='m-0' type='vertical' />
+              //         <Typography.Text>{value}</Typography.Text>
+              //       </Space>
+              //     </Tag>
+              //   )
+              // }}
             >
-              {/* <Space size='small' wrap>
+              <Space size='small' wrap>
                 {record.garmentAccessoryNotes &&
                   record.garmentAccessoryNotes.map((item, index) => {
                     return (
-                      <Typography.Link key={index} code>
-                        <Space split={<Divider type='vertical' />} size={0}>
-                          <SkyTableTypography status={item.status}>{item.accessoryNote?.title}</SkyTableTypography>
-                          <SkyTableTypography type='secondary' status={item.status}>
-                            {item.garmentNoteStatus?.title}
-                          </SkyTableTypography>
-                        </Space>
-                      </Typography.Link>
+                      <SkyTableTypography
+                        className='my-[2px] h-6 rounded-sm bg-black bg-opacity-[0.06] px-2 py-1'
+                        key={index}
+                        status={item.status}
+                      >
+                        {item.accessoryNote?.title}
+                      </SkyTableTypography>
                     )
                   })}
-              </Space> */}
+              </Space>
             </EditableStateCell>
           </>
         )

@@ -137,7 +137,7 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
                 productID: record.id!,
                 garmentAccessoryID: record.garmentAccessory!.id!,
                 accessoryNoteID: item.accessoryNoteID,
-                garmentNoteStatusID: item.garmentNoteStatusID
+                noteStatus: item.noteStatus
               } as GarmentAccessoryNote
             }),
             setLoading,
