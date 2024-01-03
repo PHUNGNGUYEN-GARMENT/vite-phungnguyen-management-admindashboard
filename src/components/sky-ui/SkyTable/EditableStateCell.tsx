@@ -1,19 +1,31 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-refresh/only-export-components */
-import { Checkbox, ColorPicker, DatePicker, Flex, Input, InputNumber, Select, Table, Typography } from 'antd'
-import { ItemType } from 'antd/es/menu/hooks/useItems'
+import {
+  Checkbox,
+  ColorPicker,
+  DatePicker,
+  Divider,
+  Flex,
+  Input,
+  InputNumber,
+  Select,
+  Space,
+  Table,
+  Tag,
+  Typography
+} from 'antd'
 import { DefaultOptionType } from 'antd/es/select'
-import { HTMLAttributes, memo, useState } from 'react'
+import { HTMLAttributes, memo } from 'react'
 import { InputType } from '~/typing'
 import { DatePattern } from '~/utils/date-formatter'
 import { cn } from '~/utils/helpers'
-import SelectMultipleItem from '../SelectMultipleItem'
 
 export interface EditableStateCellProps extends HTMLAttributes<HTMLElement> {
   isEditing: boolean
   dataIndex?: string
   value?: any
+  setLoading?: (enable: boolean) => void
   initialValue?: any
   onValueChange?: (value: any, option?: any) => void
   selectItems?: (DefaultOptionType & { optionData?: any })[]
@@ -21,9 +33,6 @@ export interface EditableStateCellProps extends HTMLAttributes<HTMLElement> {
   required?: boolean
   title?: string
   disabled?: boolean
-  isShowDropdown?: boolean
-  dropdownItems?: ItemType[]
-  dropdownInitialValue?: string
 }
 
 export type EditableTableProps = Parameters<typeof Table>[0]
@@ -36,18 +45,38 @@ function EditableStateCell({
   selectItems,
   initialValue,
   onValueChange,
+  setLoading,
   required,
   inputType,
   disabled,
-  isShowDropdown,
-  dropdownItems,
-  dropdownInitialValue,
   ...restProps
 }: EditableStateCellProps) {
-  const [itemSelected, setItemSelected] = useState<{ key: React.Key; values: string }>({
-    key: '',
-    values: ''
-  })
+  // const [itemSelects, setItemSelects] = useState<{ accessoryNoteID: React.Key; garmentNoteStatusID: React.Key }[]>([])
+
+  // const handleMenuSelectItem = (value: React.Key, info: any) => {
+  //   if (selectItems) {
+  //     const newItems = [...selectItems]
+  //     const index = selectItems.findIndex((i) => i.value === value)
+  //     if (index !== -1) {
+  //       newItems[index].garmentNoteStatusID = info.key
+  //       console.log({
+  //         value: value,
+  //         info: info
+  //       })
+  //     } else {
+  //       // Handle the case when the selectedKey is not found in the array
+  //       console.error(`Object with selectKey ${value} not found in the array.`)
+  //     }
+  //     setItemSelects(
+  //       newItems.map((item) => {
+  //         return {
+  //           accessoryNoteID: Number(item.value),
+  //           garmentNoteStatusID: info.key
+  //         }
+  //       })
+  //     )
+  //   }
+  // }
 
   const inputNode = ((): React.ReactNode => {
     switch (inputType) {
@@ -131,10 +160,10 @@ function EditableStateCell({
             className={cn('w-full', restProps.className)}
           />
         )
-      case 'noteselectmultiple':
+      case 'multipleselect':
         return (
-          <SelectMultipleItem
-            disabled={disabled}
+          <Select
+            mode='multiple'
             defaultValue={initialValue}
             options={
               selectItems &&
@@ -147,10 +176,30 @@ function EditableStateCell({
               })
             }
             value={value}
-            onChange={(val, option) => onValueChange?.(val as number, option)}
-            isShowDropdown={isShowDropdown}
-            dropdownItems={dropdownItems}
-            dropdownInitialValue={dropdownInitialValue}
+            onChange={(val: number[], option) => onValueChange?.(val, option)}
+            tagRender={(props) => {
+              const { label, value, closable, onClose } = props
+              const onPreventMouseDown = (event: React.MouseEvent<HTMLSpanElement>) => {
+                event.preventDefault()
+                event.stopPropagation()
+              }
+              return (
+                <Tag
+                  color={'default'}
+                  onMouseDown={onPreventMouseDown}
+                  closable={closable}
+                  onClose={onClose}
+                  className='m-[2px]'
+                >
+                  <Space size='small' align='center' className='p-1'>
+                    <Typography.Text>{label}</Typography.Text>
+                    <Divider className='m-0' type='vertical' />
+                    <Typography.Text>{value}</Typography.Text>
+                  </Space>
+                </Tag>
+              )
+            }}
+            className='w-full'
           />
         )
       case 'colorselector':

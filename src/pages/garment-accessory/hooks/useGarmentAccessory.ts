@@ -36,6 +36,7 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
   const [accessoryNotes, setAccessoryNotes] = useState<AccessoryNote[]>([])
   const [garmentAccessories, setGarmentAccessories] = useState<GarmentAccessory[]>([])
   const [garmentAccessoryNotes, setGarmentAccessoryNotes] = useState<GarmentAccessoryNote[]>([])
+
   const [productColors, setProductColors] = useState<ProductColor[]>([])
 
   // New
@@ -59,21 +60,15 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
     })
     await garmentAccessoryNoteService.getListItems(defaultRequestBody, setLoading, (meta) => {
       if (meta?.success) {
-        console.log(meta.data)
         setGarmentAccessoryNotes(meta.data as GarmentAccessoryNote[])
       }
     })
     await accessoryNoteService.getListItems(defaultRequestBody, setLoading, (meta) => {
       if (meta?.success) {
-        console.log(meta.data)
         setAccessoryNotes(meta.data as AccessoryNote[])
       }
     })
   }
-
-  useEffect(() => {
-    console.log({ dataSource: table.dataSource, accessoryNotes: accessoryNotes })
-  }, [table.dataSource, accessoryNotes])
 
   useEffect(() => {
     loadData()
@@ -111,27 +106,15 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
     console.log({ old: record, new: newRecord })
     if (newRecord) {
       try {
-        if (record.garmentAccessory) {
-          if (
-            (newRecord.amountCutting !== record.garmentAccessory?.amountCutting && newRecord.amountCutting > 0) ||
+        if (
+          record.garmentAccessory &&
+          ((newRecord.amountCutting !== record.garmentAccessory?.amountCutting && newRecord.amountCutting > 0) ||
             (newRecord.passingDeliveryDate &&
-              DayJS(newRecord.passingDeliveryDate).diff(record.garmentAccessory?.passingDeliveryDate))
-          ) {
-            console.log('GarmentAccessory progressing...')
-            await garmentAccessoryService.updateItemByPk(
-              record.garmentAccessory.id!,
-              { passingDeliveryDate: newRecord.passingDeliveryDate, amountCutting: newRecord.amountCutting },
-              setLoading,
-              (meta) => {
-                if (!meta?.success) {
-                  throw new Error('API update failed')
-                }
-              }
-            )
-          }
-        } else {
-          console.log('Create')
-          await garmentAccessoryService.createNewItem(
+              DayJS(newRecord.passingDeliveryDate).diff(record.garmentAccessory?.passingDeliveryDate)))
+        ) {
+          console.log('GarmentAccessory progressing...')
+          await garmentAccessoryService.createOrUpdateItemByPk(
+            record.garmentAccessory.id!,
             {
               productID: record.id!,
               passingDeliveryDate: newRecord.passingDeliveryDate,
@@ -140,7 +123,27 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
             setLoading,
             (meta) => {
               if (!meta?.success) {
-                throw new Error('API create failed')
+                throw new Error('API update GarmentAccessory failed')
+              }
+            }
+          )
+        }
+        if (record.garmentAccessoryNotes) {
+          const newGarmentAccessoryNotes: GarmentAccessoryNote[] = newRecord.garmentAccessoryNotes
+          console.log('GarmentAccessoryNotes progressing...')
+          await garmentAccessoryNoteService.createNewItems(
+            newGarmentAccessoryNotes.map((item) => {
+              return {
+                productID: record.id!,
+                garmentAccessoryID: record.garmentAccessory!.id!,
+                accessoryNoteID: item.accessoryNoteID,
+                garmentNoteStatusID: item.garmentNoteStatusID
+              } as GarmentAccessoryNote
+            }),
+            setLoading,
+            (meta) => {
+              if (!meta?.success) {
+                throw new Error('API update GarmentAccessory failed')
               }
             }
           )

@@ -8,9 +8,74 @@ export default {
   createNewItem: async (item: GarmentAccessoryNote): Promise<ResponseDataType | undefined> => {
     return await client
       .post(`${NAMESPACE}`, {
+        productID: item.productID,
         accessoryNoteID: item.accessoryNoteID,
         garmentAccessoryID: item.garmentAccessoryID,
-        noteStatus: item.noteStatus,
+        garmentNoteStatusID: item.garmentNoteStatusID,
+        status: item.status ?? 'active'
+      })
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  createNewItems: async (items: GarmentAccessoryNote[]): Promise<ResponseDataType | undefined> => {
+    return await client
+      .post(
+        `${NAMESPACE}/items`,
+        items.map((item) => {
+          return {
+            productID: item.productID,
+            accessoryNoteID: item.accessoryNoteID,
+            garmentAccessoryID: item.garmentAccessoryID,
+            garmentNoteStatusID: item.garmentNoteStatusID,
+            status: item.status ?? 'active'
+          }
+        })
+      )
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  createOrUpdateItemByPk: async (id: number, item: GarmentAccessoryNote): Promise<ResponseDataType | undefined> => {
+    return await client
+      .post(`${NAMESPACE}/createOrUpdate/${id}`, {
+        productID: item.productID,
+        garmentAccessoryID: item.garmentAccessoryID,
+        accessoryNoteID: item.accessoryNoteID,
+        garmentNoteStatusID: item.garmentNoteStatusID,
+        status: item.status ?? 'active'
+      })
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  createOrUpdateItemByProductID: async (
+    productID: number,
+    item: GarmentAccessoryNote
+  ): Promise<ResponseDataType | undefined> => {
+    return await client
+      .post(`${NAMESPACE}/createOrUpdate/productID/${productID}`, {
+        garmentAccessoryID: item.garmentAccessoryID,
+        accessoryNoteID: item.accessoryNoteID,
+        garmentNoteStatusID: item.garmentNoteStatusID,
         status: item.status ?? 'active'
       })
       .then((res) => {

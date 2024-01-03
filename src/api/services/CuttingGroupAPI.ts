@@ -1,58 +1,19 @@
 import client, { RequestBodyType, ResponseDataType } from '~/api/client'
-import { GarmentAccessory } from '~/typing'
+import { CuttingGroup } from '~/typing'
 import { errorFormatter } from '~/utils/promise-formatter'
 
-const NAMESPACE = 'garment-accessories'
+const NAMESPACE = 'cutting-groups'
 
 export default {
-  createNewItem: async (item: GarmentAccessory): Promise<ResponseDataType | undefined> => {
+  createNewItem: async (item: CuttingGroup): Promise<ResponseDataType | undefined> => {
     return await client
       .post(`${NAMESPACE}`, {
         productID: item.productID,
-        amountCutting: item.amountCutting,
-        passingDeliveryDate: item.passingDeliveryDate,
-        status: item.status ?? 'active'
-      })
-      .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
-      })
-      .catch(function (error) {
-        errorFormatter(error)
-      })
-  },
-  createOrUpdateItemByPk: async (id: number, item: GarmentAccessory): Promise<ResponseDataType | undefined> => {
-    return await client
-      .post(`${NAMESPACE}/createOrUpdate/${id}`, {
-        productID: item.productID,
-        amountCutting: item.amountCutting,
-        passingDeliveryDate: item.passingDeliveryDate,
-        status: item.status ?? 'active'
-      })
-      .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
-      })
-      .catch(function (error) {
-        errorFormatter(error)
-      })
-  },
-  createOrUpdateItemBy: async (
-    query: {
-      field: string
-      key: React.Key
-    },
-    item: GarmentAccessory
-  ): Promise<ResponseDataType | undefined> => {
-    return await client
-      .post(`${NAMESPACE}/createOrUpdate/${query.field}/${query.key}`, {
-        productID: item.productID,
-        amountCutting: item.amountCutting,
-        passingDeliveryDate: item.passingDeliveryDate,
+        quantityRealCut: item.quantityRealCut,
+        timeCut: item.timeCut,
+        dateSendEmbroidered: item.dateSendEmbroidered,
+        quantityArrivedEmbroidered: item.quantityArrivedEmbroidered,
+        quantityDeliveredBTP: item.quantityDeliveredBTP,
         status: item.status ?? 'active'
       })
       .then((res) => {
@@ -106,10 +67,10 @@ export default {
         errorFormatter(error)
       })
   },
-  updateItemByPk: async (id: number, item: GarmentAccessory): Promise<ResponseDataType | undefined> => {
+  updateItemByPk: async (id: number, itemToUpdate: CuttingGroup): Promise<ResponseDataType | undefined> => {
     return client
       .put(`${NAMESPACE}/${id}`, {
-        ...item
+        ...itemToUpdate
       })
       .then((res) => {
         if (res.data) {
@@ -126,11 +87,11 @@ export default {
       field: string
       key: React.Key
     },
-    item: GarmentAccessory
+    itemToUpdate: CuttingGroup
   ): Promise<ResponseDataType | undefined> => {
     return client
       .put(`${NAMESPACE}/${query.field}/${query.key}`, {
-        ...item
+        ...itemToUpdate
       })
       .then((res) => {
         if (res.data) {

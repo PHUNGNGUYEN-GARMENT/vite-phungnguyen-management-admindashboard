@@ -25,7 +25,7 @@ export type InputType =
   | 'colorselector'
   | 'textarea'
   | 'checkbox'
-  | 'noteselectmultiple'
+  | 'multipleselect'
 
 export type ItemWithKeyAndTitleType = {
   key?: React.Key
@@ -173,7 +173,8 @@ export interface GarmentAccessoryNote {
   accessoryNote?: AccessoryNote
   garmentAccessoryID?: number
   garmentAccessory?: GarmentAccessory
-  noteStatus?: NoteItemStatusType
+  garmentNoteStatusID?: number
+  garmentNoteStatus?: GarmentNoteStatus
   status?: ItemStatusType
   createdAt?: string
   updatedAt?: string
@@ -217,15 +218,17 @@ export interface DateSendSampleSewing {
 }
 
 export interface CuttingGroup {
-  productID: number
-  quantityRealCut: number
-  amountRemaining: number
-  dateSendEmbroideredPrint: string | null
-  quantityEmbroideredPrintArrived: number
-  quantityDeliveredBTP: number
-  createdAt: string
-  updatedAt: string
-  orderNumber: number
+  id?: number
+  productID?: number
+  product?: Product
+  quantityRealCut?: number
+  timeCut?: string | null
+  dateSendEmbroidered?: string | null
+  quantityArrivedEmbroidered?: string
+  quantityDeliveredBTP?: string
+  status?: ItemStatusType
+  createdAt?: string
+  updatedAt?: string
 }
 
 export interface EmbroideredDelivery {

@@ -2,15 +2,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ColorPicker, Flex } from 'antd'
 import { ColumnsType } from 'antd/es/table'
-import { useState } from 'react'
-import AccessoryNoteAPI from '~/api/services/AccessoryNoteAPI'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import useAPIService from '~/hooks/useAPIService'
-import { AccessoryNote } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import useGarmentAccessory from '../hooks/useGarmentAccessory'
 import { GarmentAccessoryTableDataType } from '../type'
@@ -20,7 +16,6 @@ interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 const GarmentAccessoryTable: React.FC<Props> = () => {
   const table = useTable<GarmentAccessoryTableDataType>([])
-  const accessoryNoteService = useAPIService<AccessoryNote>(AccessoryNoteAPI)
   const {
     searchText,
     setSearchText,
@@ -40,11 +35,6 @@ const GarmentAccessoryTable: React.FC<Props> = () => {
     garmentAccessoryService,
     accessoryNotes
   } = useGarmentAccessory(table)
-  const [itemSelected, setItemSelected] = useState<{ key: React.Key; values: string[]; label: string }>({
-    key: '',
-    values: [''],
-    label: ''
-  })
 
   const columns: ColumnsType<GarmentAccessoryTableDataType> = [
     {
@@ -195,85 +185,51 @@ const GarmentAccessoryTable: React.FC<Props> = () => {
       render: (_value: any, record: TableItemWithKey<GarmentAccessoryTableDataType>) => {
         return (
           <>
-            {/* {table.isEditing(record.key!) && (
-              <Select
-                mode='multiple'
-                options={accessoryNotes.map((item) => {
-                  return {
-                    label: item.title,
-                    value: item.id,
-                    key: item.id
-                  } as DefaultOptionType
-                })}
-                // onChange={(val: number[], _option) =>
-                //   setNewRecord({
-                //     ...newRecord,
-                //     garmentAccessoryNotes: accessoryNotes.map((i) => {
-                //       if (val.includes(i.id!)) {
-                //         return {
-                //           productID: record.id!,
-                //           accessoryNoteID: i.id!,
-                //           garmentAccessoryID: record.garmentAccessory?.id
-                //         } as GarmentAccessoryNote
-                //       }
-                //     })
-                //   })
-                // }
-                tagRender={(props) => {
-                  const { label, value, closable, onClose } = props
-                  const onPreventMouseDown = (event: React.MouseEvent<HTMLSpanElement>) => {
-                    event.preventDefault()
-                    event.stopPropagation()
-                  }
-                  const noteStatus: { value: NoteItemStatusType; label: string }[] = [
-                    { value: 'lake', label: 'Thiếu' },
-                    { value: 'enough', label: 'Đủ' },
-                    { value: 'arrived', label: 'Đã về' },
-                    { value: 'not_arrived', label: 'Chưa về' }
-                  ]
-                  return (
-                    <Tag
-                      color={'default'}
-                      onMouseDown={onPreventMouseDown}
-                      closable={closable}
-                      onClose={onClose}
-                      className='m-[2px]'
-                    >
-                      <Space size='small' align='center' className='p-1'>
-                        <Typography.Text>{label}</Typography.Text>
-                        <Divider className='m-0' type='vertical' />
-                        <Dropdown
-                          trigger={['click']}
-                          menu={{
-                            items: noteStatus.map((item) => {
-                              return { key: item.value, label: item.label }
-                            }) as MenuProps['items'],
-                            selectable: true,
-                            defaultSelectedKeys: [`${0}`],
-                            onSelect: (info) =>
-                              setItemSelected({
-                                key: info.key,
-                                values: info.selectedKeys,
-                                label: noteStatus.find((i) => i.value === info.key)?.label ?? ''
-                              })
-                          }}
-                        >
-                          <Typography.Link className=''>
-                            <Flex align='center' justify='center' gap={5} className='rounded-sm bg-border px-2 py-1'>
-                              <Typography.Text>{itemSelected.label}</Typography.Text>
-                              <ChevronDown strokeWidth={1} size={20} />
-                            </Flex>
-                          </Typography.Link>
-                        </Dropdown>
-                        <Divider className='m-0' type='vertical' />
-                      </Space>
-                    </Tag>
-                  )
-                }}
-                // defaultValue={[]}
-                className='w-full'
-              />
-            )} */}
+            <EditableStateCell
+              isEditing={table.isEditing(record.key!)}
+              dataIndex='accessoryNotes'
+              title='Ghi chú'
+              inputType='multipleselect'
+              required={true}
+              selectItems={accessoryNotes.map((item) => {
+                return {
+                  value: item.id,
+                  label: item.title,
+                  optionData:
+                    record.garmentAccessoryNotes &&
+                    record.garmentAccessoryNotes.find((i) => i.accessoryNoteID === item.id)?.garmentNoteStatusID
+                }
+              })}
+              initialValue={
+                record.garmentAccessoryNotes
+                  ? record.garmentAccessoryNotes.map((item) => {
+                      return { value: item.id, label: item.accessoryNote?.title, optionData: item.id }
+                    })
+                  : ''
+              }
+              onValueChange={(val) => {
+                setNewRecord({
+                  ...newRecord,
+                  garmentAccessoryNotes: val
+                })
+              }}
+            >
+              {/* <Space size='small' wrap>
+                {record.garmentAccessoryNotes &&
+                  record.garmentAccessoryNotes.map((item, index) => {
+                    return (
+                      <Typography.Link key={index} code>
+                        <Space split={<Divider type='vertical' />} size={0}>
+                          <SkyTableTypography status={item.status}>{item.accessoryNote?.title}</SkyTableTypography>
+                          <SkyTableTypography type='secondary' status={item.status}>
+                            {item.garmentNoteStatus?.title}
+                          </SkyTableTypography>
+                        </Space>
+                      </Typography.Link>
+                    )
+                  })}
+              </Space> */}
+            </EditableStateCell>
           </>
         )
       }

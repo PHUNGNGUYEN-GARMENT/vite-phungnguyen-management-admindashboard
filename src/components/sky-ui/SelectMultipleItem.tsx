@@ -1,30 +1,25 @@
-import { Divider, Dropdown, Flex, Select, Space, Tag, Typography } from 'antd'
-import { ItemType } from 'antd/es/menu/hooks/useItems'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Divider, Select, Space, Tag, Typography } from 'antd'
 import { SelectProps } from 'antd/lib'
-import { ChevronDown } from 'lucide-react'
 import React, { useState } from 'react'
 
 export interface SelectMultipleItemProps extends SelectProps {
-  isShowDropdown?: boolean
-  dropdownItems?: ItemType[]
-  dropdownInitialValue?: string
+  dropDownMenu?: SelectProps
+  onValueChange?: (value: any, option?: any) => void
 }
 
-const SelectMultipleItem = ({
-  isShowDropdown,
-  dropdownInitialValue,
-  dropdownItems,
-  ...props
-}: SelectMultipleItemProps) => {
-  const [itemSelected, setItemSelected] = useState<{ key: React.Key; values: string[] }>({
+const SelectMultipleItem = ({ dropDownMenu, onValueChange, ...props }: SelectMultipleItemProps) => {
+  const [itemSelected, setItemSelected] = useState<{ key: React.Key; value: string }>({
     key: '',
-    values: ['']
+    value: ''
   })
 
   return (
     <Select
       {...props}
       mode='multiple'
+      options={props.options}
+      onChange={(val: number[]) => onValueChange?.(val, { dropdownItems: itemSelected })}
       tagRender={(props) => {
         const { label, value, closable, onClose } = props
         const onPreventMouseDown = (event: React.MouseEvent<HTMLSpanElement>) => {
@@ -39,26 +34,17 @@ const SelectMultipleItem = ({
             onClose={onClose}
             className='m-[2px]'
           >
-            <Space size='small' align='center' split={<Divider type='vertical' />}>
+            <Space size='small' align='center' className='p-1'>
               <Typography.Text>{label}</Typography.Text>
-              {isShowDropdown && (
-                <Dropdown
-                  trigger={['click']}
-                  menu={{
-                    items: dropdownItems,
-                    selectable: true,
-                    defaultSelectedKeys: [dropdownInitialValue ?? ''],
-                    onSelect: (info) => setItemSelected({ key: info.key, values: info.selectedKeys })
-                  }}
-                >
-                  <Typography.Link>
-                    <Flex align='center' justify='center'>
-                      {itemSelected.values}
-                      <ChevronDown strokeWidth={1} size={20} />
-                    </Flex>
-                  </Typography.Link>
-                </Dropdown>
+              <Divider className='m-0' type='vertical' />
+              {dropDownMenu && (
+                <Select
+                  {...dropDownMenu}
+                  style={{ width: 120 }}
+                  onChange={(val, option) => setItemSelected({ key: val, value: val })}
+                />
               )}
+              <Divider className='m-0' type='vertical' />
             </Space>
           </Tag>
         )

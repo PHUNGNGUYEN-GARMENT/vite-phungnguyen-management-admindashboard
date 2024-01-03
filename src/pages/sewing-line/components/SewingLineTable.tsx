@@ -71,6 +71,7 @@ const SewingLineTable: React.FC<Props> = () => {
           loading={table.loading}
           columns={columns}
           editingKey={table.editingKey}
+          deletingKey={table.deletingKey}
           dataSource={table.dataSource}
           rowClassName='editable-row'
           metaData={sewingLineService.metaData}

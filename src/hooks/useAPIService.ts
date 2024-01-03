@@ -11,6 +11,7 @@ export interface ItemWithId {
 
 export interface APIService<T extends ItemWithId> {
   createNewItem: (itemNew: Partial<T>) => Promise<ResponseDataType | undefined>
+  createNewItems?: (itemsNew: Partial<T>[]) => Promise<ResponseDataType | undefined>
   createOrUpdateItemByPk?: (id: number, item: Partial<T>) => Promise<ResponseDataType | undefined>
   createOrUpdateItemBy?: (
     query: { field: string; key: React.Key },
@@ -43,6 +44,28 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
     try {
       setLoading?.(true)
       const meta = await apiService.createNewItem(itemNew)
+      if (meta?.success) {
+        onDataSuccess?.(meta, 'Created!')
+      } else {
+        onDataSuccess?.(undefined, 'Failed!')
+      }
+      setMetaData(meta)
+    } catch (err) {
+      console.error(err)
+      onDataSuccess?.(undefined, 'Error!')
+    } finally {
+      setLoading?.(false)
+    }
+  }
+
+  const createNewItems = async (
+    itemsNew: T[],
+    setLoading?: (enable: boolean) => void,
+    onDataSuccess?: (meta: ResponseDataType | undefined, message?: string) => void
+  ) => {
+    try {
+      setLoading?.(true)
+      const meta = await apiService.createNewItems?.(itemsNew)
       if (meta?.success) {
         onDataSuccess?.(meta, 'Created!')
       } else {
@@ -298,6 +321,7 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
     page,
     setPage,
     createNewItem,
+    createNewItems,
     getItemByPk,
     getItemBy,
     getListItems,

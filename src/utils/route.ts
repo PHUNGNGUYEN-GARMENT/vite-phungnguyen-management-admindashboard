@@ -13,7 +13,7 @@ import {
   SewingMachineIcon
 } from '~/assets/icons'
 const Dashboard = lazy(() => import('~/pages/dashboard/Dashboard'))
-const Cutting = lazy(() => import('~/pages/cutting/Cutting'))
+const CuttingGroupPage = lazy(() => import('~/pages/cutting-group/CuttingGroupPage'))
 const ColorPage = lazy(() => import('~/pages/color/ColorPage'))
 const GroupPage = lazy(() => import('~/pages/group/GroupPage'))
 const NotePage = lazy(() => import('~/pages/accessory-note/AccessoryNotePage'))
@@ -74,9 +74,9 @@ export const appRoutes: SideType[] = [
   {
     key: '4',
     name: 'Tổ cắt',
-    path: 'cutting',
+    path: 'cutting-group',
     isGroup: false,
-    component: Cutting,
+    component: CuttingGroupPage,
     icon: CutIcon
   },
   {

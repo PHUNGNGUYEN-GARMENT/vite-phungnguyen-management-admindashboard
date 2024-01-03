@@ -1,20 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ColorPicker } from 'antd'
-import type { Color as AntColor } from 'antd/es/color-picker'
 import { ColumnType } from 'antd/es/table'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
-import { default as EditableStateCell } from '~/components/sky-ui/SkyTable/EditableStateCell'
+import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import { ColorTableDataType } from '../ColorPage'
-import useColor from '../hooks/useColor'
-import ModalAddNewColor from './ModalAddNewColor'
+import useGarmentNoteStatus from '../hooks/useGarmentNoteStatus'
+import { GarmentNoteStatusTableDataType } from '../type'
+import ModalAddNewGarmentNoteStatus from './ModalAddNewGarmentNoteStatus'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
-const ColorTable: React.FC<Props> = () => {
-  const table = useTable<ColorTableDataType>([])
+const GarmentNoteStatusTable: React.FC<Props> = () => {
+  const table = useTable<GarmentNoteStatusTableDataType>([])
 
   const {
     searchText,
@@ -30,55 +28,27 @@ const ColorTable: React.FC<Props> = () => {
     handleAddNewItem,
     handleConfirmDelete,
     handlePageChange,
-    colorService
-  } = useColor(table)
+    accessoryNoteService
+  } = useGarmentNoteStatus(table)
 
-  const columns: ColumnType<ColorTableDataType>[] = [
+  const columns: ColumnType<GarmentNoteStatusTableDataType>[] = [
     {
-      title: 'Tên màu',
-      dataIndex: 'name',
+      title: 'Tên trạng thái',
+      dataIndex: 'title',
       width: '15%',
-      render: (_value: any, record: TableItemWithKey<ColorTableDataType>) => {
+      render: (_value: any, record: TableItemWithKey<GarmentNoteStatusTableDataType>) => {
         return (
           <EditableStateCell
             isEditing={table.isEditing(record.key!)}
-            dataIndex='name'
-            title='Tên màu'
+            dataIndex='title'
+            title='Tên trạng thái'
             inputType='text'
             required={true}
-            initialValue={record.name}
-            value={newRecord.name}
-            onValueChange={(val) => setNewRecord({ ...newRecord, name: val })}
+            initialValue={record.title}
+            value={newRecord?.title}
+            onValueChange={(val) => setNewRecord({ ...newRecord, title: val })}
           >
-            <SkyTableTypography status={record.status}>{record.name}</SkyTableTypography>
-          </EditableStateCell>
-        )
-      }
-    },
-    {
-      title: 'Mã màu',
-      dataIndex: 'hexColor',
-      width: '15%',
-      render: (_, record: TableItemWithKey<ColorTableDataType>) => {
-        return (
-          <EditableStateCell
-            isEditing={table.isEditing(record.key!)}
-            dataIndex='hexColor'
-            title='Mã màu'
-            inputType='colorpicker'
-            required={true}
-            className='w-fit'
-            initialValue={record.hexColor}
-            value={newRecord.hexColor}
-            onValueChange={(val: AntColor) => setNewRecord({ ...newRecord, hexColor: val.toHexString() })}
-          >
-            <ColorPicker
-              disabled={true}
-              value={record.hexColor}
-              defaultFormat='hex'
-              defaultValue={record.hexColor}
-              showText
-            />
+            <SkyTableTypography status={record.status}>{record.title}</SkyTableTypography>
           </EditableStateCell>
         )
       }
@@ -104,13 +74,13 @@ const ColorTable: React.FC<Props> = () => {
           deletingKey={table.deletingKey}
           dataSource={table.dataSource}
           rowClassName='editable-row'
-          metaData={colorService.metaData}
+          metaData={accessoryNoteService.metaData}
           onPageChange={handlePageChange}
           isDateCreation={table.dateCreation}
           actions={{
             onEdit: {
               onClick: (_e, record) => {
-                setNewRecord(record)
+                setNewRecord(record!)
                 table.handleStartEditing(record!.key!)
               }
             },
@@ -127,9 +97,11 @@ const ColorTable: React.FC<Props> = () => {
           }}
         />
       </BaseLayout>
-      {openModal && <ModalAddNewColor openModal={openModal} setOpenModal={setOpenModal} onAddNew={handleAddNewItem} />}
+      {openModal && (
+        <ModalAddNewGarmentNoteStatus openModal={openModal} setOpenModal={setOpenModal} onAddNew={handleAddNewItem} />
+      )}
     </>
   )
 }
 
-export default ColorTable
+export default GarmentNoteStatusTable
