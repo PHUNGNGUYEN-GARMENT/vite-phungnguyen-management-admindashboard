@@ -75,6 +75,12 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
   }, [garmentAccessoryNew])
 
   useEffect(() => {
+    if (table.dataSource) {
+      console.info(table.dataSource)
+    }
+  }, [table.dataSource])
+
+  useEffect(() => {
     selfConvertDataSource(products, productColors, garmentAccessories, garmentAccessoryNotes)
   }, [products, productColors, garmentAccessories, garmentAccessoryNotes])
 
@@ -128,9 +134,37 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
             }
           )
         }
-        if (record.garmentAccessoryNotes) {
+        if (record.garmentAccessoryNotes && record.garmentAccessoryNotes.length > 0) {
+          console.log('Update')
           const newGarmentAccessoryNotes: GarmentAccessoryNote[] = newRecord.garmentAccessoryNotes
-          console.log('GarmentAccessoryNotes progressing...')
+          await garmentAccessoryNoteService.deleteItemBy(
+            { field: 'productID', key: record.id! },
+            setLoading,
+            (meta) => {
+              if (meta) {
+                console.log(meta)
+              }
+            }
+          )
+          await garmentAccessoryNoteService.createNewItems(
+            newGarmentAccessoryNotes.map((item) => {
+              return {
+                productID: record.id!,
+                garmentAccessoryID: record.garmentAccessory!.id!,
+                accessoryNoteID: item.accessoryNoteID,
+                noteStatus: item.noteStatus
+              } as GarmentAccessoryNote
+            }),
+            setLoading,
+            (meta) => {
+              if (!meta?.success) {
+                throw new Error('API update GarmentAccessory failed')
+              }
+            }
+          )
+        } else {
+          console.log('Create new')
+          const newGarmentAccessoryNotes: GarmentAccessoryNote[] = newRecord.garmentAccessoryNotes
           await garmentAccessoryNoteService.createNewItems(
             newGarmentAccessoryNotes.map((item) => {
               return {
@@ -148,6 +182,7 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
             }
           )
         }
+
         message.success('Success!')
       } catch (error) {
         console.error(error)

@@ -202,8 +202,8 @@ const GarmentAccessoryTable: React.FC<Props> = () => {
                 record.garmentAccessoryNotes &&
                 record.garmentAccessoryNotes.map((item) => {
                   return {
-                    value: item.accessoryNote?.id ?? -1,
-                    label: item.accessoryNote?.title ?? ''
+                    value: item.accessoryNote?.id,
+                    label: item.accessoryNote?.title
                   }
                 })
               }
