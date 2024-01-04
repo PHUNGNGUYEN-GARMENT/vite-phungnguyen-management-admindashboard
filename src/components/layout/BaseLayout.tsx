@@ -51,17 +51,19 @@ const BaseLayout: React.FC<Props> = ({
   return (
     <div {...props}>
       <Flex vertical gap={20}>
-        <Search
-          placeholder={searchPlaceHolder ? searchPlaceHolder : 'Search...'}
-          size='middle'
-          enterButton
-          name='search'
-          allowClear
-          value={searchValue}
-          defaultValue={defaultSearchValue}
-          onSearch={onSearch}
-          onChange={onSearchChange}
-        />
+        {onSearch && (
+          <Search
+            placeholder={searchPlaceHolder ? searchPlaceHolder : 'Search...'}
+            size='middle'
+            enterButton
+            name='search'
+            allowClear
+            value={searchValue}
+            defaultValue={defaultSearchValue}
+            onSearch={onSearch}
+            onChange={onSearchChange}
+          />
+        )}
         <Flex justify='space-between' align='center'>
           <Flex gap={10} align='center'>
             <Switch
@@ -73,13 +75,15 @@ const BaseLayout: React.FC<Props> = ({
                 dispatch(setAdminAction(val))
               }}
             />
-            <Switch
-              checkedChildren='Sorted'
-              unCheckedChildren='Sorted'
-              defaultChecked={false}
-              onChange={onSortChange}
-            />
-            {user.isAdmin && (
+            {onSortChange && (
+              <Switch
+                checkedChildren='Sorted'
+                unCheckedChildren='Sorted'
+                defaultChecked={false}
+                onChange={onSortChange}
+              />
+            )}
+            {user.isAdmin && onDateCreationChange && (
               <Switch
                 checkedChildren='DateCreation'
                 unCheckedChildren='DateCreation'
@@ -89,11 +93,13 @@ const BaseLayout: React.FC<Props> = ({
             )}
           </Flex>
           <Flex gap={10} align='center'>
-            <Button onClick={onResetClick} className='flex items-center' type='default'>
-              Reset
-            </Button>
+            {onResetClick && (
+              <Button onClick={onResetClick} className='flex items-center' type='default'>
+                Reset
+              </Button>
+            )}
 
-            {user.isAdmin && (
+            {user.isAdmin && onAddNewClick && (
               <Button onClick={onAddNewClick} className='flex items-center' type='primary' icon={<Plus size={20} />}>
                 New
               </Button>

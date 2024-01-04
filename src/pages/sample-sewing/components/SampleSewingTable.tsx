@@ -10,7 +10,6 @@ import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import useSampleSewing from '../hooks/useSampleSewing'
 import { SampleSewingTableDataType } from '../type'
-import ModalAddNewGroup from './ModalAddNewSampleSewing'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
@@ -22,13 +21,10 @@ const SampleSewingTable: React.FC<Props> = () => {
     setSearchText,
     newRecord,
     setNewRecord,
-    openModal,
-    setOpenModal,
     handleResetClick,
     handleSortChange,
     handleSearch,
     handleSaveClick,
-    handleAddNewItem,
     handleConfirmDelete,
     handlePageChange,
     productService
@@ -347,7 +343,6 @@ const SampleSewingTable: React.FC<Props> = () => {
         onSearch={(value) => handleSearch(value)}
         onSortChange={(checked, e) => handleSortChange(checked, e)}
         onResetClick={() => handleResetClick()}
-        onAddNewClick={() => setOpenModal(true)}
       >
         <SkyTable
           bordered
@@ -401,7 +396,6 @@ const SampleSewingTable: React.FC<Props> = () => {
           }}
         />
       </BaseLayout>
-      {openModal && <ModalAddNewGroup openModal={openModal} setOpenModal={setOpenModal} onAddNew={handleAddNewItem} />}
     </>
   )
 }

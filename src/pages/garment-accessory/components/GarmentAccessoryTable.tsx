@@ -11,7 +11,6 @@ import { GarmentAccessoryNote } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import useGarmentAccessory from '../hooks/useGarmentAccessory'
 import { GarmentAccessoryTableDataType } from '../type'
-import ModalAddNewAccessoryNote from './ModalAddNewAccessoryNote'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
@@ -22,18 +21,13 @@ const GarmentAccessoryTable: React.FC<Props> = () => {
     setSearchText,
     newRecord,
     setNewRecord,
-    openModal,
-    setOpenModal,
     handleResetClick,
     handleSortChange,
     handleSearch,
     handleSaveClick,
-    handleAddNewItem,
     handleConfirmDelete,
     handlePageChange,
     productService,
-    productColorService,
-    garmentAccessoryService,
     accessoryNotes
   } = useGarmentAccessory(table)
 
@@ -258,7 +252,6 @@ const GarmentAccessoryTable: React.FC<Props> = () => {
         onSearch={(value) => handleSearch(value)}
         onSortChange={(checked, e) => handleSortChange(checked, e)}
         onResetClick={() => handleResetClick()}
-        onAddNewClick={() => setOpenModal(true)}
       >
         <SkyTable
           bordered
@@ -291,9 +284,6 @@ const GarmentAccessoryTable: React.FC<Props> = () => {
           }}
         />
       </BaseLayout>
-      {openModal && (
-        <ModalAddNewAccessoryNote openModal={openModal} setOpenModal={setOpenModal} onAddNew={handleAddNewItem} />
-      )}
     </>
   )
 }

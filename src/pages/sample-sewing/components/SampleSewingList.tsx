@@ -4,7 +4,6 @@ import BaseLayout from '~/components/layout/BaseLayout'
 import SkyList from '~/components/sky-ui/SkyList/SkyList'
 import useSampleSewing from '../hooks/useSampleSewing'
 import { SampleSewingTableDataType } from '../type'
-import ModalAddNewGroup from './ModalAddNewSampleSewing'
 import SampleSewingListItem from './SampleSewingListItem'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {}
@@ -17,13 +16,10 @@ const SampleSewingList: React.FC<Props> = () => {
     setSearchText,
     newRecord,
     setNewRecord,
-    openModal,
-    setOpenModal,
     handleResetClick,
     handleSortChange,
     handleSearch,
     handleSaveClick,
-    handleAddNewItem,
     handleConfirmDelete,
     handlePageChange,
     productService
@@ -38,7 +34,6 @@ const SampleSewingList: React.FC<Props> = () => {
         onSearch={(value) => handleSearch(value)}
         onSortChange={(checked, e) => handleSortChange(checked, e)}
         onResetClick={() => handleResetClick()}
-        onAddNewClick={() => setOpenModal(true)}
       >
         <SkyList
           itemLayout='vertical'
@@ -76,7 +71,6 @@ const SampleSewingList: React.FC<Props> = () => {
           )}
         />
       </BaseLayout>
-      {openModal && <ModalAddNewGroup openModal={openModal} setOpenModal={setOpenModal} onAddNew={handleAddNewItem} />}
     </>
   )
 }

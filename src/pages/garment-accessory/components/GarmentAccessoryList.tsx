@@ -16,7 +16,6 @@ const GarmentAccessoryList: React.FC<Props> = () => {
     setSearchText,
     newRecord,
     setNewRecord,
-    setOpenModal,
     handleResetClick,
     handleSortChange,
     handleSearch,
@@ -35,7 +34,6 @@ const GarmentAccessoryList: React.FC<Props> = () => {
         onSearch={(value) => handleSearch(value)}
         onSortChange={(checked, e) => handleSortChange(checked, e)}
         onResetClick={() => handleResetClick()}
-        onAddNewClick={() => setOpenModal(true)}
       >
         <SkyList
           itemLayout='vertical'
