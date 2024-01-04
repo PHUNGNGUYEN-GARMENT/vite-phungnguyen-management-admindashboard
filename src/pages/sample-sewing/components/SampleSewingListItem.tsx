@@ -1,14 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-refresh/only-export-components */
 import { Collapse, ColorPicker, Divider, Flex, Space, Typography } from 'antd'
-import React, { memo, useEffect, useState } from 'react'
-import { defaultRequestBody } from '~/api/client'
-import ColorAPI from '~/api/services/ColorAPI'
+import React, { memo } from 'react'
 import SkyListItem, { SkyListItemProps } from '~/components/sky-ui/SkyList/SkyListItem'
 import ListItemRow from '~/components/sky-ui/SkyTable/ListItemRow'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import useAPIService from '~/hooks/useAPIService'
-import { Color } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import { SampleSewingTableDataType } from '../type'
 
@@ -19,23 +15,6 @@ interface Props extends SkyListItemProps<SampleSewingTableDataType> {
 }
 
 const SampleSewingListItem: React.FC<Props> = ({ record, newRecord, setNewRecord, ...props }) => {
-  const colorService = useAPIService(ColorAPI)
-  const [colors, setColors] = useState<Color[]>([])
-
-  useEffect(() => {
-    const loadData = async () => {
-      await colorService.getListItems(defaultRequestBody, props.setLoading, (meta) => {
-        if (meta?.success) {
-          const items = meta.data as Color[]
-          setColors(items)
-        }
-      })
-    }
-    if (props.isEditing) {
-      loadData()
-    }
-  }, [props.isEditing])
-
   return (
     <SkyListItem
       label={record.productCode}
@@ -61,18 +40,7 @@ const SampleSewingListItem: React.FC<Props> = ({ record, newRecord, setNewRecord
             children: (
               <Space direction='vertical' className='w-full gap-4'>
                 <Space className='flex gap-0' split={<Divider className='my-3' />} direction='vertical'>
-                  <ListItemRow
-                    {...props}
-                    label='Màu'
-                    isEditing={false}
-                    dataIndex='colorID'
-                    inputType='select'
-                    selectItems={colors.map((i) => {
-                      return { label: i.name, value: i.id, optionData: i.hexColor }
-                    })}
-                    initialValue={record.productColor?.colorID}
-                    onValueChange={(val) => setNewRecord({ ...newRecord, colorID: val })}
-                  >
+                  <ListItemRow {...props} label='Màu' isEditing={false} dataIndex='colorID' inputType='select'>
                     <Flex className='' justify='space-between' align='center' gap={10}>
                       <SkyTableTypography status={record.productColor?.color?.status}>
                         {record.productColor?.color?.name}

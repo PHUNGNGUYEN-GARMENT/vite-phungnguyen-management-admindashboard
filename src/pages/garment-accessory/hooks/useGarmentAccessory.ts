@@ -277,20 +277,7 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
 
   const handleResetClick = async () => {
     setSearchText('')
-
-    try {
-      await productService.getListItems(defaultRequestBody, setLoading, (meta) => {
-        if (meta?.success) {
-          selfConvertDataSource(meta?.data as Product[])
-        }
-      })
-      message.success('Success!')
-    } catch (error) {
-      console.error(error)
-    } finally {
-      loadData()
-      setLoading(false)
-    }
+    loadData()
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

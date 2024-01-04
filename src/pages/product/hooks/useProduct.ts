@@ -12,6 +12,16 @@ import { ProductTableDataType } from '~/pages/product/type'
 import { Color, Group, PrintablePlace, Product, ProductColor, ProductGroup } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 
+export interface ProductNewRecordProps {
+  colorID?: number | null
+  quantityPO?: number | null
+  productCode?: string | null
+  dateInputNPL?: string | null
+  dateOutputFCR?: string | null
+  groupID?: number | null
+  printID?: number | null
+}
+
 export default function useProduct(table: UseTableProps<ProductTableDataType>) {
   const { setLoading, setDataSource, handleConfirmCancelEditing, handleConfirmDeleting } = table
 
@@ -24,7 +34,7 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
 
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [searchText, setSearchText] = useState<string>('')
-  const [newRecord, setNewRecord] = useState<any>({})
+  const [newRecord, setNewRecord] = useState<ProductNewRecordProps>({})
 
   const [products, setProducts] = useState<Product[]>([])
   const [productColors, setProductColors] = useState<ProductColor[]>([])
@@ -268,11 +278,7 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
 
   const handleResetClick = async () => {
     setSearchText('')
-    await productService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        selfConvertDataSource(meta?.data as Product[])
-      }
-    })
+    loadData()
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

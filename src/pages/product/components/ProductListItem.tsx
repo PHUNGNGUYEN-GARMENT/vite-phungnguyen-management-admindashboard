@@ -84,14 +84,16 @@ const ProductListItem: React.FC<Props> = ({ record, newRecord, setNewRecord, ...
                     isEditing={props.isEditing}
                     dataIndex='colorID'
                     inputType='select'
-                    selectItems={colors.map((i) => {
-                      return { label: i.name, value: i.id, optionData: i.hexColor }
-                    })}
-                    initialValue={record.productColor?.colorID}
-                    value={newRecord.colorID}
-                    onValueChange={(val) => setNewRecord({ ...newRecord, colorID: val })}
+                    selectProps={{
+                      defaultValue: record.productColor?.colorID,
+                      value: newRecord.colorID,
+                      options: colors.map((i) => {
+                        return { label: i.name, value: i.id, optionData: i.hexColor }
+                      })
+                    }}
+                    onValueChange={(id: number) => setNewRecord({ ...newRecord, colorID: id })}
                   >
-                    <Flex className='w-full' justify='space-between' align='center' gap={10}>
+                    <Flex justify='space-between' align='center' gap={10}>
                       <SkyTableTypography status={record.productColor?.color?.status}>
                         {record.productColor?.color?.name}
                       </SkyTableTypography>
@@ -148,15 +150,17 @@ const ProductListItem: React.FC<Props> = ({ record, newRecord, setNewRecord, ...
                     isEditing={props.isEditing}
                     dataIndex='groupID'
                     inputType='select'
-                    initialValue={record.productGroup?.groupID}
-                    selectItems={groups.map((item) => {
-                      return {
-                        label: item.name,
-                        value: item.id,
-                        optionData: item.id
-                      }
-                    })}
-                    value={newRecord.groupID}
+                    selectProps={{
+                      defaultValue: record.productGroup?.groupID,
+                      options: groups.map((item) => {
+                        return {
+                          label: item.name,
+                          value: item.id,
+                          optionData: item.id
+                        }
+                      }),
+                      value: newRecord.groupID
+                    }}
                     onValueChange={(val) => setNewRecord({ ...newRecord, groupID: val })}
                   >
                     <SkyTableTypography status={record.productGroup?.group?.status}>
@@ -170,15 +174,17 @@ const ProductListItem: React.FC<Props> = ({ record, newRecord, setNewRecord, ...
                     dataIndex='printID'
                     inputType='select'
                     required={false}
-                    initialValue={record.printablePlace?.printID}
-                    selectItems={prints.map((item) => {
-                      return {
-                        label: item.name,
-                        value: item.id,
-                        optionData: item.id
-                      }
-                    })}
-                    value={newRecord.printID}
+                    selectProps={{
+                      defaultValue: record.printablePlace?.printID,
+                      options: prints.map((item) => {
+                        return {
+                          label: item.name,
+                          value: item.id,
+                          optionData: item.id
+                        }
+                      }),
+                      value: newRecord.printID
+                    }}
                     onValueChange={(val) => setNewRecord({ ...newRecord, printID: val })}
                   >
                     <SkyTableTypography status={record.printablePlace?.print?.status}>

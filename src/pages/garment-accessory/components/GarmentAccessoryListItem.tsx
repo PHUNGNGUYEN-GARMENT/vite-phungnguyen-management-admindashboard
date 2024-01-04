@@ -45,14 +45,7 @@ const GarmentAccessoryListItem: React.FC<Props> = ({ record, newRecord, setNewRe
             children: (
               <Space direction='vertical' className='w-full gap-4'>
                 <Space className='flex gap-0' split={<Divider className='my-3' />} direction='vertical'>
-                  <ListItemRow
-                    {...props}
-                    isEditing={false}
-                    dataIndex='colorID'
-                    label='Màu'
-                    inputType='colorselector'
-                    required={false}
-                  >
+                  <ListItemRow {...props} isEditing={false} dataIndex='colorID' label='Màu' inputType='colorselector'>
                     <Flex className='' justify='space-between' align='center' gap={10}>
                       <SkyTableTypography status={record.productColor?.color?.status}>
                         {record.productColor?.color?.name}

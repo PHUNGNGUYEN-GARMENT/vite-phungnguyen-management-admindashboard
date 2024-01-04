@@ -2,17 +2,11 @@
 import { ColorPicker, Flex } from 'antd'
 import { ColumnType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
-import { useEffect, useState } from 'react'
-import { defaultRequestBody } from '~/api/client'
-import ColorAPI from '~/api/services/ColorAPI'
-import useDevice from '~/components/hooks/useDevice'
 import useTable from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import useAPIService from '~/hooks/useAPIService'
-import { Color } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import useSampleSewing from '../hooks/useSampleSewing'
 import { SampleSewingTableDataType } from '../type'
@@ -22,7 +16,6 @@ interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 const SampleSewingTable: React.FC<Props> = () => {
   const table = useTable<SampleSewingTableDataType>([])
-  const { width } = useDevice()
 
   const {
     searchText,
@@ -40,22 +33,6 @@ const SampleSewingTable: React.FC<Props> = () => {
     handlePageChange,
     productService
   } = useSampleSewing(table)
-
-  const colorService = useAPIService(ColorAPI)
-  const [editable, setEditable] = useState<boolean>(false)
-
-  const [colors, setColors] = useState<Color[]>([])
-
-  useEffect(() => {
-    if (editable) {
-      colorService.getListItems(defaultRequestBody, table.setLoading, (meta) => {
-        if (meta?.success) {
-          const items = meta.data as Color[]
-          setColors(items)
-        }
-      })
-    }
-  }, [editable])
 
   const columns: ColumnType<SampleSewingTableDataType>[] = [
     {
@@ -83,11 +60,8 @@ const SampleSewingTable: React.FC<Props> = () => {
               title='Màu'
               inputType='colorselector'
               required={false}
-              selectItems={colors.map((i) => {
-                return { label: i.name, value: i.id, optionData: i.hexColor }
-              })}
             >
-              <Flex justify='center' align='center' gap={10}>
+              <Flex justify='space-between' align='center' gap={10}>
                 <SkyTableTypography status={record.productColor?.color?.status} className='w-fit'>
                   {record.productColor?.color?.name}
                 </SkyTableTypography>
@@ -390,7 +364,6 @@ const SampleSewingTable: React.FC<Props> = () => {
             onEdit: {
               onClick: (_e, record) => {
                 setNewRecord(record?.sampleSewing)
-                setEditable((prev) => !prev)
                 table.handleStartEditing(record!.key!)
               }
             },
@@ -409,20 +382,18 @@ const SampleSewingTable: React.FC<Props> = () => {
             expandedRowRender: (record) => {
               return (
                 <Flex vertical gap={10}>
-                  {width < 1600 && (
-                    <SkyTable
-                      bordered
-                      loading={table.loading}
-                      columns={expandableColumns}
-                      rowClassName='editable-row'
-                      dataSource={table.dataSource.filter((item) => item.id === record.id)}
-                      metaData={productService.metaData}
-                      pagination={false}
-                      isDateCreation={table.dateCreation}
-                      editingKey={table.editingKey}
-                      deletingKey={table.deletingKey}
-                    />
-                  )}
+                  <SkyTable
+                    bordered
+                    loading={table.loading}
+                    columns={expandableColumns}
+                    rowClassName='editable-row'
+                    dataSource={table.dataSource.filter((item) => item.id === record.id)}
+                    metaData={productService.metaData}
+                    pagination={false}
+                    isDateCreation={table.dateCreation}
+                    editingKey={table.editingKey}
+                    deletingKey={table.deletingKey}
+                  />
                 </Flex>
               )
             },

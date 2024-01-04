@@ -304,7 +304,7 @@ const ProductTable: React.FC = () => {
           actions={{
             onEdit: {
               onClick: (_e, record) => {
-                setNewRecord(record)
+                setNewRecord({ ...record })
                 setEditable((prev) => !prev)
                 table.handleStartEditing(record!.key!)
               }
