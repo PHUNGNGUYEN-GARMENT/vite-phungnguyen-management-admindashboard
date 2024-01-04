@@ -1,6 +1,6 @@
 import { Flex } from 'antd'
 import useDevice from '~/components/hooks/useDevice'
-import AccessoryNoteList from './components/AccessoryNoteList'
+import GarmentAccessoryList from './components/GarmentAccessoryList'
 import GarmentAccessoryTable from './components/GarmentAccessoryTable'
 
 const GarmentAccessoryPage = () => {
@@ -10,7 +10,7 @@ const GarmentAccessoryPage = () => {
     <>
       <Flex vertical gap={20}>
         {width >= 768 && <GarmentAccessoryTable className='' />}
-        {width <= 768 && <AccessoryNoteList className='' />}
+        {width <= 768 && <GarmentAccessoryList className='' />}
       </Flex>
     </>
   )

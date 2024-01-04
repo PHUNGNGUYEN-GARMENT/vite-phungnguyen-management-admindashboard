@@ -2,32 +2,29 @@ import React from 'react'
 import useTable from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import SkyList from '~/components/sky-ui/SkyList/SkyList'
-import useAccessoryNote from '../hooks/useGarmentAccessory'
-import { AccessoryNoteTableDataType } from '../type'
-import AccessoryNoteListItem from './AccessoryNoteListItem'
-import ModalAddNewAccessoryNote from './ModalAddNewAccessoryNote'
+import useGarmentAccessory from '../hooks/useGarmentAccessory'
+import { GarmentAccessoryTableDataType } from '../type'
+import GarmentAccessoryListItem from './GarmentAccessoryListItem'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
-const AccessoryNoteList: React.FC<Props> = () => {
-  const table = useTable<AccessoryNoteTableDataType>([])
+const GarmentAccessoryList: React.FC<Props> = () => {
+  const table = useTable<GarmentAccessoryTableDataType>([])
 
   const {
     searchText,
     setSearchText,
     newRecord,
     setNewRecord,
-    openModal,
     setOpenModal,
     handleResetClick,
     handleSortChange,
     handleSearch,
     handleSaveClick,
-    handleAddNewItem,
     handleConfirmDelete,
     handlePageChange,
-    accessoryNoteService
-  } = useAccessoryNote(table)
+    productService
+  } = useGarmentAccessory(table)
 
   return (
     <>
@@ -45,10 +42,10 @@ const AccessoryNoteList: React.FC<Props> = () => {
           size='large'
           loading={table.loading}
           dataSource={table.dataSource}
-          metaData={accessoryNoteService.metaData}
+          metaData={productService.metaData}
           onPageChange={handlePageChange}
-          renderItem={(record) => (
-            <AccessoryNoteListItem
+          renderItem={(record: GarmentAccessoryTableDataType) => (
+            <GarmentAccessoryListItem
               record={record}
               newRecord={newRecord}
               setNewRecord={setNewRecord}
@@ -56,10 +53,7 @@ const AccessoryNoteList: React.FC<Props> = () => {
               isEditing={table.isEditing(record.key!)}
               actions={{
                 onSave: {
-                  onClick: () => {
-                    setNewRecord(record)
-                    handleSaveClick(record, newRecord)
-                  }
+                  onClick: () => handleSaveClick(record)
                 },
                 onEdit: {
                   onClick: () => {
@@ -78,11 +72,8 @@ const AccessoryNoteList: React.FC<Props> = () => {
           )}
         />
       </BaseLayout>
-      {openModal && (
-        <ModalAddNewAccessoryNote openModal={openModal} setOpenModal={setOpenModal} onAddNew={handleAddNewItem} />
-      )}
     </>
   )
 }
 
-export default AccessoryNoteList
+export default GarmentAccessoryList

@@ -227,28 +227,6 @@ const GarmentAccessoryTable: React.FC<Props> = () => {
                   })
                 })
               }}
-              // tagRender={(props) => {
-              //   const { label, value, closable, onClose } = props
-              //   const onPreventMouseDown = (event: React.MouseEvent<HTMLSpanElement>) => {
-              //     event.preventDefault()
-              //     event.stopPropagation()
-              //   }
-              //   return (
-              //     <Tag
-              //       color={'default'}
-              //       onMouseDown={onPreventMouseDown}
-              //       closable={closable}
-              //       onClose={onClose}
-              //       className='m-[2px]'
-              //     >
-              //       <Space size='small' align='center' className='p-1'>
-              //         <Typography.Text>{label}</Typography.Text>
-              //         <Divider className='m-0' type='vertical' />
-              //         <Typography.Text>{value}</Typography.Text>
-              //       </Space>
-              //     </Tag>
-              //   )
-              // }}
             >
               <Space size='small' wrap>
                 {record.garmentAccessoryNotes &&
