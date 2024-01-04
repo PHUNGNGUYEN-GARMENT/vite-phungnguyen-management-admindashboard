@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-refresh/only-export-components */
 import { Checkbox, ColorPicker, DatePicker, Flex, Input, InputNumber, Select, Table, Typography } from 'antd'
-import { DefaultOptionType } from 'antd/es/select'
+import { DefaultOptionType, SelectProps } from 'antd/es/select'
 import { HTMLAttributes, memo } from 'react'
 import { InputType } from '~/typing'
 import { DatePattern } from '~/utils/date-formatter'
@@ -15,6 +15,7 @@ export interface EditableStateCellProps extends HTMLAttributes<HTMLElement> {
   setLoading?: (enable: boolean) => void
   initialValue?: any
   onValueChange?: (value: any, option?: any) => void
+  selectProps?: SelectProps
   selectItems?: (DefaultOptionType & { optionData?: any })[]
   inputType?: InputType
   required?: boolean
@@ -30,6 +31,7 @@ function EditableStateCell({
   title,
   value,
   selectItems,
+  selectProps,
   initialValue,
   onValueChange,
   setLoading,
@@ -114,54 +116,35 @@ function EditableStateCell({
       case 'select':
         return (
           <Select
-            placeholder={`Select ${title}`}
-            options={
-              selectItems &&
-              selectItems.map((item) => {
-                return {
-                  label: item.label,
-                  value: item.value,
-                  key: item.optionData
-                } as DefaultOptionType
-              })
-            }
-            disabled={disabled}
-            defaultValue={initialValue}
+            {...selectProps}
             onChange={(val, option) => onValueChange?.(val, option)}
-            value={value}
-            optionRender={(ori, info) => {
-              return (
-                <>
-                  <Flex justify='space-between' align='center' key={info.index}>
-                    <Typography.Text>{ori.label}</Typography.Text>
-                    <div
-                      className='h-6 w-6 rounded-sm'
-                      style={{
-                        backgroundColor: `${ori.key}`
-                      }}
-                    />
-                  </Flex>
-                </>
-              )
-            }}
+            optionRender={
+              selectProps
+                ? selectProps.optionRender
+                : (ori, info) => {
+                    return (
+                      <>
+                        <Flex justify='space-between' align='center' key={info.index}>
+                          <Typography.Text>{ori.label}</Typography.Text>
+                          <div
+                            className='h-6 w-6 rounded-sm'
+                            style={{
+                              backgroundColor: `${ori.key}`
+                            }}
+                          />
+                        </Flex>
+                      </>
+                    )
+                  }
+            }
             className={cn('w-full', restProps.className)}
           />
         )
       case 'multipleselect':
         return (
           <Select
+            {...selectProps}
             mode='multiple'
-            defaultValue={initialValue}
-            options={
-              selectItems &&
-              selectItems.map((item) => {
-                return {
-                  label: item.label,
-                  value: item.value,
-                  key: item.value
-                } as DefaultOptionType
-              })
-            }
             virtual={false}
             value={value}
             onChange={(val: number[], option) => onValueChange?.(val, option)}

@@ -10,7 +10,6 @@ import ProductColorAPI from '~/api/services/ProductColorAPI'
 import { TableItemWithKey, UseTableProps } from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
 import { AccessoryNote, GarmentAccessory, GarmentAccessoryNote, Product, ProductColor } from '~/typing'
-import DayJS from '~/utils/date-formatter'
 import { GarmentAccessoryTableDataType } from '../type'
 
 export default function useGarmentAccessory(table: UseTableProps<GarmentAccessoryTableDataType>) {
@@ -29,7 +28,10 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
   // State changes
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [searchText, setSearchText] = useState<string>('')
-  const [newRecord, setNewRecord] = useState<any>({})
+  const [newRecord, setNewRecord] = useState<{
+    garmentAccessory?: GarmentAccessory | undefined
+    garmentAccessoryNotes?: GarmentAccessoryNote[] | undefined
+  }>({})
 
   // List
   const [products, setProducts] = useState<Product[]>([])
@@ -78,12 +80,6 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
     loadData()
   }, [garmentAccessoryNew])
 
-  // useEffect(() => {
-  //   if (table.dataSource) {
-  //     console.info(table.dataSource)
-  //   }
-  // }, [table.dataSource])
-
   useEffect(() => {
     selfConvertDataSource(products, productColors, garmentAccessories, garmentAccessoryNotes)
   }, [products, productColors, garmentAccessories, garmentAccessoryNotes])
@@ -111,87 +107,74 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
     )
   }
 
-  const updateGarmentAccessory = async (record: TableItemWithKey<GarmentAccessoryTableDataType>) => {
-    if (!record.garmentAccessory) return
-
-    const updateData = {
-      productID: record.id!,
-      passingDeliveryDate: newRecord.passingDeliveryDate,
-      amountCutting: newRecord.amountCutting
-    }
-
-    console.log('GarmentAccessory progressing...')
-    await garmentAccessoryService.createOrUpdateItemByPk(
-      record.garmentAccessory.id!,
-      updateData,
-      setLoading,
-      (meta) => {
-        if (!meta?.success) {
-          throw new Error('API update GarmentAccessory failed')
-        }
-      }
-    )
-  }
-
-  const createNewUpdateGarmentAccessoryNoteItems = async (record: TableItemWithKey<GarmentAccessoryTableDataType>) => {
-    const newGarmentAccessoryNotes: GarmentAccessoryNote[] = newRecord.garmentAccessoryNotes || []
-
-    await garmentAccessoryNoteService.createNewItems(
-      newGarmentAccessoryNotes.map((item) => ({
-        productID: record.id!,
-        garmentAccessoryID: record.garmentAccessory!.id!,
-        accessoryNoteID: item.accessoryNoteID,
-        noteStatus: item.noteStatus
-      })),
-      setLoading,
-      (meta) => {
-        if (!meta?.success) {
-          throw new Error('API update GarmentAccessory failed')
-        }
-      }
-    )
-  }
-
-  const updateGarmentAccessoryNotes = async (record: TableItemWithKey<GarmentAccessoryTableDataType>) => {
-    console.log('Update')
-    await garmentAccessoryNoteService.deleteItemBy(
-      { field: 'productID', key: record.id! },
-      setLoading,
-      async (meta) => {
-        if (meta?.success) {
-          await createNewUpdateGarmentAccessoryNoteItems(record)
-        }
-      }
-    )
-  }
-
-  const handleSaveClick = async (record: TableItemWithKey<GarmentAccessoryTableDataType>, newRecord: any) => {
+  const handleSaveClick = async (record: TableItemWithKey<GarmentAccessoryTableDataType>) => {
     // const row = (await form.validateFields()) as any
     console.log({ old: record, new: newRecord })
     try {
       if (newRecord) {
-        if (
-          record.garmentAccessory &&
-          ((newRecord.amountCutting !== record.garmentAccessory?.amountCutting && newRecord.amountCutting > 0) ||
-            (newRecord.passingDeliveryDate &&
-              DayJS(newRecord.passingDeliveryDate).diff(record.garmentAccessory?.passingDeliveryDate)))
-        ) {
-          console.log('GarmentAccessory progressing...')
-          await updateGarmentAccessory(record)
-        }
-        if (record.garmentAccessoryNotes && record.garmentAccessoryNotes.length > 0) {
-          console.log('Update')
-          await updateGarmentAccessoryNotes(record)
-        } else {
-          console.log('Create new')
-          await createNewUpdateGarmentAccessoryNoteItems(record)
-        }
+        if (newRecord.garmentAccessory) {
+          if (record.garmentAccessory) {
+            // Update GarmentAccessory
+            if ((newRecord.garmentAccessory.amountCutting ?? 0) < 0) {
+              throw new Error('The value must be greater than 0')
+            } else {
+              await garmentAccessoryService.updateItemByPk(
+                record.garmentAccessory.id!,
+                {
+                  amountCutting: newRecord.garmentAccessory.amountCutting,
+                  passingDeliveryDate: newRecord.garmentAccessory.passingDeliveryDate
+                },
+                setLoading,
+                (meta) => {
+                  if (!meta?.success) {
+                    throw new Error('API update GarmentAccessory failed')
+                  }
+                }
+              )
+            }
+          } else {
+            // Create GarmentAccessory
+            await garmentAccessoryService.createNewItem(
+              {
+                ...newRecord.garmentAccessory,
+                productID: record.id!
+              },
+              setLoading,
+              (meta) => {
+                if (!meta?.success) {
+                  throw new Error('API create GarmentAccessory failed')
+                }
+              }
+            )
+          }
 
+          if (newRecord.garmentAccessoryNotes) {
+            console.log('Update GarmentAccessoryNote')
+            await garmentAccessoryNoteService.updateItemsBy?.(
+              { field: 'productID', key: record.id! },
+              newRecord.garmentAccessoryNotes.map((item) => {
+                return {
+                  ...item,
+                  productID: record.id!,
+                  garmentAccessoryID: record.garmentAccessory?.id,
+                  noteStatus: 'enough',
+                  status: 'active'
+                }
+              }),
+              setLoading,
+              (meta) => {
+                if (!meta?.success) {
+                  throw new Error('API update GarmentAccessoryNote failed')
+                }
+              }
+            )
+          }
+        }
         message.success('Success!')
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(error)
-      message.error('Failed')
+      message.error(`${error.message}`)
     } finally {
       setLoading(false)
       handleConfirmCancelEditing()
@@ -232,23 +215,27 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
     record: TableItemWithKey<GarmentAccessoryTableDataType>,
     onDataSuccess?: (meta: ResponseDataType | undefined) => void
   ) => {
-    console.log(record)
     try {
-      await garmentAccessoryService.deleteItemBy(
+      await garmentAccessoryService.updateItemBy(
         {
           field: 'productID',
           key: record.id!
+        },
+        {
+          amountCutting: null,
+          passingDeliveryDate: null
         },
         setLoading,
         async (meta, msg) => {
           if (!meta?.success) {
             throw new Error('API delete GarmentAccessory failed')
           }
-          await garmentAccessoryNoteService.deleteItemBy(
+          await garmentAccessoryNoteService.updateItemsBy(
             {
               field: 'productID',
               key: record.id!
             },
+            [],
             setLoading,
             (meta2) => {
               if (!meta2?.success) {

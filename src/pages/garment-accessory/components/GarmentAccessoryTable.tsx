@@ -121,8 +121,13 @@ const GarmentAccessoryTable: React.FC<Props> = () => {
                 inputType='number'
                 required={true}
                 initialValue={record.garmentAccessory ? record.garmentAccessory?.amountCutting : ''}
-                value={newRecord && (newRecord.amountCutting ?? 0)}
-                onValueChange={(val) => setNewRecord({ ...newRecord, amountCutting: val })}
+                value={newRecord && (newRecord.garmentAccessory?.amountCutting ?? 0)}
+                onValueChange={(val) =>
+                  setNewRecord({
+                    ...newRecord,
+                    garmentAccessory: { ...newRecord.garmentAccessory, amountCutting: val }
+                  })
+                }
               >
                 <SkyTableTypography status={record.status}>
                   {record.garmentAccessory ? record.garmentAccessory?.amountCutting : ''}
@@ -167,7 +172,13 @@ const GarmentAccessoryTable: React.FC<Props> = () => {
                 : ''
             }
             onValueChange={(val) =>
-              setNewRecord({ ...newRecord, passingDeliveryDate: val ? DayJS(val).format(DatePattern.iso8601) : null })
+              setNewRecord({
+                ...newRecord,
+                garmentAccessory: {
+                  ...newRecord.garmentAccessory,
+                  passingDeliveryDate: val ? DayJS(val).format(DatePattern.iso8601) : null
+                }
+              })
             }
           >
             <SkyTableTypography status={record.status}>
@@ -192,21 +203,22 @@ const GarmentAccessoryTable: React.FC<Props> = () => {
               title='Ghi chú'
               inputType='multipleselect'
               required={true}
-              selectItems={accessoryNotes.map((item) => {
-                return {
-                  value: item.id,
-                  label: item.title
-                }
-              })}
-              initialValue={
-                record.garmentAccessoryNotes &&
-                record.garmentAccessoryNotes.map((item) => {
+              selectProps={{
+                options: accessoryNotes.map((item) => {
                   return {
-                    value: item.accessoryNote?.id,
-                    label: item.accessoryNote?.title
+                    value: item.id,
+                    label: item.title
                   }
-                })
-              }
+                }),
+                defaultValue:
+                  record.garmentAccessoryNotes &&
+                  record.garmentAccessoryNotes.map((item) => {
+                    return {
+                      value: item.accessoryNote?.id,
+                      label: item.accessoryNote?.title
+                    }
+                  })
+              }}
               onValueChange={(val: number[]) => {
                 setNewRecord({
                   ...newRecord,
@@ -284,12 +296,12 @@ const GarmentAccessoryTable: React.FC<Props> = () => {
           actions={{
             onEdit: {
               onClick: (_e, record) => {
-                setNewRecord(record!.garmentAccessory!)
+                setNewRecord({ garmentAccessory: record?.garmentAccessory })
                 table.handleStartEditing(record!.key!)
               }
             },
             onSave: {
-              onClick: (_e, record) => handleSaveClick(record!, newRecord)
+              onClick: (_e, record) => handleSaveClick(record!)
             },
             onDelete: {
               onClick: (_e, record) => table.handleStartDeleting(record!.key!)

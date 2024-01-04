@@ -148,7 +148,7 @@ export interface ProductGroup {
 export interface GarmentAccessory {
   id?: number
   productID?: number
-  amountCutting?: number
+  amountCutting?: number | null
   passingDeliveryDate?: string | null
   status?: ItemStatusType
   product?: Product

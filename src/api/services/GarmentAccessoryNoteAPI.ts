@@ -26,18 +26,7 @@ export default {
   },
   createNewItems: async (items: GarmentAccessoryNote[]): Promise<ResponseDataType | undefined> => {
     return await client
-      .post(
-        `${NAMESPACE}/items`,
-        items.map((item) => {
-          return {
-            productID: item.productID,
-            accessoryNoteID: item.accessoryNoteID,
-            garmentAccessoryID: item.garmentAccessoryID,
-            noteStatus: item.noteStatus,
-            status: item.status ?? 'active'
-          }
-        })
-      )
+      .post(`${NAMESPACE}/items`, items)
       .then((res) => {
         if (res.data) {
           return res.data as ResponseDataType
@@ -134,6 +123,25 @@ export default {
       .put(`${NAMESPACE}/${id}`, {
         ...item
       })
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  updateItemsBy: async (
+    query: {
+      field: string
+      key: React.Key
+    },
+    recordsToUpdate: GarmentAccessoryNote[]
+  ): Promise<ResponseDataType | undefined> => {
+    return client
+      .post(`${NAMESPACE}/updateItems/${query.field}/${query.key}`, recordsToUpdate)
       .then((res) => {
         if (res.data) {
           return res.data as ResponseDataType

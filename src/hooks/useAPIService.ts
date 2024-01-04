@@ -21,6 +21,10 @@ export interface APIService<T extends ItemWithId> {
   getItemBy: (query: { field: string; key: React.Key }) => Promise<ResponseDataType | undefined>
   getItems: (params: RequestBodyType) => Promise<ResponseDataType | undefined>
   updateItemByPk: (id: number, itemToUpdate: Partial<T>) => Promise<ResponseDataType | undefined>
+  updateItemsBy?: (
+    query: { field: string; key: React.Key },
+    recordsToUpdate: Partial<T>[]
+  ) => Promise<ResponseDataType | undefined>
   updateItemBy: (
     query: {
       field: string
@@ -202,6 +206,32 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
     }
   }
 
+  const updateItemsBy = async (
+    query: {
+      field: string
+      key: React.Key
+    },
+    recordsToUpdate: T[],
+    setLoading?: (enable: boolean) => void,
+    onDataSuccess?: (data: ResponseDataType | undefined, message?: string) => void
+  ) => {
+    try {
+      setLoading?.(true)
+      const meta = await apiService.updateItemsBy?.(query, recordsToUpdate)
+      if (meta?.success) {
+        onDataSuccess?.(meta, 'Updated!')
+      } else {
+        onDataSuccess?.(undefined, 'Failed!')
+      }
+      setMetaData(meta)
+    } catch (err) {
+      console.error(err)
+      onDataSuccess?.(undefined, 'Error!')
+    } finally {
+      setLoading?.(false)
+    }
+  }
+
   const updateItemBy = async (
     query: {
       field: string
@@ -327,6 +357,7 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
     getListItems,
     updateItemByPk,
     updateItemBy,
+    updateItemsBy,
     deleteItemByPk,
     deleteItemBy,
     sortedListItems,
