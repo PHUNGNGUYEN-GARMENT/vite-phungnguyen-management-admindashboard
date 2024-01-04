@@ -162,6 +162,7 @@ function EditableStateCell({
                 } as DefaultOptionType
               })
             }
+            virtual={false}
             value={value}
             onChange={(val: number[], option) => onValueChange?.(val, option)}
             className='w-full'

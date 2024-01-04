@@ -63,22 +63,26 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
         setGarmentAccessoryNotes(meta.data as GarmentAccessoryNote[])
       }
     })
-    await accessoryNoteService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        setAccessoryNotes(meta.data as AccessoryNote[])
+    await accessoryNoteService.getListItems(
+      { ...defaultRequestBody, paginator: { pageSize: 1000, page: 1 } },
+      setLoading,
+      (meta) => {
+        if (meta?.success) {
+          setAccessoryNotes(meta.data as AccessoryNote[])
+        }
       }
-    })
+    )
   }
 
   useEffect(() => {
     loadData()
   }, [garmentAccessoryNew])
 
-  useEffect(() => {
-    if (table.dataSource) {
-      console.info(table.dataSource)
-    }
-  }, [table.dataSource])
+  // useEffect(() => {
+  //   if (table.dataSource) {
+  //     console.info(table.dataSource)
+  //   }
+  // }, [table.dataSource])
 
   useEffect(() => {
     selfConvertDataSource(products, productColors, garmentAccessories, garmentAccessoryNotes)
@@ -107,11 +111,65 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
     )
   }
 
+  const updateGarmentAccessory = async (record: TableItemWithKey<GarmentAccessoryTableDataType>) => {
+    if (!record.garmentAccessory) return
+
+    const updateData = {
+      productID: record.id!,
+      passingDeliveryDate: newRecord.passingDeliveryDate,
+      amountCutting: newRecord.amountCutting
+    }
+
+    console.log('GarmentAccessory progressing...')
+    await garmentAccessoryService.createOrUpdateItemByPk(
+      record.garmentAccessory.id!,
+      updateData,
+      setLoading,
+      (meta) => {
+        if (!meta?.success) {
+          throw new Error('API update GarmentAccessory failed')
+        }
+      }
+    )
+  }
+
+  const createNewUpdateGarmentAccessoryNoteItems = async (record: TableItemWithKey<GarmentAccessoryTableDataType>) => {
+    const newGarmentAccessoryNotes: GarmentAccessoryNote[] = newRecord.garmentAccessoryNotes || []
+
+    await garmentAccessoryNoteService.createNewItems(
+      newGarmentAccessoryNotes.map((item) => ({
+        productID: record.id!,
+        garmentAccessoryID: record.garmentAccessory!.id!,
+        accessoryNoteID: item.accessoryNoteID,
+        noteStatus: item.noteStatus
+      })),
+      setLoading,
+      (meta) => {
+        if (!meta?.success) {
+          throw new Error('API update GarmentAccessory failed')
+        }
+      }
+    )
+  }
+
+  const updateGarmentAccessoryNotes = async (record: TableItemWithKey<GarmentAccessoryTableDataType>) => {
+    console.log('Update')
+    await garmentAccessoryNoteService.deleteItemBy(
+      { field: 'productID', key: record.id! },
+      setLoading,
+      async (meta) => {
+        if (meta?.success) {
+          await createNewUpdateGarmentAccessoryNoteItems(record)
+        }
+      }
+    )
+  }
+
   const handleSaveClick = async (record: TableItemWithKey<GarmentAccessoryTableDataType>, newRecord: any) => {
     // const row = (await form.validateFields()) as any
     console.log({ old: record, new: newRecord })
-    if (newRecord) {
-      try {
+    try {
+      if (newRecord) {
         if (
           record.garmentAccessory &&
           ((newRecord.amountCutting !== record.garmentAccessory?.amountCutting && newRecord.amountCutting > 0) ||
@@ -119,79 +177,25 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
               DayJS(newRecord.passingDeliveryDate).diff(record.garmentAccessory?.passingDeliveryDate)))
         ) {
           console.log('GarmentAccessory progressing...')
-          await garmentAccessoryService.createOrUpdateItemByPk(
-            record.garmentAccessory.id!,
-            {
-              productID: record.id!,
-              passingDeliveryDate: newRecord.passingDeliveryDate,
-              amountCutting: newRecord.amountCutting
-            },
-            setLoading,
-            (meta) => {
-              if (!meta?.success) {
-                throw new Error('API update GarmentAccessory failed')
-              }
-            }
-          )
+          await updateGarmentAccessory(record)
         }
         if (record.garmentAccessoryNotes && record.garmentAccessoryNotes.length > 0) {
           console.log('Update')
-          const newGarmentAccessoryNotes: GarmentAccessoryNote[] = newRecord.garmentAccessoryNotes
-          await garmentAccessoryNoteService.deleteItemBy(
-            { field: 'productID', key: record.id! },
-            setLoading,
-            (meta) => {
-              if (meta) {
-                console.log(meta)
-              }
-            }
-          )
-          await garmentAccessoryNoteService.createNewItems(
-            newGarmentAccessoryNotes.map((item) => {
-              return {
-                productID: record.id!,
-                garmentAccessoryID: record.garmentAccessory!.id!,
-                accessoryNoteID: item.accessoryNoteID,
-                noteStatus: item.noteStatus
-              } as GarmentAccessoryNote
-            }),
-            setLoading,
-            (meta) => {
-              if (!meta?.success) {
-                throw new Error('API update GarmentAccessory failed')
-              }
-            }
-          )
+          await updateGarmentAccessoryNotes(record)
         } else {
           console.log('Create new')
-          const newGarmentAccessoryNotes: GarmentAccessoryNote[] = newRecord.garmentAccessoryNotes
-          await garmentAccessoryNoteService.createNewItems(
-            newGarmentAccessoryNotes.map((item) => {
-              return {
-                productID: record.id!,
-                garmentAccessoryID: record.garmentAccessory!.id!,
-                accessoryNoteID: item.accessoryNoteID,
-                noteStatus: item.noteStatus
-              } as GarmentAccessoryNote
-            }),
-            setLoading,
-            (meta) => {
-              if (!meta?.success) {
-                throw new Error('API update GarmentAccessory failed')
-              }
-            }
-          )
+          await createNewUpdateGarmentAccessoryNoteItems(record)
         }
 
         message.success('Success!')
-      } catch (error) {
-        console.error(error)
-        message.error('Failed')
-      } finally {
-        setLoading(false)
-        handleConfirmCancelEditing()
-        loadData()
       }
+    } catch (error) {
+      console.error(error)
+      message.error('Failed')
+    } finally {
+      setLoading(false)
+      handleConfirmCancelEditing()
+      loadData()
     }
   }
 
@@ -229,21 +233,43 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
     onDataSuccess?: (meta: ResponseDataType | undefined) => void
   ) => {
     console.log(record)
-    await garmentAccessoryService.deleteItemByPk(record.garmentAccessory!.id!, setLoading, (meta, msg) => {
-      if (meta) {
-        if (meta.success) {
-          loadData()
+    try {
+      await garmentAccessoryService.deleteItemBy(
+        {
+          field: 'productID',
+          key: record.id!
+        },
+        setLoading,
+        async (meta, msg) => {
+          if (!meta?.success) {
+            throw new Error('API delete GarmentAccessory failed')
+          }
+          await garmentAccessoryNoteService.deleteItemBy(
+            {
+              field: 'productID',
+              key: record.id!
+            },
+            setLoading,
+            (meta2) => {
+              if (!meta2?.success) {
+                throw new Error('API delete GarmentAccessoryNote failed')
+              }
+            }
+          )
+          onDataSuccess?.(meta)
           message.success(msg)
         }
-      } else {
-        message.error(msg)
-      }
-      onDataSuccess?.(meta)
-    })
+      )
+    } catch (error) {
+      console.error(error)
+    } finally {
+      loadData()
+      setLoading(false)
+    }
   }
 
   const handlePageChange = async (_page: number) => {
-    garmentAccessoryService.setPage(_page)
+    productService.setPage(_page)
     const body: RequestBodyType = {
       ...defaultRequestBody,
       paginator: {
@@ -255,7 +281,7 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
         term: searchText
       }
     }
-    await productColorService.getListItems(body, setLoading, (meta) => {
+    await productService.getListItems(body, setLoading, (meta) => {
       if (meta?.success) {
         selfConvertDataSource(meta?.data as Product[])
       }
@@ -273,12 +299,12 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleSortChange = async (checked: boolean, _event: React.MouseEvent<HTMLButtonElement>) => {
-    await garmentAccessoryService.sortedListItems(
+    await productService.sortedListItems(
       checked ? 'asc' : 'desc',
       setLoading,
       (meta) => {
         if (meta?.success) {
-          selfConvertDataSource(meta?.data as GarmentAccessory[])
+          selfConvertDataSource(meta?.data as Product[])
         }
       },
       { field: 'productCode', term: searchText }
@@ -287,7 +313,7 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
 
   const handleSearch = async (value: string) => {
     if (value.length > 0) {
-      await garmentAccessoryService.getListItems(
+      await productService.getListItems(
         {
           ...defaultRequestBody,
           search: {
@@ -298,7 +324,7 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
         setLoading,
         (meta) => {
           if (meta?.success) {
-            selfConvertDataSource(meta?.data as GarmentAccessory[])
+            selfConvertDataSource(meta?.data as Product[])
           }
         }
       )

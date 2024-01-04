@@ -154,5 +154,18 @@ export default {
       .catch(function (error) {
         errorFormatter(error)
       })
+  },
+  deleteItemBy: async (query: { field: string; key: React.Key }): Promise<ResponseDataType | undefined> => {
+    return client
+      .delete(`${NAMESPACE}/${query.field}/${query.key}`)
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
   }
 }
