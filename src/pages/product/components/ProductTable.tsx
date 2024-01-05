@@ -1,11 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ColorPicker, Flex } from 'antd'
 import type { ColumnType } from 'antd/es/table'
-import { useEffect, useState } from 'react'
-import { defaultRequestBody } from '~/api/client'
-import ColorAPI from '~/api/services/ColorAPI'
-import GroupAPI from '~/api/services/GroupAPI'
-import PrintAPI from '~/api/services/PrintAPI'
 import useDevice from '~/components/hooks/useDevice'
 import useTable from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
@@ -13,8 +8,8 @@ import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import ImportationTable from '~/pages/importation/components/ImportationTable'
-import { Color, Group, Print } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
+import { dateValidatorDisplay, numberValidatorDisplay, textValidatorDisplay } from '~/utils/helpers'
 import useProduct from '../hooks/useProduct'
 import { ProductTableDataType } from '../type'
 import ModalAddNewProduct from './ModalAddNewProduct'
@@ -37,37 +32,12 @@ const ProductTable: React.FC = () => {
     handleAddNewItem,
     handleConfirmDelete,
     handlePageChange,
-    productService
+    productService,
+    prints,
+    groups,
+    colors
   } = useProduct(table)
   const { width } = useDevice()
-  const [editable, setEditable] = useState<boolean>(false)
-
-  const [colors, setColors] = useState<Color[]>([])
-  const [groups, setGroups] = useState<Group[]>([])
-  const [prints, setPrints] = useState<Print[]>([])
-
-  useEffect(() => {
-    if (editable) {
-      ColorAPI.getItems(defaultRequestBody).then((meta) => {
-        if (meta?.success) {
-          const items = meta.data as Color[]
-          setColors(items)
-        }
-      })
-      GroupAPI.getItems(defaultRequestBody).then((meta) => {
-        if (meta?.success) {
-          const items = meta.data as Group[]
-          setGroups(items)
-        }
-      })
-      PrintAPI.getItems(defaultRequestBody).then((meta) => {
-        if (meta?.success) {
-          const items = meta.data as Print[]
-          setPrints(items)
-        }
-      })
-    }
-  }, [editable])
 
   const groupCol: ColumnType<ProductTableDataType> = {
     title: 'Nhóm',
@@ -82,17 +52,18 @@ const ProductTable: React.FC = () => {
             title='Nhóm'
             inputType='select'
             required={false}
-            initialValue={record.productGroup?.groupID}
-            value={newRecord.groupID}
             onValueChange={(val) => {
               setNewRecord({ ...newRecord, groupID: val })
             }}
-            selectItems={groups.map((i) => {
-              return { label: i.name, value: i.id, optionData: i.id }
-            })}
+            selectProps={{
+              options: groups.map((i) => {
+                return { label: i.name, value: i.id, optionData: i.id }
+              }),
+              defaultValue: record.productGroup?.group?.name
+            }}
           >
             <SkyTableTypography status={record.productGroup?.group?.status}>
-              {record.productGroup?.group?.name}
+              {textValidatorDisplay(record.productGroup?.group?.name)}
             </SkyTableTypography>
           </EditableStateCell>
         </>
@@ -113,15 +84,17 @@ const ProductTable: React.FC = () => {
             title='Nơi in'
             inputType='select'
             required={true}
-            initialValue={record.printablePlace?.printID}
-            value={newRecord.printID}
             onValueChange={(val: any) => setNewRecord({ ...newRecord, printID: val })}
-            selectItems={prints.map((i) => {
-              return { label: i.name, value: i.id, optionData: i.id }
-            })}
+            selectProps={{
+              options: prints.map((i) => {
+                return { label: i.name, value: i.id, optionData: i.id }
+              }),
+              value: newRecord.printID,
+              defaultValue: record.printablePlace?.print?.name
+            }}
           >
             <SkyTableTypography status={record.printablePlace?.print?.status}>
-              {record.printablePlace?.print?.name}
+              {textValidatorDisplay(record.printablePlace?.print?.name)}
             </SkyTableTypography>
           </EditableStateCell>
         </>
@@ -142,14 +115,12 @@ const ProductTable: React.FC = () => {
             title='NPL'
             inputType='datepicker'
             required={true}
-            initialValue={record.dateInputNPL ? DayJS(record.dateInputNPL) : ''}
+            initialValue={record.dateInputNPL}
             onValueChange={(val: any) =>
               setNewRecord({ ...newRecord, dateInputNPL: val ? DayJS(val).format(DatePattern.iso8601) : null })
             }
           >
-            <SkyTableTypography status={'active'}>
-              {record.dateInputNPL ? DayJS(record.dateInputNPL).format(DatePattern.display) : ''}
-            </SkyTableTypography>
+            <SkyTableTypography status={'active'}>{dateValidatorDisplay(record.dateInputNPL)}</SkyTableTypography>
           </EditableStateCell>
         </>
       )
@@ -174,7 +145,7 @@ const ProductTable: React.FC = () => {
               value={newRecord.productCode}
               onValueChange={(val) => setNewRecord({ ...newRecord, productCode: val })}
             >
-              <SkyTableTypography status={'active'}>{record.productCode}</SkyTableTypography>
+              <SkyTableTypography status={'active'}>{textValidatorDisplay(record.productCode)}</SkyTableTypography>
             </EditableStateCell>
           </>
         )
@@ -197,7 +168,7 @@ const ProductTable: React.FC = () => {
               value={newRecord.quantityPO}
               onValueChange={(val) => setNewRecord({ ...newRecord, quantityPO: val })}
             >
-              <SkyTableTypography status={'active'}>{record.quantityPO}</SkyTableTypography>
+              <SkyTableTypography status={'active'}>{numberValidatorDisplay(record.quantityPO)}</SkyTableTypography>
             </EditableStateCell>
           </>
         )
@@ -216,16 +187,18 @@ const ProductTable: React.FC = () => {
               title='Màu'
               inputType='colorselector'
               required={false}
-              initialValue={record.productColor?.colorID}
-              // value={newRecord.colorID}
               onValueChange={(val) => setNewRecord({ ...newRecord, colorID: val })}
-              selectItems={colors.map((i) => {
-                return { label: i.name, value: i.id, optionData: i.hexColor }
-              })}
+              selectProps={{
+                options: colors.map((i) => {
+                  return { label: i.name, value: i.id, key: i.hexColor }
+                }),
+                defaultValue: record.productColor?.colorID,
+                value: newRecord.colorID
+              }}
             >
               <Flex className='' justify='space-between' align='center' gap={10}>
                 <SkyTableTypography status={record.productColor?.color?.status} className='w-fit'>
-                  {record.productColor?.color?.name}
+                  {textValidatorDisplay(record.productColor?.color?.name)}
                 </SkyTableTypography>
                 {record.productColor && (
                   <ColorPicker size='middle' format='hex' value={record.productColor?.color?.hexColor} disabled />
@@ -238,15 +211,6 @@ const ProductTable: React.FC = () => {
     },
     { ...groupCol, responsive: ['xxl'] },
     { ...printCol, responsive: ['xxl'] },
-    // {
-    //   title: 'Tiến trình',
-    //   dataIndex: 'progress',
-    //   responsive: ['xxl'],
-    //   width: 'auto',
-    //   render: (_value: any, record: ProductTableDataType) => {
-    //     return <ProductProgressStatus collapse={false} record={record} />
-    //   }
-    // },
     { ...dateInputNPLCol, responsive: ['xl'] },
     {
       title: 'FCR',
@@ -261,13 +225,13 @@ const ProductTable: React.FC = () => {
               title='FCR'
               inputType='datepicker'
               required={true}
-              initialValue={record.dateOutputFCR ? DayJS(record.dateOutputFCR) : ''}
+              initialValue={record.dateOutputFCR}
               onValueChange={(val: any) =>
                 setNewRecord({ ...newRecord, dateOutputFCR: val ? DayJS(val).format(DatePattern.iso8601) : null })
               }
             >
               <SkyTableTypography status={'active'}>
-                {record.dateOutputFCR ? DayJS(record.dateOutputFCR).format(DatePattern.display) : ''}
+                {record.dateOutputFCR && dateValidatorDisplay(record.dateOutputFCR)}
               </SkyTableTypography>
             </EditableStateCell>
           </>
@@ -305,7 +269,6 @@ const ProductTable: React.FC = () => {
             onEdit: {
               onClick: (_e, record) => {
                 setNewRecord({ ...record })
-                setEditable((prev) => !prev)
                 table.handleStartEditing(record!.key!)
               }
             },

@@ -12,13 +12,23 @@ import useAPIService from '~/hooks/useAPIService'
 import { Color, Group, Print } from '~/typing'
 import DayJS from '~/utils/date-formatter'
 
+export interface ProductAddNewProps {
+  productCode?: string | null
+  quantityPO?: number | null
+  colorID?: number | null
+  groupID?: number | null
+  printID?: number | null
+  dateInputNPL?: string
+  dateOutputFCR?: string | null
+}
+
 interface Props extends React.HTMLAttributes<HTMLElement> {
   openModal: boolean
   loading: boolean
   setOpenModal: (enable: boolean) => void
   setLoading: (enable: boolean) => void
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onAddNew: (itemToAddNew: any) => void
+  onAddNew: (recordToAddNew: ProductAddNewProps) => void
 }
 
 const ModalAddNewProduct: React.FC<Props> = ({ loading, openModal, setOpenModal, setLoading, onAddNew, ...props }) => {
@@ -33,21 +43,33 @@ const ModalAddNewProduct: React.FC<Props> = ({ loading, openModal, setOpenModal,
 
   useEffect(() => {
     const loadData = async () => {
-      await colorService.getListItems(defaultRequestBody, setLoading, (meta) => {
-        if (meta?.success) {
-          setColors(meta.data as Color[])
+      await colorService.getListItems(
+        { ...defaultRequestBody, paginator: { pageSize: -1, page: 1 } },
+        setLoading,
+        (meta) => {
+          if (meta?.success) {
+            setColors(meta.data as Color[])
+          }
         }
-      })
-      await groupService.getListItems(defaultRequestBody, setLoading, (meta) => {
-        if (meta?.success) {
-          setGroups(meta.data as Group[])
+      )
+      await groupService.getListItems(
+        { ...defaultRequestBody, paginator: { pageSize: -1, page: 1 } },
+        setLoading,
+        (meta) => {
+          if (meta?.success) {
+            setGroups(meta.data as Group[])
+          }
         }
-      })
-      await printService.getListItems(defaultRequestBody, setLoading, (meta) => {
-        if (meta?.success) {
-          setPrints(meta.data as Print[])
+      )
+      await printService.getListItems(
+        { ...defaultRequestBody, paginator: { pageSize: -1, page: 1 } },
+        setLoading,
+        (meta) => {
+          if (meta?.success) {
+            setPrints(meta.data as Print[])
+          }
         }
-      })
+      )
     }
     loadData()
   }, [])
@@ -109,9 +131,8 @@ const ModalAddNewProduct: React.FC<Props> = ({ loading, openModal, setOpenModal,
                 dataIndex='colorID'
                 inputType='colorselector'
                 placeholder='Chọn mã màu...'
-                initialField={{
-                  value: undefined,
-                  selectItems: colors.map((item) => {
+                selectProps={{
+                  options: colors.map((item) => {
                     return {
                       label: item.name,
                       value: item.id,
@@ -131,9 +152,8 @@ const ModalAddNewProduct: React.FC<Props> = ({ loading, openModal, setOpenModal,
                 dataIndex='groupID'
                 inputType='select'
                 placeholder='Chọn nhóm...'
-                initialField={{
-                  value: undefined,
-                  selectItems: groups.map((item) => {
+                selectProps={{
+                  options: groups.map((item) => {
                     return {
                       label: item.name,
                       value: item.id,
@@ -153,9 +173,8 @@ const ModalAddNewProduct: React.FC<Props> = ({ loading, openModal, setOpenModal,
                 dataIndex='printID'
                 inputType='select'
                 placeholder='Chọn nơi in...'
-                initialField={{
-                  value: undefined,
-                  selectItems: prints.map((item) => {
+                selectProps={{
+                  options: prints.map((item) => {
                     return {
                       label: item.name,
                       value: item.id,
@@ -176,9 +195,7 @@ const ModalAddNewProduct: React.FC<Props> = ({ loading, openModal, setOpenModal,
                 inputType='datepicker'
                 required
                 placeholder='Ngày nhập NPL...'
-                initialField={{
-                  value: DayJS(Date.now())
-                }}
+                initialValue={DayJS(Date.now())}
               />
             </Flex>
             <Flex className='w-full' align='center'>
@@ -192,9 +209,7 @@ const ModalAddNewProduct: React.FC<Props> = ({ loading, openModal, setOpenModal,
                 inputType='datepicker'
                 required
                 placeholder='Ngày xuất FCR...'
-                initialField={{
-                  value: DayJS(Date.now())
-                }}
+                initialValue={DayJS(Date.now())}
               />
             </Flex>
           </Flex>

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ColorPicker, Flex } from 'antd'
-import { ColumnType } from 'antd/es/table'
+import { ColumnsType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
 import useTable from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
@@ -8,6 +8,7 @@ import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
+import { dateValidatorDisplay } from '~/utils/helpers'
 import useSampleSewing from '../hooks/useSampleSewing'
 import { SampleSewingTableDataType } from '../type'
 
@@ -30,7 +31,7 @@ const SampleSewingTable: React.FC<Props> = () => {
     productService
   } = useSampleSewing(table)
 
-  const columns: ColumnType<SampleSewingTableDataType>[] = [
+  const columns: ColumnsType<SampleSewingTableDataType> = [
     {
       title: 'Mã hàng',
       dataIndex: 'productCode',
@@ -71,7 +72,7 @@ const SampleSewingTable: React.FC<Props> = () => {
       }
     },
     {
-      title: 'Ngày gửi NPL',
+      title: 'NPL may mẫu',
       dataIndex: 'dateSubmissionNPL',
       width: '15%',
       render: (_value: any, record: SampleSewingTableDataType) => {
@@ -79,23 +80,16 @@ const SampleSewingTable: React.FC<Props> = () => {
           <EditableStateCell
             isEditing={table.isEditing(record.key!)}
             dataIndex='dateSubmissionNPL'
-            title='Ngày gửi NPL'
+            title='NPL may mẫu'
             inputType='datepicker'
             required={true}
-            initialValue={
-              record.sampleSewing
-                ? record.sampleSewing.dateSubmissionNPL && DayJS(record.sampleSewing.dateSubmissionNPL)
-                : ''
-            }
+            initialValue={record.sampleSewing && record.sampleSewing.dateSubmissionNPL}
             onValueChange={(val: Dayjs) =>
-              setNewRecord({ ...newRecord, dateSubmissionNPL: val ? DayJS(val).format(DatePattern.iso8601) : null })
+              setNewRecord({ ...newRecord, dateSubmissionNPL: DayJS(val).format(DatePattern.iso8601) })
             }
           >
             <SkyTableTypography status={record.status}>
-              {record.sampleSewing
-                ? record.sampleSewing.dateSubmissionNPL &&
-                  DayJS(record.sampleSewing.dateSubmissionNPL).format(DatePattern.display)
-                : ''}
+              {record.sampleSewing && dateValidatorDisplay(record.sampleSewing.dateSubmissionNPL)}
             </SkyTableTypography>
           </EditableStateCell>
         )
@@ -117,14 +111,11 @@ const SampleSewingTable: React.FC<Props> = () => {
               record.sampleSewing ? record.sampleSewing.dateApprovalPP && DayJS(record.sampleSewing.dateApprovalPP) : ''
             }
             onValueChange={(val: Dayjs) =>
-              setNewRecord({ ...newRecord, dateApprovalPP: val ? DayJS(val).format(DatePattern.iso8601) : null })
+              setNewRecord({ ...newRecord, dateApprovalPP: val && DayJS(val).format(DatePattern.iso8601) })
             }
           >
             <SkyTableTypography status={record.status}>
-              {record.sampleSewing
-                ? record.sampleSewing.dateApprovalPP &&
-                  DayJS(record.sampleSewing.dateApprovalPP).format(DatePattern.display)
-                : ''}
+              {record.sampleSewing && dateValidatorDisplay(record.sampleSewing.dateApprovalPP)}
             </SkyTableTypography>
           </EditableStateCell>
         )
@@ -139,21 +130,18 @@ const SampleSewingTable: React.FC<Props> = () => {
           <EditableStateCell
             isEditing={table.isEditing(record.key!)}
             dataIndex='dateApprovalSO'
-            title='Ngày gửi NPL'
+            title='Ngày duyệt SO'
             inputType='datepicker'
             required={true}
             initialValue={
-              record.sampleSewing ? record.sampleSewing.dateApprovalSO && DayJS(record.sampleSewing.dateApprovalSO) : ''
+              record.sampleSewing && record.sampleSewing.dateApprovalSO && DayJS(record.sampleSewing.dateApprovalSO)
             }
             onValueChange={(val: Dayjs) =>
-              setNewRecord({ ...newRecord, dateApprovalSO: val ? DayJS(val).format(DatePattern.iso8601) : null })
+              setNewRecord({ ...newRecord, dateApprovalSO: val && DayJS(val).format(DatePattern.iso8601) })
             }
           >
             <SkyTableTypography status={record.status}>
-              {record.sampleSewing
-                ? record.sampleSewing.dateApprovalSO &&
-                  DayJS(record.sampleSewing.dateApprovalSO).format(DatePattern.display)
-                : ''}
+              {record.sampleSewing && dateValidatorDisplay(record.sampleSewing.dateApprovalSO)}
             </SkyTableTypography>
           </EditableStateCell>
         )
@@ -161,7 +149,7 @@ const SampleSewingTable: React.FC<Props> = () => {
     }
   ]
 
-  const expandableColumns: ColumnType<SampleSewingTableDataType>[] = [
+  const expandableColumns: ColumnsType<SampleSewingTableDataType> = [
     {
       title: 'Ngày gửi mẫu lần 1',
       dataIndex: 'dateSubmissionFirstTime',
@@ -175,22 +163,19 @@ const SampleSewingTable: React.FC<Props> = () => {
             inputType='datepicker'
             required={true}
             initialValue={
-              record.sampleSewing
-                ? record.sampleSewing.dateSubmissionFirstTime && DayJS(record.sampleSewing.dateSubmissionFirstTime)
-                : ''
+              record.sampleSewing &&
+              record.sampleSewing.dateSubmissionFirstTime &&
+              DayJS(record.sampleSewing.dateSubmissionFirstTime)
             }
             onValueChange={(val: Dayjs) =>
               setNewRecord({
                 ...newRecord,
-                dateSubmissionFirstTime: val ? DayJS(val).format(DatePattern.iso8601) : null
+                dateSubmissionFirstTime: val && DayJS(val).format(DatePattern.iso8601)
               })
             }
           >
             <SkyTableTypography status={record.status}>
-              {record.sampleSewing
-                ? record.sampleSewing.dateSubmissionFirstTime &&
-                  DayJS(record.sampleSewing.dateSubmissionFirstTime).format(DatePattern.display)
-                : ''}
+              {record.sampleSewing && dateValidatorDisplay(record.sampleSewing.dateSubmissionFirstTime)}
             </SkyTableTypography>
           </EditableStateCell>
         )
@@ -209,14 +194,14 @@ const SampleSewingTable: React.FC<Props> = () => {
             inputType='datepicker'
             required={true}
             initialValue={
-              record.sampleSewing
-                ? record.sampleSewing.dateSubmissionSecondTime && DayJS(record.sampleSewing.dateSubmissionSecondTime)
-                : ''
+              record.sampleSewing &&
+              record.sampleSewing.dateSubmissionSecondTime &&
+              DayJS(record.sampleSewing.dateSubmissionSecondTime)
             }
             onValueChange={(val: Dayjs) =>
               setNewRecord({
                 ...newRecord,
-                dateSubmissionSecondTime: val ? DayJS(val).format(DatePattern.iso8601) : null
+                dateSubmissionSecondTime: val && DayJS(val).format(DatePattern.iso8601)
               })
             }
           >
@@ -243,22 +228,19 @@ const SampleSewingTable: React.FC<Props> = () => {
             inputType='datepicker'
             required={true}
             initialValue={
-              record.sampleSewing
-                ? record.sampleSewing.dateSubmissionThirdTime && DayJS(record.sampleSewing.dateSubmissionThirdTime)
-                : ''
+              record.sampleSewing &&
+              record.sampleSewing.dateSubmissionThirdTime &&
+              DayJS(record.sampleSewing.dateSubmissionThirdTime)
             }
             onValueChange={(val: Dayjs) =>
               setNewRecord({
                 ...newRecord,
-                dateSubmissionThirdTime: val ? DayJS(val).format(DatePattern.iso8601) : null
+                dateSubmissionThirdTime: val && DayJS(val).format(DatePattern.iso8601)
               })
             }
           >
             <SkyTableTypography status={record.status}>
-              {record.sampleSewing
-                ? record.sampleSewing.dateSubmissionThirdTime &&
-                  DayJS(record.sampleSewing.dateSubmissionThirdTime).format(DatePattern.display)
-                : ''}
+              {record.sampleSewing && dateValidatorDisplay(record.sampleSewing.dateSubmissionThirdTime)}
             </SkyTableTypography>
           </EditableStateCell>
         )
@@ -284,15 +266,12 @@ const SampleSewingTable: React.FC<Props> = () => {
             onValueChange={(val: Dayjs) =>
               setNewRecord({
                 ...newRecord,
-                dateSubmissionForthTime: val ? DayJS(val).format(DatePattern.iso8601) : null
+                dateSubmissionForthTime: val && DayJS(val).format(DatePattern.iso8601)
               })
             }
           >
             <SkyTableTypography status={record.status}>
-              {record.sampleSewing
-                ? record.sampleSewing.dateSubmissionForthTime &&
-                  DayJS(record.sampleSewing.dateSubmissionForthTime).format(DatePattern.display)
-                : ''}
+              {record.sampleSewing && dateValidatorDisplay(record.sampleSewing.dateSubmissionForthTime)}
             </SkyTableTypography>
           </EditableStateCell>
         )
@@ -318,15 +297,12 @@ const SampleSewingTable: React.FC<Props> = () => {
             onValueChange={(val: Dayjs) =>
               setNewRecord({
                 ...newRecord,
-                dateSubmissionFifthTime: val ? DayJS(val).format(DatePattern.iso8601) : null
+                dateSubmissionFifthTime: val && DayJS(val).format(DatePattern.iso8601)
               })
             }
           >
             <SkyTableTypography status={record.status}>
-              {record.sampleSewing
-                ? record.sampleSewing.dateSubmissionFifthTime &&
-                  DayJS(record.sampleSewing.dateSubmissionFifthTime).format(DatePattern.display)
-                : ''}
+              {record.sampleSewing && dateValidatorDisplay(record.sampleSewing.dateSubmissionFifthTime)}
             </SkyTableTypography>
           </EditableStateCell>
         )

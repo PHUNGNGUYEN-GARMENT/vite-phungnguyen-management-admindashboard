@@ -60,13 +60,17 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
         setGarmentAccessories(meta.data as GarmentAccessory[])
       }
     })
-    await garmentAccessoryNoteService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        setGarmentAccessoryNotes(meta.data as GarmentAccessoryNote[])
+    await garmentAccessoryNoteService.getListItems(
+      { ...defaultRequestBody, paginator: { pageSize: -1, page: 1 } },
+      setLoading,
+      (meta) => {
+        if (meta?.success) {
+          setGarmentAccessoryNotes(meta.data as GarmentAccessoryNote[])
+        }
       }
-    })
+    )
     await accessoryNoteService.getListItems(
-      { ...defaultRequestBody, paginator: { pageSize: 1000, page: 1 } },
+      { ...defaultRequestBody, paginator: { pageSize: -1, page: 1 } },
       setLoading,
       (meta) => {
         if (meta?.success) {
@@ -75,6 +79,12 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
       }
     )
   }
+
+  useEffect(() => {
+    if (garmentAccessoryNotes.length > 0) {
+      console.log(garmentAccessoryNotes)
+    }
+  }, [garmentAccessoryNotes])
 
   useEffect(() => {
     loadData()
@@ -87,7 +97,7 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
   const selfConvertDataSource = (
     _products: Product[],
     _productColors?: ProductColor[],
-    _garmentAccessory?: GarmentAccessory[],
+    _garmentAccessories?: GarmentAccessory[],
     _garmentAccessoryNotes?: GarmentAccessoryNote[]
   ) => {
     setDataSource(
@@ -96,7 +106,7 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
           ...item,
           key: item.id,
           productColor: (_productColors ? _productColors : productColors).find((i) => i.productID === item.id),
-          garmentAccessory: (_garmentAccessory ? _garmentAccessory : garmentAccessories).find(
+          garmentAccessory: (_garmentAccessories ? _garmentAccessories : garmentAccessories).find(
             (i) => i.productID === item.id
           ),
           garmentAccessoryNotes: (_garmentAccessoryNotes ? _garmentAccessoryNotes : garmentAccessoryNotes).filter(

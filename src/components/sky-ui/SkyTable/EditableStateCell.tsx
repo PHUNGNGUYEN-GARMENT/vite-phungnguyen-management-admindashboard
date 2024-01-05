@@ -1,11 +1,25 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-refresh/only-export-components */
-import { Checkbox, ColorPicker, DatePicker, Flex, Input, InputNumber, Select, Table, Typography } from 'antd'
-import { DefaultOptionType, SelectProps } from 'antd/es/select'
+import {
+  Checkbox,
+  CheckboxProps,
+  ColorPicker,
+  ColorPickerProps,
+  DatePicker,
+  Flex,
+  Input,
+  InputNumber,
+  InputNumberProps,
+  Select,
+  Table,
+  Typography
+} from 'antd'
+import { InputProps, TextAreaProps } from 'antd/es/input'
+import { SelectProps } from 'antd/es/select'
 import { HTMLAttributes, memo } from 'react'
 import { InputType } from '~/typing'
-import { DatePattern } from '~/utils/date-formatter'
+import DayJS, { DatePattern } from '~/utils/date-formatter'
 import { cn } from '~/utils/helpers'
 
 export interface EditableStateCellProps extends HTMLAttributes<HTMLElement> {
@@ -16,7 +30,11 @@ export interface EditableStateCellProps extends HTMLAttributes<HTMLElement> {
   initialValue?: any
   onValueChange?: (value: any, option?: any) => void
   selectProps?: SelectProps
-  selectItems?: (DefaultOptionType & { optionData?: any })[]
+  colorPickerProps?: ColorPickerProps
+  checkboxProps?: CheckboxProps
+  inputNumberProps?: InputNumberProps
+  textAreaProps?: TextAreaProps
+  inputProps?: InputProps
   inputType?: InputType
   required?: boolean
   title?: string
@@ -30,8 +48,12 @@ function EditableStateCell({
   dataIndex,
   title,
   value,
-  selectItems,
+  colorPickerProps,
+  checkboxProps,
+  inputNumberProps,
+  textAreaProps,
   selectProps,
+  inputProps,
   initialValue,
   onValueChange,
   setLoading,
@@ -40,42 +62,16 @@ function EditableStateCell({
   disabled,
   ...restProps
 }: EditableStateCellProps) {
-  // const [itemSelects, setItemSelects] = useState<{ accessoryNoteID: React.Key; garmentNoteStatusID: React.Key }[]>([])
-
-  // const handleMenuSelectItem = (value: React.Key, info: any) => {
-  //   if (selectItems) {
-  //     const newItems = [...selectItems]
-  //     const index = selectItems.findIndex((i) => i.value === value)
-  //     if (index !== -1) {
-  //       newItems[index].garmentNoteStatusID = info.key
-  //       console.log({
-  //         value: value,
-  //         info: info
-  //       })
-  //     } else {
-  //       // Handle the case when the selectedKey is not found in the array
-  //       console.error(`Object with selectKey ${value} not found in the array.`)
-  //     }
-  //     setItemSelects(
-  //       newItems.map((item) => {
-  //         return {
-  //           accessoryNoteID: Number(item.value),
-  //           garmentNoteStatusID: info.key
-  //         }
-  //       })
-  //     )
-  //   }
-  // }
-
   const inputNode = ((): React.ReactNode => {
     switch (inputType) {
       case 'colorpicker':
         return (
           <ColorPicker
+            {...colorPickerProps}
             onChange={(val, hex) => onValueChange?.(val, hex)}
             defaultFormat='hex'
-            defaultValue={initialValue}
-            value={value}
+            defaultValue={initialValue ?? colorPickerProps?.defaultValue ?? ''}
+            value={value ?? colorPickerProps?.value ?? ''}
             showText
             disabled={disabled}
             className={cn('w-full', restProps.className)}
@@ -84,9 +80,12 @@ function EditableStateCell({
       case 'checkbox':
         return (
           <Checkbox
+            {...checkboxProps}
             name={dataIndex}
-            checked={value}
+            defaultChecked={initialValue ?? checkboxProps?.defaultChecked ?? ''}
+            checked={value ?? checkboxProps?.value ?? ''}
             disabled={disabled}
+            value={value ?? checkboxProps?.value ?? ''}
             onChange={(val) => onValueChange?.(val)}
             className={cn('w-full', restProps.className)}
           />
@@ -94,22 +93,27 @@ function EditableStateCell({
       case 'number':
         return (
           <InputNumber
+            {...inputNumberProps}
+            placeholder={`Enter ${title}`}
             name={dataIndex}
-            value={value}
+            required
+            value={value ?? inputNumberProps?.value ?? ''}
             disabled={disabled}
             onChange={(val) => onValueChange?.(val)}
-            defaultValue={initialValue}
+            defaultValue={initialValue ?? inputNumberProps?.defaultValue ?? ''}
             className={cn('w-full', restProps.className)}
           />
         )
       case 'textarea':
         return (
           <Input.TextArea
+            {...textAreaProps}
+            placeholder={`Enter ${title}`}
             name={dataIndex}
-            value={value}
+            value={value ?? textAreaProps?.value ?? ''}
             disabled={disabled}
             onChange={(val) => onValueChange?.(val.target.value)}
-            defaultValue={initialValue}
+            defaultValue={initialValue ?? textAreaProps?.defaultValue ?? ''}
             className={cn('w-full', restProps.className)}
           />
         )
@@ -117,26 +121,12 @@ function EditableStateCell({
         return (
           <Select
             {...selectProps}
+            placeholder={`Select ${title}`}
+            defaultValue={initialValue ?? selectProps?.defaultValue ?? ''}
+            // value={value ?? selectProps?.value ?? ''}
             onChange={(val, option) => onValueChange?.(val, option)}
-            optionRender={
-              selectProps
-                ? selectProps.optionRender
-                : (ori, info) => {
-                    return (
-                      <>
-                        <Flex justify='space-between' align='center' key={info.index}>
-                          <Typography.Text>{ori.label}</Typography.Text>
-                          <div
-                            className='h-6 w-6 rounded-sm'
-                            style={{
-                              backgroundColor: `${ori.key}`
-                            }}
-                          />
-                        </Flex>
-                      </>
-                    )
-                  }
-            }
+            disabled={disabled}
+            virtual={false}
             className={cn('w-full', restProps.className)}
           />
         )
@@ -144,9 +134,12 @@ function EditableStateCell({
         return (
           <Select
             {...selectProps}
+            placeholder={`Select ${title}`}
             mode='multiple'
             virtual={false}
-            value={value}
+            defaultValue={initialValue ?? selectProps?.defaultValue ?? ''}
+            // value={value ?? selectProps?.value ?? ''}
+            disabled={disabled}
             onChange={(val: number[], option) => onValueChange?.(val, option)}
             className='w-full'
           />
@@ -154,21 +147,14 @@ function EditableStateCell({
       case 'colorselector':
         return (
           <Select
+            {...selectProps}
             placeholder={`Select ${title}`}
-            options={
-              selectItems &&
-              selectItems.map((item) => {
-                return {
-                  label: item.label,
-                  value: item.value,
-                  key: item.optionData
-                } as DefaultOptionType
-              })
-            }
+            defaultValue={initialValue ?? selectProps?.defaultValue ?? ''}
+            // value={value ?? selectProps?.value ?? ''}
+            onChange={(val, option) => onValueChange?.(val, option)}
             disabled={disabled}
-            defaultValue={initialValue}
-            onChange={(val, option) => onValueChange?.(val as number, option)}
-            value={value}
+            virtual={false}
+            className={cn('w-full', restProps.className)}
             optionRender={(ori, info) => {
               return (
                 <>
@@ -184,17 +170,17 @@ function EditableStateCell({
                 </>
               )
             }}
-            className={cn('w-full', restProps.className)}
           />
         )
       case 'datepicker':
         return (
           <DatePicker
+            placeholder={`Pick ${title}`}
             name={dataIndex}
             onChange={(val) => onValueChange?.(val)}
-            defaultValue={initialValue}
-            value={value}
             disabled={disabled}
+            // value={value && DayJS(value)}
+            defaultValue={initialValue && DayJS(initialValue)}
             format={DatePattern.display}
             className={cn('w-full', restProps.className)}
           />
@@ -202,10 +188,13 @@ function EditableStateCell({
       default:
         return (
           <Input
+            {...inputProps}
+            required
+            placeholder={`Enter ${title}`}
             name={dataIndex}
             onChange={(event) => onValueChange?.(event.target.value)}
-            defaultValue={initialValue}
-            value={value}
+            defaultValue={initialValue ?? inputProps?.defaultValue ?? ''}
+            value={value ?? inputProps?.value ?? ''}
             disabled={disabled}
             className={cn('w-full', restProps.className)}
           />

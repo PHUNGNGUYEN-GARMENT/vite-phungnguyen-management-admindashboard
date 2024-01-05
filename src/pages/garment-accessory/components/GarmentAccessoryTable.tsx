@@ -170,7 +170,7 @@ const GarmentAccessoryTable: React.FC<Props> = () => {
                 ...newRecord,
                 garmentAccessory: {
                   ...newRecord.garmentAccessory,
-                  passingDeliveryDate: val ? DayJS(val).format(DatePattern.iso8601) : null
+                  passingDeliveryDate: val && DayJS(val).format(DatePattern.iso8601)
                 }
               })
             }

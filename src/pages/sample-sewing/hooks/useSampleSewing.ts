@@ -53,10 +53,10 @@ export default function useSampleSewing(table: UseTableProps<SampleSewingTableDa
   }
 
   useEffect(() => {
-    if (newRecord) {
-      console.log(newRecord)
+    if (sampleSewings) {
+      console.log(sampleSewings)
     }
-  }, [newRecord])
+  }, [sampleSewings])
 
   useEffect(() => {
     loadData()

@@ -29,8 +29,8 @@ export type InputType =
 
 export type ItemWithKeyAndTitleType = {
   key?: React.Key
-  title?: string | React.ReactNode
-  desc?: string | React.ReactNode
+  title?: string | null | React.ReactNode
+  desc?: string | null | React.ReactNode
   editable?: boolean
   dataIndex: string
   initialField?: {
@@ -58,8 +58,8 @@ export type TableListDataType<T> = {
 
 export interface User {
   id?: number
-  email?: string
-  fullName?: string
+  email?: string | null
+  fullName?: string | null
   role?: Role
   isAdmin?: boolean
   createdAt?: string
@@ -68,131 +68,131 @@ export interface User {
 
 export interface Product {
   id?: number
-  productCode?: string
-  quantityPO?: number
+  productCode?: string | null
+  quantityPO?: number | null
   dateInputNPL?: string | null
   dateOutputFCR?: string | null
   progress?: {
-    sewing?: number
-    iron?: number
-    check?: number
-    pack?: number
+    sewing?: number | null
+    iron?: number | null
+    check?: number | null
+    pack?: number | null
   }
-  status?: ItemStatusType
+  status?: ItemStatusType | null
   createdAt?: string
   updatedAt?: string
 }
 
 export interface Color {
   id?: number
-  name?: string
-  hexColor?: string
-  status?: ItemStatusType
+  name?: string | null
+  hexColor?: string | null
+  status?: ItemStatusType | null
   createdAt?: string
   updatedAt?: string
-  orderNumber?: number
+  orderNumber?: number | null
 }
 
 export interface ProductColor {
   id?: number
-  colorID?: number
-  productID?: number
-  status?: ItemStatusType
+  colorID?: number | null
+  productID?: number | null
+  status?: ItemStatusType | null
   color?: Color
-  product?: Product
+  product?: Product | null
   createdAt?: string
   updatedAt?: string
 }
 
 export interface Group {
   id?: number
-  name?: string
-  status?: ItemStatusType
+  name?: string | null
+  status?: ItemStatusType | null
   createdAt?: string
   updatedAt?: string
-  orderNumber?: number
+  orderNumber?: number | null
 }
 
 export interface Print {
   id?: number
-  name?: string
-  status?: ItemStatusType
+  name?: string | null
+  status?: ItemStatusType | null
   createdAt?: string
   updatedAt?: string
-  orderNumber?: number
+  orderNumber?: number | null
 }
 
 export interface PrintablePlace {
   id?: number
-  printID?: number
-  productID?: number
-  status?: ItemStatusType
-  product?: Product
-  print?: Print
+  printID?: number | null
+  productID?: number | null
+  status?: ItemStatusType | null
+  product?: Product | null
+  print?: Print | null
   createdAt?: string
   updatedAt?: string
 }
 
 export interface ProductGroup {
   id?: number
-  groupID?: number
-  productID?: number
-  name?: string
-  status?: ItemStatusType
+  groupID?: number | null
+  productID?: number | null
+  name?: string | null
+  status?: ItemStatusType | null
   createdAt?: string
   updatedAt?: string
-  product?: Product
-  group?: Group
+  product?: Product | null
+  group?: Group | null
 }
 
 export interface GarmentAccessory {
   id?: number
-  productID?: number
+  productID?: number | null
   amountCutting?: number | null
   passingDeliveryDate?: string | null
-  status?: ItemStatusType
-  product?: Product
+  status?: ItemStatusType | null
+  product?: Product | null
   createdAt?: string
   updatedAt?: string
 }
 
 export interface AccessoryNote {
   id?: number
-  title?: string
-  summary?: string
-  status?: ItemStatusType
+  title?: string | null
+  summary?: string | null
+  status?: ItemStatusType | null
   createdAt?: string
   updatedAt?: string
 }
 
 export interface GarmentAccessoryNote {
   id?: number
-  productID?: number
-  product?: Product
-  accessoryNoteID?: number
+  productID?: number | null
+  product?: Product | null
+  accessoryNoteID?: number | null
   accessoryNote?: AccessoryNote
-  garmentAccessoryID?: number
-  garmentAccessory?: GarmentAccessory
-  noteStatus?: NoteItemStatusType
-  status?: ItemStatusType
+  garmentAccessoryID?: number | null
+  garmentAccessory?: GarmentAccessory | null
+  noteStatus?: NoteItemStatusType | null
+  status?: ItemStatusType | null
   createdAt?: string
   updatedAt?: string
 }
 
 export interface Importation {
   id?: number
-  productID?: number
-  quantity?: number
-  status?: ItemStatusType
+  productID?: number | null
+  quantity?: number | null
+  status?: ItemStatusType | null
   dateImported?: string | null
-  product?: Product
+  product?: Product | null
   createdAt?: string
   updatedAt?: string
 }
 
 export type SampleSewing = {
   id?: number
-  productID?: number
+  productID?: number | null
   dateSubmissionNPL?: string | null
   dateApprovalSO?: string | null
   dateApprovalPP?: string | null
@@ -201,16 +201,16 @@ export type SampleSewing = {
   dateSubmissionThirdTime?: string | null
   dateSubmissionForthTime?: string | null
   dateSubmissionFifthTime?: string | null
-  status?: ItemStatusType
+  status?: ItemStatusType | null
   createdAt?: string
   updatedAt?: string
-  product?: Product
+  product?: Product | null
 }
 
 export interface DateSendSampleSewing {
   dateSampleSewingID: number
   productID: number
-  dateSend: string | null
+  dateSend: string
   createdAt: string
   updatedAt: string
   orderNumber: number
@@ -218,14 +218,14 @@ export interface DateSendSampleSewing {
 
 export interface CuttingGroup {
   id?: number
-  productID?: number
-  product?: Product
-  quantityRealCut?: number
+  productID?: number | null
+  product?: Product | null
+  quantityRealCut?: number | null
   timeCut?: string | null
   dateSendEmbroidered?: string | null
-  quantityArrivedEmbroidered?: string
-  quantityDeliveredBTP?: string
-  status?: ItemStatusType
+  quantityArrivedEmbroidered?: string | null
+  quantityDeliveredBTP?: string | null
+  status?: ItemStatusType | null
   createdAt?: string
   updatedAt?: string
 }
@@ -234,7 +234,7 @@ export interface EmbroideredDelivery {
   embroideredDeliveryID: number
   productID: number
   quantitySewingOut: number
-  dateExpectedCompletion: string | null
+  dateExpectedCompletion: string
   createdAt: string
   updatedAt: string
   orderNumber: number
@@ -242,20 +242,20 @@ export interface EmbroideredDelivery {
 
 export interface SewingLineDelivery {
   id?: number
-  productID?: number
-  sewingLineID?: number
-  quantityOrigin?: number
-  quantitySewed?: number
+  productID?: number | null
+  sewingLineID?: number | null
+  quantityOrigin?: number | null
+  quantitySewed?: number | null
   expiredDate?: string | null
-  status?: ItemStatusType
-  product?: Product
-  sewingLine?: SewingLine
+  status?: ItemStatusType | null
+  product?: Product | null
+  sewingLine?: SewingLine | null
 }
 
 export interface SewingLine {
   id?: number
-  name?: string
-  status?: ItemStatusType
+  name?: string | null
+  status?: ItemStatusType | null
   createdAt?: string
   updatedAt?: string
 }

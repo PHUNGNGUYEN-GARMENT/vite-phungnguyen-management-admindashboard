@@ -2,6 +2,9 @@
 import { App as AntApp } from 'antd'
 import { useEffect, useState } from 'react'
 import { RequestBodyType, ResponseDataType, defaultRequestBody } from '~/api/client'
+import ColorAPI from '~/api/services/ColorAPI'
+import GroupAPI from '~/api/services/GroupAPI'
+import PrintAPI from '~/api/services/PrintAPI'
 import PrintablePlaceAPI from '~/api/services/PrintablePlaceAPI'
 import ProductAPI from '~/api/services/ProductAPI'
 import ProductColorAPI from '~/api/services/ProductColorAPI'
@@ -9,8 +12,9 @@ import ProductGroupAPI from '~/api/services/ProductGroupAPI'
 import { TableItemWithKey, UseTableProps } from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
 import { ProductTableDataType } from '~/pages/product/type'
-import { Color, Group, PrintablePlace, Product, ProductColor, ProductGroup } from '~/typing'
+import { Color, Group, Print, PrintablePlace, Product, ProductColor, ProductGroup } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
+import { ProductAddNewProps } from '../components/ModalAddNewProduct'
 
 export interface ProductNewRecordProps {
   colorID?: number | null
@@ -29,6 +33,9 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
   const productColorService = useAPIService<ProductColor>(ProductColorAPI)
   const productGroupService = useAPIService<ProductGroup>(ProductGroupAPI)
   const printablePlaceService = useAPIService<PrintablePlace>(PrintablePlaceAPI)
+  const colorService = useAPIService<Color>(ColorAPI)
+  const groupService = useAPIService<Group>(GroupAPI)
+  const printService = useAPIService<Group>(PrintAPI)
 
   const { message } = AntApp.useApp()
 
@@ -45,6 +52,33 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
   const [productColorNew, setProductColorNew] = useState<Color | undefined>(undefined)
   const [productGroupNew, setProductGroupNew] = useState<Group | undefined>(undefined)
   const [printablePlaceNew, setPrintablePlaceNew] = useState<PrintablePlace | undefined>(undefined)
+
+  const [colors, setColors] = useState<Color[]>([])
+  const [groups, setGroups] = useState<Group[]>([])
+  const [prints, setPrints] = useState<Print[]>([])
+
+  useEffect(() => {
+    if (table.editingKey !== '') {
+      colorService.getListItems({ ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } }, setLoading, (meta) => {
+        if (meta?.success) {
+          const items = meta.data as Color[]
+          setColors(items)
+        }
+      })
+      groupService.getListItems({ ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } }, setLoading, (meta) => {
+        if (meta?.success) {
+          const items = meta.data as Group[]
+          setGroups(items)
+        }
+      })
+      printService.getListItems({ ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } }, setLoading, (meta) => {
+        if (meta?.success) {
+          const items = meta.data as Print[]
+          setPrints(items)
+        }
+      })
+    }
+  }, [table.editingKey])
 
   const loadData = async () => {
     await productService.getListItems(defaultRequestBody, setLoading, (meta) => {
@@ -101,22 +135,29 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
     console.log({ old: record, new: newRecord })
     if (newRecord) {
       try {
-        console.log('Product progressing...')
-        await productService.updateItemByPk(
-          Number(record.id!),
-          {
-            productCode: newRecord.productCode,
-            quantityPO: newRecord.quantityPO,
-            dateInputNPL: newRecord.dateInputNPL,
-            dateOutputFCR: newRecord.dateOutputFCR
-          },
-          setLoading,
-          (meta) => {
-            if (!meta?.success) {
-              throw new Error('API update Product failed')
+        if (
+          (newRecord.productCode && newRecord.productCode !== record.productCode) ||
+          (newRecord.quantityPO && newRecord.quantityPO !== record.quantityPO) ||
+          (newRecord.dateInputNPL && DayJS(newRecord.dateInputNPL).diff(record.dateInputNPL)) ||
+          (newRecord.dateOutputFCR && DayJS(newRecord.dateOutputFCR).diff(record.dateOutputFCR))
+        ) {
+          console.log('Product progressing...')
+          await productService.updateItemByPk(
+            Number(record.id!),
+            {
+              productCode: newRecord.productCode,
+              quantityPO: newRecord.quantityPO,
+              dateInputNPL: newRecord.dateInputNPL,
+              dateOutputFCR: newRecord.dateOutputFCR
+            },
+            setLoading,
+            (meta) => {
+              if (!meta?.success) {
+                throw new Error('API update Product failed')
+              }
             }
-          }
-        )
+          )
+        }
         if (newRecord.colorID && newRecord.colorID !== record.productColor?.colorID) {
           console.log('Product color progressing...')
           await productColorService.createOrUpdateItemBy(
@@ -169,7 +210,7 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleAddNewItem = async (formAddNew: any) => {
+  const handleAddNewItem = async (formAddNew: ProductAddNewProps) => {
     try {
       console.log(formAddNew)
       setLoading(true)
@@ -177,14 +218,13 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
         {
           productCode: formAddNew.productCode,
           quantityPO: formAddNew.quantityPO,
-          dateInputNPL: DayJS(formAddNew.dateInputNPL).format(DatePattern.iso8601),
-          dateOutputFCR: DayJS(formAddNew.dateOutputFCR).format(DatePattern.iso8601)
+          dateInputNPL: formAddNew.dateInputNPL ? DayJS(formAddNew.dateInputNPL).format(DatePattern.iso8601) : null,
+          dateOutputFCR: formAddNew.dateOutputFCR ? DayJS(formAddNew.dateOutputFCR).format(DatePattern.iso8601) : null
         },
         setLoading,
         async (meta, msg) => {
-          if (meta?.data) {
+          if (meta?.success) {
             const productNew = meta.data as Product
-            setProductNew(productNew)
             if (formAddNew.colorID) {
               console.log('Product color created')
               await productColorService.createNewItem(
@@ -192,8 +232,7 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
                 setLoading,
                 (meta) => {
                   if (meta?.success) {
-                    const productColorNew = meta.data as ProductColor
-                    setProductColorNew(productColorNew)
+                    setProductColorNew(meta.data as ProductColor)
                   }
                 }
               )
@@ -205,8 +244,7 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
                 setLoading,
                 (meta) => {
                   if (meta?.success) {
-                    const productGroupNew = meta.data as ProductGroup
-                    setProductGroupNew(productGroupNew)
+                    setProductGroupNew(meta.data as ProductGroup)
                   }
                 }
               )
@@ -218,15 +256,15 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
                 setLoading,
                 (meta) => {
                   if (meta?.success) {
-                    const printablePlaceNew = meta.data as PrintablePlace
-                    setPrintablePlaceNew(printablePlaceNew)
+                    setPrintablePlaceNew(meta.data as PrintablePlace)
                   }
                 }
               )
             }
+            setProductNew(productNew)
             message.success(msg)
           } else {
-            console.log('Errr')
+            console.log('Error')
             message.error(msg)
           }
         }
@@ -337,6 +375,9 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
     handleConfirmDelete,
     printablePlaceService,
     selfConvertDataSource,
-    handleConfirmCancelEditing
+    handleConfirmCancelEditing,
+    prints,
+    colors,
+    groups
   }
 }
