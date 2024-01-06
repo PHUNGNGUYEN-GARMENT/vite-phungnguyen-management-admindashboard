@@ -2,13 +2,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ColorPicker, Flex, Space } from 'antd'
 import { ColumnsType } from 'antd/es/table'
+import { Dayjs } from 'dayjs'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import { GarmentAccessoryNote } from '~/typing'
-import DayJS, { DatePattern } from '~/utils/date-formatter'
+import {
+  dateValidatorChange,
+  dateValidatorDisplay,
+  dateValidatorInit,
+  numberValidatorChange,
+  numberValidatorDisplay,
+  numberValidatorInit,
+  textValidatorDisplay
+} from '~/utils/helpers'
 import useGarmentAccessory from '../hooks/useGarmentAccessory'
 import { GarmentAccessoryTableDataType } from '../type'
 
@@ -46,7 +55,7 @@ const GarmentAccessoryTable: React.FC<Props> = () => {
               inputType='text'
               required={true}
             >
-              <SkyTableTypography status={'active'}>{record.productCode}</SkyTableTypography>
+              <SkyTableTypography status={'active'}>{textValidatorDisplay(record.productCode)}</SkyTableTypography>
             </EditableStateCell>
           </>
         )
@@ -66,7 +75,7 @@ const GarmentAccessoryTable: React.FC<Props> = () => {
               inputType='number'
               required={true}
             >
-              <SkyTableTypography status={'active'}>{record.quantityPO}</SkyTableTypography>
+              <SkyTableTypography status={'active'}>{numberValidatorDisplay(record.quantityPO)}</SkyTableTypography>
             </EditableStateCell>
           </>
         )
@@ -88,7 +97,7 @@ const GarmentAccessoryTable: React.FC<Props> = () => {
             >
               <Flex className='' wrap='wrap' justify='space-between' align='center' gap={10}>
                 <SkyTableTypography status={record.productColor?.color?.status} className='w-fit'>
-                  {record.productColor?.color?.name}
+                  {textValidatorDisplay(record.productColor?.color?.name)}
                 </SkyTableTypography>
                 {record.productColor && (
                   <ColorPicker size='middle' format='hex' value={record.productColor?.color?.hexColor} disabled />
@@ -114,17 +123,17 @@ const GarmentAccessoryTable: React.FC<Props> = () => {
                 title='Cắt được'
                 inputType='number'
                 required={true}
-                initialValue={record.garmentAccessory ? record.garmentAccessory?.amountCutting : ''}
-                value={newRecord && (newRecord.garmentAccessory?.amountCutting ?? 0)}
+                initialValue={record.garmentAccessory && numberValidatorInit(record.garmentAccessory.amountCutting)}
+                value={newRecord.amountCutting}
                 onValueChange={(val) =>
                   setNewRecord({
                     ...newRecord,
-                    garmentAccessory: { ...newRecord.garmentAccessory, amountCutting: val }
+                    amountCutting: numberValidatorChange(val)
                   })
                 }
               >
                 <SkyTableTypography status={record.status}>
-                  {record.garmentAccessory ? record.garmentAccessory?.amountCutting : ''}
+                  {record.garmentAccessory && numberValidatorDisplay(record.garmentAccessory.amountCutting)}
                 </SkyTableTypography>
               </EditableStateCell>
             )
@@ -160,26 +169,16 @@ const GarmentAccessoryTable: React.FC<Props> = () => {
             title='Giao chuyền'
             inputType='datepicker'
             required={true}
-            initialValue={
-              record.garmentAccessory
-                ? record.garmentAccessory.passingDeliveryDate && DayJS(record.garmentAccessory.passingDeliveryDate)
-                : ''
-            }
-            onValueChange={(val) =>
+            initialValue={record.garmentAccessory && dateValidatorInit(record.garmentAccessory.passingDeliveryDate)}
+            onValueChange={(val: Dayjs) =>
               setNewRecord({
                 ...newRecord,
-                garmentAccessory: {
-                  ...newRecord.garmentAccessory,
-                  passingDeliveryDate: val && DayJS(val).format(DatePattern.iso8601)
-                }
+                passingDeliveryDate: dateValidatorChange(val)
               })
             }
           >
             <SkyTableTypography status={record.status}>
-              {record.garmentAccessory
-                ? record.garmentAccessory.passingDeliveryDate &&
-                  DayJS(record.garmentAccessory.passingDeliveryDate).format(DatePattern.display)
-                : ''}
+              {record.garmentAccessory && dateValidatorDisplay(record.garmentAccessory.passingDeliveryDate)}
             </SkyTableTypography>
           </EditableStateCell>
         )
@@ -231,7 +230,7 @@ const GarmentAccessoryTable: React.FC<Props> = () => {
                         key={index}
                         status={item.status}
                       >
-                        {item.accessoryNote?.title}
+                        {textValidatorDisplay(item.accessoryNote?.title)}
                       </SkyTableTypography>
                     )
                   })}
@@ -267,7 +266,11 @@ const GarmentAccessoryTable: React.FC<Props> = () => {
           actions={{
             onEdit: {
               onClick: (_e, record) => {
-                setNewRecord({ garmentAccessory: record?.garmentAccessory })
+                setNewRecord({
+                  amountCutting: record?.garmentAccessory?.amountCutting,
+                  passingDeliveryDate: record?.garmentAccessory?.passingDeliveryDate,
+                  garmentAccessoryNotes: record?.garmentAccessoryNotes
+                })
                 table.handleStartEditing(record!.key!)
               }
             },

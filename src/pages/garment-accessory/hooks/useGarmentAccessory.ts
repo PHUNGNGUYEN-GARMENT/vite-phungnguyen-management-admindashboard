@@ -10,7 +10,15 @@ import ProductColorAPI from '~/api/services/ProductColorAPI'
 import { TableItemWithKey, UseTableProps } from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
 import { AccessoryNote, GarmentAccessory, GarmentAccessoryNote, Product, ProductColor } from '~/typing'
+import DayJS from '~/utils/date-formatter'
+import { dateComparator, dateValidator, numberComparator, numberValidator } from '~/utils/helpers'
 import { GarmentAccessoryTableDataType } from '../type'
+
+export interface GarmentAccessoryNewRecordProps {
+  amountCutting?: number | null
+  passingDeliveryDate?: string | null
+  garmentAccessoryNotes?: GarmentAccessoryNote[] | null
+}
 
 export default function useGarmentAccessory(table: UseTableProps<GarmentAccessoryTableDataType>) {
   const { setLoading, setDataSource, handleConfirmCancelEditing } = table
@@ -28,10 +36,7 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
   // State changes
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [searchText, setSearchText] = useState<string>('')
-  const [newRecord, setNewRecord] = useState<{
-    garmentAccessory?: GarmentAccessory | undefined
-    garmentAccessoryNotes?: GarmentAccessoryNote[] | undefined
-  }>({})
+  const [newRecord, setNewRecord] = useState<GarmentAccessoryNewRecordProps>({})
 
   // List
   const [products, setProducts] = useState<Product[]>([])
@@ -81,12 +86,6 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
   }
 
   useEffect(() => {
-    if (garmentAccessoryNotes.length > 0) {
-      console.log(garmentAccessoryNotes)
-    }
-  }, [garmentAccessoryNotes])
-
-  useEffect(() => {
     loadData()
   }, [garmentAccessoryNew])
 
@@ -121,67 +120,68 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
     // const row = (await form.validateFields()) as any
     console.log({ old: record, new: newRecord })
     try {
-      if (newRecord) {
-        if (newRecord.garmentAccessory) {
-          if (record.garmentAccessory) {
-            // Update GarmentAccessory
-            if ((newRecord.garmentAccessory.amountCutting ?? 0) < 0) {
-              throw new Error('The value must be greater than 0')
-            } else {
-              await garmentAccessoryService.updateItemByPk(
-                record.garmentAccessory.id!,
-                {
-                  amountCutting: newRecord.garmentAccessory.amountCutting,
-                  passingDeliveryDate: newRecord.garmentAccessory.passingDeliveryDate
-                },
-                setLoading,
-                (meta) => {
-                  if (!meta?.success) {
-                    throw new Error('API update GarmentAccessory failed')
-                  }
-                }
-              )
+      if (record.garmentAccessory) {
+        // Update GarmentAccessory
+        if (
+          numberComparator(newRecord.amountCutting, record.garmentAccessory.amountCutting) ||
+          dateComparator(newRecord.passingDeliveryDate, record.garmentAccessory.passingDeliveryDate)
+        ) {
+          console.log('Update GarmentAccessory')
+          await garmentAccessoryService.updateItemByPk(
+            record.garmentAccessory.id!,
+            {
+              amountCutting: newRecord.amountCutting,
+              passingDeliveryDate: newRecord.passingDeliveryDate
+            },
+            setLoading,
+            (meta) => {
+              if (!meta?.success) {
+                throw new Error('API update GarmentAccessory failed')
+              }
             }
-          } else {
-            // Create GarmentAccessory
-            await garmentAccessoryService.createNewItem(
-              {
-                ...newRecord.garmentAccessory,
-                productID: record.id!
-              },
-              setLoading,
-              (meta) => {
-                if (!meta?.success) {
-                  throw new Error('API create GarmentAccessory failed')
-                }
-              }
-            )
+          )
+        }
+      } else {
+        if (!numberValidator(newRecord.amountCutting)) {
+          throw new Error('Quantity must be than zero.')
+        }
+        if (!dateValidator(newRecord.passingDeliveryDate)) {
+          throw new Error('Invalid Date')
+        }
+        await garmentAccessoryService.createNewItem(
+          {
+            productID: record.id!,
+            amountCutting: newRecord.amountCutting,
+            passingDeliveryDate: DayJS(newRecord.passingDeliveryDate).toISOString()
+          },
+          setLoading,
+          (meta) => {
+            if (!meta?.success) {
+              throw new Error('API create GarmentAccessory failed')
+            }
           }
+        )
+      }
 
-          if (newRecord.garmentAccessoryNotes) {
-            console.log('Update GarmentAccessoryNote')
-            await garmentAccessoryNoteService.updateItemsBy?.(
-              { field: 'productID', key: record.id! },
-              newRecord.garmentAccessoryNotes.map((item) => {
-                return {
-                  ...item,
-                  productID: record.id!,
-                  garmentAccessoryID: record.garmentAccessory?.id,
-                  noteStatus: 'enough',
-                  status: 'active'
-                }
-              }),
-              setLoading,
-              (meta) => {
-                if (!meta?.success) {
-                  throw new Error('API update GarmentAccessoryNote failed')
-                }
-              }
-            )
+      await garmentAccessoryNoteService.updateItemsBy?.(
+        { field: 'productID', key: record.id! },
+        newRecord.garmentAccessoryNotes!.map((item) => {
+          return {
+            ...item,
+            productID: record.id!,
+            garmentAccessoryID: record.garmentAccessory?.id,
+            noteStatus: 'enough',
+            status: 'active'
+          }
+        }),
+        setLoading,
+        (meta) => {
+          if (!meta?.success) {
+            throw new Error('API update GarmentAccessoryNote failed')
           }
         }
-        message.success('Success!')
-      }
+      )
+      message.success('Success!')
     } catch (error: any) {
       console.error(error)
       message.error(`${error.message}`)

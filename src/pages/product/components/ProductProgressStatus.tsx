@@ -1,21 +1,19 @@
 /* eslint-disable react-refresh/only-export-components */
-import { Collapse, Flex, Typography } from 'antd'
+import { Flex, Typography } from 'antd'
 import React, { HTMLAttributes, memo } from 'react'
 import { TableItemWithKey } from '~/components/hooks/useTable'
 import ProgressBar from '~/components/sky-ui/ProgressBar'
-import { cn } from '~/utils/helpers'
 import { ProductTableDataType } from '../type'
 
 interface Props extends HTMLAttributes<HTMLElement> {
   record: TableItemWithKey<ProductTableDataType>
-  collapse?: boolean
 }
 
 interface ProcessableProps {
   list: { task: string; quantity: number }[]
 }
 
-const ProductProgressStatus: React.FC<Props> = ({ record, collapse, ...props }) => {
+const ProductProgressStatus: React.FC<Props> = ({ record }) => {
   const progressArr: { task: string; quantity: number }[] = [
     {
       task: 'May',
@@ -57,26 +55,7 @@ const ProductProgressStatus: React.FC<Props> = ({ record, collapse, ...props }) 
 
   return (
     <>
-      <Flex {...props} className={cn('w-full', props.className)}>
-        {collapse ? (
-          <Collapse
-            className='w-full'
-            items={[
-              {
-                key: '1',
-                label: (
-                  <Typography.Title className='m-0' level={5} type='secondary'>
-                    Tiến trình
-                  </Typography.Title>
-                ),
-                children: <Processable list={progressArr} />
-              }
-            ]}
-          />
-        ) : (
-          <Processable list={progressArr} />
-        )}
-      </Flex>
+      <Processable list={progressArr} />
     </>
   )
 }

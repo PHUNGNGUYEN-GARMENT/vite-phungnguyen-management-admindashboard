@@ -8,6 +8,7 @@ import ProductColorAPI from '~/api/services/ProductColorAPI'
 import { TableItemWithKey, UseTableProps } from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
 import { CuttingGroup, Product, ProductColor } from '~/typing'
+import { dateValidator, numberValidator } from '~/utils/helpers'
 import { CuttingGroupTableDataType } from '../type'
 
 export default function useCuttingGroup(table: UseTableProps<CuttingGroupTableDataType>) {
@@ -53,12 +54,6 @@ export default function useCuttingGroup(table: UseTableProps<CuttingGroupTableDa
   }
 
   useEffect(() => {
-    if (newRecord) {
-      console.log(newRecord)
-    }
-  }, [newRecord])
-
-  useEffect(() => {
     loadData()
   }, [sampleSewingNew])
 
@@ -84,21 +79,59 @@ export default function useCuttingGroup(table: UseTableProps<CuttingGroupTableDa
     )
   }
 
-  const handleSaveClick = async (record: TableItemWithKey<CuttingGroupTableDataType>, newRecord: CuttingGroup) => {
+  const handleSaveClick = async (record: TableItemWithKey<CuttingGroupTableDataType>) => {
     // const row = (await form.validateFields()) as any
     console.log({ old: record, new: newRecord })
-    if (newRecord) {
-      try {
+    try {
+      if (newRecord) {
+        if (!numberValidator(newRecord.quantityRealCut)) {
+          throw new Error('Quantity must be than zero!')
+        }
+        if (!dateValidator(newRecord.timeCut)) {
+          throw new Error('Invalid time cut!')
+        }
+        if (newRecord.dateSendEmbroidered && !dateValidator(newRecord.dateSendEmbroidered)) {
+          throw new Error('Invalid date send embroidered!')
+        }
+        if (newRecord.quantityDeliveredBTP && !numberValidator(newRecord.quantityDeliveredBTP)) {
+          throw new Error('Invalid quantity delivery BTP!')
+        }
+        if (newRecord.quantityArrived1Th && !numberValidator(newRecord.quantityArrived1Th)) {
+          throw new Error('Invalid 1!')
+        }
+        if (newRecord.quantityArrived2Th && !numberValidator(newRecord.quantityArrived2Th)) {
+          throw new Error('Invalid 2!')
+        }
+        if (newRecord.quantityArrived3Th && !numberValidator(newRecord.quantityArrived3Th)) {
+          throw new Error('Invalid 3!')
+        }
+        if (newRecord.quantityArrived4Th && !numberValidator(newRecord.quantityArrived4Th)) {
+          throw new Error('Invalid 4!')
+        }
+        if (newRecord.quantityArrived5Th && !numberValidator(newRecord.quantityArrived5Th)) {
+          throw new Error('Invalid 5!')
+        }
+        if (newRecord.quantityArrived6Th && !numberValidator(newRecord.quantityArrived6Th)) {
+          throw new Error('Invalid 6!')
+        }
+        if (newRecord.quantityArrived7Th && !numberValidator(newRecord.quantityArrived7Th)) {
+          throw new Error('Invalid 7!')
+        }
+        if (newRecord.quantityArrived8Th && !numberValidator(newRecord.quantityArrived8Th)) {
+          throw new Error('Invalid 8!')
+        }
+        if (newRecord.quantityArrived9Th && !numberValidator(newRecord.quantityArrived9Th)) {
+          throw new Error('Invalid 9!')
+        }
+        if (newRecord.quantityArrived10Th && !numberValidator(newRecord.quantityArrived10Th)) {
+          throw new Error('Invalid 10!')
+        }
         if (record.cuttingGroup) {
           console.log('CuttingGroup progressing: ', newRecord)
           await cuttingGroupService.updateItemBy(
             { field: 'productID', key: record.key },
             {
-              quantityRealCut: newRecord.quantityRealCut,
-              dateSendEmbroidered: newRecord.dateSendEmbroidered,
-              timeCut: newRecord.timeCut,
-              quantityArrivedEmbroidered: newRecord.quantityArrivedEmbroidered,
-              quantityDeliveredBTP: newRecord.quantityDeliveredBTP
+              ...newRecord
             },
             setLoading,
             (meta) => {
@@ -109,21 +142,20 @@ export default function useCuttingGroup(table: UseTableProps<CuttingGroupTableDa
           )
         } else {
           console.log('add new')
-          await cuttingGroupService.createNewItem({ ...newRecord, productID: record.id }, table.setLoading, (meta) => {
+          await cuttingGroupService.createNewItem({ ...newRecord, productID: record.id }, setLoading, (meta) => {
             if (!meta?.success) {
               throw new Error('API update group failed')
             }
           })
         }
         message.success('Success!')
-      } catch (error) {
-        console.error(error)
-        message.error('Failed')
-      } finally {
-        setLoading(false)
-        handleConfirmCancelEditing()
-        loadData()
       }
+    } catch (error: any) {
+      message.error(error.message)
+    } finally {
+      setLoading(false)
+      handleConfirmCancelEditing()
+      loadData()
     }
   }
 

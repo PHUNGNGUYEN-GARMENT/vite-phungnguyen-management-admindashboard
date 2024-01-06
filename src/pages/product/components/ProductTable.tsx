@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ColorPicker, Flex } from 'antd'
+import { Collapse, ColorPicker, Flex, Typography } from 'antd'
 import type { ColumnType } from 'antd/es/table'
+import { Dayjs } from 'dayjs'
 import useDevice from '~/components/hooks/useDevice'
 import useTable from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
@@ -8,8 +9,17 @@ import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import ImportationTable from '~/pages/importation/components/ImportationTable'
-import DayJS, { DatePattern } from '~/utils/date-formatter'
-import { dateValidatorDisplay, numberValidatorDisplay, textValidatorDisplay } from '~/utils/helpers'
+import {
+  dateValidatorChange,
+  dateValidatorDisplay,
+  dateValidatorInit,
+  numberValidatorChange,
+  numberValidatorDisplay,
+  numberValidatorInit,
+  textValidatorChange,
+  textValidatorDisplay,
+  textValidatorInit
+} from '~/utils/helpers'
 import useProduct from '../hooks/useProduct'
 import { ProductTableDataType } from '../type'
 import ModalAddNewProduct from './ModalAddNewProduct'
@@ -53,13 +63,13 @@ const ProductTable: React.FC = () => {
             inputType='select'
             required={false}
             onValueChange={(val) => {
-              setNewRecord({ ...newRecord, groupID: val })
+              setNewRecord({ ...newRecord, groupID: numberValidatorChange(val) })
             }}
             selectProps={{
               options: groups.map((i) => {
                 return { label: i.name, value: i.id, optionData: i.id }
               }),
-              defaultValue: record.productGroup?.group?.name
+              defaultValue: textValidatorInit(record.productGroup?.group?.name)
             }}
           >
             <SkyTableTypography status={record.productGroup?.group?.status}>
@@ -84,13 +94,12 @@ const ProductTable: React.FC = () => {
             title='Nơi in'
             inputType='select'
             required={true}
-            onValueChange={(val: any) => setNewRecord({ ...newRecord, printID: val })}
+            onValueChange={(val: any) => setNewRecord({ ...newRecord, printID: numberValidatorChange(val) })}
             selectProps={{
               options: prints.map((i) => {
                 return { label: i.name, value: i.id, optionData: i.id }
               }),
-              value: newRecord.printID,
-              defaultValue: record.printablePlace?.print?.name
+              defaultValue: textValidatorInit(record.printablePlace?.print?.name)
             }}
           >
             <SkyTableTypography status={record.printablePlace?.print?.status}>
@@ -115,10 +124,8 @@ const ProductTable: React.FC = () => {
             title='NPL'
             inputType='datepicker'
             required={true}
-            initialValue={record.dateInputNPL}
-            onValueChange={(val: any) =>
-              setNewRecord({ ...newRecord, dateInputNPL: val ? DayJS(val).format(DatePattern.iso8601) : null })
-            }
+            initialValue={dateValidatorInit(record.dateInputNPL)}
+            onValueChange={(val: Dayjs) => setNewRecord({ ...newRecord, dateInputNPL: dateValidatorChange(val) })}
           >
             <SkyTableTypography status={'active'}>{dateValidatorDisplay(record.dateInputNPL)}</SkyTableTypography>
           </EditableStateCell>
@@ -141,9 +148,9 @@ const ProductTable: React.FC = () => {
               title='Mã hàng'
               inputType='text'
               required={true}
-              initialValue={record.productCode}
+              initialValue={textValidatorInit(record.productCode)}
               value={newRecord.productCode}
-              onValueChange={(val) => setNewRecord({ ...newRecord, productCode: val })}
+              onValueChange={(val) => setNewRecord({ ...newRecord, productCode: textValidatorChange(val) })}
             >
               <SkyTableTypography status={'active'}>{textValidatorDisplay(record.productCode)}</SkyTableTypography>
             </EditableStateCell>
@@ -164,9 +171,9 @@ const ProductTable: React.FC = () => {
               title='Số lượng PO'
               inputType='number'
               required={true}
-              initialValue={record.quantityPO}
+              initialValue={numberValidatorInit(record.quantityPO)}
               value={newRecord.quantityPO}
-              onValueChange={(val) => setNewRecord({ ...newRecord, quantityPO: val })}
+              onValueChange={(val) => setNewRecord({ ...newRecord, quantityPO: numberValidatorChange(val) })}
             >
               <SkyTableTypography status={'active'}>{numberValidatorDisplay(record.quantityPO)}</SkyTableTypography>
             </EditableStateCell>
@@ -187,12 +194,12 @@ const ProductTable: React.FC = () => {
               title='Màu'
               inputType='colorselector'
               required={false}
-              onValueChange={(val) => setNewRecord({ ...newRecord, colorID: val })}
+              onValueChange={(val) => setNewRecord({ ...newRecord, colorID: numberValidatorChange(val) })}
               selectProps={{
                 options: colors.map((i) => {
                   return { label: i.name, value: i.id, key: i.hexColor }
                 }),
-                defaultValue: record.productColor?.colorID,
+                defaultValue: numberValidatorInit(record.productColor?.colorID),
                 value: newRecord.colorID
               }}
             >
@@ -225,10 +232,8 @@ const ProductTable: React.FC = () => {
               title='FCR'
               inputType='datepicker'
               required={true}
-              initialValue={record.dateOutputFCR}
-              onValueChange={(val: any) =>
-                setNewRecord({ ...newRecord, dateOutputFCR: val ? DayJS(val).format(DatePattern.iso8601) : null })
-              }
+              initialValue={dateValidatorInit(record.dateOutputFCR)}
+              onValueChange={(val: Dayjs) => setNewRecord({ ...newRecord, dateOutputFCR: dateValidatorChange(val) })}
             >
               <SkyTableTypography status={'active'}>
                 {record.dateOutputFCR && dateValidatorDisplay(record.dateOutputFCR)}
@@ -301,8 +306,29 @@ const ProductTable: React.FC = () => {
                       deletingKey={table.deletingKey}
                     />
                   )}
-                  <ProductProgressStatus collapse record={record} />
-                  <ImportationTable productRecord={record} />
+                  <Collapse
+                    className='w-full'
+                    items={[
+                      {
+                        key: '1',
+                        label: (
+                          <Typography.Title className='m-0' level={5} type='secondary'>
+                            Trạng thái
+                          </Typography.Title>
+                        ),
+                        children: <ProductProgressStatus record={record} />
+                      },
+                      {
+                        key: '2',
+                        label: (
+                          <Typography.Title className='m-0' level={5} type='secondary'>
+                            Nhập khẩu
+                          </Typography.Title>
+                        ),
+                        children: <ImportationTable productRecord={record} />
+                      }
+                    ]}
+                  />
                 </Flex>
               )
             },

@@ -8,12 +8,7 @@ export default {
   createNewItem: async (item: CuttingGroup): Promise<ResponseDataType | undefined> => {
     return await client
       .post(`${NAMESPACE}`, {
-        productID: item.productID,
-        quantityRealCut: item.quantityRealCut,
-        timeCut: item.timeCut,
-        dateSendEmbroidered: item.dateSendEmbroidered,
-        quantityArrivedEmbroidered: item.quantityArrivedEmbroidered,
-        quantityDeliveredBTP: item.quantityDeliveredBTP,
+        ...item,
         status: item.status ?? 'active'
       })
       .then((res) => {

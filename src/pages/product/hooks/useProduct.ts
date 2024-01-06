@@ -14,6 +14,7 @@ import useAPIService from '~/hooks/useAPIService'
 import { ProductTableDataType } from '~/pages/product/type'
 import { Color, Group, Print, PrintablePlace, Product, ProductColor, ProductGroup } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
+import { dateComparator, numberComparator, textComparator } from '~/utils/helpers'
 import { ProductAddNewProps } from '../components/ModalAddNewProduct'
 
 export interface ProductNewRecordProps {
@@ -136,10 +137,10 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
     if (newRecord) {
       try {
         if (
-          (newRecord.productCode && newRecord.productCode !== record.productCode) ||
-          (newRecord.quantityPO && newRecord.quantityPO !== record.quantityPO) ||
-          (newRecord.dateInputNPL && DayJS(newRecord.dateInputNPL).diff(record.dateInputNPL)) ||
-          (newRecord.dateOutputFCR && DayJS(newRecord.dateOutputFCR).diff(record.dateOutputFCR))
+          textComparator(newRecord.productCode, record.productCode) ||
+          numberComparator(newRecord.quantityPO, record.quantityPO) ||
+          dateComparator(newRecord.dateInputNPL, record.dateInputNPL) ||
+          dateComparator(newRecord.dateOutputFCR, record.dateOutputFCR)
         ) {
           console.log('Product progressing...')
           await productService.updateItemByPk(
@@ -158,7 +159,7 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
             }
           )
         }
-        if (newRecord.colorID && newRecord.colorID !== record.productColor?.colorID) {
+        if (numberComparator(newRecord.colorID, record.productColor?.colorID)) {
           console.log('Product color progressing...')
           await productColorService.createOrUpdateItemBy(
             { field: 'productID', key: record.key! },
@@ -171,7 +172,7 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
             }
           )
         }
-        if (newRecord.groupID && newRecord.groupID !== record.productGroup?.groupID) {
+        if (numberComparator(newRecord.groupID, record.productGroup?.groupID)) {
           console.log('ProductGroup progressing...')
           await productGroupService.createOrUpdateItemBy(
             { field: 'productID', key: record.key! },
@@ -184,7 +185,7 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
             }
           )
         }
-        if (newRecord.printID && newRecord.printID !== record.printablePlace?.printID) {
+        if (numberComparator(newRecord.printID, record.printablePlace?.printID)) {
           console.log('PrintablePlace progressing...')
           await printablePlaceService.createOrUpdateItemBy(
             { field: 'productID', key: record.key! },

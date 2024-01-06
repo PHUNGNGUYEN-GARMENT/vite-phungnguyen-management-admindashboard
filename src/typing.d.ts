@@ -219,13 +219,32 @@ export interface DateSendSampleSewing {
 export interface CuttingGroup {
   id?: number
   productID?: number | null
-  product?: Product | null
   quantityRealCut?: number | null
   timeCut?: string | null
   dateSendEmbroidered?: string | null
-  quantityArrivedEmbroidered?: string | null
-  quantityDeliveredBTP?: string | null
-  status?: ItemStatusType | null
+  quantityArrivedEmbroidered?: number | null
+  quantityDeliveredBTP?: number | null
+  status?: ItemStatusType
+  dateArrived1Th?: string | null
+  quantityArrived1Th?: number | null
+  dateArrived2Th?: string | null
+  quantityArrived2Th?: number | null
+  dateArrived3Th?: string | null
+  quantityArrived3Th?: number | null
+  dateArrived4Th?: string | null
+  quantityArrived4Th?: number | null
+  dateArrived5Th?: string | null
+  quantityArrived5Th?: number | null
+  dateArrived6Th?: string | null
+  quantityArrived6Th?: number | null
+  dateArrived7Th?: string | null
+  quantityArrived7Th?: number | null
+  dateArrived8Th?: string | null
+  quantityArrived8Th?: number | null
+  dateArrived9Th?: string | null
+  quantityArrived9Th?: number | null
+  dateArrived10Th?: string | null
+  quantityArrived10Th?: number | null
   createdAt?: string
   updatedAt?: string
 }
