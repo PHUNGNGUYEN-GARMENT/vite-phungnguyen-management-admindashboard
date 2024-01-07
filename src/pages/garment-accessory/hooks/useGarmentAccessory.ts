@@ -10,13 +10,13 @@ import ProductColorAPI from '~/api/services/ProductColorAPI'
 import { TableItemWithKey, UseTableProps } from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
 import { AccessoryNote, GarmentAccessory, GarmentAccessoryNote, Product, ProductColor } from '~/typing'
-import DayJS from '~/utils/date-formatter'
-import { dateComparator, dateValidator, numberComparator, numberValidator } from '~/utils/helpers'
+import { dateComparator, numberComparator } from '~/utils/helpers'
 import { GarmentAccessoryTableDataType } from '../type'
 
 export interface GarmentAccessoryNewRecordProps {
   amountCutting?: number | null
   passingDeliveryDate?: string | null
+  syncStatus?: boolean | null
   garmentAccessoryNotes?: GarmentAccessoryNote[] | null
 }
 
@@ -36,7 +36,12 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
   // State changes
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [searchText, setSearchText] = useState<string>('')
-  const [newRecord, setNewRecord] = useState<GarmentAccessoryNewRecordProps>({})
+  const [newRecord, setNewRecord] = useState<GarmentAccessoryNewRecordProps>({
+    syncStatus: null,
+    amountCutting: null,
+    passingDeliveryDate: null,
+    garmentAccessoryNotes: null
+  })
 
   // List
   const [products, setProducts] = useState<Product[]>([])
@@ -124,14 +129,17 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
         // Update GarmentAccessory
         if (
           numberComparator(newRecord.amountCutting, record.garmentAccessory.amountCutting) ||
-          dateComparator(newRecord.passingDeliveryDate, record.garmentAccessory.passingDeliveryDate)
+          dateComparator(newRecord.passingDeliveryDate, record.garmentAccessory.passingDeliveryDate) ||
+          newRecord.syncStatus ||
+          !newRecord.syncStatus
         ) {
           console.log('Update GarmentAccessory')
           await garmentAccessoryService.updateItemByPk(
             record.garmentAccessory.id!,
             {
               amountCutting: newRecord.amountCutting,
-              passingDeliveryDate: newRecord.passingDeliveryDate
+              passingDeliveryDate: newRecord.passingDeliveryDate,
+              syncStatus: newRecord.syncStatus
             },
             setLoading,
             (meta) => {
@@ -142,17 +150,13 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
           )
         }
       } else {
-        if (!numberValidator(newRecord.amountCutting)) {
-          throw new Error('Quantity must be than zero.')
-        }
-        if (!dateValidator(newRecord.passingDeliveryDate)) {
-          throw new Error('Invalid Date')
-        }
+        console.log('Create GarmentAccessory')
         await garmentAccessoryService.createNewItem(
           {
             productID: record.id!,
             amountCutting: newRecord.amountCutting,
-            passingDeliveryDate: DayJS(newRecord.passingDeliveryDate).toISOString()
+            passingDeliveryDate: newRecord.passingDeliveryDate,
+            syncStatus: newRecord.syncStatus
           },
           setLoading,
           (meta) => {
@@ -183,7 +187,6 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
       )
       message.success('Success!')
     } catch (error: any) {
-      console.error(error)
       message.error(`${error.message}`)
     } finally {
       setLoading(false)

@@ -17,7 +17,7 @@ import {
 } from 'antd'
 import { InputProps, TextAreaProps } from 'antd/es/input'
 import { SelectProps } from 'antd/es/select'
-import { HTMLAttributes, memo } from 'react'
+import { HTMLAttributes, memo, useEffect, useState } from 'react'
 import { InputType } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import { cn } from '~/utils/helpers'
@@ -62,7 +62,15 @@ function EditableStateCell({
   disabled,
   ...restProps
 }: EditableStateCellProps) {
-  const inputNode = ((): React.ReactNode => {
+  const [checkedState, setCheckedState] = useState<boolean>(inputType === 'checkbox' ? value : false)
+
+  useEffect(() => {
+    if (inputType === 'checkbox') {
+      console.log(checkedState)
+    }
+  }, [checkedState])
+
+  const inputNode = (checked: boolean): React.ReactNode => {
     switch (inputType) {
       case 'colorpicker':
         return (
@@ -73,7 +81,7 @@ function EditableStateCell({
             defaultValue={initialValue ?? colorPickerProps?.defaultValue ?? ''}
             value={value ?? colorPickerProps?.value ?? ''}
             showText
-            disabled={disabled}
+            disabled={disabled && checked}
             className={cn('w-full', restProps.className)}
           />
         )
@@ -82,11 +90,13 @@ function EditableStateCell({
           <Checkbox
             {...checkboxProps}
             name={dataIndex}
-            defaultChecked={initialValue ?? checkboxProps?.defaultChecked ?? ''}
-            checked={value ?? checkboxProps?.value ?? ''}
+            // defaultChecked={initialValue ?? checkboxProps?.defaultChecked ?? undefined}
+            checked={value ?? checkboxProps?.value ?? initialValue ?? checkboxProps?.defaultChecked ?? undefined}
             disabled={disabled}
-            value={value ?? checkboxProps?.value ?? ''}
-            onChange={(val) => onValueChange?.(val)}
+            onChange={(val) => {
+              onValueChange?.(val.target.checked)
+              setCheckedState(val.target.checked)
+            }}
             className={cn('w-full', restProps.className)}
           />
         )
@@ -98,7 +108,7 @@ function EditableStateCell({
             name={dataIndex}
             required
             value={value ?? inputNumberProps?.value ?? ''}
-            disabled={disabled}
+            disabled={disabled && checked}
             onChange={(val) => onValueChange?.(val)}
             defaultValue={initialValue ?? inputNumberProps?.defaultValue ?? ''}
             className={cn('w-full', restProps.className)}
@@ -111,7 +121,7 @@ function EditableStateCell({
             placeholder={`Enter ${title}`}
             name={dataIndex}
             value={value ?? textAreaProps?.value ?? ''}
-            disabled={disabled}
+            disabled={disabled && checked}
             onChange={(val) => onValueChange?.(val.target.value)}
             defaultValue={initialValue ?? textAreaProps?.defaultValue ?? ''}
             className={cn('w-full', restProps.className)}
@@ -125,7 +135,7 @@ function EditableStateCell({
             defaultValue={initialValue ?? selectProps?.defaultValue ?? ''}
             // value={value ?? selectProps?.value ?? ''}
             onChange={(val, option) => onValueChange?.(val, option)}
-            disabled={disabled}
+            disabled={disabled && checked}
             virtual={false}
             className={cn('w-full', restProps.className)}
           />
@@ -139,7 +149,7 @@ function EditableStateCell({
             virtual={false}
             defaultValue={initialValue ?? selectProps?.defaultValue ?? ''}
             // value={value ?? selectProps?.value ?? ''}
-            disabled={disabled}
+            disabled={disabled && checked}
             onChange={(val: number[], option) => onValueChange?.(val, option)}
             className='w-full'
           />
@@ -152,7 +162,7 @@ function EditableStateCell({
             defaultValue={initialValue ?? selectProps?.defaultValue ?? ''}
             // value={value ?? selectProps?.value ?? ''}
             onChange={(val, option) => onValueChange?.(val, option)}
-            disabled={disabled}
+            disabled={disabled && checked}
             virtual={false}
             className={cn('w-full', restProps.className)}
             optionRender={(ori, info) => {
@@ -173,12 +183,13 @@ function EditableStateCell({
           />
         )
       case 'datepicker':
+        console.log(checked)
         return (
           <DatePicker
             placeholder={`Pick ${title}`}
             name={dataIndex}
             onChange={(val) => onValueChange?.(val)}
-            disabled={disabled}
+            disabled={checked}
             // value={value && DayJS(value)}
             defaultValue={initialValue && DayJS(initialValue)}
             format={DatePattern.display}
@@ -195,14 +206,14 @@ function EditableStateCell({
             onChange={(event) => onValueChange?.(event.target.value)}
             defaultValue={initialValue ?? inputProps?.defaultValue ?? ''}
             value={value ?? inputProps?.value ?? ''}
-            disabled={disabled}
+            disabled={disabled && checked}
             className={cn('w-full', restProps.className)}
           />
         )
     }
-  })()
+  }
 
-  return <>{isEditing ? inputNode : restProps.children}</>
+  return <>{isEditing ? inputNode(checkedState) : restProps.children}</>
 }
 
 export default memo(EditableStateCell)

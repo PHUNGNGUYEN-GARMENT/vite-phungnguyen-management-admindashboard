@@ -31,7 +31,7 @@ export const textValidatorChange = (text: string): string => {
 }
 
 export const numberValidatorChange = (number: number): number => {
-  return number ?? 0
+  return number ? (number > 0 ? number : 0) : 0
 }
 
 // Validator initial value
@@ -56,7 +56,7 @@ export const dateValidator = (date?: string | null): boolean => {
 
 export const dateComparator = (date1?: string | null, date2?: string | null): boolean => {
   return date1 && date2
-    ? DayJS(date1).isValid() && DayJS(date2).isValid() && DayJS(date1).diff(date2, 'day') === 0
+    ? DayJS(date1).isValid() && DayJS(date2).isValid() && DayJS(date1).diff(date2, 'day') !== 0
     : false
 }
 

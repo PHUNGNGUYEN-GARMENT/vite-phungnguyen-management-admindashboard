@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ColorPicker, Flex, Space } from 'antd'
+import { Checkbox, ColorPicker, Flex, Space } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
+import { Check } from 'lucide-react'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
@@ -55,7 +56,14 @@ const GarmentAccessoryTable: React.FC<Props> = () => {
               inputType='text'
               required={true}
             >
-              <SkyTableTypography status={'active'}>{textValidatorDisplay(record.productCode)}</SkyTableTypography>
+              <SkyTableTypography status={'active'} className='flex gap-[2px] font-bold'>
+                {textValidatorDisplay(record.productCode)}
+                <span>
+                  {((record.garmentAccessory && record.garmentAccessory.syncStatus) ?? undefined) && (
+                    <Check size={16} color='#ffffff' className='rounded-full bg-success p-[2px]' />
+                  )}
+                </span>
+              </SkyTableTypography>
             </EditableStateCell>
           </>
         )
@@ -132,7 +140,10 @@ const GarmentAccessoryTable: React.FC<Props> = () => {
                   })
                 }
               >
-                <SkyTableTypography status={record.status}>
+                <SkyTableTypography
+                  status={record.status}
+                  disabled={(record.garmentAccessory && record.garmentAccessory.syncStatus) ?? false}
+                >
                   {record.garmentAccessory && numberValidatorDisplay(record.garmentAccessory.amountCutting)}
                 </SkyTableTypography>
               </EditableStateCell>
@@ -146,7 +157,10 @@ const GarmentAccessoryTable: React.FC<Props> = () => {
           render: (_value: any, record: TableItemWithKey<GarmentAccessoryTableDataType>) => {
             return (
               <EditableStateCell isEditing={false} dataIndex='remainingAmount' title='Còn lại' inputType='number'>
-                <SkyTableTypography status={record.status}>
+                <SkyTableTypography
+                  status={record.status}
+                  disabled={(record.garmentAccessory && record.garmentAccessory.syncStatus) ?? false}
+                >
                   {record.garmentAccessory?.amountCutting &&
                     record.garmentAccessory.amountCutting > 0 &&
                     (record.quantityPO ?? 0) - (record.garmentAccessory?.amountCutting ?? 0)}
@@ -169,6 +183,7 @@ const GarmentAccessoryTable: React.FC<Props> = () => {
             title='Giao chuyền'
             inputType='datepicker'
             required={true}
+            disabled={(record.garmentAccessory && record.garmentAccessory.syncStatus) ?? false}
             initialValue={record.garmentAccessory && dateValidatorInit(record.garmentAccessory.passingDeliveryDate)}
             onValueChange={(val: Dayjs) =>
               setNewRecord({
@@ -177,9 +192,44 @@ const GarmentAccessoryTable: React.FC<Props> = () => {
               })
             }
           >
-            <SkyTableTypography status={record.status}>
+            <SkyTableTypography
+              status={record.status}
+              disabled={
+                (record.garmentAccessory && record.garmentAccessory.syncStatus && newRecord.syncStatus) ?? false
+              }
+            >
               {record.garmentAccessory && dateValidatorDisplay(record.garmentAccessory.passingDeliveryDate)}
             </SkyTableTypography>
+          </EditableStateCell>
+        )
+      }
+    },
+    {
+      title: 'Đồng bộ PL',
+      dataIndex: 'syncStatus',
+      width: '10%',
+      render: (_value: any, record: TableItemWithKey<GarmentAccessoryTableDataType>) => {
+        return (
+          <EditableStateCell
+            isEditing={table.isEditing(record.key!)}
+            dataIndex='syncStatus'
+            title='Đồng bộ PL'
+            inputType='checkbox'
+            required={true}
+            initialValue={(record.garmentAccessory && record.garmentAccessory.syncStatus) ?? undefined}
+            value={newRecord.syncStatus}
+            onValueChange={(val: boolean) =>
+              setNewRecord({
+                ...newRecord,
+                syncStatus: val
+              })
+            }
+          >
+            <Checkbox
+              name='syncStatus'
+              checked={(record.garmentAccessory && record.garmentAccessory.syncStatus) ?? undefined}
+              disabled
+            />
           </EditableStateCell>
         )
       }

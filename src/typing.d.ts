@@ -151,6 +151,7 @@ export interface GarmentAccessory {
   amountCutting?: number | null
   passingDeliveryDate?: string | null
   status?: ItemStatusType | null
+  syncStatus?: boolean | null
   product?: Product | null
   createdAt?: string
   updatedAt?: string

@@ -8,9 +8,7 @@ export default {
   createNewItem: async (item: GarmentAccessory): Promise<ResponseDataType | undefined> => {
     return await client
       .post(`${NAMESPACE}`, {
-        productID: item.productID,
-        amountCutting: item.amountCutting,
-        passingDeliveryDate: item.passingDeliveryDate,
+        ...item,
         status: item.status ?? 'active'
       })
       .then((res) => {
@@ -26,9 +24,7 @@ export default {
   createOrUpdateItemByPk: async (id: number, item: GarmentAccessory): Promise<ResponseDataType | undefined> => {
     return await client
       .post(`${NAMESPACE}/createOrUpdate/${id}`, {
-        productID: item.productID,
-        amountCutting: item.amountCutting,
-        passingDeliveryDate: item.passingDeliveryDate,
+        ...item,
         status: item.status ?? 'active'
       })
       .then((res) => {
@@ -50,9 +46,7 @@ export default {
   ): Promise<ResponseDataType | undefined> => {
     return await client
       .post(`${NAMESPACE}/createOrUpdate/${query.field}/${query.key}`, {
-        productID: item.productID,
-        amountCutting: item.amountCutting,
-        passingDeliveryDate: item.passingDeliveryDate,
+        ...item,
         status: item.status ?? 'active'
       })
       .then((res) => {
@@ -107,6 +101,7 @@ export default {
       })
   },
   updateItemByPk: async (id: number, item: GarmentAccessory): Promise<ResponseDataType | undefined> => {
+    console.log(item)
     return client
       .put(`${NAMESPACE}/${id}`, {
         ...item
