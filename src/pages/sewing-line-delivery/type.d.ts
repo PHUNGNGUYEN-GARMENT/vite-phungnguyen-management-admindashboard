@@ -1,16 +1,11 @@
-import { ItemStatusType } from '~/typing'
+import { Product, ProductColor, SewingLineDelivery } from '~/typing'
 
-export type SewingLineDeliveryTableDataType = {
+export interface ExpandableTableDataType extends SewingLineDelivery {
   key?: React.Key
-  id?: number | undefined
-  productID?: number | undefined
-  sewingLineID?: number | undefined
-  quantityOrigin?: number | undefined
-  quantitySewed?: number | undefined
-  expiredDate?: string | undefined
-  status?: ItemStatusType | undefined
-  product?: Product | undefined
-  sewingLine?: SewingLine | undefined
-  createdAt?: string
-  updatedAt?: string
+}
+
+export interface SewingLineDeliveryTableDataType extends Product {
+  key?: React.Key
+  productColor?: ProductColor
+  sewingLineDeliveries?: SewingLineDelivery[]
 }

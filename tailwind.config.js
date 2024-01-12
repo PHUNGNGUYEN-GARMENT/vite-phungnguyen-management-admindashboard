@@ -16,6 +16,7 @@ module.exports = {
         warn: 'var(--warn)',
         error: 'var(--error)',
         success: 'var(--success)',
+        blue: 'var(--blue)',
         primary: {
           DEFAULT: 'var(--primary)',
           foreground: 'var(--primary-foreground)'

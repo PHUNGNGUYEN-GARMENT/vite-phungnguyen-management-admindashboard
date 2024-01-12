@@ -8,13 +8,40 @@ export default {
   createNewItem: async (item: SewingLineDelivery): Promise<ResponseDataType | undefined> => {
     return await client
       .post(`${NAMESPACE}`, {
-        sewingLineID: item.sewingLineID,
-        productID: item.productID,
-        quantityOrigin: item.quantityOrigin,
-        quantitySewed: item.quantitySewed,
-        expiredDate: item.expiredDate,
-        status: item.status
+        ...item,
+        status: item.status ?? 'active'
       })
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  createNewItems: async (items: SewingLineDelivery[]): Promise<ResponseDataType | undefined> => {
+    return await client
+      .post(
+        `${NAMESPACE}/items`,
+        items.map((item) => {
+          return { ...item, status: 'active' }
+        })
+      )
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  getItemBy: async (query: { field: string; key: React.Key }): Promise<ResponseDataType | undefined> => {
+    return client
+      .get(`${NAMESPACE}/${query.field}/${query.key}`)
       .then((res) => {
         if (res.data) {
           return res.data as ResponseDataType
@@ -79,6 +106,25 @@ export default {
       .put(`${NAMESPACE}/${query.field}/${query.key}`, {
         ...item
       })
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  updateItemsBy: async (
+    query: {
+      field: string
+      key: React.Key
+    },
+    recordsToUpdate: SewingLineDelivery[]
+  ): Promise<ResponseDataType | undefined> => {
+    return client
+      .post(`${NAMESPACE}/updateItems/${query.field}/${query.key}`, recordsToUpdate)
       .then((res) => {
         if (res.data) {
           return res.data as ResponseDataType

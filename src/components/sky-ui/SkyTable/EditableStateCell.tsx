@@ -17,7 +17,7 @@ import {
 } from 'antd'
 import { InputProps, TextAreaProps } from 'antd/es/input'
 import { SelectProps } from 'antd/es/select'
-import { HTMLAttributes, memo, useEffect, useState } from 'react'
+import { HTMLAttributes, memo, useState } from 'react'
 import { InputType } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import { cn } from '~/utils/helpers'
@@ -63,12 +63,6 @@ function EditableStateCell({
   ...restProps
 }: EditableStateCellProps) {
   const [checkedState, setCheckedState] = useState<boolean>(inputType === 'checkbox' ? value : false)
-
-  useEffect(() => {
-    if (inputType === 'checkbox') {
-      console.log(checkedState)
-    }
-  }, [checkedState])
 
   const inputNode = (checked: boolean): React.ReactNode => {
     switch (inputType) {
@@ -132,7 +126,7 @@ function EditableStateCell({
           <Select
             {...selectProps}
             placeholder={`Select ${title}`}
-            defaultValue={initialValue ?? selectProps?.defaultValue ?? ''}
+            defaultValue={initialValue ?? selectProps?.defaultValue}
             // value={value ?? selectProps?.value ?? ''}
             onChange={(val, option) => onValueChange?.(val, option)}
             disabled={disabled && checked}
@@ -147,7 +141,7 @@ function EditableStateCell({
             placeholder={`Select ${title}`}
             mode='multiple'
             virtual={false}
-            defaultValue={initialValue ?? selectProps?.defaultValue ?? ''}
+            defaultValue={initialValue ?? selectProps?.defaultValue}
             // value={value ?? selectProps?.value ?? ''}
             disabled={disabled && checked}
             onChange={(val: number[], option) => onValueChange?.(val, option)}

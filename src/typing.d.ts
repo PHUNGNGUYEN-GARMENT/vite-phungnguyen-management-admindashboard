@@ -264,7 +264,7 @@ export interface SewingLineDelivery {
   id?: number
   productID?: number | null
   sewingLineID?: number | null
-  quantityOrigin?: number | null
+  quantityOriginal?: number | null
   quantitySewed?: number | null
   expiredDate?: string | null
   status?: ItemStatusType | null
