@@ -140,6 +140,7 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
       setLoading?.(true)
       const meta = await apiService.getItems(params)
       if (meta?.success) {
+        console.log(meta)
         onDataSuccess?.(meta, 'Success!')
       } else {
         onDataSuccess?.(undefined, 'Failed!')
@@ -178,6 +179,33 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
       await getListItems(body, setLoading, onDataSuccess)
     } catch (err) {
       console.log(err)
+    } finally {
+      setLoading?.(false)
+    }
+  }
+
+  const pageChange = async (
+    _page: number,
+    setLoading?: (enable: boolean) => void,
+    onDataSuccess?: (data: ResponseDataType | undefined, message?: string) => void,
+    search?: {
+      field: string
+      term: string
+    }
+  ) => {
+    try {
+      setPage(_page)
+      const body: RequestBodyType = {
+        ...defaultRequestBody,
+        paginator: {
+          page: _page,
+          pageSize: 5
+        },
+        search: search
+      }
+      await getListItems(body, setLoading, onDataSuccess)
+    } catch (err) {
+      console.error(err)
     } finally {
       setLoading?.(false)
     }
@@ -361,6 +389,7 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
     deleteItemByPk,
     deleteItemBy,
     sortedListItems,
+    pageChange,
     createOrUpdateItemBy,
     createOrUpdateItemByPk
   }

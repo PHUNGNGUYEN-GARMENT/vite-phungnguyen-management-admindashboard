@@ -16,6 +16,7 @@ export type ResponseDataType = {
   meta?: any
   length?: number
   page?: number
+  pageSize?: number
   total?: number
 }
 

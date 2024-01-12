@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { App as AntApp } from 'antd'
 import { useEffect, useState } from 'react'
-import { RequestBodyType, ResponseDataType, defaultRequestBody } from '~/api/client'
+import { ResponseDataType, defaultRequestBody } from '~/api/client'
 import ProductAPI from '~/api/services/ProductAPI'
 import ProductColorAPI from '~/api/services/ProductColorAPI'
 import SampleSewingAPI from '~/api/services/SampleSewingAPI'
@@ -190,19 +190,7 @@ export default function useSampleSewing(table: UseTableProps<SampleSewingTableDa
   }
 
   const handlePageChange = async (_page: number) => {
-    sampleSewingService.setPage(_page)
-    const body: RequestBodyType = {
-      ...defaultRequestBody,
-      paginator: {
-        page: _page,
-        pageSize: 5
-      },
-      search: {
-        field: 'productCode',
-        term: searchText
-      }
-    }
-    await productService.getListItems(body, setLoading, (meta) => {
+    await productService.pageChange(_page, setLoading, (meta) => {
       if (meta?.success) {
         selfConvertDataSource(meta?.data as Product[])
       }

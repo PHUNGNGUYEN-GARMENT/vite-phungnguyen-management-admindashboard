@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { App as AntApp } from 'antd'
 import { useEffect, useState } from 'react'
-import { RequestBodyType, ResponseDataType, defaultRequestBody } from '~/api/client'
+import { ResponseDataType, defaultRequestBody } from '~/api/client'
 import ColorAPI from '~/api/services/ColorAPI'
 import { TableItemWithKey, UseTableProps } from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
-import { Color, Product } from '~/typing'
+import { Color } from '~/typing'
 import { ColorTableDataType } from '../ColorPage'
 
 export default function useColor(table: UseTableProps<ColorTableDataType>) {
@@ -29,11 +29,18 @@ export default function useColor(table: UseTableProps<ColorTableDataType>) {
   const [colorNew, setColorNew] = useState<Color | undefined>(undefined)
 
   const loadData = async () => {
-    await colorService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        setColors(meta.data as Product[])
+    await colorService.getListItems(
+      {
+        ...defaultRequestBody,
+        paginator: { page: colorService.page, pageSize: defaultRequestBody.paginator?.pageSize }
+      },
+      setLoading,
+      (meta) => {
+        if (meta?.success) {
+          setColors(meta.data as Color[])
+        }
       }
-    })
+    )
   }
 
   useEffect(() => {
@@ -137,23 +144,16 @@ export default function useColor(table: UseTableProps<ColorTableDataType>) {
   }
 
   const handlePageChange = async (_page: number) => {
-    colorService.setPage(_page)
-    const body: RequestBodyType = {
-      ...defaultRequestBody,
-      paginator: {
-        page: _page,
-        pageSize: 5
+    await colorService.pageChange(
+      _page,
+      setLoading,
+      (meta) => {
+        if (meta?.success) {
+          selfConvertDataSource(meta?.data as Color[])
+        }
       },
-      search: {
-        field: 'name',
-        term: searchText
-      }
-    }
-    await colorService.getListItems(body, setLoading, (meta) => {
-      if (meta?.success) {
-        selfConvertDataSource(meta?.data as Color[])
-      }
-    })
+      { field: 'productCode', term: searchText }
+    )
   }
 
   const handleResetClick = async () => {

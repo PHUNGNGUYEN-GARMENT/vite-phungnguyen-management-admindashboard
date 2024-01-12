@@ -16,7 +16,7 @@ export interface SewingLineDeliveryNewRecordProps {
 }
 
 export default function useSewingLineDelivery(table: UseTableProps<SewingLineDeliveryTableDataType>) {
-  const { setLoading, page, setDataSource, handleConfirmCancelEditing } = table
+  const { setLoading, setDataSource, handleConfirmCancelEditing } = table
 
   // Services
   const productService = useAPIService<Product>(ProductAPI)

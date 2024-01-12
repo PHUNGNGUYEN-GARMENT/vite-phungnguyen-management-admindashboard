@@ -141,7 +141,11 @@ const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: s
           props.pagination ?? {
             onChange: props.onPageChange,
             current: props.metaData?.page,
-            pageSize: 5,
+            pageSize: props.metaData?.pageSize
+              ? props.metaData.pageSize !== -1
+                ? props.metaData.pageSize
+                : undefined
+              : 10,
             total: props.metaData?.total
           }
         }

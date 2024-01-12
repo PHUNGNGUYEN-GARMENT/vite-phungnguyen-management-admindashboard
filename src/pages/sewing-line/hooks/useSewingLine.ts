@@ -9,7 +9,7 @@ import { SewingLine } from '~/typing'
 import { SewingLineTableDataType } from '../SewingLinePage'
 
 export default function useSewingLine(table: UseTableProps<SewingLineTableDataType>) {
-  const { setLoading, setDataSource, handleConfirmCancelEditing, handleConfirmDeleting } = table
+  const { setLoading, page, setPage, setDataSource, handleConfirmCancelEditing, handleConfirmDeleting } = table
 
   // Services
   const sewingLineService = useAPIService<SewingLine>(SewingLineAPI)
@@ -29,11 +29,15 @@ export default function useSewingLine(table: UseTableProps<SewingLineTableDataTy
   const [SewingLineNew, setSewingLineNew] = useState<SewingLine | undefined>(undefined)
 
   const loadData = async () => {
-    await sewingLineService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        setSewingLines(meta.data as SewingLine[])
+    await sewingLineService.getListItems(
+      { ...defaultRequestBody, paginator: { page: page, pageSize: defaultRequestBody.paginator?.pageSize } },
+      setLoading,
+      (meta) => {
+        if (meta?.success) {
+          setSewingLines(meta.data as SewingLine[])
+        }
       }
-    })
+    )
   }
 
   useEffect(() => {
@@ -129,6 +133,7 @@ export default function useSewingLine(table: UseTableProps<SewingLineTableDataTy
 
   const handlePageChange = async (_page: number) => {
     sewingLineService.setPage(_page)
+    setPage(_page)
     const body: RequestBodyType = {
       ...defaultRequestBody,
       paginator: {

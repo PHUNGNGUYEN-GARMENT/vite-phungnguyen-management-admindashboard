@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { App as AntApp } from 'antd'
 import { useEffect, useState } from 'react'
-import { RequestBodyType, ResponseDataType, defaultRequestBody } from '~/api/client'
+import { ResponseDataType, defaultRequestBody } from '~/api/client'
 import ColorAPI from '~/api/services/ColorAPI'
 import GroupAPI from '~/api/services/GroupAPI'
 import PrintAPI from '~/api/services/PrintAPI'
@@ -62,47 +62,69 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
     if (table.editingKey !== '') {
       colorService.getListItems({ ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } }, setLoading, (meta) => {
         if (meta?.success) {
-          const items = meta.data as Color[]
-          setColors(items)
+          setColors(meta.data as Color[])
         }
       })
       groupService.getListItems({ ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } }, setLoading, (meta) => {
         if (meta?.success) {
-          const items = meta.data as Group[]
-          setGroups(items)
+          setGroups(meta.data as Group[])
         }
       })
       printService.getListItems({ ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } }, setLoading, (meta) => {
         if (meta?.success) {
-          const items = meta.data as Print[]
-          setPrints(items)
+          setPrints(meta.data as Print[])
         }
       })
     }
   }, [table.editingKey])
 
-  const loadData = async () => {
-    await productService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        setProducts(meta.data as Product[])
+  const loadData = async (defaultLoading?: boolean) => {
+    await productService.getListItems(
+      defaultLoading
+        ? defaultRequestBody
+        : {
+            ...defaultRequestBody,
+            paginator: { page: productService.page, pageSize: defaultRequestBody.paginator?.pageSize }
+          },
+      setLoading,
+      (meta) => {
+        if (meta?.success) {
+          setProducts(meta.data as Product[])
+        }
       }
-    })
-    await productColorService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        setProductColors(meta.data as ProductColor[])
+    )
+    await productColorService.getListItems(
+      { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
+      setLoading,
+      (meta) => {
+        if (meta?.success) {
+          setProductColors(meta.data as ProductColor[])
+        }
       }
-    })
-    await productGroupService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        setProductGroups(meta.data as ProductGroup[])
+    )
+    await productGroupService.getListItems(
+      { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
+      setLoading,
+      (meta) => {
+        if (meta?.success) {
+          setProductGroups(meta.data as ProductGroup[])
+        }
       }
-    })
-    await printablePlaceService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        setPrintablePlaces(meta.data as PrintablePlace[])
+    )
+    await printablePlaceService.getListItems(
+      { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
+      setLoading,
+      (meta) => {
+        if (meta?.success) {
+          setPrintablePlaces(meta.data as PrintablePlace[])
+        }
       }
-    })
+    )
   }
+
+  useEffect(() => {
+    console.log(table.dataSource)
+  }, [table.dataSource])
 
   useEffect(() => {
     loadData()
@@ -118,8 +140,9 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
     _productGroups?: ProductGroup[],
     _printablePlaces?: PrintablePlace[]
   ) => {
+    const items = _products ? _products : products
     setDataSource(
-      _products.map((item) => {
+      items.map((item) => {
         return {
           ...item,
           productColor: (_productColors ? _productColors : productColors).find((i) => i.productID === item.id),
@@ -134,8 +157,8 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
   const handleSaveClick = async (record: TableItemWithKey<ProductTableDataType>, newRecord: any) => {
     // const row = (await form.validateFields()) as any
     console.log({ old: record, new: newRecord })
-    if (newRecord) {
-      try {
+    try {
+      if (newRecord) {
         if (
           textComparator(newRecord.productCode, record.productCode) ||
           numberComparator(newRecord.quantityPO, record.quantityPO) ||
@@ -199,14 +222,14 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
           )
         }
         message.success('Success!')
-      } catch (error) {
-        console.error(error)
-        message.error('Failed')
-      } finally {
-        setLoading(false)
-        handleConfirmCancelEditing()
-        loadData()
       }
+    } catch (error) {
+      console.error(error)
+      message.error('Failed')
+    } finally {
+      setLoading(false)
+      handleConfirmCancelEditing()
+      loadData()
     }
   }
 
@@ -296,28 +319,21 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
   }
 
   const handlePageChange = async (_page: number) => {
-    productService.setPage(_page)
-    const body: RequestBodyType = {
-      ...defaultRequestBody,
-      paginator: {
-        page: _page,
-        pageSize: 5
+    await productService.pageChange(
+      _page,
+      setLoading,
+      (meta) => {
+        if (meta?.success) {
+          selfConvertDataSource(meta?.data as Product[])
+        }
       },
-      search: {
-        field: 'productCode',
-        term: searchText
-      }
-    }
-    await productService.getListItems(body, setLoading, (meta) => {
-      if (meta?.success) {
-        selfConvertDataSource(meta?.data as Product[])
-      }
-    })
+      { field: 'productCode', term: searchText }
+    )
   }
 
   const handleResetClick = async () => {
     setSearchText('')
-    loadData()
+    loadData(true)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
