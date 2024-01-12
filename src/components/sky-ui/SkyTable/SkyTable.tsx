@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Table } from 'antd'
 import type { ColumnsType, TableProps } from 'antd/es/table'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { ResponseDataType } from '~/api/client'
 import { ProductTableDataType } from '~/pages/product/type'
@@ -18,11 +18,13 @@ export interface SkyTableProps<T extends { key?: React.Key; createdAt?: string; 
   editingKey: React.Key
   deletingKey: React.Key
   actions?: ActionProps<T>
+  scrollTo?: number
 }
 
 const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: string }>({
   ...props
 }: SkyTableProps<T>) => {
+  const tblRef: Parameters<typeof Table>[0]['ref'] = useRef(null)
   const user = useSelector((state: RootState) => state.user)
   const [editKey, setEditKey] = useState<React.Key>('-1')
   // const [deleteKey, setDeleteKey] = useState<React.Key>('-1')
@@ -33,6 +35,12 @@ const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: s
   // const isDeleting = (key?: React.Key): boolean => {
   //   return props.deletingKey === key
   // }
+
+  useEffect(() => {
+    if (props.scrollTo) {
+      tblRef.current?.scrollTo({ index: props.scrollTo })
+    }
+  }, [props.scrollTo])
 
   const actionsCols: ColumnsType<T> = [
     {
@@ -122,6 +130,7 @@ const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: s
     <>
       <Table
         {...props}
+        ref={tblRef}
         className={props.className}
         loading={props.loading}
         bordered
@@ -142,6 +151,7 @@ const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: s
   )
 }
 
+export default SkyTable
 // export const mergedColumns = <T extends { key?: React.Key }>(
 //   cols: {
 //     title: string
@@ -180,5 +190,3 @@ const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: s
 //     }
 //   })
 // }
-
-export default SkyTable

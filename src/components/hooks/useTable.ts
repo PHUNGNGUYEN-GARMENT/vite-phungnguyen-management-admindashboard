@@ -6,7 +6,11 @@ export type TableItemWithId<T> = T & { id?: number }
 
 export interface UseTableProps<T extends { key?: React.Key }> {
   loading: boolean
+  page: number
+  setPage: (page: number) => void
   setLoading: (state: boolean) => void
+  scrollIndex: number
+  setScrollIndex: (index: number) => void
   editingKey: React.Key
   setEditingKey: (key: React.Key) => void
   setDeletingKey: (key: React.Key) => void
@@ -28,6 +32,8 @@ export interface UseTableProps<T extends { key?: React.Key }> {
 }
 
 export default function useTable<T extends { key?: React.Key }>(initValue: TableItemWithKey<T>[]): UseTableProps<T> {
+  const [scrollIndex, setScrollIndex] = useState<number>(0)
+  const [page, setPage] = useState<number>(2)
   const [loading, setLoading] = useState<boolean>(false)
   const [dataSource, setDataSource] = useState<TableItemWithKey<T>[]>(initValue)
   const [editingKey, setEditingKey] = useState<React.Key>('')
@@ -119,6 +125,8 @@ export default function useTable<T extends { key?: React.Key }>(initValue: Table
   return {
     loading,
     setLoading,
+    page,
+    setPage,
     dateCreation,
     setDateCreation,
     isDelete,
@@ -127,6 +135,8 @@ export default function useTable<T extends { key?: React.Key }>(initValue: Table
     deletingKey,
     setEditingKey,
     setDeletingKey,
+    scrollIndex,
+    setScrollIndex,
     dataSource,
     setDataSource,
     handleStartAddNew,

@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ColorPicker, Divider, Flex, Space } from 'antd'
+import { ColorPicker, Flex, Space } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
-import { useEffect } from 'react'
 import useTable from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
@@ -32,10 +31,6 @@ const SewingLineDeliveryTable: React.FC = () => {
     sewingLineDeliveryRecordTemp,
     setSewingLineDeliveryRecordTemp
   } = useSewingLineDelivery(table)
-
-  useEffect(() => {
-    console.log(sewingLines)
-  }, [sewingLines])
 
   const columns: ColumnsType<SewingLineDeliveryTableDataType> = [
     {
@@ -140,17 +135,17 @@ const SewingLineDeliveryTable: React.FC = () => {
               {sewingLinesFiltered.map((item, index) => {
                 return (
                   <SkyTableTypography
-                    className='my-[2px] h-6 rounded-sm bg-black bg-opacity-[0.06] px-2 py-1'
                     key={index}
+                    className='my-[2px] h-6 rounded-sm bg-border px-2 py-1'
                     status={item.status}
                   >
                     {textValidatorDisplay(item.name)}
-                    <Divider type='vertical' />
+                    {/* <Divider type='vertical' />
                     <SkyTableTypography code type='success'>
                       {numberValidatorDisplay(
                         record.sewingLineDeliveries?.find((i) => i.sewingLineID === item.id)?.quantityOriginal
                       )}
-                    </SkyTableTypography>
+                    </SkyTableTypography> */}
                   </SkyTableTypography>
                 )
               })}
@@ -177,7 +172,7 @@ const SewingLineDeliveryTable: React.FC = () => {
           return {
             style: {
               background: cn({
-                'var(--secondary)': disabled && index % 2 === 0
+                'var(--border)': disabled && index % 2 === 0
               })
             }
           }
@@ -398,7 +393,7 @@ const SewingLineDeliveryTable: React.FC = () => {
             expandedRowRender: (record) => {
               return (
                 <>
-                  <Flex vertical gap={10} className='relative z-[999] h-[200px]'>
+                  <Flex vertical gap={10} className='relative z-[999] h-[200px] scroll-smooth'>
                     <SkyTable
                       bordered
                       virtual
