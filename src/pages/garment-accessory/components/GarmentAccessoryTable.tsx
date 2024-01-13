@@ -56,14 +56,17 @@ const GarmentAccessoryTable: React.FC<Props> = () => {
               inputType='text'
               required={true}
             >
-              <SkyTableTypography status={'active'} className='flex gap-[2px] font-bold'>
-                {textValidatorDisplay(record.productCode)}
-                <span>
-                  {((record.garmentAccessory && record.garmentAccessory.syncStatus) ?? undefined) && (
-                    <Check size={16} color='#ffffff' className='rounded-full bg-success p-[2px]' />
-                  )}
-                </span>
-              </SkyTableTypography>
+              <Space size={2} direction='horizontal'>
+                <SkyTableTypography strong status={'active'} className='flex gap-[2px]'>
+                  {textValidatorDisplay(record.productCode)}
+                </SkyTableTypography>
+                {table.isEditing(record.id!) && newRecord.syncStatus && (
+                  <Check size={16} color='#ffffff' className='relative top-[2px] rounded-full bg-success p-[2px]' />
+                )}
+                {record.garmentAccessory && record.garmentAccessory.syncStatus && !table.isEditing(record.id!) && (
+                  <Check size={16} color='#ffffff' className='relative top-[2px] m-0 rounded-full bg-success p-[2px]' />
+                )}
+              </Space>
             </EditableStateCell>
           </>
         )
@@ -131,12 +134,13 @@ const GarmentAccessoryTable: React.FC<Props> = () => {
                 title='Cắt được'
                 inputType='number'
                 required={true}
+                disabled={(newRecord.syncStatus && table.isEditing(record.id!)) ?? false}
                 initialValue={record.garmentAccessory && numberValidatorInit(record.garmentAccessory.amountCutting)}
                 value={newRecord.amountCutting}
                 onValueChange={(val) =>
                   setNewRecord({
                     ...newRecord,
-                    amountCutting: numberValidatorChange(val)
+                    amountCutting: val > 0 ? numberValidatorChange(val) : null
                   })
                 }
               >
@@ -144,7 +148,7 @@ const GarmentAccessoryTable: React.FC<Props> = () => {
                   status={record.status}
                   disabled={(record.garmentAccessory && record.garmentAccessory.syncStatus) ?? false}
                 >
-                  {record.garmentAccessory && numberValidatorDisplay(record.garmentAccessory.amountCutting)}
+                  {numberValidatorDisplay(record.garmentAccessory?.amountCutting)}
                 </SkyTableTypography>
               </EditableStateCell>
             )
@@ -155,15 +159,32 @@ const GarmentAccessoryTable: React.FC<Props> = () => {
           dataIndex: 'remainingAmount',
           width: '10%',
           render: (_value: any, record: TableItemWithKey<GarmentAccessoryTableDataType>) => {
+            const amount =
+              record.garmentAccessory?.amountCutting &&
+              record.garmentAccessory.amountCutting > 0 &&
+              numberValidatorDisplay(record.quantityPO) - numberValidatorDisplay(record.garmentAccessory?.amountCutting)
             return (
-              <EditableStateCell isEditing={false} dataIndex='remainingAmount' title='Còn lại' inputType='number'>
+              <EditableStateCell
+                dataIndex='remainingAmount'
+                title='Còn lại'
+                isEditing={table.isEditing(record.id!)}
+                editableRender={
+                  <SkyTableTypography
+                    status={record.status}
+                    disabled={(newRecord.syncStatus && table.isEditing(record.id!)) ?? false}
+                  >
+                    {amount}
+                  </SkyTableTypography>
+                }
+                disabled={(newRecord.syncStatus && table.isEditing(record.id!)) ?? false}
+                initialValue={amount}
+                inputType='number'
+              >
                 <SkyTableTypography
                   status={record.status}
                   disabled={(record.garmentAccessory && record.garmentAccessory.syncStatus) ?? false}
                 >
-                  {record.garmentAccessory?.amountCutting &&
-                    record.garmentAccessory.amountCutting > 0 &&
-                    (record.quantityPO ?? 0) - (record.garmentAccessory?.amountCutting ?? 0)}
+                  {amount}
                 </SkyTableTypography>
               </EditableStateCell>
             )
@@ -183,7 +204,7 @@ const GarmentAccessoryTable: React.FC<Props> = () => {
             title='Giao chuyền'
             inputType='datepicker'
             required={true}
-            disabled={(record.garmentAccessory && record.garmentAccessory.syncStatus) ?? false}
+            disabled={(newRecord.syncStatus && table.isEditing(record.id!)) ?? false}
             initialValue={record.garmentAccessory && dateValidatorInit(record.garmentAccessory.passingDeliveryDate)}
             onValueChange={(val: Dayjs) =>
               setNewRecord({
@@ -194,9 +215,7 @@ const GarmentAccessoryTable: React.FC<Props> = () => {
           >
             <SkyTableTypography
               status={record.status}
-              disabled={
-                (record.garmentAccessory && record.garmentAccessory.syncStatus && newRecord.syncStatus) ?? false
-              }
+              disabled={(record.garmentAccessory && record.garmentAccessory.syncStatus) ?? false}
             >
               {record.garmentAccessory && dateValidatorDisplay(record.garmentAccessory.passingDeliveryDate)}
             </SkyTableTypography>
@@ -246,6 +265,7 @@ const GarmentAccessoryTable: React.FC<Props> = () => {
               title='Ghi chú'
               inputType='multipleselect'
               required={true}
+              disabled={(newRecord.syncStatus && table.isEditing(record.id!)) ?? false}
               selectProps={{
                 options: accessoryNotes.map((item) => {
                   return {
@@ -278,6 +298,7 @@ const GarmentAccessoryTable: React.FC<Props> = () => {
                       <SkyTableTypography
                         className='my-[2px] h-6 rounded-sm bg-black bg-opacity-[0.06] px-2 py-1'
                         key={index}
+                        disabled={(record.garmentAccessory && record.garmentAccessory.syncStatus) ?? false}
                         status={item.status}
                       >
                         {textValidatorDisplay(item.accessoryNote?.title)}
@@ -295,6 +316,7 @@ const GarmentAccessoryTable: React.FC<Props> = () => {
   return (
     <>
       <BaseLayout
+        searchPlaceHolder='Mã hàng...'
         searchValue={searchText}
         onDateCreationChange={(enable) => table.setDateCreation(enable)}
         onSearchChange={(e) => setSearchText(e.target.value)}
@@ -317,9 +339,12 @@ const GarmentAccessoryTable: React.FC<Props> = () => {
             onEdit: {
               onClick: (_e, record) => {
                 setNewRecord({
+                  garmentAccessoryID: record?.garmentAccessory?.id, // Using for compare check box
+                  productColorID: record?.productColor?.colorID, // Using for compare check box
                   amountCutting: record?.garmentAccessory?.amountCutting,
                   passingDeliveryDate: record?.garmentAccessory?.passingDeliveryDate,
-                  garmentAccessoryNotes: record?.garmentAccessoryNotes
+                  garmentAccessoryNotes: record?.garmentAccessoryNotes,
+                  syncStatus: record?.garmentAccessory?.syncStatus
                 })
                 table.handleStartEditing(record!.key!)
               }

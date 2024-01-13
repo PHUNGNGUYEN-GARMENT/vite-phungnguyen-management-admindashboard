@@ -177,7 +177,9 @@ const ProductTable: React.FC = () => {
               value={newRecord.productCode}
               onValueChange={(val) => setNewRecord({ ...newRecord, productCode: textValidatorChange(val) })}
             >
-              <SkyTableTypography status={'active'}>{textValidatorDisplay(record.productCode)}</SkyTableTypography>
+              <SkyTableTypography strong status={'active'}>
+                {textValidatorDisplay(record.productCode)}
+              </SkyTableTypography>
             </EditableStateCell>
           </>
         )
@@ -253,6 +255,7 @@ const ProductTable: React.FC = () => {
   return (
     <>
       <BaseLayout
+        searchPlaceHolder='Mã hàng...'
         searchValue={searchText}
         onDateCreationChange={(enable) => table.setDateCreation(enable)}
         onSearchChange={(e) => setSearchText(e.target.value)}

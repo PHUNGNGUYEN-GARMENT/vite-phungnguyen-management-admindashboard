@@ -14,6 +14,8 @@ import { dateComparator, numberComparator } from '~/utils/helpers'
 import { GarmentAccessoryTableDataType } from '../type'
 
 export interface GarmentAccessoryNewRecordProps {
+  garmentAccessoryID?: number | null // Using for compare check box
+  productColorID?: number | null // Using for compare check box
   amountCutting?: number | null
   passingDeliveryDate?: string | null
   syncStatus?: boolean | null
@@ -37,12 +39,13 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [searchText, setSearchText] = useState<string>('')
   const [newRecord, setNewRecord] = useState<GarmentAccessoryNewRecordProps>({
+    garmentAccessoryID: null,
+    productColorID: null,
     syncStatus: null,
     amountCutting: null,
     passingDeliveryDate: null,
     garmentAccessoryNotes: null
   })
-
   // List
   const [products, setProducts] = useState<Product[]>([])
   const [accessoryNotes, setAccessoryNotes] = useState<AccessoryNote[]>([])
@@ -55,21 +58,42 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
   const [garmentAccessoryNew, setGarmentAccessoryNew] = useState<GarmentAccessory | undefined>(undefined)
 
   const loadData = async () => {
-    await productService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        setProducts(meta.data as Product[])
+    await productService.getListItems(
+      {
+        ...defaultRequestBody,
+        paginator: { page: productService.page, pageSize: defaultRequestBody.paginator?.pageSize }
+      },
+      setLoading,
+      (meta) => {
+        if (meta?.success) {
+          setProducts(meta.data as Product[])
+        }
       }
-    })
-    await productColorService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        setProductColors(meta.data as ProductColor[])
+    )
+    await productColorService.getListItems(
+      {
+        ...defaultRequestBody,
+        paginator: { page: 1, pageSize: -1 }
+      },
+      setLoading,
+      (meta) => {
+        if (meta?.success) {
+          setProductColors(meta.data as ProductColor[])
+        }
       }
-    })
-    await garmentAccessoryService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        setGarmentAccessories(meta.data as GarmentAccessory[])
+    )
+    await garmentAccessoryService.getListItems(
+      {
+        ...defaultRequestBody,
+        paginator: { page: 1, pageSize: -1 }
+      },
+      setLoading,
+      (meta) => {
+        if (meta?.success) {
+          setGarmentAccessories(meta.data as GarmentAccessory[])
+        }
       }
-    })
+    )
     await garmentAccessoryNoteService.getListItems(
       { ...defaultRequestBody, paginator: { pageSize: -1, page: 1 } },
       setLoading,
@@ -229,33 +253,62 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
     onDataSuccess?: (meta: ResponseDataType | undefined) => void
   ) => {
     try {
-      await garmentAccessoryService.updateItemBy(
+      // await garmentAccessoryService.updateItemBy(
+      //   {
+      //     field: 'productID',
+      //     key: record.id!
+      //   },
+      //   {
+      //     amountCutting: null,
+      //     passingDeliveryDate: null,
+      //     syncStatus: null
+      //   },
+      //   setLoading,
+      //   async (meta, msg) => {
+      //     if (!meta?.success) {
+      //       throw new Error('API delete GarmentAccessory failed')
+      //     }
+      //     await garmentAccessoryNoteService.updateItemsBy(
+      //       {
+      //         field: 'productID',
+      //         key: record.id!
+      //       },
+      //       [],
+      //       setLoading,
+      //       (meta2) => {
+      //         if (!meta2?.success) {
+      //           throw new Error('API delete GarmentAccessoryNote failed')
+      //         }
+      //       }
+      //     )
+      //     onDataSuccess?.(meta)
+      //     message.success(msg)
+      //   }
+      // )
+      await garmentAccessoryService.deleteItemBy(
         {
           field: 'productID',
           key: record.id!
-        },
-        {
-          amountCutting: null,
-          passingDeliveryDate: null
         },
         setLoading,
         async (meta, msg) => {
           if (!meta?.success) {
             throw new Error('API delete GarmentAccessory failed')
           }
-          await garmentAccessoryNoteService.updateItemsBy(
-            {
-              field: 'productID',
-              key: record.id!
-            },
-            [],
-            setLoading,
-            (meta2) => {
-              if (!meta2?.success) {
-                throw new Error('API delete GarmentAccessoryNote failed')
+          if (record.garmentAccessoryNotes) {
+            await garmentAccessoryNoteService.deleteItemBy(
+              {
+                field: 'productID',
+                key: record.id!
+              },
+              setLoading,
+              (meta2) => {
+                if (!meta2?.success) {
+                  throw new Error('API delete GarmentAccessoryNote failed')
+                }
               }
-            }
-          )
+            )
+          }
           onDataSuccess?.(meta)
           message.success(msg)
         }

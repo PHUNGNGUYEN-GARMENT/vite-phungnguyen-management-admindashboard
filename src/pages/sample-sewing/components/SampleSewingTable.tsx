@@ -38,7 +38,9 @@ const SampleSewingTable: React.FC<Props> = () => {
       render: (_value: any, record: SampleSewingTableDataType) => {
         return (
           <EditableStateCell isEditing={false} dataIndex='productCode' title='Mã hàng' inputType='text' required={true}>
-            <SkyTableTypography status={record.status}>{textValidatorDisplay(record.productCode)}</SkyTableTypography>
+            <SkyTableTypography strong status={record.status}>
+              {textValidatorDisplay(record.productCode)}
+            </SkyTableTypography>
           </EditableStateCell>
         )
       }
@@ -279,6 +281,7 @@ const SampleSewingTable: React.FC<Props> = () => {
   return (
     <>
       <BaseLayout
+        searchPlaceHolder='Mã hàng...'
         searchValue={searchText}
         onDateCreationChange={(enable) => table.setDateCreation(enable)}
         onSearchChange={(e) => setSearchText(e.target.value)}
@@ -300,7 +303,9 @@ const SampleSewingTable: React.FC<Props> = () => {
           actions={{
             onEdit: {
               onClick: (_e, record) => {
-                setNewRecord(record?.sampleSewing)
+                setNewRecord({
+                  ...record?.sampleSewing
+                })
                 table.handleStartEditing(record!.key!)
               }
             },

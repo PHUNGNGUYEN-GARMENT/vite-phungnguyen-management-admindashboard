@@ -24,7 +24,7 @@ export default function useSampleSewing(table: UseTableProps<SampleSewingTableDa
   // State changes
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [searchText, setSearchText] = useState<string>('')
-  const [newRecord, setNewRecord] = useState<SampleSewing | undefined>(undefined)
+  const [newRecord, setNewRecord] = useState<SampleSewing>({})
 
   // List
   const [products, setProducts] = useState<Product[]>([])
@@ -35,28 +35,36 @@ export default function useSampleSewing(table: UseTableProps<SampleSewingTableDa
   const [sampleSewingNew, setSampleSewingNew] = useState<SampleSewing | undefined>(undefined)
 
   const loadData = async () => {
-    await productService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        setProducts(meta.data as Product[])
+    await productService.getListItems(
+      {
+        ...defaultRequestBody,
+        paginator: { page: productService.page, pageSize: defaultRequestBody.paginator?.pageSize }
+      },
+      setLoading,
+      (meta) => {
+        if (meta?.success) {
+          setProducts(meta.data as Product[])
+        }
       }
-    })
-    await productColorService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        setProductColors(meta.data as ProductColor[])
+    )
+    await productColorService.getListItems(
+      {
+        ...defaultRequestBody,
+        paginator: { page: 1, pageSize: -1 }
+      },
+      setLoading,
+      (meta) => {
+        if (meta?.success) {
+          setProductColors(meta.data as ProductColor[])
+        }
       }
-    })
+    )
     await sampleSewingService.getListItems(defaultRequestBody, setLoading, (meta) => {
       if (meta?.success) {
         setSampleSewings(meta.data as SampleSewing[])
       }
     })
   }
-
-  useEffect(() => {
-    if (sampleSewings) {
-      console.log(sampleSewings)
-    }
-  }, [sampleSewings])
 
   useEffect(() => {
     loadData()
@@ -87,46 +95,44 @@ export default function useSampleSewing(table: UseTableProps<SampleSewingTableDa
   const handleSaveClick = async (record: TableItemWithKey<SampleSewingTableDataType>, newRecord: SampleSewing) => {
     // const row = (await form.validateFields()) as any
     console.log({ old: record, new: newRecord })
-    if (newRecord) {
-      try {
-        if (record.sampleSewing) {
-          console.log('SampleSewing progressing: ', newRecord)
-          await sampleSewingService.updateItemByPk(
-            newRecord.id!,
-            {
-              dateSubmissionNPL: newRecord.dateSubmissionNPL,
-              dateApprovalPP: newRecord.dateApprovalPP,
-              dateApprovalSO: newRecord.dateApprovalSO,
-              dateSubmissionFirstTime: newRecord.dateSubmissionFirstTime,
-              dateSubmissionSecondTime: newRecord.dateSubmissionSecondTime,
-              dateSubmissionThirdTime: newRecord.dateSubmissionThirdTime,
-              dateSubmissionForthTime: newRecord.dateSubmissionForthTime,
-              dateSubmissionFifthTime: newRecord.dateSubmissionFifthTime
-            },
-            setLoading,
-            (meta) => {
-              if (!meta?.success) {
-                throw new Error('API update group failed')
-              }
-            }
-          )
-        } else {
-          console.log('add new')
-          await sampleSewingService.createNewItem({ ...newRecord, productID: record.id }, table.setLoading, (meta) => {
+    try {
+      if (newRecord && record.sampleSewing) {
+        console.log('SampleSewing progressing: ', newRecord)
+        await sampleSewingService.updateItemByPk(
+          newRecord.id!,
+          {
+            dateSubmissionNPL: newRecord.dateSubmissionNPL,
+            dateApprovalPP: newRecord.dateApprovalPP,
+            dateApprovalSO: newRecord.dateApprovalSO,
+            dateSubmissionFirstTime: newRecord.dateSubmissionFirstTime,
+            dateSubmissionSecondTime: newRecord.dateSubmissionSecondTime,
+            dateSubmissionThirdTime: newRecord.dateSubmissionThirdTime,
+            dateSubmissionForthTime: newRecord.dateSubmissionForthTime,
+            dateSubmissionFifthTime: newRecord.dateSubmissionFifthTime
+          },
+          setLoading,
+          (meta) => {
             if (!meta?.success) {
               throw new Error('API update group failed')
             }
-          })
-        }
-        message.success('Success!')
-      } catch (error) {
-        console.error(error)
-        message.error('Failed')
-      } finally {
-        setLoading(false)
-        handleConfirmCancelEditing()
-        loadData()
+          }
+        )
+      } else {
+        console.log('add new')
+        await sampleSewingService.createNewItem({ ...newRecord, productID: record.id }, table.setLoading, (meta) => {
+          if (!meta?.success) {
+            throw new Error('API update group failed')
+          }
+        })
       }
+      message.success('Success!')
+    } catch (error) {
+      console.error(error)
+      message.error('Failed')
+    } finally {
+      setLoading(false)
+      handleConfirmCancelEditing()
+      loadData()
     }
   }
 
@@ -190,11 +196,16 @@ export default function useSampleSewing(table: UseTableProps<SampleSewingTableDa
   }
 
   const handlePageChange = async (_page: number) => {
-    await productService.pageChange(_page, setLoading, (meta) => {
-      if (meta?.success) {
-        selfConvertDataSource(meta?.data as Product[])
-      }
-    })
+    await productService.pageChange(
+      _page,
+      setLoading,
+      (meta) => {
+        if (meta?.success) {
+          selfConvertDataSource(meta?.data as Product[])
+        }
+      },
+      { field: 'productCode', term: searchText }
+    )
   }
 
   const handleResetClick = async () => {
