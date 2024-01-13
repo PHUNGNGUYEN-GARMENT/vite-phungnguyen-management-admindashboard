@@ -123,10 +123,6 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
   }
 
   useEffect(() => {
-    console.log(table.dataSource)
-  }, [table.dataSource])
-
-  useEffect(() => {
     loadData()
   }, [productNew, productColorNew, productGroupNew, printablePlaceNew])
 

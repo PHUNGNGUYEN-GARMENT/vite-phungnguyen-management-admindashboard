@@ -134,6 +134,31 @@ const ProductTable: React.FC = () => {
     }
   }
 
+  const dateInputFCRCol: ColumnType<ProductTableDataType> = {
+    title: 'FCR',
+    dataIndex: 'dateOutputFCR',
+    width: '10%',
+    render: (_value: any, record: ProductTableDataType) => {
+      return (
+        <>
+          <EditableStateCell
+            isEditing={table.isEditing(record.key!)}
+            dataIndex='dateOutputFCR'
+            title='FCR'
+            inputType='datepicker'
+            required={true}
+            initialValue={dateValidatorInit(record.dateOutputFCR)}
+            onValueChange={(val: Dayjs) => setNewRecord({ ...newRecord, dateOutputFCR: dateValidatorChange(val) })}
+          >
+            <SkyTableTypography status={'active'}>
+              {record.dateOutputFCR && dateValidatorDisplay(record.dateOutputFCR)}
+            </SkyTableTypography>
+          </EditableStateCell>
+        </>
+      )
+    }
+  }
+
   const columns: ColumnType<ProductTableDataType>[] = [
     {
       title: 'Mã hàng',
@@ -203,7 +228,7 @@ const ProductTable: React.FC = () => {
                 value: newRecord.colorID
               }}
             >
-              <Flex className='' justify='space-between' align='center' gap={10}>
+              <Flex className='' wrap='wrap' justify='space-between' align='center' gap={10}>
                 <SkyTableTypography status={record.productColor?.color?.status} className='w-fit'>
                   {textValidatorDisplay(record.productColor?.color?.name)}
                 </SkyTableTypography>
@@ -219,34 +244,11 @@ const ProductTable: React.FC = () => {
     { ...groupCol, responsive: ['xxl'] },
     { ...printCol, responsive: ['xxl'] },
     { ...dateInputNPLCol, responsive: ['xl'] },
-    {
-      title: 'FCR',
-      dataIndex: 'dateOutputFCR',
-      width: '10%',
-      render: (_value: any, record: ProductTableDataType) => {
-        return (
-          <>
-            <EditableStateCell
-              isEditing={table.isEditing(record.key!)}
-              dataIndex='dateOutputFCR'
-              title='FCR'
-              inputType='datepicker'
-              required={true}
-              initialValue={dateValidatorInit(record.dateOutputFCR)}
-              onValueChange={(val: Dayjs) => setNewRecord({ ...newRecord, dateOutputFCR: dateValidatorChange(val) })}
-            >
-              <SkyTableTypography status={'active'}>
-                {record.dateOutputFCR && dateValidatorDisplay(record.dateOutputFCR)}
-              </SkyTableTypography>
-            </EditableStateCell>
-          </>
-        )
-      }
-    }
+    { ...dateInputFCRCol, responsive: ['xl'] }
   ]
 
   const expandableColumns: ColumnType<ProductTableDataType>[] =
-    width < 1600 ? (width < 1200 ? [groupCol, printCol, dateInputNPLCol] : [groupCol, printCol]) : []
+    width < 1600 ? (width < 1200 ? [groupCol, printCol, dateInputNPLCol, dateInputFCRCol] : [groupCol, printCol]) : []
 
   return (
     <>

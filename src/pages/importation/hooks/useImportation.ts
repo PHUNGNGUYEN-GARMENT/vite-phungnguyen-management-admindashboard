@@ -5,15 +5,16 @@ import { RequestBodyType, ResponseDataType, defaultRequestBody } from '~/api/cli
 import ImportationAPI from '~/api/services/ImportationAPI'
 import { TableItemWithKey, UseTableProps } from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
-import { ProductTableDataType } from '~/pages/product/type'
 import { Importation } from '~/typing'
-import DayJS, { DatePattern } from '~/utils/date-formatter'
-import { ImportationTableDataType } from '../components/ImportationTable'
+import { dateComparator, numberComparator } from '~/utils/helpers'
+import { ImportationTableDataType } from '../type'
 
-export default function useImportation(
-  productRecord: ProductTableDataType,
-  table: UseTableProps<ImportationTableDataType>
-) {
+export interface ImportationNewRecordProps {
+  quantity?: number | null
+  dateImported?: string | null
+}
+
+export default function useImportation(table: UseTableProps<ImportationTableDataType>) {
   const { dataSource, setLoading, setDataSource, handleConfirmCancelEditing, handleConfirmDeleting } = table
   const importationService = useAPIService<Importation>(ImportationAPI)
 
@@ -24,13 +25,17 @@ export default function useImportation(
   const [importationNew, setImportationNew] = useState<Importation | undefined>(undefined)
 
   const [searchText, setSearchText] = useState<string>('')
-  const [newRecord, setNewRecord] = useState<any>({})
+  const [newRecord, setNewRecord] = useState<ImportationNewRecordProps>({})
 
-  const amountQuantity = dataSource.reduce((acc, current) => acc + (current.quantity ?? 0), 0)
+  const amountQuantity =
+    dataSource && dataSource.length > 0 ? dataSource.reduce((acc, current) => acc + (current.quantity ?? 0), 0) : 0
 
   const loadData = async () => {
     await importationService.getListItems(
-      { ...defaultRequestBody, search: { field: 'productID', term: `${productRecord.id}` } },
+      {
+        ...defaultRequestBody,
+        paginator: { page: importationService.page, pageSize: defaultRequestBody.paginator?.pageSize }
+      },
       setLoading,
       (meta) => {
         if (meta?.success) {
@@ -50,14 +55,16 @@ export default function useImportation(
 
   const selfConvertDataSource = (_importations?: Importation[]) => {
     const items = _importations ? _importations : importations
-    setDataSource(
-      items.map((item) => {
-        return {
-          ...item,
-          key: item.id
-        } as ImportationTableDataType
-      })
-    )
+    if (items.length > 0) {
+      setDataSource(
+        items.map((item) => {
+          return {
+            ...item,
+            key: item.id
+          } as ImportationTableDataType
+        })
+      )
+    }
   }
 
   const handleSaveClick = async (
@@ -66,65 +73,61 @@ export default function useImportation(
   ) => {
     // const row = (await form.validateFields()) as any
     console.log({ old: record, new: newRecord })
-    if (newRecord) {
-      try {
-        if (
-          (newRecord.quantity && newRecord.quantity !== record.quantity) ||
-          (newRecord.dateImported && DayJS(newRecord.dateImported).diff(DayJS(record.dateImported)))
-        ) {
-          console.log('Importation progressing...')
-          await importationService.createOrUpdateItemByPk(
-            record.id!,
-            {
-              quantity: newRecord.quantity,
-              dateImported: newRecord.dateImported && DayJS(newRecord.dateImported).format(DatePattern.iso8601)
-            },
-            setLoading,
-            (meta) => {
-              if (meta?.success) {
-                const itemNew = meta.data as Importation
-                setImportationNew(itemNew)
-              } else {
-                throw new Error('API update Importation failed')
-              }
+    try {
+      if (
+        newRecord &&
+        (numberComparator(newRecord.quantity, record.quantity) ||
+          dateComparator(newRecord.dateImported, record.dateImported))
+      ) {
+        console.log('Importation progressing...')
+        await importationService.createOrUpdateItemByPk(
+          record.id!,
+          {
+            quantity: newRecord.quantity,
+            dateImported: newRecord.dateImported
+          },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              const itemNew = meta.data as Importation
+              setImportationNew(itemNew)
+            } else {
+              throw new Error('API update Importation failed')
             }
-          )
-        }
+          }
+        )
         message.success('Success!')
-      } catch (error) {
-        console.error(error)
-        message.error('Failed')
-      } finally {
-        setLoading(false)
-        handleConfirmCancelEditing()
-        loadData()
       }
+    } catch (error) {
+      message.error('Failed')
+    } finally {
+      setLoading(false)
+      handleConfirmCancelEditing()
+      loadData()
     }
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleAddNewItem = async (formAddNew: any) => {
     try {
-      console.log(formAddNew)
       setLoading(true)
       await importationService.createNewItem(
         {
           productID: formAddNew.productID,
           quantity: formAddNew.quantity,
-          dateImported: DayJS(formAddNew.dateImported).format(DatePattern.iso8601)
+          dateImported: formAddNew.dateImported
         },
         setLoading,
         async (meta, msg) => {
           if (meta?.data) {
             message.success(msg)
           } else {
-            console.log('Errr')
             message.error(msg)
           }
         }
       )
     } catch (error) {
-      console.error(error)
+      message.error('Failed')
     } finally {
       setLoading(false)
       setOpenModal(false)

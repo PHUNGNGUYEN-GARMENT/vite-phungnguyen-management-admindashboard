@@ -9,7 +9,6 @@ import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import { ProductTableDataType } from '~/pages/product/type'
 import { RootState } from '~/store/store'
-import { Importation } from '~/typing'
 import {
   dateValidatorChange,
   dateValidatorDisplay,
@@ -19,14 +18,11 @@ import {
   numberValidatorInit
 } from '~/utils/helpers'
 import useImportation from '../hooks/useImportation'
+import { ImportationTableDataType } from '../type'
 import ModalAddNewImportation from './ModalAddNewImportation'
 
 interface Props {
   productRecord: ProductTableDataType
-}
-
-export interface ImportationTableDataType extends Importation {
-  key?: React.Key
 }
 
 const ImportationTable: React.FC<Props> = ({ productRecord }) => {
@@ -42,7 +38,7 @@ const ImportationTable: React.FC<Props> = ({ productRecord }) => {
     handleConfirmDelete,
     handlePageChange,
     importationService
-  } = useImportation(productRecord, table)
+  } = useImportation(table)
   const user = useSelector((state: RootState) => state.user)
   const columns: ColumnType<ImportationTableDataType>[] = [
     {
@@ -107,15 +103,17 @@ const ImportationTable: React.FC<Props> = ({ productRecord }) => {
               />
             )}
           </Flex>
-          <Button
-            onClick={() => setOpenModal(true)}
-            className='flex w-fit items-center'
-            type='primary'
-            icon={<Plus size={20} />}
-            disabled={amountQuantity >= productRecord.quantityPO!}
-          >
-            New
-          </Button>
+          {user.isAdmin && (
+            <Button
+              onClick={() => setOpenModal(true)}
+              className='flex w-fit items-center'
+              type='primary'
+              icon={<Plus size={20} />}
+              disabled={amountQuantity >= productRecord.quantityPO!}
+            >
+              New
+            </Button>
+          )}
         </Flex>
         <SkyTable
           bordered
@@ -125,13 +123,17 @@ const ImportationTable: React.FC<Props> = ({ productRecord }) => {
           deletingKey={table.deletingKey}
           dataSource={table.dataSource}
           rowClassName='editable-row'
+          // pagination={false}
           metaData={importationService.metaData}
           onPageChange={handlePageChange}
           isDateCreation={table.dateCreation}
           actions={{
             onEdit: {
               onClick: (_e, record) => {
-                setNewRecord(record)
+                setNewRecord({
+                  quantity: record?.quantity,
+                  dateImported: record?.dateImported
+                })
                 table.handleStartEditing(record!.key!)
               }
             },

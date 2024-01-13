@@ -140,7 +140,6 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
       setLoading?.(true)
       const meta = await apiService.getItems(params)
       if (meta?.success) {
-        console.log(meta)
         onDataSuccess?.(meta, 'Success!')
       } else {
         onDataSuccess?.(undefined, 'Failed!')

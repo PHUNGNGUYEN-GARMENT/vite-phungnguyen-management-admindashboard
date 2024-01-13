@@ -1,9 +1,11 @@
 /* eslint-disable react-refresh/only-export-components */
-import { DatePicker, Flex, Form, InputNumber, Modal, Typography } from 'antd'
+import { Flex, Form, Modal } from 'antd'
 import React, { memo } from 'react'
-import DotRequired from '~/components/sky-ui/DotRequired'
+import AddNewTitle from '~/components/sky-ui/AddNewTitle'
+import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
+import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import { ProductTableDataType } from '~/pages/product/type'
-import DayJS, { DatePattern } from '~/utils/date-formatter'
+import DayJS from '~/utils/date-formatter'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
   openModal: boolean
@@ -34,7 +36,7 @@ const ModalAddNewImportation: React.FC<Props> = ({ openModal, setOpenModal, onAd
   return (
     <Modal
       {...props}
-      title='Thêm mới lô nhập'
+      title={<AddNewTitle title='Thêm mới lô nhập' />}
       open={openModal}
       onOk={handleOk}
       onCancel={handleCancel}
@@ -44,30 +46,31 @@ const ModalAddNewImportation: React.FC<Props> = ({ openModal, setOpenModal, onAd
       <Form form={form}>
         <Flex vertical gap={10} className='w-full'>
           <Flex align='center' className='w-full'>
-            <Typography.Text className='w-28 flex-shrink-0'>
-              Lô nhập <DotRequired />
-            </Typography.Text>
-            <Form.Item
-              name='quantity'
+            <SkyTableTypography required className='w-32' status={'active'}>
+              Lô nhập
+            </SkyTableTypography>
+            <EditableFormCell
+              isEditing={true}
+              title='Lô nhập'
+              dataIndex='quantity'
+              placeholder='Lô nhập...'
+              inputType='number'
               required
-              className='m-0 w-full'
-              rules={[
-                {
-                  required: true,
-                  message: `Please enter quantity!`
-                }
-              ]}
-            >
-              <InputNumber min={0} className='w-full' placeholder='Số lượng..' />
-            </Form.Item>
+            />
           </Flex>
           <Flex className='w-full' align='center'>
-            <Typography.Text className='w-28 flex-shrink-0'>
-              Ngày nhập <DotRequired />
-            </Typography.Text>
-            <Form.Item required className='m-0 w-full' name='dateImported' initialValue={DayJS(Date.now())}>
-              <DatePicker format={DatePattern.display} className='w-full' />
-            </Form.Item>
+            <SkyTableTypography className='w-32' required status={'active'}>
+              Ngày nhập
+            </SkyTableTypography>
+            <EditableFormCell
+              isEditing={true}
+              title='Ngày nhập:'
+              dataIndex='dateImported'
+              inputType='datepicker'
+              required
+              placeholder='Ngày nhập...'
+              initialValue={DayJS(Date.now())}
+            />
           </Flex>
         </Flex>
       </Form>

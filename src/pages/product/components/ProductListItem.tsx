@@ -6,12 +6,10 @@ import { defaultRequestBody } from '~/api/client'
 import ColorAPI from '~/api/services/ColorAPI'
 import GroupAPI from '~/api/services/GroupAPI'
 import PrintAPI from '~/api/services/PrintAPI'
-import useDevice from '~/components/hooks/useDevice'
 import SkyListItem, { SkyListItemProps } from '~/components/sky-ui/SkyList/SkyListItem'
 import ListItemRow from '~/components/sky-ui/SkyTable/ListItemRow'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import ImportationList from '~/pages/importation/components/ImportationList'
-import ImportationTable from '~/pages/importation/components/ImportationTable'
 import { Color, Group, Print } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import { ProductTableDataType } from '../type'
@@ -26,7 +24,6 @@ const ProductListItem: React.FC<Props> = ({ record, newRecord, setNewRecord, ...
   const [colors, setColors] = useState<Color[]>([])
   const [groups, setGroups] = useState<Group[]>([])
   const [prints, setPrints] = useState<Print[]>([])
-  const { width } = useDevice()
 
   useEffect(() => {
     if (props.isEditing) {
@@ -192,9 +189,32 @@ const ProductListItem: React.FC<Props> = ({ record, newRecord, setNewRecord, ...
                     </SkyTableTypography>
                   </ListItemRow>
                 </Space>
-                <ProductProgressStatus collapse record={record} />
-                {width >= 768 && <ImportationTable productRecord={record} />}
-                {width <= 768 && <ImportationList productRecord={record} />}
+                <Collapse
+                  className='w-full'
+                  items={[
+                    {
+                      key: '1',
+                      label: (
+                        <Typography.Title className='m-0' level={5} type='secondary'>
+                          Trạng thái
+                        </Typography.Title>
+                      ),
+                      children: <ProductProgressStatus record={record} />
+                    },
+                    {
+                      key: '2',
+                      label: (
+                        <Typography.Title className='m-0' level={5} type='secondary'>
+                          Nhập khẩu
+                        </Typography.Title>
+                      ),
+                      children: <ImportationList productRecord={record} />
+                    }
+                  ]}
+                />
+
+                {/* {width >= 768 && <ImportationTable productRecord={record} />}
+                {width <= 768 && <ImportationList productRecord={record} />} */}
               </Space>
             )
           }
