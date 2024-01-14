@@ -253,62 +253,34 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
     onDataSuccess?: (meta: ResponseDataType | undefined) => void
   ) => {
     try {
-      // await garmentAccessoryService.updateItemBy(
-      //   {
-      //     field: 'productID',
-      //     key: record.id!
-      //   },
-      //   {
-      //     amountCutting: null,
-      //     passingDeliveryDate: null,
-      //     syncStatus: null
-      //   },
-      //   setLoading,
-      //   async (meta, msg) => {
-      //     if (!meta?.success) {
-      //       throw new Error('API delete GarmentAccessory failed')
-      //     }
-      //     await garmentAccessoryNoteService.updateItemsBy(
-      //       {
-      //         field: 'productID',
-      //         key: record.id!
-      //       },
-      //       [],
-      //       setLoading,
-      //       (meta2) => {
-      //         if (!meta2?.success) {
-      //           throw new Error('API delete GarmentAccessoryNote failed')
-      //         }
-      //       }
-      //     )
-      //     onDataSuccess?.(meta)
-      //     message.success(msg)
-      //   }
-      // )
-      await garmentAccessoryService.deleteItemBy(
+      await garmentAccessoryService.updateItemBy(
         {
           field: 'productID',
           key: record.id!
+        },
+        {
+          amountCutting: null,
+          passingDeliveryDate: null,
+          syncStatus: null
         },
         setLoading,
         async (meta, msg) => {
           if (!meta?.success) {
             throw new Error('API delete GarmentAccessory failed')
           }
-          if (record.garmentAccessoryNotes) {
-            await garmentAccessoryNoteService.deleteItemBy(
-              {
-                field: 'productID',
-                key: record.id!
-              },
-              setLoading,
-              (meta2) => {
-                if (!meta2?.success) {
-                  throw new Error('API delete GarmentAccessoryNote failed')
-                }
+          await garmentAccessoryNoteService.updateItemsBy(
+            {
+              field: 'productID',
+              key: record.id!
+            },
+            [],
+            setLoading,
+            (meta2) => {
+              if (!meta2?.success) {
+                throw new Error('API delete GarmentAccessoryNote failed')
               }
-            )
-          }
+            }
+          )
           onDataSuccess?.(meta)
           message.success(msg)
         }
