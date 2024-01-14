@@ -10,6 +10,7 @@ DayJS.extend(customParseFormat)
 
 export const DatePattern = {
   display: 'DD/MM/YYYY',
+  dateTimeDisplay: 'L - LT',
   iso8601: 'YYYY-MM-DDTHH:mm:ss.sssZ'
 }
 

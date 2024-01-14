@@ -17,7 +17,11 @@ export const textValidatorDisplay = (text?: string | null): string => {
 }
 
 export const dateValidatorDisplay = (date?: string | null): string => {
-  return date ? DayJS(date).format(DatePattern.display) : ''
+  return date ? DayJS(date).format(DatePattern.dateTimeDisplay) : ''
+}
+
+export const dateTimeValidatorDisplay = (date?: string | null): string => {
+  return date ? DayJS(date).format(DatePattern.dateTimeDisplay) : ''
 }
 
 // Validator value change

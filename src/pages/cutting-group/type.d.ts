@@ -5,3 +5,8 @@ export interface CuttingGroupTableDataType extends Product {
   productColor: ProductColor
   cuttingGroup: CuttingGroup
 }
+
+export interface CuttingGroupNewRecordProps extends CuttingGroup {
+  productColorID?: number | null // Using for compare check box
+  cuttingGroupID?: number | null // Using for compare check box
+}

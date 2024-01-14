@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Button, Collapse, ColorPicker, Flex, Typography } from 'antd'
+import { Checkbox, ColorPicker, Flex, Space } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
-import { ChevronDown } from 'lucide-react'
-import { useState } from 'react'
+import { Check } from 'lucide-react'
 import useDevice from '~/components/hooks/useDevice'
 import useTable from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
@@ -11,7 +10,7 @@ import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import {
-  cn,
+  dateTimeValidatorDisplay,
   dateValidatorChange,
   dateValidatorDisplay,
   dateValidatorInit,
@@ -25,10 +24,9 @@ import { CuttingGroupTableDataType } from '../type'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
-const CuttingGroup: React.FC<Props> = () => {
+const CuttingGroupTable: React.FC<Props> = () => {
   const table = useTable<CuttingGroupTableDataType>([])
   const { width } = useDevice()
-  const [expandableTable, setExpandableTable] = useState<boolean>(false)
   const {
     searchText,
     setSearchText,
@@ -51,7 +49,9 @@ const CuttingGroup: React.FC<Props> = () => {
       render: (_value: any, record: CuttingGroupTableDataType) => {
         return (
           <EditableStateCell isEditing={false} dataIndex='productCode' title='Mã hàng' inputType='text' required={true}>
-            <SkyTableTypography status={record.status}>{textValidatorDisplay(record.productCode)}</SkyTableTypography>
+            <SkyTableTypography strong status={record.status}>
+              {textValidatorDisplay(record.productCode)}
+            </SkyTableTypography>
           </EditableStateCell>
         )
       }
@@ -62,24 +62,22 @@ const CuttingGroup: React.FC<Props> = () => {
       width: '10%',
       render: (_value: any, record: CuttingGroupTableDataType) => {
         return (
-          <>
-            <EditableStateCell
-              isEditing={false}
-              dataIndex='colorID'
-              title='Màu'
-              inputType='colorselector'
-              required={false}
-            >
-              <Flex className='' wrap='wrap' justify='space-between' align='center' gap={10}>
-                <SkyTableTypography status={record.productColor?.color?.status} className='w-fit'>
-                  {textValidatorDisplay(record.productColor?.color?.name)}
-                </SkyTableTypography>
-                {record.productColor && (
-                  <ColorPicker size='middle' format='hex' value={record.productColor?.color?.hexColor} disabled />
-                )}
-              </Flex>
-            </EditableStateCell>
-          </>
+          <EditableStateCell
+            isEditing={false}
+            dataIndex='colorID'
+            title='Màu'
+            inputType='colorselector'
+            required={false}
+          >
+            <Flex className='' wrap='wrap' justify='space-between' align='center' gap={10}>
+              <SkyTableTypography status={record.productColor?.color?.status} className='w-fit'>
+                {textValidatorDisplay(record.productColor?.color?.name)}
+              </SkyTableTypography>
+              {record.productColor && (
+                <ColorPicker size='middle' format='hex' value={record.productColor?.color?.hexColor} disabled />
+              )}
+            </Flex>
+          </EditableStateCell>
         )
       }
     },
@@ -89,17 +87,15 @@ const CuttingGroup: React.FC<Props> = () => {
       width: '10%',
       render: (_value: any, record: CuttingGroupTableDataType) => {
         return (
-          <>
-            <EditableStateCell
-              isEditing={false}
-              dataIndex='quantityPO'
-              title='Số lượng PO'
-              inputType='number'
-              required={true}
-            >
-              <SkyTableTypography status={'active'}>{numberValidatorDisplay(record.quantityPO)}</SkyTableTypography>
-            </EditableStateCell>
-          </>
+          <EditableStateCell
+            isEditing={false}
+            dataIndex='quantityPO'
+            title='Số lượng PO'
+            inputType='number'
+            required={true}
+          >
+            <SkyTableTypography status={'active'}>{numberValidatorDisplay(record.quantityPO)}</SkyTableTypography>
+          </EditableStateCell>
         )
       }
     },
@@ -109,22 +105,20 @@ const CuttingGroup: React.FC<Props> = () => {
       width: '10%',
       render: (_value: any, record: CuttingGroupTableDataType) => {
         return (
-          <>
-            <EditableStateCell
-              isEditing={table.isEditing(record.key!)}
-              dataIndex='quantityRealCut'
-              title='Thực cắt'
-              inputType='number'
-              required={true}
-              initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup?.quantityRealCut)}
-              value={newRecord?.quantityRealCut}
-              onValueChange={(val) => setNewRecord({ ...newRecord, quantityRealCut: numberValidatorChange(val) })}
-            >
-              <SkyTableTypography status={record.status}>
-                {record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityRealCut)}
-              </SkyTableTypography>
-            </EditableStateCell>
-          </>
+          <EditableStateCell
+            isEditing={table.isEditing(record.key!)}
+            dataIndex='quantityRealCut'
+            title='Thực cắt'
+            inputType='number'
+            required={true}
+            initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup?.quantityRealCut)}
+            value={newRecord?.quantityRealCut}
+            onValueChange={(val) => setNewRecord({ ...newRecord, quantityRealCut: numberValidatorChange(val) })}
+          >
+            <SkyTableTypography status={record.status}>
+              {record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityRealCut)}
+            </SkyTableTypography>
+          </EditableStateCell>
         )
       }
     },
@@ -144,7 +138,7 @@ const CuttingGroup: React.FC<Props> = () => {
             onValueChange={(val: Dayjs) => setNewRecord({ ...newRecord, timeCut: dateValidatorChange(val) })}
           >
             <SkyTableTypography status={record.status}>
-              {record.cuttingGroup && dateValidatorDisplay(record.cuttingGroup.timeCut)}
+              {record.cuttingGroup && dateTimeValidatorDisplay(record.cuttingGroup.timeCut)}
             </SkyTableTypography>
           </EditableStateCell>
         )
@@ -168,14 +162,26 @@ const CuttingGroup: React.FC<Props> = () => {
     }
   ]
 
-  const expandableColumns: ColumnsType<CuttingGroupTableDataType> = [
+  const expandableColumns = (record: CuttingGroupTableDataType): ColumnsType<CuttingGroupTableDataType> => [
     {
-      title: 'In thêu',
+      title: (
+        <Space size={2} direction='horizontal'>
+          <SkyTableTypography strong status={'active'} className='flex gap-[2px]'>
+            In thêu
+          </SkyTableTypography>
+          {table.isEditing(record.id!) && newRecord.syncStatus && (
+            <Check size={16} color='#ffffff' className='relative top-[2px] rounded-full bg-success p-[2px]' />
+          )}
+          {record.cuttingGroup && record.cuttingGroup.syncStatus && !table.isEditing(record.id!) && (
+            <Check size={16} color='#ffffff' className='relative top-[2px] m-0 rounded-full bg-success p-[2px]' />
+          )}
+        </Space>
+      ),
       children: [
         {
           title: 'Ngày gửi in thêu',
           dataIndex: 'dateSendEmbroidered',
-          width: '25%',
+          width: '20%',
           render: (_value: any, record: CuttingGroupTableDataType) => {
             return (
               <EditableStateCell
@@ -184,6 +190,7 @@ const CuttingGroup: React.FC<Props> = () => {
                 title='Ngày gửi in thêu'
                 inputType='datepicker'
                 required={true}
+                disabled={(newRecord.syncStatus && table.isEditing(record.id!)) ?? false}
                 initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateSendEmbroidered)}
                 onValueChange={(val: Dayjs) =>
                   setNewRecord({
@@ -192,7 +199,10 @@ const CuttingGroup: React.FC<Props> = () => {
                   })
                 }
               >
-                <SkyTableTypography status={record.status}>
+                <SkyTableTypography
+                  disabled={(record.cuttingGroup && record.cuttingGroup.syncStatus) ?? false}
+                  status={record.status}
+                >
                   {record.cuttingGroup && dateValidatorDisplay(record.cuttingGroup.dateSendEmbroidered)}
                 </SkyTableTypography>
               </EditableStateCell>
@@ -200,35 +210,72 @@ const CuttingGroup: React.FC<Props> = () => {
           }
         },
         {
-          title: 'SL Còn lại',
+          title: 'Còn lại',
           dataIndex: 'amountQuantityEmbroidered',
-          width: '25%',
+          width: '10%',
           render: (_value: any, record: CuttingGroupTableDataType) => {
             const totalAmount = record.cuttingGroup
               ? numberValidatorDisplay(record.cuttingGroup.quantityArrived1Th) +
                 numberValidatorDisplay(record.cuttingGroup.quantityArrived2Th) +
                 numberValidatorDisplay(record.cuttingGroup.quantityArrived3Th) +
                 numberValidatorDisplay(record.cuttingGroup.quantityArrived4Th) +
-                numberValidatorDisplay(record.cuttingGroup.quantityArrived5Th) +
-                numberValidatorDisplay(record.cuttingGroup.quantityArrived6Th) +
-                numberValidatorDisplay(record.cuttingGroup.quantityArrived7Th) +
-                numberValidatorDisplay(record.cuttingGroup.quantityArrived8Th) +
-                numberValidatorDisplay(record.cuttingGroup.quantityArrived9Th) +
-                numberValidatorDisplay(record.cuttingGroup.quantityArrived10Th)
+                numberValidatorDisplay(record.cuttingGroup.quantityArrived5Th)
               : 0
             const total = numberValidatorDisplay(record.quantityPO) - totalAmount
             return (
-              <>
-                <EditableStateCell
-                  isEditing={false}
-                  dataIndex='amountQuantityEmbroidered'
-                  title='SL Còn lại'
-                  inputType='number'
-                  required={true}
+              <EditableStateCell
+                dataIndex='amountQuantityEmbroidered'
+                title='Còn lại'
+                isEditing={table.isEditing(record.id!)}
+                editableRender={
+                  <SkyTableTypography
+                    status={record.status}
+                    disabled={(newRecord.syncStatus && table.isEditing(record.id!)) ?? false}
+                  >
+                    {total}
+                  </SkyTableTypography>
+                }
+                disabled={(newRecord.syncStatus && table.isEditing(record.id!)) ?? false}
+                initialValue={total}
+                inputType='number'
+              >
+                <SkyTableTypography
+                  status={record.status}
+                  disabled={(record.cuttingGroup && record.cuttingGroup.syncStatus) ?? false}
                 >
-                  <SkyTableTypography status={record.status}>{total}</SkyTableTypography>
-                </EditableStateCell>
-              </>
+                  {total}
+                </SkyTableTypography>
+              </EditableStateCell>
+            )
+          }
+        },
+        {
+          title: 'Option',
+          dataIndex: 'syncStatus',
+          width: '15%',
+          render: (_value: any, record: CuttingGroupTableDataType) => {
+            return (
+              <EditableStateCell
+                isEditing={table.isEditing(record.key!)}
+                dataIndex='syncStatus'
+                title='Option'
+                inputType='checkbox'
+                required={true}
+                initialValue={(record.cuttingGroup && record.cuttingGroup.syncStatus) ?? undefined}
+                value={newRecord.syncStatus}
+                onValueChange={(val: boolean) =>
+                  setNewRecord({
+                    ...newRecord,
+                    syncStatus: val
+                  })
+                }
+              >
+                <Checkbox
+                  name='syncStatus'
+                  checked={(record.cuttingGroup && record.cuttingGroup.syncStatus) ?? undefined}
+                  disabled
+                />
+              </EditableStateCell>
             )
           }
         }
@@ -243,22 +290,20 @@ const CuttingGroup: React.FC<Props> = () => {
           width: '25%',
           render: (_value: any, record: CuttingGroupTableDataType) => {
             return (
-              <>
-                <EditableStateCell
-                  isEditing={table.isEditing(record.key!)}
-                  dataIndex='quantityDeliveredBTP'
-                  title='SL Giao'
-                  inputType='number'
-                  required={true}
-                  initialValue={record.cuttingGroup ? record.cuttingGroup.quantityDeliveredBTP : ''}
-                  value={newRecord && (newRecord?.quantityDeliveredBTP ?? 0)}
-                  onValueChange={(val) => setNewRecord({ ...newRecord, quantityDeliveredBTP: val })}
-                >
-                  <SkyTableTypography status={record.status}>
-                    {record.cuttingGroup ? record.cuttingGroup?.quantityDeliveredBTP : ''}
-                  </SkyTableTypography>
-                </EditableStateCell>
-              </>
+              <EditableStateCell
+                isEditing={table.isEditing(record.key!)}
+                dataIndex='quantityDeliveredBTP'
+                title='SL Giao'
+                inputType='number'
+                required={true}
+                initialValue={record.cuttingGroup ? record.cuttingGroup.quantityDeliveredBTP : ''}
+                value={newRecord && (newRecord?.quantityDeliveredBTP ?? 0)}
+                onValueChange={(val) => setNewRecord({ ...newRecord, quantityDeliveredBTP: val })}
+              >
+                <SkyTableTypography status={record.status}>
+                  {record.cuttingGroup ? record.cuttingGroup?.quantityDeliveredBTP : ''}
+                </SkyTableTypography>
+              </EditableStateCell>
             )
           }
         },
@@ -271,17 +316,15 @@ const CuttingGroup: React.FC<Props> = () => {
               numberValidatorDisplay(record.quantityPO) -
               numberValidatorDisplay(record.cuttingGroup?.quantityDeliveredBTP)
             return (
-              <>
-                <EditableStateCell
-                  isEditing={false}
-                  dataIndex='amountQuantityDeliveredBTP'
-                  title='SL Còn lại'
-                  inputType='number'
-                  required={true}
-                >
-                  <SkyTableTypography status={record.status}>{amountQuantityBTP}</SkyTableTypography>
-                </EditableStateCell>
-              </>
+              <EditableStateCell
+                isEditing={false}
+                dataIndex='amountQuantityDeliveredBTP'
+                title='SL Còn lại'
+                inputType='number'
+                required={true}
+              >
+                <SkyTableTypography status={record.status}>{amountQuantityBTP}</SkyTableTypography>
+              </EditableStateCell>
             )
           }
         }
@@ -291,575 +334,311 @@ const CuttingGroup: React.FC<Props> = () => {
 
   const expandableColumns2: ColumnsType<CuttingGroupTableDataType> = [
     {
-      title: 'Lần 1',
+      title: 'In thêu về',
       children: [
         {
-          title: 'SL về',
-          dataIndex: 'quantityArrived',
-          render: (_value: any, record: CuttingGroupTableDataType) => {
-            return (
-              <>
-                <EditableStateCell
-                  isEditing={table.isEditing(record.key!)}
-                  dataIndex='quantityArrived'
-                  title='Thực cắt'
-                  inputType='number'
-                  required={true}
-                  initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived1Th)}
-                  value={newRecord?.quantityArrived1Th}
-                  onValueChange={(val) =>
-                    setNewRecord({ ...newRecord, quantityArrived1Th: numberValidatorChange(val) })
-                  }
-                >
-                  <SkyTableTypography status={record.status}>
-                    {record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityArrived1Th)}
-                  </SkyTableTypography>
-                </EditableStateCell>
-              </>
-            )
-          }
+          title: 'Lần 1',
+          onHeaderCell: () => {
+            return {
+              style: {
+                background: 'var(--border)'
+              }
+            }
+          },
+          children: [
+            {
+              title: 'SL về',
+              dataIndex: 'quantityArrived',
+              render: (_value: any, record: CuttingGroupTableDataType) => {
+                return (
+                  <EditableStateCell
+                    isEditing={table.isEditing(record.key!)}
+                    dataIndex='quantityArrived'
+                    title='Thực cắt'
+                    inputType='number'
+                    required={true}
+                    initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived1Th)}
+                    value={newRecord?.quantityArrived1Th}
+                    onValueChange={(val) =>
+                      setNewRecord({ ...newRecord, quantityArrived1Th: numberValidatorChange(val) })
+                    }
+                  >
+                    <SkyTableTypography status={record.status}>
+                      {record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityArrived1Th)}
+                    </SkyTableTypography>
+                  </EditableStateCell>
+                )
+              }
+            },
+            {
+              title: 'Ngày về',
+              dataIndex: 'dateArrived',
+              render: (_value: any, record: CuttingGroupTableDataType) => {
+                return (
+                  <EditableStateCell
+                    isEditing={table.isEditing(record.key!)}
+                    dataIndex='dateArrived'
+                    title='Ngày về'
+                    inputType='datepicker'
+                    required={true}
+                    initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived1Th)}
+                    onValueChange={(val: Dayjs) =>
+                      setNewRecord({
+                        ...newRecord,
+                        dateArrived1Th: dateValidatorChange(val)
+                      })
+                    }
+                  >
+                    <SkyTableTypography status={record.status}>
+                      {record.cuttingGroup && dateValidatorDisplay(record.cuttingGroup.dateArrived1Th)}
+                    </SkyTableTypography>
+                  </EditableStateCell>
+                )
+              }
+            }
+          ]
         },
         {
-          title: 'Ngày về',
-          dataIndex: 'dateArrived',
-          render: (_value: any, record: CuttingGroupTableDataType) => {
-            return (
-              <EditableStateCell
-                isEditing={table.isEditing(record.key!)}
-                dataIndex='dateArrived'
-                title='Ngày về'
-                inputType='datepicker'
-                required={true}
-                initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived1Th)}
-                onValueChange={(val: Dayjs) =>
-                  setNewRecord({
-                    ...newRecord,
-                    dateArrived1Th: dateValidatorChange(val)
-                  })
-                }
-              >
-                <SkyTableTypography status={record.status}>
-                  {record.cuttingGroup && dateValidatorDisplay(record.cuttingGroup.dateArrived1Th)}
-                </SkyTableTypography>
-              </EditableStateCell>
-            )
-          }
-        }
-      ]
-    },
-    {
-      title: 'Lần 2',
-      children: [
-        {
-          title: 'SL về',
-          dataIndex: 'quantityArrived',
-          render: (_value: any, record: CuttingGroupTableDataType) => {
-            return (
-              <>
-                <EditableStateCell
-                  isEditing={table.isEditing(record.key!)}
-                  dataIndex='quantityArrived'
-                  title='Thực cắt'
-                  inputType='number'
-                  required={true}
-                  initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived2Th)}
-                  value={newRecord?.quantityArrived2Th}
-                  onValueChange={(val) =>
-                    setNewRecord({ ...newRecord, quantityArrived2Th: numberValidatorChange(val) })
-                  }
-                >
-                  <SkyTableTypography status={record.status}>
-                    {record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityArrived2Th)}
-                  </SkyTableTypography>
-                </EditableStateCell>
-              </>
-            )
-          }
+          title: 'Lần 2',
+          children: [
+            {
+              title: 'SL về',
+              dataIndex: 'quantityArrived',
+              render: (_value: any, record: CuttingGroupTableDataType) => {
+                return (
+                  <>
+                    <EditableStateCell
+                      isEditing={table.isEditing(record.key!)}
+                      dataIndex='quantityArrived'
+                      title='Thực cắt'
+                      inputType='number'
+                      required={true}
+                      initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived2Th)}
+                      value={newRecord?.quantityArrived2Th}
+                      onValueChange={(val) =>
+                        setNewRecord({ ...newRecord, quantityArrived2Th: numberValidatorChange(val) })
+                      }
+                    >
+                      <SkyTableTypography status={record.status}>
+                        {record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityArrived2Th)}
+                      </SkyTableTypography>
+                    </EditableStateCell>
+                  </>
+                )
+              }
+            },
+            {
+              title: 'Ngày về',
+              dataIndex: 'dateArrived',
+              render: (_value: any, record: CuttingGroupTableDataType) => {
+                return (
+                  <EditableStateCell
+                    isEditing={table.isEditing(record.key!)}
+                    dataIndex='dateArrived'
+                    title='Ngày về'
+                    inputType='datepicker'
+                    required={true}
+                    initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived2Th)}
+                    onValueChange={(val: Dayjs) =>
+                      setNewRecord({
+                        ...newRecord,
+                        dateArrived2Th: dateValidatorChange(val)
+                      })
+                    }
+                  >
+                    <SkyTableTypography status={record.status}>
+                      {record.cuttingGroup && dateValidatorDisplay(record.cuttingGroup.dateArrived2Th)}
+                    </SkyTableTypography>
+                  </EditableStateCell>
+                )
+              }
+            }
+          ]
         },
         {
-          title: 'Ngày về',
-          dataIndex: 'dateArrived',
-          render: (_value: any, record: CuttingGroupTableDataType) => {
-            return (
-              <EditableStateCell
-                isEditing={table.isEditing(record.key!)}
-                dataIndex='dateArrived'
-                title='Ngày về'
-                inputType='datepicker'
-                required={true}
-                initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived2Th)}
-                onValueChange={(val: Dayjs) =>
-                  setNewRecord({
-                    ...newRecord,
-                    dateArrived2Th: dateValidatorChange(val)
-                  })
-                }
-              >
-                <SkyTableTypography status={record.status}>
-                  {record.cuttingGroup && dateValidatorDisplay(record.cuttingGroup.dateArrived2Th)}
-                </SkyTableTypography>
-              </EditableStateCell>
-            )
-          }
-        }
-      ]
-    },
-    {
-      title: 'Lần 3',
-      children: [
-        {
-          title: 'SL về',
-          dataIndex: 'quantityArrived',
-          render: (_value: any, record: CuttingGroupTableDataType) => {
-            return (
-              <>
-                <EditableStateCell
-                  isEditing={table.isEditing(record.key!)}
-                  dataIndex='quantityArrived'
-                  title='Thực cắt'
-                  inputType='number'
-                  required={true}
-                  initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived3Th)}
-                  value={newRecord?.quantityArrived3Th}
-                  onValueChange={(val) =>
-                    setNewRecord({ ...newRecord, quantityArrived3Th: numberValidatorChange(val) })
-                  }
-                >
-                  <SkyTableTypography status={record.status}>
-                    {record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityArrived3Th)}
-                  </SkyTableTypography>
-                </EditableStateCell>
-              </>
-            )
-          }
+          title: 'Lần 3',
+          onHeaderCell: () => {
+            return {
+              style: {
+                background: 'var(--border)'
+              }
+            }
+          },
+          children: [
+            {
+              title: 'SL về',
+              dataIndex: 'quantityArrived',
+              render: (_value: any, record: CuttingGroupTableDataType) => {
+                return (
+                  <>
+                    <EditableStateCell
+                      isEditing={table.isEditing(record.key!)}
+                      dataIndex='quantityArrived'
+                      title='Thực cắt'
+                      inputType='number'
+                      required={true}
+                      initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived3Th)}
+                      value={newRecord?.quantityArrived3Th}
+                      onValueChange={(val) =>
+                        setNewRecord({ ...newRecord, quantityArrived3Th: numberValidatorChange(val) })
+                      }
+                    >
+                      <SkyTableTypography status={record.status}>
+                        {record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityArrived3Th)}
+                      </SkyTableTypography>
+                    </EditableStateCell>
+                  </>
+                )
+              }
+            },
+            {
+              title: 'Ngày về',
+              dataIndex: 'dateArrived',
+              render: (_value: any, record: CuttingGroupTableDataType) => {
+                return (
+                  <EditableStateCell
+                    isEditing={table.isEditing(record.key!)}
+                    dataIndex='dateArrived'
+                    title='Ngày về'
+                    inputType='datepicker'
+                    required={true}
+                    initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived3Th)}
+                    onValueChange={(val: Dayjs) =>
+                      setNewRecord({
+                        ...newRecord,
+                        dateArrived3Th: dateValidatorChange(val)
+                      })
+                    }
+                  >
+                    <SkyTableTypography status={record.status}>
+                      {record.cuttingGroup && dateValidatorDisplay(record.cuttingGroup.dateArrived3Th)}
+                    </SkyTableTypography>
+                  </EditableStateCell>
+                )
+              }
+            }
+          ]
         },
         {
-          title: 'Ngày về',
-          dataIndex: 'dateArrived',
-          render: (_value: any, record: CuttingGroupTableDataType) => {
-            return (
-              <EditableStateCell
-                isEditing={table.isEditing(record.key!)}
-                dataIndex='dateArrived'
-                title='Ngày về'
-                inputType='datepicker'
-                required={true}
-                initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived3Th)}
-                onValueChange={(val: Dayjs) =>
-                  setNewRecord({
-                    ...newRecord,
-                    dateArrived3Th: dateValidatorChange(val)
-                  })
-                }
-              >
-                <SkyTableTypography status={record.status}>
-                  {record.cuttingGroup && dateValidatorDisplay(record.cuttingGroup.dateArrived3Th)}
-                </SkyTableTypography>
-              </EditableStateCell>
-            )
-          }
-        }
-      ]
-    },
-    {
-      title: 'Lần 4',
-      children: [
-        {
-          title: 'SL về',
-          dataIndex: 'quantityArrived',
-          render: (_value: any, record: CuttingGroupTableDataType) => {
-            return (
-              <>
-                <EditableStateCell
-                  isEditing={table.isEditing(record.key!)}
-                  dataIndex='quantityArrived'
-                  title='Thực cắt'
-                  inputType='number'
-                  required={true}
-                  initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived4Th)}
-                  value={newRecord?.quantityArrived4Th}
-                  onValueChange={(val) =>
-                    setNewRecord({ ...newRecord, quantityArrived4Th: numberValidatorChange(val) })
-                  }
-                >
-                  <SkyTableTypography status={record.status}>
-                    {record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityArrived4Th)}
-                  </SkyTableTypography>
-                </EditableStateCell>
-              </>
-            )
-          }
+          title: 'Lần 4',
+          children: [
+            {
+              title: 'SL về',
+              dataIndex: 'quantityArrived',
+              render: (_value: any, record: CuttingGroupTableDataType) => {
+                return (
+                  <>
+                    <EditableStateCell
+                      isEditing={table.isEditing(record.key!)}
+                      dataIndex='quantityArrived'
+                      title='Thực cắt'
+                      inputType='number'
+                      required={true}
+                      initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived4Th)}
+                      value={newRecord?.quantityArrived4Th}
+                      onValueChange={(val) =>
+                        setNewRecord({ ...newRecord, quantityArrived4Th: numberValidatorChange(val) })
+                      }
+                    >
+                      <SkyTableTypography status={record.status}>
+                        {record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityArrived4Th)}
+                      </SkyTableTypography>
+                    </EditableStateCell>
+                  </>
+                )
+              }
+            },
+            {
+              title: 'Ngày về',
+              dataIndex: 'dateArrived',
+              render: (_value: any, record: CuttingGroupTableDataType) => {
+                return (
+                  <EditableStateCell
+                    isEditing={table.isEditing(record.key!)}
+                    dataIndex='dateArrived'
+                    title='Ngày về'
+                    inputType='datepicker'
+                    required={true}
+                    initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived4Th)}
+                    onValueChange={(val: Dayjs) =>
+                      setNewRecord({
+                        ...newRecord,
+                        dateArrived4Th: dateValidatorChange(val)
+                      })
+                    }
+                  >
+                    <SkyTableTypography status={record.status}>
+                      {record.cuttingGroup && dateValidatorDisplay(record.cuttingGroup.dateArrived4Th)}
+                    </SkyTableTypography>
+                  </EditableStateCell>
+                )
+              }
+            }
+          ]
         },
         {
-          title: 'Ngày về',
-          dataIndex: 'dateArrived',
-          render: (_value: any, record: CuttingGroupTableDataType) => {
-            return (
-              <EditableStateCell
-                isEditing={table.isEditing(record.key!)}
-                dataIndex='dateArrived'
-                title='Ngày về'
-                inputType='datepicker'
-                required={true}
-                initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived4Th)}
-                onValueChange={(val: Dayjs) =>
-                  setNewRecord({
-                    ...newRecord,
-                    dateArrived4Th: dateValidatorChange(val)
-                  })
-                }
-              >
-                <SkyTableTypography status={record.status}>
-                  {record.cuttingGroup && dateValidatorDisplay(record.cuttingGroup.dateArrived4Th)}
-                </SkyTableTypography>
-              </EditableStateCell>
-            )
-          }
-        }
-      ]
-    },
-    {
-      title: 'Lần 5',
-      children: [
-        {
-          title: 'SL về',
-          dataIndex: 'quantityArrived',
-          render: (_value: any, record: CuttingGroupTableDataType) => {
-            return (
-              <>
-                <EditableStateCell
-                  isEditing={table.isEditing(record.key!)}
-                  dataIndex='quantityArrived'
-                  title='Thực cắt'
-                  inputType='number'
-                  required={true}
-                  initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived5Th)}
-                  value={newRecord?.quantityArrived5Th}
-                  onValueChange={(val) =>
-                    setNewRecord({ ...newRecord, quantityArrived5Th: numberValidatorChange(val) })
-                  }
-                >
-                  <SkyTableTypography status={record.status}>
-                    {record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityArrived5Th)}
-                  </SkyTableTypography>
-                </EditableStateCell>
-              </>
-            )
-          }
-        },
-        {
-          title: 'Ngày về',
-          dataIndex: 'dateArrived',
-          render: (_value: any, record: CuttingGroupTableDataType) => {
-            return (
-              <EditableStateCell
-                isEditing={table.isEditing(record.key!)}
-                dataIndex='dateArrived'
-                title='Ngày về'
-                inputType='datepicker'
-                required={true}
-                initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived5Th)}
-                onValueChange={(val: Dayjs) =>
-                  setNewRecord({
-                    ...newRecord,
-                    dateArrived5Th: dateValidatorChange(val)
-                  })
-                }
-              >
-                <SkyTableTypography status={record.status}>
-                  {record.cuttingGroup && dateValidatorDisplay(record.cuttingGroup.dateArrived5Th)}
-                </SkyTableTypography>
-              </EditableStateCell>
-            )
-          }
-        }
-      ]
-    }
-  ]
-
-  const expandableColumns3: ColumnsType<CuttingGroupTableDataType> = [
-    {
-      title: 'Lần 6',
-      children: [
-        {
-          title: 'SL về',
-          dataIndex: 'quantityArrived',
-          render: (_value: any, record: CuttingGroupTableDataType) => {
-            return (
-              <>
-                <EditableStateCell
-                  isEditing={table.isEditing(record.key!)}
-                  dataIndex='quantityArrived'
-                  title='Thực cắt'
-                  inputType='number'
-                  required={true}
-                  initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived6Th)}
-                  value={newRecord?.quantityArrived6Th}
-                  onValueChange={(val) =>
-                    setNewRecord({ ...newRecord, quantityArrived6Th: numberValidatorChange(val) })
-                  }
-                >
-                  <SkyTableTypography status={record.status}>
-                    {record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityArrived6Th)}
-                  </SkyTableTypography>
-                </EditableStateCell>
-              </>
-            )
-          }
-        },
-        {
-          title: 'Ngày về',
-          dataIndex: 'dateArrived',
-          render: (_value: any, record: CuttingGroupTableDataType) => {
-            return (
-              <EditableStateCell
-                isEditing={table.isEditing(record.key!)}
-                dataIndex='dateArrived'
-                title='Ngày về'
-                inputType='datepicker'
-                required={true}
-                initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived6Th)}
-                onValueChange={(val: Dayjs) =>
-                  setNewRecord({
-                    ...newRecord,
-                    dateArrived6Th: dateValidatorChange(val)
-                  })
-                }
-              >
-                <SkyTableTypography status={record.status}>
-                  {record.cuttingGroup && dateValidatorDisplay(record.cuttingGroup.dateArrived6Th)}
-                </SkyTableTypography>
-              </EditableStateCell>
-            )
-          }
-        }
-      ]
-    },
-    {
-      title: 'Lần 7',
-      children: [
-        {
-          title: 'SL về',
-          dataIndex: 'quantityArrived',
-          render: (_value: any, record: CuttingGroupTableDataType) => {
-            return (
-              <>
-                <EditableStateCell
-                  isEditing={table.isEditing(record.key!)}
-                  dataIndex='quantityArrived'
-                  title='Thực cắt'
-                  inputType='number'
-                  required={true}
-                  initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived7Th)}
-                  value={newRecord?.quantityArrived7Th}
-                  onValueChange={(val) =>
-                    setNewRecord({ ...newRecord, quantityArrived7Th: numberValidatorChange(val) })
-                  }
-                >
-                  <SkyTableTypography status={record.status}>
-                    {record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityArrived7Th)}
-                  </SkyTableTypography>
-                </EditableStateCell>
-              </>
-            )
-          }
-        },
-        {
-          title: 'Ngày về',
-          dataIndex: 'dateArrived',
-          render: (_value: any, record: CuttingGroupTableDataType) => {
-            return (
-              <EditableStateCell
-                isEditing={table.isEditing(record.key!)}
-                dataIndex='dateArrived'
-                title='Ngày về'
-                inputType='datepicker'
-                required={true}
-                initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived7Th)}
-                onValueChange={(val: Dayjs) =>
-                  setNewRecord({
-                    ...newRecord,
-                    dateArrived7Th: dateValidatorChange(val)
-                  })
-                }
-              >
-                <SkyTableTypography status={record.status}>
-                  {record.cuttingGroup && dateValidatorDisplay(record.cuttingGroup.dateArrived7Th)}
-                </SkyTableTypography>
-              </EditableStateCell>
-            )
-          }
-        }
-      ]
-    },
-    {
-      title: 'Lần 8',
-      children: [
-        {
-          title: 'SL về',
-          dataIndex: 'quantityArrived',
-          render: (_value: any, record: CuttingGroupTableDataType) => {
-            return (
-              <>
-                <EditableStateCell
-                  isEditing={table.isEditing(record.key!)}
-                  dataIndex='quantityArrived'
-                  title='Thực cắt'
-                  inputType='number'
-                  required={true}
-                  initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived8Th)}
-                  value={newRecord?.quantityArrived8Th}
-                  onValueChange={(val) =>
-                    setNewRecord({ ...newRecord, quantityArrived8Th: numberValidatorChange(val) })
-                  }
-                >
-                  <SkyTableTypography status={record.status}>
-                    {record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityArrived8Th)}
-                  </SkyTableTypography>
-                </EditableStateCell>
-              </>
-            )
-          }
-        },
-        {
-          title: 'Ngày về',
-          dataIndex: 'dateArrived',
-          render: (_value: any, record: CuttingGroupTableDataType) => {
-            return (
-              <EditableStateCell
-                isEditing={table.isEditing(record.key!)}
-                dataIndex='dateArrived'
-                title='Ngày về'
-                inputType='datepicker'
-                required={true}
-                initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived8Th)}
-                onValueChange={(val: Dayjs) =>
-                  setNewRecord({
-                    ...newRecord,
-                    dateArrived8Th: dateValidatorChange(val)
-                  })
-                }
-              >
-                <SkyTableTypography status={record.status}>
-                  {record.cuttingGroup && dateValidatorDisplay(record.cuttingGroup.dateArrived8Th)}
-                </SkyTableTypography>
-              </EditableStateCell>
-            )
-          }
-        }
-      ]
-    },
-    {
-      title: 'Lần 9',
-      children: [
-        {
-          title: 'SL về',
-          dataIndex: 'quantityArrived',
-          render: (_value: any, record: CuttingGroupTableDataType) => {
-            return (
-              <>
-                <EditableStateCell
-                  isEditing={table.isEditing(record.key!)}
-                  dataIndex='quantityArrived'
-                  title='Thực cắt'
-                  inputType='number'
-                  required={true}
-                  initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived9Th)}
-                  value={newRecord?.quantityArrived9Th}
-                  onValueChange={(val) =>
-                    setNewRecord({ ...newRecord, quantityArrived9Th: numberValidatorChange(val) })
-                  }
-                >
-                  <SkyTableTypography status={record.status}>
-                    {record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityArrived9Th)}
-                  </SkyTableTypography>
-                </EditableStateCell>
-              </>
-            )
-          }
-        },
-        {
-          title: 'Ngày về',
-          dataIndex: 'dateArrived',
-          render: (_value: any, record: CuttingGroupTableDataType) => {
-            return (
-              <EditableStateCell
-                isEditing={table.isEditing(record.key!)}
-                dataIndex='dateArrived'
-                title='Ngày về'
-                inputType='datepicker'
-                required={true}
-                initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived9Th)}
-                onValueChange={(val: Dayjs) =>
-                  setNewRecord({
-                    ...newRecord,
-                    dateArrived9Th: dateValidatorChange(val)
-                  })
-                }
-              >
-                <SkyTableTypography status={record.status}>
-                  {record.cuttingGroup && dateValidatorDisplay(record.cuttingGroup.dateArrived9Th)}
-                </SkyTableTypography>
-              </EditableStateCell>
-            )
-          }
-        }
-      ]
-    },
-    {
-      title: 'Lần 10',
-      children: [
-        {
-          title: 'SL về',
-          dataIndex: 'quantityArrived',
-          render: (_value: any, record: CuttingGroupTableDataType) => {
-            return (
-              <>
-                <EditableStateCell
-                  isEditing={table.isEditing(record.key!)}
-                  dataIndex='quantityArrived'
-                  title='Thực cắt'
-                  inputType='number'
-                  required={true}
-                  initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived10Th)}
-                  value={newRecord?.quantityArrived10Th}
-                  onValueChange={(val) =>
-                    setNewRecord({ ...newRecord, quantityArrived10Th: numberValidatorChange(val) })
-                  }
-                >
-                  <SkyTableTypography status={record.status}>
-                    {record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityArrived10Th)}
-                  </SkyTableTypography>
-                </EditableStateCell>
-              </>
-            )
-          }
-        },
-        {
-          title: 'Ngày về',
-          dataIndex: 'dateArrived',
-          render: (_value: any, record: CuttingGroupTableDataType) => {
-            return (
-              <EditableStateCell
-                isEditing={table.isEditing(record.key!)}
-                dataIndex='dateArrived'
-                title='Ngày về'
-                inputType='datepicker'
-                required={true}
-                initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived10Th)}
-                onValueChange={(val: Dayjs) =>
-                  setNewRecord({
-                    ...newRecord,
-                    dateArrived10Th: dateValidatorChange(val)
-                  })
-                }
-              >
-                <SkyTableTypography status={record.status}>
-                  {record.cuttingGroup && dateValidatorDisplay(record.cuttingGroup.dateArrived10Th)}
-                </SkyTableTypography>
-              </EditableStateCell>
-            )
-          }
+          title: 'Lần 5',
+          onHeaderCell: () => {
+            return {
+              style: {
+                background: 'var(--border)'
+              }
+            }
+          },
+          children: [
+            {
+              title: 'SL về',
+              dataIndex: 'quantityArrived',
+              render: (_value: any, record: CuttingGroupTableDataType) => {
+                return (
+                  <>
+                    <EditableStateCell
+                      isEditing={table.isEditing(record.key!)}
+                      dataIndex='quantityArrived'
+                      title='Thực cắt'
+                      inputType='number'
+                      required={true}
+                      initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived5Th)}
+                      value={newRecord?.quantityArrived5Th}
+                      onValueChange={(val) =>
+                        setNewRecord({ ...newRecord, quantityArrived5Th: numberValidatorChange(val) })
+                      }
+                    >
+                      <SkyTableTypography status={record.status}>
+                        {record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityArrived5Th)}
+                      </SkyTableTypography>
+                    </EditableStateCell>
+                  </>
+                )
+              }
+            },
+            {
+              title: 'Ngày về',
+              dataIndex: 'dateArrived',
+              render: (_value: any, record: CuttingGroupTableDataType) => {
+                return (
+                  <EditableStateCell
+                    isEditing={table.isEditing(record.key!)}
+                    dataIndex='dateArrived'
+                    title='Ngày về'
+                    inputType='datepicker'
+                    required={true}
+                    initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived5Th)}
+                    onValueChange={(val: Dayjs) =>
+                      setNewRecord({
+                        ...newRecord,
+                        dateArrived5Th: dateValidatorChange(val)
+                      })
+                    }
+                  >
+                    <SkyTableTypography status={record.status}>
+                      {record.cuttingGroup && dateValidatorDisplay(record.cuttingGroup.dateArrived5Th)}
+                    </SkyTableTypography>
+                  </EditableStateCell>
+                )
+              }
+            }
+          ]
         }
       ]
     }
@@ -889,7 +668,11 @@ const CuttingGroup: React.FC<Props> = () => {
           actions={{
             onEdit: {
               onClick: (_e, record) => {
-                setNewRecord(record?.cuttingGroup)
+                setNewRecord({
+                  ...record?.cuttingGroup,
+                  cuttingGroupID: record?.cuttingGroup ? record?.cuttingGroup.id : null, // Using for compare check box
+                  productColorID: record?.productColor?.colorID // Using for compare check box
+                })
                 table.handleStartEditing(record!.key!)
               }
             },
@@ -913,7 +696,7 @@ const CuttingGroup: React.FC<Props> = () => {
                       <SkyTable
                         bordered
                         loading={table.loading}
-                        columns={expandableColumns}
+                        columns={expandableColumns(record)}
                         rowClassName='editable-row'
                         dataSource={table.dataSource.filter((item) => item.id === record.id)}
                         metaData={productService.metaData}
@@ -922,63 +705,17 @@ const CuttingGroup: React.FC<Props> = () => {
                         editingKey={table.editingKey}
                         deletingKey={table.deletingKey}
                       />
-                      <Collapse
-                        className='w-full'
-                        items={[
-                          {
-                            key: '1',
-                            label: (
-                              <Typography.Title className='m-0' level={5} type='secondary'>
-                                In thêu về
-                              </Typography.Title>
-                            ),
-                            children: (
-                              <Flex vertical gap={10}>
-                                <SkyTable
-                                  bordered
-                                  loading={table.loading}
-                                  columns={expandableColumns2}
-                                  rowClassName='editable-row'
-                                  dataSource={table.dataSource.filter((item) => item.id === record.id)}
-                                  metaData={productService.metaData}
-                                  pagination={false}
-                                  isDateCreation={table.dateCreation}
-                                  editingKey={table.editingKey}
-                                  deletingKey={table.deletingKey}
-                                />
-                                <div className='flex w-full items-center justify-center'>
-                                  <Button
-                                    type='link'
-                                    className='flex items-center justify-center'
-                                    onClick={() => setExpandableTable((prev) => !prev)}
-                                  >
-                                    <span>Mở rộng</span>
-                                    <ChevronDown
-                                      size={20}
-                                      className={cn('transition-transform duration-300', {
-                                        'rotate-180': expandableTable
-                                      })}
-                                    />
-                                  </Button>
-                                </div>
-                                {expandableTable && (
-                                  <SkyTable
-                                    bordered
-                                    loading={table.loading}
-                                    columns={expandableColumns3}
-                                    rowClassName='editable-row'
-                                    dataSource={table.dataSource.filter((item) => item.id === record.id)}
-                                    metaData={productService.metaData}
-                                    pagination={false}
-                                    isDateCreation={table.dateCreation}
-                                    editingKey={table.editingKey}
-                                    deletingKey={table.deletingKey}
-                                  />
-                                )}
-                              </Flex>
-                            )
-                          }
-                        ]}
+                      <SkyTable
+                        bordered
+                        loading={table.loading}
+                        columns={expandableColumns2}
+                        rowClassName='editable-row'
+                        dataSource={table.dataSource.filter((item) => item.id === record.id)}
+                        metaData={productService.metaData}
+                        pagination={false}
+                        isDateCreation={table.dateCreation}
+                        editingKey={table.editingKey}
+                        deletingKey={table.deletingKey}
                       />
                     </Flex>
                   )}
@@ -993,4 +730,4 @@ const CuttingGroup: React.FC<Props> = () => {
   )
 }
 
-export default CuttingGroup
+export default CuttingGroupTable

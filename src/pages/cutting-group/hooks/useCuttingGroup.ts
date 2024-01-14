@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { App as AntApp } from 'antd'
 import { useEffect, useState } from 'react'
-import { RequestBodyType, ResponseDataType, defaultRequestBody } from '~/api/client'
+import { ResponseDataType, defaultRequestBody } from '~/api/client'
 import CuttingGroupAPI from '~/api/services/CuttingGroupAPI'
 import ProductAPI from '~/api/services/ProductAPI'
 import ProductColorAPI from '~/api/services/ProductColorAPI'
@@ -9,7 +9,7 @@ import { TableItemWithKey, UseTableProps } from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
 import { CuttingGroup, Product, ProductColor } from '~/typing'
 import { dateValidator, numberValidator } from '~/utils/helpers'
-import { CuttingGroupTableDataType } from '../type'
+import { CuttingGroupNewRecordProps, CuttingGroupTableDataType } from '../type'
 
 export default function useCuttingGroup(table: UseTableProps<CuttingGroupTableDataType>) {
   const { setLoading, setDataSource, handleConfirmCancelEditing } = table
@@ -25,7 +25,21 @@ export default function useCuttingGroup(table: UseTableProps<CuttingGroupTableDa
   // State changes
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [searchText, setSearchText] = useState<string>('')
-  const [newRecord, setNewRecord] = useState<CuttingGroup | undefined>(undefined)
+  const [newRecord, setNewRecord] = useState<CuttingGroupNewRecordProps>({
+    productColorID: null,
+    cuttingGroupID: null,
+    syncStatus: null,
+    quantityArrived1Th: null,
+    dateArrived1Th: null,
+    quantityArrived2Th: null,
+    dateArrived2Th: null,
+    quantityArrived3Th: null,
+    dateArrived3Th: null,
+    quantityArrived4Th: null,
+    dateArrived4Th: null,
+    quantityArrived5Th: null,
+    dateArrived5Th: null
+  })
 
   // List
   const [products, setProducts] = useState<Product[]>([])
@@ -36,22 +50,41 @@ export default function useCuttingGroup(table: UseTableProps<CuttingGroupTableDa
   const [sampleSewingNew, setCuttingGroupNew] = useState<CuttingGroup | undefined>(undefined)
 
   const loadData = async () => {
-    await productService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        setProducts(meta.data as Product[])
+    await productService.getListItems(
+      {
+        ...defaultRequestBody,
+        paginator: { page: productService.page, pageSize: defaultRequestBody.paginator?.pageSize }
+      },
+      setLoading,
+      (meta) => {
+        if (meta?.success) {
+          setProducts(meta.data as Product[])
+        }
       }
-    })
-    await productColorService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        setProductColors(meta.data as ProductColor[])
+    )
+    await productColorService.getListItems(
+      { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
+      setLoading,
+      (meta) => {
+        if (meta?.success) {
+          setProductColors(meta.data as ProductColor[])
+        }
       }
-    })
-    await cuttingGroupService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        setCuttingGroups(meta.data as CuttingGroup[])
+    )
+    await cuttingGroupService.getListItems(
+      { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
+      setLoading,
+      (meta) => {
+        if (meta?.success) {
+          setCuttingGroups(meta.data as CuttingGroup[])
+        }
       }
-    })
+    )
   }
+
+  useEffect(() => {
+    console.log(newRecord)
+  }, [newRecord])
 
   useEffect(() => {
     loadData()
@@ -216,23 +249,16 @@ export default function useCuttingGroup(table: UseTableProps<CuttingGroupTableDa
   }
 
   const handlePageChange = async (_page: number) => {
-    cuttingGroupService.setPage(_page)
-    const body: RequestBodyType = {
-      ...defaultRequestBody,
-      paginator: {
-        page: _page,
-        pageSize: 5
+    await productService.pageChange(
+      _page,
+      setLoading,
+      (meta) => {
+        if (meta?.success) {
+          selfConvertDataSource(meta?.data as Product[])
+        }
       },
-      search: {
-        field: 'productCode',
-        term: searchText
-      }
-    }
-    await productService.getListItems(body, setLoading, (meta) => {
-      if (meta?.success) {
-        selfConvertDataSource(meta?.data as Product[])
-      }
-    })
+      { field: 'productCode', term: searchText }
+    )
   }
 
   const handleResetClick = async () => {

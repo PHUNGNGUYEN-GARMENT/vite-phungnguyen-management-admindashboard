@@ -226,6 +226,7 @@ export interface CuttingGroup {
   quantityArrivedEmbroidered?: number | null
   quantityDeliveredBTP?: number | null
   status?: ItemStatusType
+  syncStatus?: boolean | null
   dateArrived1Th?: string | null
   quantityArrived1Th?: number | null
   dateArrived2Th?: string | null
