@@ -8,6 +8,33 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+export const breakpoint = {
+  /**
+   * <
+   */
+  xs: 576,
+  /**
+   * >=
+   */
+  sm: 576,
+  /**
+   * >=
+   */
+  md: 768,
+  /**
+   * >=
+   */
+  lg: 992,
+  /**
+   * >=
+   */
+  xl: 1200,
+  /**
+   * >=
+   */
+  xxl: 1600
+}
+
 export const numberValidatorDisplay = (number?: number | null): number => {
   return number ? number : 0
 }
@@ -17,7 +44,7 @@ export const textValidatorDisplay = (text?: string | null): string => {
 }
 
 export const dateValidatorDisplay = (date?: string | null): string => {
-  return date ? DayJS(date).format(DatePattern.dateTimeDisplay) : ''
+  return date ? DayJS(date).format(DatePattern.display) : ''
 }
 
 export const dateTimeValidatorDisplay = (date?: string | null): string => {
