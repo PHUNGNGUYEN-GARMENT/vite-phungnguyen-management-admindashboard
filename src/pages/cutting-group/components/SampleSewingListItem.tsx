@@ -8,9 +8,9 @@ import SkyListItem, { SkyListItemProps } from '~/components/sky-ui/SkyList/SkyLi
 import ListItemRow from '~/components/sky-ui/SkyTable/ListItemRow'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import useAPIService from '~/hooks/useAPIService'
+import { SampleSewingTableDataType } from '~/pages/sample-sewing/type'
 import { Color } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
-import { SampleSewingTableDataType } from '../type'
 
 interface Props extends SkyListItemProps<SampleSewingTableDataType> {
   newRecord: any
@@ -42,7 +42,7 @@ const SampleSewingListItem: React.FC<Props> = ({ record, newRecord, setNewRecord
       dataIndex='productCode'
       record={record}
       key={record.key}
-      defaultValue={record.productCode}
+      defaultValue={record.productCode ?? undefined}
       onValueChange={(e) => setNewRecord({ ...newRecord, productCode: e.target.value })}
       isEditing={props.isEditing}
       isDateCreation={props.isDateCreation}
@@ -67,9 +67,11 @@ const SampleSewingListItem: React.FC<Props> = ({ record, newRecord, setNewRecord
                     isEditing={false}
                     dataIndex='colorID'
                     inputType='select'
-                    selectItems={colors.map((i) => {
-                      return { label: i.name, value: i.id, optionData: i.hexColor }
-                    })}
+                    selectProps={{
+                      options: colors.map((i) => {
+                        return { label: i.name, value: i.id, optionData: i.hexColor }
+                      })
+                    }}
                     initialValue={record.productColor?.colorID}
                     onValueChange={(val) => setNewRecord({ ...newRecord, colorID: val })}
                   >

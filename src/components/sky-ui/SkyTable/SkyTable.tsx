@@ -127,31 +127,29 @@ const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: s
   const staffColumns: ColumnsType<T> = [...props.columns!]
 
   return (
-    <>
-      <Table
-        {...props}
-        ref={tblRef}
-        className={props.className}
-        loading={props.loading}
-        bordered
-        columns={user.isAdmin ? adminColumns : staffColumns}
-        dataSource={props.dataSource}
-        rowClassName={cn('editable-row', props.rowClassName)}
-        pagination={
-          props.pagination ?? {
-            onChange: props.onPageChange,
-            current: props.metaData?.page,
-            pageSize: props.metaData?.pageSize
-              ? props.metaData.pageSize !== -1
-                ? props.metaData.pageSize
-                : undefined
-              : 10,
-            total: props.metaData?.total
-          }
+    <Table
+      {...props}
+      ref={tblRef}
+      className={props.className}
+      loading={props.loading}
+      bordered
+      columns={user.isAdmin ? adminColumns : staffColumns}
+      dataSource={props.dataSource}
+      rowClassName={cn('editable-row', props.rowClassName)}
+      pagination={
+        props.pagination ?? {
+          onChange: props.onPageChange,
+          current: props.metaData?.page,
+          pageSize: props.metaData?.pageSize
+            ? props.metaData.pageSize !== -1
+              ? props.metaData.pageSize
+              : undefined
+            : 10,
+          total: props.metaData?.total
         }
-        expandable={props.expandable}
-      />
-    </>
+      }
+      expandable={props.expandable}
+    />
   )
 }
 

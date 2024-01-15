@@ -1,31 +1,43 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { List, ListProps } from 'antd'
 import { ResponseDataType } from '~/api/client'
+import { ActionProps } from '../ActionRow'
 
-export interface SkyListProps<T extends { key?: React.Key }> extends ListProps<T> {
+export interface SkyListProps<T extends { key?: React.Key; createdAt?: string; updatedAt?: string }>
+  extends ListProps<T> {
   metaData: ResponseDataType | undefined
   onPageChange?: (page: number, pageSize: number) => void
   isDateCreation?: boolean
+  editingKey: React.Key
+  deletingKey: React.Key
+  actions?: ActionProps<T>
+  scrollTo?: number
 }
 
-const SkyList = <T extends { key?: React.Key }>({ ...props }: SkyListProps<T>) => {
+const SkyList = <T extends { key?: React.Key; createdAt?: string; updatedAt?: string }>({
+  ...props
+}: SkyListProps<T>) => {
   return (
-    <>
-      <List
-        className={props.className}
-        itemLayout='vertical'
-        size='large'
-        loading={props.loading}
-        pagination={{
+    <List
+      className={props.className}
+      itemLayout='vertical'
+      size='large'
+      loading={props.loading}
+      pagination={
+        props.pagination ?? {
           onChange: props.onPageChange,
           current: props.metaData?.page,
-          pageSize: 5,
+          pageSize: props.metaData?.pageSize
+            ? props.metaData.pageSize !== -1
+              ? props.metaData.pageSize
+              : undefined
+            : 10,
           total: props.metaData?.total
-        }}
-        renderItem={props.renderItem}
-        dataSource={props.dataSource}
-      />
-    </>
+        }
+      }
+      renderItem={props.renderItem}
+      dataSource={props.dataSource}
+    />
   )
 }
 

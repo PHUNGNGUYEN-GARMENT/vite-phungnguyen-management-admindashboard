@@ -13,7 +13,7 @@ export interface SkyListItemProps<
   T extends { key?: React.Key; status?: ItemStatusType | null; createdAt?: string; updatedAt?: string }
 > extends EditableStateCellProps {
   record: T
-  label?: string
+  label?: string | null
   labelEditing?: boolean
   isDateCreation?: boolean
   actions?: ActionProps<T>
