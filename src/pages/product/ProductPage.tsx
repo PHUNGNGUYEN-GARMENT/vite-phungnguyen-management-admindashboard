@@ -231,7 +231,7 @@ const ProductPage: React.FC = () => {
       title: 'Nơi in',
       dataIndex: 'printID',
       width: '10%',
-      responsive: ['lg'],
+      responsive: ['xl'],
       render: (_value: any, record: ProductTableDataType) => {
         return columns.productGroup(record)
       }
@@ -249,7 +249,7 @@ const ProductPage: React.FC = () => {
       title: 'Ngày xuất FCR',
       dataIndex: 'dateOutputFCR',
       width: '10%',
-      responsive: ['xl'],
+      responsive: ['lg'],
       render: (_value: any, record: ProductTableDataType) => {
         return columns.dateOutputFCR(record)
       }
@@ -312,7 +312,7 @@ const ProductPage: React.FC = () => {
                         {columns.productPrint(record)}
                       </ExpandableItemRow>
                     )}
-                    {!(width >= breakpoint.lg) && (
+                    {!(width >= breakpoint.xl) && (
                       <ExpandableItemRow title='Nơi in:' isEditing={table.isEditing(record.id!)}>
                         {columns.productPrint(record)}
                       </ExpandableItemRow>
@@ -326,7 +326,7 @@ const ProductPage: React.FC = () => {
                         {columns.dateInputNPL(record)}
                       </ExpandableItemRow>
                     )}
-                    {!(width >= breakpoint.xl) && (
+                    {!(width >= breakpoint.lg) && (
                       <ExpandableItemRow title='Ngày xuất FCR:' isEditing={table.isEditing(record.id!)}>
                         {columns.dateInputNPL(record)}
                       </ExpandableItemRow>
