@@ -35,20 +35,24 @@ export const breakpoint = {
   xxl: 1600
 }
 
-export const numberValidatorDisplay = (number?: number | null): number => {
+export const numberValidatorDisplay = (number?: number | null): string => {
+  return number ? `${number}` : '-'
+}
+
+export const numberValidatorCalc = (number?: number | null): number => {
   return number ? number : 0
 }
 
 export const textValidatorDisplay = (text?: string | null): string => {
-  return text ? text : ''
+  return text ? text : '-'
 }
 
 export const dateValidatorDisplay = (date?: string | null): string => {
-  return date ? DayJS(date).format(DatePattern.display) : ''
+  return date ? DayJS(date).format(DatePattern.display) : '--/--/----'
 }
 
 export const dateTimeValidatorDisplay = (date?: string | null): string => {
-  return date ? DayJS(date).format(DatePattern.dateTimeDisplay) : ''
+  return date ? DayJS(date).format(DatePattern.dateTimeDisplay) : '--/--/----'
 }
 
 // Validator value change

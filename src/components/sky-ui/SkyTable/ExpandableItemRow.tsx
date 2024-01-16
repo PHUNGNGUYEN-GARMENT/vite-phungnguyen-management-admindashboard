@@ -10,8 +10,8 @@ interface Props extends EditableStateCellProps {}
 
 const ExpandableItemRow = ({ ...props }: Props) => {
   return (
-    <Flex className={cn('w-full', props.className)} align='center' justify='start' gap={5}>
-      <SkyTableTypography strong className='w-1/2'>
+    <Flex className='w-full' align='center' justify='start' gap={5}>
+      <SkyTableTypography strong className={cn('w-1/2 flex-shrink-0', props.className)}>
         {props.title}
       </SkyTableTypography>
       {props.children}

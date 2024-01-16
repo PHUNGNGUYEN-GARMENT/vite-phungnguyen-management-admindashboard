@@ -14,6 +14,7 @@ import {
   dateValidatorChange,
   dateValidatorDisplay,
   dateValidatorInit,
+  numberValidatorCalc,
   numberValidatorChange,
   numberValidatorDisplay,
   numberValidatorInit,
@@ -150,7 +151,7 @@ const CuttingGroupTable: React.FC<Props> = () => {
       width: '10%',
       render: (_value: any, record: CuttingGroupTableDataType) => {
         const totalAmount =
-          numberValidatorDisplay(record.quantityPO) - numberValidatorDisplay(record.cuttingGroup?.quantityRealCut)
+          numberValidatorCalc(record.quantityPO) - numberValidatorCalc(record.cuttingGroup?.quantityRealCut)
         return (
           <EditableStateCell isEditing={false} dataIndex='remainingAmount' title='Còn lại' inputType='number'>
             <SkyTableTypography status={record.status}>
@@ -215,13 +216,13 @@ const CuttingGroupTable: React.FC<Props> = () => {
           width: '10%',
           render: (_value: any, record: CuttingGroupTableDataType) => {
             const totalAmount = record.cuttingGroup
-              ? numberValidatorDisplay(record.cuttingGroup.quantityArrived1Th) +
-                numberValidatorDisplay(record.cuttingGroup.quantityArrived2Th) +
-                numberValidatorDisplay(record.cuttingGroup.quantityArrived3Th) +
-                numberValidatorDisplay(record.cuttingGroup.quantityArrived4Th) +
-                numberValidatorDisplay(record.cuttingGroup.quantityArrived5Th)
+              ? numberValidatorCalc(record.cuttingGroup.quantityArrived1Th) +
+                numberValidatorCalc(record.cuttingGroup.quantityArrived2Th) +
+                numberValidatorCalc(record.cuttingGroup.quantityArrived3Th) +
+                numberValidatorCalc(record.cuttingGroup.quantityArrived4Th) +
+                numberValidatorCalc(record.cuttingGroup.quantityArrived5Th)
               : 0
-            const total = numberValidatorDisplay(record.quantityPO) - totalAmount
+            const total = numberValidatorCalc(record.quantityPO) - totalAmount
             return (
               <EditableStateCell
                 dataIndex='amountQuantityEmbroidered'
@@ -312,9 +313,7 @@ const CuttingGroupTable: React.FC<Props> = () => {
           dataIndex: 'amountQuantityDeliveredBTP',
           width: '25%',
           render: (_value: any, record: CuttingGroupTableDataType) => {
-            const amountQuantityBTP =
-              numberValidatorDisplay(record.quantityPO) -
-              numberValidatorDisplay(record.cuttingGroup?.quantityDeliveredBTP)
+            const amountQuantityBTP = (record.quantityPO ?? 0) - (record.cuttingGroup?.quantityDeliveredBTP ?? 0)
             return (
               <EditableStateCell
                 isEditing={false}
