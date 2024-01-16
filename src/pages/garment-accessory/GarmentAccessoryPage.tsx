@@ -4,6 +4,7 @@ import { Checkbox, ColorPicker, Divider, Flex, Space } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
 import { Check } from 'lucide-react'
+import useDevice from '~/components/hooks/useDevice'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
@@ -12,6 +13,7 @@ import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import { GarmentAccessoryNote } from '~/typing'
 import {
+  breakpoint,
   dateValidatorChange,
   dateValidatorDisplay,
   dateValidatorInit,
@@ -41,6 +43,7 @@ const GarmentAccessoryPage: React.FC<Props> = () => {
     productService,
     accessoryNotes
   } = useGarmentAccessory(table)
+  const { width } = useDevice()
 
   const columns = {
     productCode: (record: GarmentAccessoryTableDataType) => {
@@ -261,15 +264,15 @@ const GarmentAccessoryPage: React.FC<Props> = () => {
         return columns.productCode(record)
       }
     },
-    {
-      title: 'Số lượng PO',
-      dataIndex: 'quantityPO',
-      width: '10%',
-      responsive: ['sm'],
-      render: (_value: any, record: GarmentAccessoryTableDataType) => {
-        return columns.quantityPO(record)
-      }
-    },
+    // {
+    //   title: 'Số lượng PO',
+    //   dataIndex: 'quantityPO',
+    //   width: '10%',
+    //   responsive: ['sm'],
+    //   render: (_value: any, record: GarmentAccessoryTableDataType) => {
+    //     return columns.quantityPO(record)
+    //   }
+    // },
     {
       title: 'Màu',
       dataIndex: 'colorID',
@@ -293,7 +296,6 @@ const GarmentAccessoryPage: React.FC<Props> = () => {
         {
           title: 'Còn lại',
           dataIndex: 'remainingAmount',
-          responsive: ['md'],
           width: '10%',
           render: (_value: any, record: TableItemWithKey<GarmentAccessoryTableDataType>) => {
             return columns.garmentAccessory.remainingAmount(record)
@@ -313,7 +315,7 @@ const GarmentAccessoryPage: React.FC<Props> = () => {
     {
       title: 'Đồng bộ PL',
       dataIndex: 'syncStatus',
-      responsive: ['xl'],
+      responsive: ['md'],
       width: '10%',
       render: (_value: any, record: TableItemWithKey<GarmentAccessoryTableDataType>) => {
         return columns.garmentAccessory.syncStatus(record)
@@ -322,7 +324,7 @@ const GarmentAccessoryPage: React.FC<Props> = () => {
     {
       title: 'Ghi chú',
       dataIndex: 'accessoryNotes',
-      responsive: ['xxl'],
+      responsive: ['xl'],
       render: (_value: any, record: TableItemWithKey<GarmentAccessoryTableDataType>) => {
         return columns.garmentAccessory.accessoryNotes(record)
       }
@@ -380,27 +382,38 @@ const GarmentAccessoryPage: React.FC<Props> = () => {
             expandedRowRender: (record) => {
               return (
                 <Flex vertical>
-                  <Space direction='vertical' size={10} split={<Divider className='my-0 py-0' />}>
-                    <ExpandableItemRow title='Cắt được:' isEditing={table.isEditing(record.id!)}>
-                      {columns.garmentAccessory.amountCutting(record)}
-                    </ExpandableItemRow>
-                    <ExpandableItemRow title='Còn lại:' isEditing={table.isEditing(record.id!)}>
-                      {columns.garmentAccessory.remainingAmount(record)}
-                    </ExpandableItemRow>
-                    <ExpandableItemRow title='Giao chuyền:' isEditing={table.isEditing(record.id!)}>
-                      {columns.garmentAccessory.passingDeliveryDate(record)}
-                    </ExpandableItemRow>
-                    <ExpandableItemRow title='Đồng bộ PL:' isEditing={table.isEditing(record.id!)}>
-                      {columns.garmentAccessory.syncStatus(record)}
-                    </ExpandableItemRow>
-                    <ExpandableItemRow title='Ghi chú:' isEditing={table.isEditing(record.id!)}>
-                      {columns.garmentAccessory.accessoryNotes(record)}
-                    </ExpandableItemRow>
+                  <Space direction='vertical' size={10} split={<Divider className='my-0 w-full py-0' />}>
+                    {!(width >= breakpoint.md) && (
+                      <>
+                        <ExpandableItemRow title='Cắt được:' isEditing={table.isEditing(record.id!)}>
+                          {columns.garmentAccessory.amountCutting(record)}
+                        </ExpandableItemRow>
+                        <ExpandableItemRow title='Còn lại:' isEditing={table.isEditing(record.id!)}>
+                          {columns.garmentAccessory.remainingAmount(record)}
+                        </ExpandableItemRow>
+                      </>
+                    )}
+                    {!(width >= breakpoint.lg) && (
+                      <ExpandableItemRow title='Ngày giao chuyền:' isEditing={table.isEditing(record.id!)}>
+                        {columns.garmentAccessory.passingDeliveryDate(record)}
+                      </ExpandableItemRow>
+                    )}
+                    {!(width >= breakpoint.md) && (
+                      <ExpandableItemRow title='Đồng bộ PL:' isEditing={table.isEditing(record.id!)}>
+                        {columns.garmentAccessory.syncStatus(record)}
+                      </ExpandableItemRow>
+                    )}
+                    {!(width >= breakpoint.xl) && (
+                      <ExpandableItemRow title='Ghi chú:' isEditing={table.isEditing(record.id!)}>
+                        {columns.garmentAccessory.accessoryNotes(record)}
+                      </ExpandableItemRow>
+                    )}
                   </Space>
                 </Flex>
               )
             },
-            columnWidth: '0.001%'
+            columnWidth: '0.001%',
+            showExpandColumn: !(width >= breakpoint.xl)
           }}
         />
       </BaseLayout>
