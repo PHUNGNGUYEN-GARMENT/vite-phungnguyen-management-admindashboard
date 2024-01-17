@@ -9,7 +9,13 @@ import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import { SewingLine } from '~/typing'
 import DayJS from '~/utils/date-formatter'
-import { cn, dateValidatorDisplay, numberValidatorDisplay, textValidatorDisplay } from '~/utils/helpers'
+import {
+  cn,
+  dateValidatorDisplay,
+  numberValidatorCalc,
+  numberValidatorDisplay,
+  textValidatorDisplay
+} from '~/utils/helpers'
 import useSewingLineDelivery from '../hooks/useSewingLineDelivery'
 import { ExpandableTableDataType, SewingLineDeliveryTableDataType } from '../type'
 
@@ -281,7 +287,7 @@ const SewingLineDeliveryTable: React.FC = () => {
             width: '10%',
             render: (_value: any, record: ExpandableTableDataType) => {
               const totalAmount =
-                numberValidatorDisplay(record.quantityOriginal) - numberValidatorDisplay(record.quantitySewed)
+                numberValidatorCalc(record.quantityOriginal) - numberValidatorCalc(record.quantitySewed)
               return (
                 <EditableStateCell
                   isEditing={false}

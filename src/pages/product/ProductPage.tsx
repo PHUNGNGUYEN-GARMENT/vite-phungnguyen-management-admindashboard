@@ -184,9 +184,7 @@ const ProductPage: React.FC = () => {
           initialValue={dateValidatorInit(record.dateOutputFCR)}
           onValueChange={(val: Dayjs) => setNewRecord({ ...newRecord, dateOutputFCR: dateValidatorChange(val) })}
         >
-          <SkyTableTypography status={'active'}>
-            {record.dateOutputFCR && dateValidatorDisplay(record.dateOutputFCR)}
-          </SkyTableTypography>
+          <SkyTableTypography status={'active'}>{dateValidatorDisplay(record.dateOutputFCR)}</SkyTableTypography>
         </EditableStateCell>
       )
     }
@@ -233,7 +231,7 @@ const ProductPage: React.FC = () => {
       width: '10%',
       responsive: ['xl'],
       render: (_value: any, record: ProductTableDataType) => {
-        return columns.productGroup(record)
+        return columns.productPrint(record)
       }
     },
     {
@@ -309,7 +307,7 @@ const ProductPage: React.FC = () => {
                     )}
                     {!(width >= breakpoint.md) && (
                       <ExpandableItemRow title='Nhóm:' isEditing={table.isEditing(record.id!)}>
-                        {columns.productPrint(record)}
+                        {columns.productGroup(record)}
                       </ExpandableItemRow>
                     )}
                     {!(width >= breakpoint.xl) && (

@@ -14,6 +14,7 @@ module.exports = {
         ring: 'var(--ring)',
         normal: 'var(--normal)',
         warn: 'var(--warn)',
+        lightGrey: 'var(--light-grey)',
         error: 'var(--error)',
         success: 'var(--success)',
         blue: 'var(--blue)',
