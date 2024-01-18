@@ -49,7 +49,7 @@ const SampleSewingPage = () => {
     productColor: (record: SampleSewingTableDataType) => {
       return (
         <EditableStateCell isEditing={false} dataIndex='colorID' title='Màu' inputType='colorselector' required={false}>
-          <Flex justify='space-between' align='center' gap={10}>
+          <Flex justify='space-between' align='center' gap={10} wrap='wrap'>
             <SkyTableTypography status={record.productColor?.color?.status} className='w-fit'>
               {textValidatorDisplay(record.productColor?.color?.name)}
             </SkyTableTypography>
@@ -360,7 +360,7 @@ const SampleSewingPage = () => {
           expandable={{
             expandedRowRender: (record) => {
               return (
-                <Flex vertical>
+                <Flex vertical className='w-full md:w-1/2'>
                   <Space direction='vertical' size={10} split={<Divider className='my-0 py-0' />}>
                     {!(width >= breakpoint.md) && (
                       <ExpandableItemRow title='NPL may mẫu:' isEditing={table.isEditing(record.id!)}>

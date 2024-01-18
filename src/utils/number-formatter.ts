@@ -1,4 +1,4 @@
-export const formatAsPercentage = (num: number) => {
+export const formatAsPercentage = (num: number): string => {
   return new Intl.NumberFormat('default', {
     style: 'percent',
     minimumFractionDigits: 1,
