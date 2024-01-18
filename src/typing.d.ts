@@ -208,15 +208,6 @@ export type SampleSewing = {
   product?: Product | null
 }
 
-export interface DateSendSampleSewing {
-  dateSampleSewingID: number
-  productID: number
-  dateSend: string
-  createdAt: string
-  updatedAt: string
-  orderNumber: number
-}
-
 export interface CuttingGroup {
   id?: number
   productID?: number | null
@@ -251,16 +242,6 @@ export interface CuttingGroup {
   updatedAt?: string
 }
 
-export interface EmbroideredDelivery {
-  embroideredDeliveryID: number
-  productID: number
-  quantitySewingOut: number
-  dateExpectedCompletion: string
-  createdAt: string
-  updatedAt: string
-  orderNumber: number
-}
-
 export interface SewingLineDelivery {
   id?: number
   productID?: number | null
@@ -277,6 +258,20 @@ export interface SewingLine {
   id?: number
   name?: string | null
   status?: ItemStatusType | null
+  createdAt?: string
+  updatedAt?: string
+}
+
+export interface Completion {
+  id?: number
+  productID?: number | null
+  quantityIroned?: number | null
+  quantityCheckPassed?: number | null
+  quantityPackaged?: number | null
+  exportedDate?: string | null
+  passFIDate?: string | null
+  status?: ItemStatusType | null
+  product?: Product | null
   createdAt?: string
   updatedAt?: string
 }

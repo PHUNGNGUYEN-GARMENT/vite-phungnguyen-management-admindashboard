@@ -23,7 +23,7 @@ const ProductPage = lazy(() => import('~/pages/product/ProductPage'))
 const SampleSewingPage = lazy(() => import('~/pages/sample-sewing/SampleSewingPage'))
 const SewingLinePage = lazy(() => import('~/pages/sewing-line/SewingLinePage'))
 const SewingLineDeliveryPage = lazy(() => import('~/pages/sewing-line-delivery/SewingLineDeliveryPage'))
-const FinishPage = lazy(() => import('~/pages/Finish/Finish'))
+const FinishPage = lazy(() => import('~/pages/completion/CompletionPage'))
 
 export type SideType = {
   key: string

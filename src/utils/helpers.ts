@@ -91,7 +91,7 @@ export const dateValidator = (date?: string | null): boolean => {
 
 export const dateComparator = (date1?: string | null, date2?: string | null): boolean => {
   return date1 && date2
-    ? DayJS(date1).isValid() && DayJS(date2).isValid() && DayJS(date1).diff(date2, 'day') !== 0
+    ? dayjs(date1).isValid() && dayjs(date2).isValid() && dayjs(date1).diff(date2, 'days') !== 0
     : false
 }
 
