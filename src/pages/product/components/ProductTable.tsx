@@ -283,7 +283,7 @@ const ProductTable: React.FC = () => {
               }
             },
             onSave: {
-              onClick: (_e, record) => handleSaveClick(record!, newRecord)
+              onClick: (_e, record) => handleSaveClick(record!)
             },
             onDelete: {
               onClick: (_e, record) => table.handleStartDeleting(record!.key!)

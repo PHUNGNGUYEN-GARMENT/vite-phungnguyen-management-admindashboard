@@ -27,7 +27,7 @@ import { ProductTableDataType } from './type'
 
 const ProductPage: React.FC = () => {
   const table = useTable<ProductTableDataType>([])
-
+  const { width } = useDevice()
   const {
     searchText,
     setSearchText,
@@ -47,7 +47,6 @@ const ProductPage: React.FC = () => {
     groups,
     colors
   } = useProduct(table)
-  const { width } = useDevice()
 
   const columns = {
     productCode: (record: ProductTableDataType) => {
@@ -144,7 +143,7 @@ const ProductPage: React.FC = () => {
           title='Nơi in'
           inputType='select'
           required={true}
-          onValueChange={(val: any) => setNewRecord({ ...newRecord, printID: numberValidatorChange(val) })}
+          onValueChange={(val: number) => setNewRecord({ ...newRecord, printID: numberValidatorChange(val) })}
           selectProps={{
             options: prints.map((i) => {
               return { label: i.name, value: i.id, optionData: i.id }
@@ -285,7 +284,7 @@ const ProductPage: React.FC = () => {
               }
             },
             onSave: {
-              onClick: (_e, record) => handleSaveClick(record!, newRecord)
+              onClick: (_e, record) => handleSaveClick(record!)
             },
             onDelete: {
               onClick: (_e, record) => table.handleStartDeleting(record!.key!)

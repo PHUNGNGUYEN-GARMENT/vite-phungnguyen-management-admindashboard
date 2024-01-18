@@ -150,11 +150,11 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
     )
   }
 
-  const handleSaveClick = async (record: TableItemWithKey<ProductTableDataType>, newRecord: any) => {
+  const handleSaveClick = async (record: TableItemWithKey<ProductTableDataType>) => {
     // const row = (await form.validateFields()) as any
-    console.log({ old: record, new: newRecord })
     try {
       if (newRecord) {
+        console.log({ old: record, new: newRecord })
         if (
           textComparator(newRecord.productCode, record.productCode) ||
           numberComparator(newRecord.quantityPO, record.quantityPO) ||
@@ -178,7 +178,10 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
             }
           )
         }
-        if (numberComparator(newRecord.colorID, record.productColor?.colorID)) {
+        if (
+          (newRecord.colorID && !record.productColor?.colorID) ||
+          numberComparator(newRecord.colorID, record.productColor?.colorID)
+        ) {
           console.log('Product color progressing...')
           await productColorService.createOrUpdateItemBy(
             { field: 'productID', key: record.key! },
@@ -191,7 +194,10 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
             }
           )
         }
-        if (numberComparator(newRecord.groupID, record.productGroup?.groupID)) {
+        if (
+          (newRecord.groupID && !record.productGroup?.groupID) ||
+          numberComparator(newRecord.groupID, record.productGroup?.groupID)
+        ) {
           console.log('ProductGroup progressing...')
           await productGroupService.createOrUpdateItemBy(
             { field: 'productID', key: record.key! },
@@ -204,7 +210,10 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
             }
           )
         }
-        if (numberComparator(newRecord.printID, record.printablePlace?.printID)) {
+        if (
+          (newRecord.printID && !record.printablePlace?.printID) ||
+          numberComparator(newRecord.printID, record.printablePlace?.printID)
+        ) {
           console.log('PrintablePlace progressing...')
           await printablePlaceService.createOrUpdateItemBy(
             { field: 'productID', key: record.key! },
