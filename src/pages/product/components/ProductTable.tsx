@@ -8,7 +8,7 @@ import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import ImportationTable from '~/pages/importation/components/ImportationTable'
+import ImportationTable from '~/pages/importations/components/ImportationTable'
 import {
   dateValidatorChange,
   dateValidatorDisplay,

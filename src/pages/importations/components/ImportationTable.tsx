@@ -123,7 +123,7 @@ const ImportationTable: React.FC<Props> = ({ productRecord }) => {
           deletingKey={table.deletingKey}
           dataSource={table.dataSource}
           rowClassName='editable-row'
-          // pagination={false}
+          pagination={{ pageSize: 3 }}
           metaData={importationService.metaData}
           onPageChange={handlePageChange}
           isDateCreation={table.dateCreation}

@@ -1,5 +1,7 @@
-import { Importation } from '~/typing'
+import { Importation, Product, ProductColor } from '~/typing'
 
-export interface ImportationTableDataType extends Importation {
-  key?: React.Key
+export interface ImportationTableDataType extends Product {
+  key: React.Key
+  productColor: ProductColor
+  importation: Importation
 }

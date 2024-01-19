@@ -1,40 +1,66 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { App as AntApp } from 'antd'
 import { useEffect, useState } from 'react'
-import { RequestBodyType, ResponseDataType, defaultRequestBody } from '~/api/client'
+import { ResponseDataType, defaultRequestBody } from '~/api/client'
 import ImportationAPI from '~/api/services/ImportationAPI'
+import ProductAPI from '~/api/services/ProductAPI'
+import ProductColorAPI from '~/api/services/ProductColorAPI'
 import { TableItemWithKey, UseTableProps } from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
-import { Importation } from '~/typing'
-import { dateComparator, numberComparator } from '~/utils/helpers'
+import { Importation, Product, ProductColor } from '~/typing'
 import { ImportationTableDataType } from '../type'
 
-export interface ImportationNewRecordProps {
-  quantity?: number | null
-  dateImported?: string | null
-}
-
 export default function useImportation(table: UseTableProps<ImportationTableDataType>) {
-  const { dataSource, setLoading, setDataSource, handleConfirmCancelEditing, handleConfirmDeleting } = table
+  const { setLoading, setDataSource, handleConfirmCancelEditing } = table
+
+  // Services
+  const productService = useAPIService<Product>(ProductAPI)
+  const productColorService = useAPIService<ProductColor>(ProductColorAPI)
   const importationService = useAPIService<Importation>(ImportationAPI)
 
+  // UI
   const { message } = AntApp.useApp()
 
+  // State changes
   const [openModal, setOpenModal] = useState<boolean>(false)
-  const [importations, setImportations] = useState<Importation[]>([])
-  const [importationNew, setImportationNew] = useState<Importation | undefined>(undefined)
-
   const [searchText, setSearchText] = useState<string>('')
-  const [newRecord, setNewRecord] = useState<ImportationNewRecordProps>({})
+  const [newRecord, setNewRecord] = useState<Importation>({})
 
-  const amountQuantity =
-    dataSource && dataSource.length > 0 ? dataSource.reduce((acc, current) => acc + (current.quantity ?? 0), 0) : 0
+  // List
+  const [products, setProducts] = useState<Product[]>([])
+  const [productColors, setProductColors] = useState<ProductColor[]>([])
+  const [importations, setImportations] = useState<Importation[]>([])
 
+  // New
   const loadData = async () => {
+    await productService.getListItems(
+      {
+        ...defaultRequestBody,
+        paginator: { page: productService.page, pageSize: defaultRequestBody.paginator?.pageSize }
+      },
+      setLoading,
+      (meta) => {
+        if (meta?.success) {
+          setProducts(meta.data as Product[])
+        }
+      }
+    )
+    await productColorService.getListItems(
+      {
+        ...defaultRequestBody,
+        paginator: { page: 1, pageSize: -1 }
+      },
+      setLoading,
+      (meta) => {
+        if (meta?.success) {
+          setProductColors(meta.data as ProductColor[])
+        }
+      }
+    )
     await importationService.getListItems(
       {
         ...defaultRequestBody,
-        paginator: { page: importationService.page, pageSize: defaultRequestBody.paginator?.pageSize }
+        paginator: { page: 1, pageSize: -1 }
       },
       setLoading,
       (meta) => {
@@ -47,58 +73,59 @@ export default function useImportation(table: UseTableProps<ImportationTableData
 
   useEffect(() => {
     loadData()
-  }, [importationNew])
+  }, [])
 
   useEffect(() => {
-    selfConvertDataSource(importations)
-  }, [importations])
+    selfConvertDataSource(products, productColors, importations)
+  }, [products, productColors, importations])
 
-  const selfConvertDataSource = (_importations?: Importation[]) => {
-    const items = _importations ? _importations : importations
-    if (items.length > 0) {
-      setDataSource(
-        items.map((item) => {
-          return {
-            ...item,
-            key: item.id
-          } as ImportationTableDataType
-        })
-      )
-    }
+  const selfConvertDataSource = (
+    _products: Product[],
+    _productColors?: ProductColor[],
+    _importations?: Importation[]
+  ) => {
+    const items = _products ? _products : products
+    setDataSource(
+      items.map((item) => {
+        return {
+          ...item,
+          key: item.id,
+          productColor: (_productColors ? _productColors : productColors).find((i) => i.productID === item.id),
+          importation: (_importations ? _importations : importations).find((i) => i.productID === item.id)
+        } as ImportationTableDataType
+      })
+    )
   }
 
-  const handleSaveClick = async (
-    record: TableItemWithKey<ImportationTableDataType>,
-    newRecord: TableItemWithKey<ImportationTableDataType>
-  ) => {
+  const handleSaveClick = async (record: TableItemWithKey<ImportationTableDataType>) => {
     // const row = (await form.validateFields()) as any
     console.log({ old: record, new: newRecord })
     try {
-      if (
-        newRecord &&
-        (numberComparator(newRecord.quantity, record.quantity) ||
-          dateComparator(newRecord.dateImported, record.dateImported))
-      ) {
-        console.log('Importation progressing...')
-        await importationService.createOrUpdateItemByPk(
-          record.id!,
+      if (newRecord && record.importation) {
+        console.log('Importation progressing: ', newRecord)
+        await importationService.updateItemBy(
+          { field: 'productID', key: record.key },
           {
-            quantity: newRecord.quantity,
-            dateImported: newRecord.dateImported
+            ...newRecord
           },
           setLoading,
           (meta) => {
-            if (meta?.success) {
-              const itemNew = meta.data as Importation
-              setImportationNew(itemNew)
-            } else {
-              throw new Error('API update Importation failed')
+            if (!meta?.success) {
+              throw new Error('API update failed')
             }
           }
         )
-        message.success('Success!')
+      } else {
+        console.log('add new')
+        await importationService.createNewItem({ ...newRecord, productID: record.id }, table.setLoading, (meta) => {
+          if (!meta?.success) {
+            throw new Error('API create failed')
+          }
+        })
       }
+      message.success('Success!')
     } catch (error) {
+      console.error(error)
       message.error('Failed')
     } finally {
       setLoading(false)
@@ -108,26 +135,27 @@ export default function useImportation(table: UseTableProps<ImportationTableData
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleAddNewItem = async (formAddNew: any) => {
+  const handleAddNewItem = async (formAddNew: { productID: number; importation: Importation }) => {
     try {
+      console.log(formAddNew)
       setLoading(true)
       await importationService.createNewItem(
         {
           productID: formAddNew.productID,
-          quantity: formAddNew.quantity,
-          dateImported: formAddNew.dateImported
+          ...formAddNew.importation
         },
         setLoading,
         async (meta, msg) => {
-          if (meta?.data) {
-            message.success(msg)
+          if (!meta?.success) {
+            throw new Error('API create failed')
           } else {
-            message.error(msg)
+            message.success(msg)
           }
         }
       )
     } catch (error) {
-      message.error('Failed')
+      console.error(error)
+      message.error('Failed!')
     } finally {
       setLoading(false)
       setOpenModal(false)
@@ -139,57 +167,96 @@ export default function useImportation(table: UseTableProps<ImportationTableData
     record: TableItemWithKey<ImportationTableDataType>,
     onDataSuccess?: (meta: ResponseDataType | undefined) => void
   ) => {
-    await importationService.deleteItemByPk(record.id!, setLoading, (meta, msg) => {
-      if (meta) {
-        if (meta.success) {
-          handleConfirmDeleting(record.key!)
+    try {
+      if (record.importation) {
+        await importationService.deleteItemByPk(record.importation.id!, setLoading, (meta, msg) => {
+          if (!meta?.success) {
+            throw new Error('API delete failed')
+          }
           message.success(msg)
-        }
-      } else {
-        message.error(msg)
+          onDataSuccess?.(meta)
+        })
       }
-      onDataSuccess?.(meta)
-    })
+    } catch (error) {
+      console.error(error)
+    } finally {
+      loadData()
+      setLoading(false)
+      setOpenModal(false)
+    }
   }
 
   const handlePageChange = async (_page: number) => {
-    importationService.setPage(_page)
-    const body: RequestBodyType = {
-      ...defaultRequestBody,
-      paginator: {
-        page: _page,
-        pageSize: 5
+    await productService.pageChange(
+      _page,
+      setLoading,
+      (meta) => {
+        if (meta?.success) {
+          selfConvertDataSource(meta?.data as Product[])
+        }
       },
-      search: {
-        field: 'productCode',
-        term: searchText
-      }
+      { field: 'productCode', term: searchText }
+    )
+  }
+
+  const handleResetClick = async () => {
+    setSearchText('')
+    loadData()
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleSortChange = async (checked: boolean, _event: React.MouseEvent<HTMLButtonElement>) => {
+    await productService.sortedListItems(
+      checked ? 'asc' : 'desc',
+      setLoading,
+      (meta) => {
+        if (meta?.success) {
+          selfConvertDataSource(meta?.data as Product[])
+        }
+      },
+      { field: 'productCode', term: searchText }
+    )
+  }
+
+  const handleSearch = async (value: string) => {
+    if (value.length > 0) {
+      await productService.getListItems(
+        {
+          ...defaultRequestBody,
+          search: {
+            field: 'productCode',
+            term: value
+          }
+        },
+        setLoading,
+        (meta) => {
+          if (meta?.success) {
+            selfConvertDataSource(meta?.data as Product[])
+          }
+        }
+      )
     }
-    await importationService.getListItems(body, setLoading, (meta) => {
-      if (meta?.success) {
-        selfConvertDataSource(meta?.data as Importation[])
-      }
-    })
   }
 
   return {
+    searchText,
+    setSearchText,
     openModal,
     loadData,
-    dataSource,
+    newRecord,
+    setNewRecord,
     setLoading,
     setOpenModal,
     setDataSource,
     handleSaveClick,
-    newRecord,
-    amountQuantity,
-    searchText,
-    setSearchText,
-    setNewRecord,
-    handlePageChange,
     handleAddNewItem,
-    importationService,
     handleConfirmDelete,
     selfConvertDataSource,
-    handleConfirmCancelEditing
+    handlePageChange,
+    handleSortChange,
+    handleResetClick,
+    handleSearch,
+    productService,
+    importationService
   }
 }

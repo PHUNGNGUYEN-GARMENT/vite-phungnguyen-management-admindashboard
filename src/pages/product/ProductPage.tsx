@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ColorPicker, Divider, Flex, Space } from 'antd'
+import { Collapse, ColorPicker, Divider, Flex, Space, Typography } from 'antd'
 import type { ColumnType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
 import useDevice from '~/components/hooks/useDevice'
@@ -21,6 +21,7 @@ import {
   textValidatorDisplay,
   textValidatorInit
 } from '~/utils/helpers'
+import ImportationTable from '../importations/components/ImportationTable'
 import ModalAddNewProduct from './components/ModalAddNewProduct'
 import useProduct from './hooks/useProduct'
 import { ProductTableDataType } from './type'
@@ -219,25 +220,25 @@ const ProductPage: React.FC = () => {
       title: 'Nhóm',
       dataIndex: 'groupID',
       width: '10%',
-      responsive: ['md'],
+      responsive: ['xl'],
       render: (_value: any, record: ProductTableDataType) => {
         return columns.productGroup(record)
       }
     },
-    {
-      title: 'Nơi in',
-      dataIndex: 'printID',
-      width: '10%',
-      responsive: ['xl'],
-      render: (_value: any, record: ProductTableDataType) => {
-        return columns.productPrint(record)
-      }
-    },
+    // {
+    //   title: 'Nơi in',
+    //   dataIndex: 'printID',
+    //   width: '10%',
+    //   responsive: ['xl'],
+    //   render: (_value: any, record: ProductTableDataType) => {
+    //     return columns.productPrint(record)
+    //   }
+    // },
     {
       title: 'Ngày nhập NPL',
       dataIndex: 'dateInputNPL',
       width: '10%',
-      responsive: ['lg'],
+      responsive: ['md'],
       render: (_value: any, record: ProductTableDataType) => {
         return columns.dateInputNPL(record)
       }
@@ -297,24 +298,27 @@ const ProductPage: React.FC = () => {
           expandable={{
             expandedRowRender: (record: ProductTableDataType) => {
               return (
-                <Flex vertical>
-                  <Space direction='vertical' size={10} split={<Divider className='my-0 py-0' />}>
+                <Flex className='' vertical gap={10}>
+                  <Space
+                    direction='vertical'
+                    className='w-full lg:w-1/2'
+                    size={10}
+                    split={<Divider className='my-0 py-0' />}
+                  >
                     {!(width >= breakpoint.sm) && (
                       <ExpandableItemRow title='Số lượng PO:' isEditing={table.isEditing(record.id!)}>
                         {columns.quantityPO(record)}
                       </ExpandableItemRow>
                     )}
-                    {!(width >= breakpoint.md) && (
+                    {!(width >= breakpoint.xl) && (
                       <ExpandableItemRow title='Nhóm:' isEditing={table.isEditing(record.id!)}>
                         {columns.productGroup(record)}
                       </ExpandableItemRow>
                     )}
-                    {!(width >= breakpoint.xl) && (
-                      <ExpandableItemRow title='Nơi in:' isEditing={table.isEditing(record.id!)}>
-                        {columns.productPrint(record)}
-                      </ExpandableItemRow>
-                    )}
-                    {!(width >= breakpoint.lg) && (
+                    <ExpandableItemRow title='Nơi in:' isEditing={table.isEditing(record.id!)}>
+                      {columns.productPrint(record)}
+                    </ExpandableItemRow>
+                    {!(width >= breakpoint.md) && (
                       <ExpandableItemRow
                         title='Ngày nhập NPL:'
                         className='flex lg:hidden'
@@ -329,11 +333,23 @@ const ProductPage: React.FC = () => {
                       </ExpandableItemRow>
                     )}
                   </Space>
+                  <Collapse
+                    items={[
+                      {
+                        key: '1',
+                        label: (
+                          <Typography.Title className='m-0' level={5} type='secondary'>
+                            Nhập khẩu
+                          </Typography.Title>
+                        ),
+                        children: <ImportationTable productRecord={record} />
+                      }
+                    ]}
+                  />
                 </Flex>
               )
             },
-            columnWidth: '0.001%',
-            showExpandColumn: !(width >= breakpoint.xl)
+            columnWidth: '0.001%'
           }}
         />
       </BaseLayout>
