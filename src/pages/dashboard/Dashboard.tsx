@@ -146,15 +146,15 @@ const Dashboard = () => {
         return columns.productColor(record)
       }
     },
-    {
-      title: 'PO',
-      dataIndex: 'quantityPO',
-      width: '5%',
-      responsive: ['sm'],
-      render: (_value: any, record: DashboardTableDataType) => {
-        return columns.quantityPO(record)
-      }
-    },
+    // {
+    //   title: 'PO',
+    //   dataIndex: 'quantityPO',
+    //   width: '5%',
+    //   responsive: ['sm'],
+    //   render: (_value: any, record: DashboardTableDataType) => {
+    //     return columns.quantityPO(record)
+    //   }
+    // },
     {
       title: 'May',
       dataIndex: 'sewed',
@@ -220,11 +220,11 @@ const Dashboard = () => {
               return (
                 <Flex vertical className='w-full md:w-1/2'>
                   <Space direction='vertical' size={10} split={<Divider className='my-0 py-0' />}>
-                    {!(width >= breakpoint.sm) && (
+                    {/* {!(width >= breakpoint.sm) && (
                       <ExpandableItemRow title='Số lượng PO:' isEditing={table.isEditing(record.id!)}>
                         {columns.quantityPO(record)}
                       </ExpandableItemRow>
-                    )}
+                    )} */}
                     {!(width >= breakpoint.sm) && (
                       <ExpandableItemRow title='May:' isEditing={table.isEditing(record.id!)}>
                         {columns.sewing(record)}
