@@ -93,7 +93,9 @@ const ImportationTable: React.FC<Props> = ({ productRecord }) => {
       <Flex vertical gap={10}>
         <Flex className='w-full' align='center' justify='space-between'>
           <Flex gap={10}>
-            <Typography.Text type='secondary'>{amountQuantity + ' / ' + productRecord.quantityPO}</Typography.Text>
+            <Typography.Text type='secondary'>
+              {numberValidatorDisplay(amountQuantity) + ' / ' + numberValidatorDisplay(productRecord.quantityPO)}
+            </Typography.Text>
             {user.isAdmin && (
               <Switch
                 checkedChildren='DateCreation'
