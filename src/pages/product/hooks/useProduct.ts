@@ -310,7 +310,7 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
     item: TableItemWithKey<ProductTableDataType>,
     onDataSuccess?: (meta: ResponseDataType | undefined) => void
   ) => {
-    await productService.deleteItemByPk(item.id!, setLoading, (meta, msg) => {
+    await productService.updateItemByPk(item.id!, { status: 'deleted' }, setLoading, (meta, msg) => {
       if (meta) {
         if (meta.success) {
           handleConfirmDeleting(item.id!)
