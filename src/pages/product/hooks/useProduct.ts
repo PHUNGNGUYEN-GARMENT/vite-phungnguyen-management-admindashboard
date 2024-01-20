@@ -400,6 +400,7 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
     handleConfirmCancelEditing,
     prints,
     colors,
-    groups
+    groups,
+    products
   }
 }

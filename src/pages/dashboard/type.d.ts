@@ -6,3 +6,9 @@ export interface DashboardTableDataType extends Product {
   sewingLineDeliveries?: SewingLineDelivery[]
   completion?: Completion
 }
+
+export interface NotificationDataType extends Product {
+  key?: React.Key
+  messages?: string[]
+  productColor?: ProductColor
+}
