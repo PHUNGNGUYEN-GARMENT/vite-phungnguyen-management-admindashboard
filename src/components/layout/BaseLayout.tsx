@@ -1,4 +1,4 @@
-import { Button, Flex, Input, Switch } from 'antd'
+import { Button, Flex, Input, Switch, Typography } from 'antd'
 import { SwitchChangeEventHandler } from 'antd/es/switch'
 import { Plus } from 'lucide-react'
 import React from 'react'
@@ -51,19 +51,7 @@ const BaseLayout: React.FC<Props> = ({
   return (
     <div {...props}>
       <Flex vertical gap={20}>
-        {onSearch && (
-          <Search
-            placeholder={searchPlaceHolder ? searchPlaceHolder : 'Search...'}
-            size='middle'
-            enterButton
-            name='search'
-            allowClear
-            value={searchValue}
-            defaultValue={defaultSearchValue}
-            onSearch={onSearch}
-            onChange={onSearchChange}
-          />
-        )}
+        {props.title && <Typography.Title level={3}>{props.title}</Typography.Title>}
         <Flex justify='space-between' align='center'>
           <Flex gap={10} align='center'>
             <Switch
@@ -89,6 +77,20 @@ const BaseLayout: React.FC<Props> = ({
                 unCheckedChildren='DateCreation'
                 defaultChecked={dateCreation}
                 onChange={onDateCreationChange}
+              />
+            )}
+            {onSearch && (
+              <Search
+                placeholder={searchPlaceHolder ? searchPlaceHolder : 'Search...'}
+                size='middle'
+                enterButton
+                className='w-[350px]'
+                name='search'
+                allowClear
+                value={searchValue}
+                defaultValue={defaultSearchValue}
+                onSearch={onSearch}
+                onChange={onSearchChange}
               />
             )}
           </Flex>

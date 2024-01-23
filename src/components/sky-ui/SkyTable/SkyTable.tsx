@@ -3,7 +3,7 @@ import { Table } from 'antd'
 import type { ColumnsType, TableProps } from 'antd/es/table'
 import { useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { ResponseDataType } from '~/api/client'
+import { ResponseDataType, defaultRequestBody } from '~/api/client'
 import { ProductTableDataType } from '~/pages/product/type'
 import { RootState } from '~/store/store'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
@@ -19,6 +19,7 @@ export interface SkyTableProps<T extends { key?: React.Key; createdAt?: string; 
   deletingKey: React.Key
   actions?: ActionProps<T>
   scrollTo?: number
+  pageSize?: number
 }
 
 const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: string }>({
@@ -140,11 +141,12 @@ const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: s
         props.pagination ?? {
           onChange: props.onPageChange,
           current: props.metaData?.page,
-          pageSize: props.metaData?.pageSize
-            ? props.metaData.pageSize !== -1
-              ? props.metaData.pageSize
-              : undefined
-            : 10,
+          // pageSize: props.metaData?.pageSize
+          //   ? props.metaData.pageSize !== -1
+          //     ? props.metaData.pageSize
+          //     : undefined
+          //   : 10,
+          pageSize: props.pageSize ?? defaultRequestBody.paginator?.pageSize,
           total: props.metaData?.total
         }
       }
@@ -154,41 +156,3 @@ const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: s
 }
 
 export default SkyTable
-// export const mergedColumns = <T extends { key?: React.Key }>(
-//   cols: {
-//     title: string
-//     dataIndex: string
-//     required: boolean
-//     type: InputType
-//     width?: string | number | undefined
-//   }[],
-//   editingKey: React.Key,
-//   newRecord: any,
-//   setNewRecord: (newRecord: any) => void
-// ): ColumnsType<T>[] => {
-//   return cols.map((item) => {
-//     return {
-//       title: item.title,
-//       dataIndex: item.dataIndex,
-//       width: item.width,
-//       render: (_value: any, record: T) => {
-//         return (
-//           <EditableStateCell
-//             isEditing={editingKey === record.key}
-//             dataIndex={item.dataIndex}
-//             title={item.title}
-//             inputType={item.type}
-//             required={item.required}
-//             initialValue={{
-//               [item.dataIndex]: record
-//             }}
-//             value={newRecord.productCode}
-//             onValueChange={(val) => setNewRecord({ ...newRecord, [item.dataIndex]: val })}
-//           >
-//             <Typography.Text className='text-md flex-shrink-0 font-bold'>{record.productCode}</Typography.Text>
-//           </EditableStateCell>
-//         )
-//       }
-//     }
-//   })
-// }

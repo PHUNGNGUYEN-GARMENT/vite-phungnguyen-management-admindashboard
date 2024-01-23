@@ -10,7 +10,6 @@ import ExpandableItemRow from '~/components/sky-ui/SkyTable/ExpandableItemRow'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import { breakpoint, numberValidatorCalc, numberValidatorDisplay, textValidatorDisplay } from '~/utils/helpers'
-import NotificationView from './components/NotificationView'
 import StatisticSlide from './components/StatisticSlide'
 import useDashboard from './hooks/useDashboard'
 import { DashboardTableDataType } from './type'
@@ -210,13 +209,13 @@ const Dashboard = () => {
     <>
       <Flex vertical gap={30}>
         <Typography.Title className='my-0' level={2}>
-          Dashboard
+          Dashboards
         </Typography.Title>
         <Flex className='w-full'>
           <StatisticSlide className='w-full' />
-          <Flex vertical>
+          {/* <Flex vertical>
             <NotificationView className='w-96' />
-          </Flex>
+          </Flex> */}
         </Flex>
         <Flex vertical>
           <Typography.Title className='my-0' level={5}>

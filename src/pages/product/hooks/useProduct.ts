@@ -78,14 +78,12 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
     }
   }, [table.editingKey])
 
-  const loadData = async (defaultLoading?: boolean) => {
+  const loadData = async () => {
     await productService.getListItems(
-      defaultLoading
-        ? defaultRequestBody
-        : {
-            ...defaultRequestBody,
-            paginator: { page: productService.page, pageSize: defaultRequestBody.paginator?.pageSize }
-          },
+      {
+        ...defaultRequestBody,
+        paginator: { page: productService.page, pageSize: defaultRequestBody.paginator?.pageSize }
+      },
       setLoading,
       (meta) => {
         if (meta?.success) {
@@ -338,7 +336,7 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
 
   const handleResetClick = async () => {
     setSearchText('')
-    loadData(true)
+    loadData()
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

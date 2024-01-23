@@ -258,6 +258,7 @@ const ProductPage: React.FC = () => {
     <>
       <BaseLayout
         searchPlaceHolder='Mã hàng...'
+        title='Danh sách sản phẩm'
         searchValue={searchText}
         onDateCreationChange={(enable) => table.setDateCreation(enable)}
         onSearchChange={(e) => setSearchText(e.target.value)}
