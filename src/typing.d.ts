@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export type Role =
+export type UserRoleType =
   | 'admin'
-  | 'importation' // Xuất nhập khẩu
-  | 'sample_sewing' // May mẫu
-  | 'fabric_warehouse' // Kho vải
-  | 'accessories_warehouse' // Kho phụ liệu
-  | 'cutting' // Tổ cắt
-  | 'embroidered_delivery' // Chuyền may
+  | 'product_manager'
+  | 'importation_manager'
+  | 'sample_sewing_manager'
+  | 'accessory_manager'
+  | 'cutting_group_manager'
+  | 'completion_manager'
+  | 'staff'
 
 export type StatusType = 'normal' | 'warn' | 'error' | 'success'
 
@@ -26,6 +27,7 @@ export type InputType =
   | 'textarea'
   | 'checkbox'
   | 'multipleselect'
+  | 'password'
 
 export type ItemWithKeyAndTitleType = {
   key?: React.Key
@@ -56,12 +58,40 @@ export type TableListDataType<T> = {
   data: T
 }
 
+export interface Role {
+  id?: number
+  userID?: number | null
+  role?: UserRoleType | null
+  shortName?: string | null
+  desc?: string | null
+  status?: ItemStatusType | null
+  user?: User | null
+  createdAt?: string
+  updatedAt?: string
+}
+
+export interface UserRole {
+  id?: number
+  roleID?: number | null
+  userID?: number | null
+  role?: Role | null
+  user?: User | null
+  status?: ItemStatusType
+  createdAt?: string
+  updatedAt?: string
+}
+
 export interface User {
   id?: number
-  email?: string | null
   fullName?: string | null
-  role?: Role
+  username?: string | null
+  password?: string | null
+  avatar?: string | null
+  phone?: string | null
   isAdmin?: boolean
+  workDescription?: string | null
+  birthday?: string | null
+  status?: ItemStatusType | null
   createdAt?: string
   updatedAt?: string
 }

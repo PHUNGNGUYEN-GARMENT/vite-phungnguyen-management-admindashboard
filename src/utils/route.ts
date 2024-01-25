@@ -12,11 +12,14 @@ import {
   PrintIcon,
   SewingMachineIcon
 } from '~/assets/icons'
+import { UserRoleType } from '~/typing'
 const Dashboard = lazy(() => import('~/pages/dashboard/Dashboard'))
 const CuttingGroupPage = lazy(() => import('~/pages/cutting-group/CuttingGroupPage'))
 const ColorPage = lazy(() => import('~/pages/color/ColorPage'))
 const GroupPage = lazy(() => import('~/pages/group/GroupPage'))
 const NotePage = lazy(() => import('~/pages/accessory-note/AccessoryNotePage'))
+const UserPage = lazy(() => import('~/pages/user/UserPage'))
+const RolePage = lazy(() => import('~/pages/role/RolePage'))
 const GarmentAccessoryPage = lazy(() => import('~/pages/garment-accessory/GarmentAccessoryPage'))
 const PrintPage = lazy(() => import('~/pages/print/PrintPage'))
 const ProductPage = lazy(() => import('~/pages/product/ProductPage'))
@@ -30,6 +33,7 @@ export type SideType = {
   key: string
   name: string
   path: string
+  role: UserRoleType
   component:
     | React.LazyExoticComponent<() => JSX.Element>
     | React.ReactNode
@@ -46,6 +50,7 @@ export const appRoutes: SideType[] = [
     path: '/',
     component: Dashboard,
     isGroup: false,
+    role: 'admin',
     icon: DashboardIcon
   },
   {
@@ -54,6 +59,7 @@ export const appRoutes: SideType[] = [
     path: 'products',
     component: ProductPage,
     isGroup: false,
+    role: 'product_manager',
     icon: PackageSearchIcon
   },
   // {
@@ -65,19 +71,21 @@ export const appRoutes: SideType[] = [
   //   icon: PackageSearchIcon
   // },
   {
-    key: '3',
+    key: '2',
     name: 'May mẫu',
     path: 'sample-sewing',
     component: SampleSewingPage,
     isGroup: false,
+    role: 'sample_sewing_manager',
     icon: SewingMachineIcon
   },
   {
-    key: '14',
+    key: '3',
     name: 'Phụ liệu',
     path: 'accessory',
     component: GarmentAccessoryPage,
     isGroup: false,
+    role: 'accessory_manager',
     icon: SewingMachineIcon
   },
   {
@@ -85,6 +93,7 @@ export const appRoutes: SideType[] = [
     name: 'Tổ cắt',
     path: 'cutting-group',
     isGroup: false,
+    role: 'cutting_group_manager',
     component: CuttingGroupPage,
     icon: CutIcon
   },
@@ -92,6 +101,7 @@ export const appRoutes: SideType[] = [
     key: '5',
     name: 'Chuyền may',
     path: 'sewing-line-deliveries',
+    role: 'sample_sewing_manager',
     component: SewingLineDeliveryPage,
     icon: DeliveryIcon
   },
@@ -101,49 +111,81 @@ export const appRoutes: SideType[] = [
     path: 'finish',
     component: FinishPage,
     isGroup: false,
-    icon: PackageSuccessIcon
-  },
-  {
-    key: '8',
-    name: 'Định nghĩa',
-    path: 'structure',
-    component: Outlet,
-    isGroup: true,
+    role: 'completion_manager',
     icon: PackageSuccessIcon
   },
   {
     key: '9',
+    name: 'Định nghĩa',
+    path: 'structure',
+    component: Outlet,
+    isGroup: true,
+    role: 'admin',
+    icon: PackageSuccessIcon
+  },
+  {
+    key: '10',
     name: 'Màu',
     path: 'colors',
+    role: 'admin',
     component: ColorPage,
     icon: ColorIcon
   },
   {
-    key: '10',
+    key: '11',
     name: 'Nhóm',
     path: 'groups',
+    role: 'admin',
     component: GroupPage,
     icon: AgeGroupIcon
   },
   {
-    key: '13',
+    key: '12',
     name: 'Chuyền',
+    role: 'admin',
     path: 'deliveries',
     component: SewingLinePage,
     icon: DeliveryIcon
   },
   {
-    key: '11',
+    key: '13',
     name: 'Nơi In - Thêu',
     path: 'print',
+    role: 'admin',
     component: PrintPage,
     icon: PrintIcon
   },
   {
-    key: '12',
+    key: '14',
     name: 'Ghi chú phụ liệu',
     path: 'notes',
+    role: 'admin',
     component: NotePage,
     icon: NoteIcon
+  },
+  {
+    key: '7',
+    name: 'Khác',
+    path: 'structure',
+    component: Outlet,
+    isGroup: true,
+    role: 'admin',
+    icon: PackageSuccessIcon
+  },
+  {
+    key: '8',
+    name: 'Người dùng',
+    path: 'users',
+    role: 'admin',
+    component: UserPage,
+    icon: PrintIcon
+  },
+  {
+    key: '15',
+    name: 'Vai trò',
+    path: 'roles',
+    role: 'admin',
+    component: RolePage,
+    icon: PrintIcon
   }
 ]

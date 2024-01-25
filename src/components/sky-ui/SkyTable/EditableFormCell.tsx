@@ -74,17 +74,15 @@ function EditableFormCell({
             disabled={disabled}
             optionRender={(ori, info) => {
               return (
-                <>
-                  <Flex justify='space-between' align='center' key={info.index}>
-                    <Typography.Text>{ori.label}</Typography.Text>
-                    <div
-                      className='h-6 w-6 rounded-sm'
-                      style={{
-                        backgroundColor: `${ori.key}`
-                      }}
-                    />
-                  </Flex>
-                </>
+                <Flex justify='space-between' align='center' key={info.index}>
+                  <Typography.Text>{ori.label}</Typography.Text>
+                  <div
+                    className='h-6 w-6 rounded-sm'
+                    style={{
+                      backgroundColor: `${ori.key}`
+                    }}
+                  />
+                </Flex>
               )
             }}
             className={cn('w-full', restProps.className)}

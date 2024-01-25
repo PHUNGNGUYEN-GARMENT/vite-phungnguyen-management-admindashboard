@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-refresh/only-export-components */
 import {
+  Button,
   Checkbox,
   CheckboxProps,
   ColorPicker,
@@ -17,7 +18,8 @@ import {
 } from 'antd'
 import { InputProps, TextAreaProps } from 'antd/es/input'
 import { SelectProps } from 'antd/es/select'
-import { HTMLAttributes, memo } from 'react'
+import { Eye, EyeOff } from 'lucide-react'
+import { HTMLAttributes, memo, useState } from 'react'
 import { InputType } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import { cn } from '~/utils/helpers'
@@ -66,6 +68,8 @@ function EditableStateCell({
   editableRender,
   ...restProps
 }: EditableStateCellProps) {
+  const [visible, setVisible] = useState<boolean>(false)
+
   const inputNode = (): React.ReactNode => {
     switch (inputType) {
       case 'colorpicker':
@@ -187,6 +191,27 @@ function EditableStateCell({
             // value={value && DayJS(value)}
             defaultValue={initialValue && DayJS(initialValue)}
             format={DatePattern.display}
+            className={cn('w-full', restProps.className)}
+          />
+        )
+      case 'password':
+        return (
+          <Input
+            {...inputProps}
+            required
+            placeholder={`Enter ${title}`}
+            name={dataIndex}
+            type={visible ? 'text' : 'password'}
+            onChange={(event) => onValueChange?.(event.target.value)}
+            defaultValue={initialValue ?? inputProps?.defaultValue ?? ''}
+            value={value ?? inputProps?.value ?? ''}
+            disabled={disabled}
+            readOnly={readonly}
+            suffix={
+              <Button onClick={() => setVisible((prev) => !prev)} type='link' className='p-2'>
+                {visible ? <Eye color='var(--foreground)' size={16} /> : <EyeOff size={16} color='var(--foreground)' />}
+              </Button>
+            }
             className={cn('w-full', restProps.className)}
           />
         )
