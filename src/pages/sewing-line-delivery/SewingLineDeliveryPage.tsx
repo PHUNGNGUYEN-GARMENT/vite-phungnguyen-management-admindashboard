@@ -560,6 +560,7 @@ const SewingLineDeliveryPage = () => {
   return (
     <>
       <BaseLayout
+        title='Chuyền may'
         searchValue={searchText}
         onDateCreationChange={(enable) => table.setDateCreation(enable)}
         onSearchChange={(e) => setSearchText(e.target.value)}

@@ -22,29 +22,27 @@ export type ResponseDataType = {
 
 export type RequestBodyType = {
   filter?: {
-    status?: ItemStatusType | 'active'
-    field?: string | 'id'
-    items?: number[] | [-1] // items: mảng id : default -1: Lấy tất cả post
+    status?: ItemStatusType
+    items?: number[] // items: mảng id : default -1: Lấy tất cả post
   }
   paginator?: {
-    page?: number | 1 // trang hiện tại : default = 1
-    pageSize?: number | 5 // số lượng post cần lấy : default = 10
+    page?: number // trang hiện tại : default = 1
+    pageSize?: number // số lượng post cần lấy : default = 10
   }
   search?: {
-    field?: string | 'id'
-    term?: string | '' // searchTerm: chỉ lấy những product có productCode chứa từ được truyền vào.
+    field?: string
+    term?: string // searchTerm: chỉ lấy những product có productCode chứa từ được truyền vào.
   }
   sorting?: {
-    column?: string | 'id' // id
-    direction?: SortDirection | 'desc' // direction: asc|desc sắp xếp trước sau
+    column?: string // id
+    direction?: SortDirection // direction: asc|desc sắp xếp trước sau
   }
 }
 
 export const defaultRequestBody: RequestBodyType = {
   filter: {
     items: [-1],
-    status: 'active',
-    field: 'id'
+    status: 'active'
   },
   paginator: { page: 1, pageSize: 5 },
   search: {

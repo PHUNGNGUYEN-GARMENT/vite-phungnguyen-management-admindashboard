@@ -163,45 +163,40 @@ const Dashboard = () => {
     //   }
     // },
     {
-      title: 'Tiến trình',
-      children: [
-        {
-          title: 'May',
-          dataIndex: 'sewed',
-          width: '10%',
-          responsive: ['sm'],
-          render: (_value: any, record: DashboardTableDataType) => {
-            return columns.sewing(record)
-          }
-        },
-        {
-          title: 'Ủi',
-          dataIndex: 'ironed',
-          width: '10%',
-          responsive: ['md'],
-          render: (_value: any, record: DashboardTableDataType) => {
-            return columns.ironed(record)
-          }
-        },
-        {
-          title: 'Kiểm',
-          dataIndex: 'checkPass',
-          width: '10%',
-          responsive: ['lg'],
-          render: (_value: any, record: DashboardTableDataType) => {
-            return columns.checkPass(record)
-          }
-        },
-        {
-          title: 'Đóng gói',
-          dataIndex: 'packaged',
-          width: '10%',
-          responsive: ['xl'],
-          render: (_value: any, record: DashboardTableDataType) => {
-            return columns.package(record)
-          }
-        }
-      ]
+      title: 'May',
+      dataIndex: 'sewed',
+      width: '10%',
+      responsive: ['sm'],
+      render: (_value: any, record: DashboardTableDataType) => {
+        return columns.sewing(record)
+      }
+    },
+    {
+      title: 'Ủi',
+      dataIndex: 'ironed',
+      width: '10%',
+      responsive: ['md'],
+      render: (_value: any, record: DashboardTableDataType) => {
+        return columns.ironed(record)
+      }
+    },
+    {
+      title: 'Kiểm',
+      dataIndex: 'checkPass',
+      width: '10%',
+      responsive: ['lg'],
+      render: (_value: any, record: DashboardTableDataType) => {
+        return columns.checkPass(record)
+      }
+    },
+    {
+      title: 'Đóng gói',
+      dataIndex: 'packaged',
+      width: '10%',
+      responsive: ['xl'],
+      render: (_value: any, record: DashboardTableDataType) => {
+        return columns.package(record)
+      }
     }
   ]
 
@@ -218,8 +213,8 @@ const Dashboard = () => {
           </Flex> */}
         </Flex>
         <Flex vertical>
-          <Typography.Title className='my-0' level={5}>
-            Danh sách mã hàng
+          <Typography.Title className='my-0' level={4}>
+            Tiến trình mã hàng
           </Typography.Title>
           <BaseLayout>
             <SkyTable

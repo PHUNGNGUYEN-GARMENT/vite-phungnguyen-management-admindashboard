@@ -6,7 +6,7 @@ import ColorAPI from '~/api/services/ColorAPI'
 import { TableItemWithKey, UseTableProps } from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
 import { Color } from '~/typing'
-import { ColorTableDataType } from '../ColorPage'
+import { ColorTableDataType } from '../type'
 
 export default function useColor(table: UseTableProps<ColorTableDataType>) {
   const { setLoading, setDataSource, handleConfirmCancelEditing, handleConfirmDeleting } = table

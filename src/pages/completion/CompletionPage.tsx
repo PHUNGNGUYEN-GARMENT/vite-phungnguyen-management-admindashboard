@@ -119,10 +119,10 @@ const FinishPage: React.FC<Props> = () => {
         )
       },
       remainingAmount: (record: CompletionTableDataType) => {
-        const amount =
-          record.completion?.quantityIroned &&
-          record.completion.quantityIroned > 0 &&
-          numberValidatorCalc(record.quantityPO) - numberValidatorCalc(record.completion.quantityIroned)
+        const amount = record.completion?.quantityIroned
+          ? numberValidatorCalc(record.quantityPO) - numberValidatorCalc(record.completion.quantityIroned)
+          : 0
+
         return (
           <EditableStateCell
             dataIndex='remainingAmount'
@@ -132,7 +132,7 @@ const FinishPage: React.FC<Props> = () => {
             initialValue={amount}
             inputType='number'
           >
-            <SkyTableTypography status={record.status}>{amount}</SkyTableTypography>
+            <SkyTableTypography status={record.status}>{numberValidatorDisplay(amount)}</SkyTableTypography>
           </EditableStateCell>
         )
       }
@@ -162,10 +162,9 @@ const FinishPage: React.FC<Props> = () => {
         )
       },
       remainingAmount: (record: CompletionTableDataType) => {
-        const amount =
-          record.completion?.quantityCheckPassed &&
-          record.completion.quantityCheckPassed > 0 &&
-          numberValidatorCalc(record.quantityPO) - numberValidatorCalc(record.completion.quantityCheckPassed)
+        const amount = record.completion?.quantityCheckPassed
+          ? numberValidatorCalc(record.quantityPO) - numberValidatorCalc(record.completion.quantityCheckPassed)
+          : 0
         return (
           <EditableStateCell
             dataIndex='remainingAmount'
@@ -175,7 +174,7 @@ const FinishPage: React.FC<Props> = () => {
             initialValue={amount}
             inputType='number'
           >
-            <SkyTableTypography status={record.status}>{amount}</SkyTableTypography>
+            <SkyTableTypography status={record.status}>{numberValidatorDisplay(amount)}</SkyTableTypography>
           </EditableStateCell>
         )
       }
@@ -205,10 +204,9 @@ const FinishPage: React.FC<Props> = () => {
         )
       },
       remainingAmount: (record: CompletionTableDataType) => {
-        const amount =
-          record.completion?.quantityPackaged &&
-          record.completion.quantityPackaged > 0 &&
-          numberValidatorCalc(record.quantityPO) - numberValidatorCalc(record.completion.quantityPackaged)
+        const amount = record.completion?.quantityPackaged
+          ? numberValidatorCalc(record.quantityPO) - numberValidatorCalc(record.completion.quantityPackaged)
+          : 0
         return (
           <EditableStateCell
             dataIndex='remainingAmount'
@@ -218,7 +216,7 @@ const FinishPage: React.FC<Props> = () => {
             initialValue={amount}
             inputType='number'
           >
-            <SkyTableTypography status={record.status}>{amount}</SkyTableTypography>
+            <SkyTableTypography status={record.status}>{numberValidatorDisplay(amount)}</SkyTableTypography>
           </EditableStateCell>
         )
       }
@@ -240,7 +238,7 @@ const FinishPage: React.FC<Props> = () => {
           }
         >
           <SkyTableTypography status={record.status}>
-            {record.completion && dateValidatorDisplay(record.completion.exportedDate)}
+            {(record.completion && dateValidatorDisplay(record.completion.exportedDate)) ?? '--/--/----'}
           </SkyTableTypography>
         </EditableStateCell>
       )
@@ -262,7 +260,7 @@ const FinishPage: React.FC<Props> = () => {
           }
         >
           <SkyTableTypography status={record.status}>
-            {record.completion && dateValidatorDisplay(record.completion.passFIDate)}
+            {(record.completion && dateValidatorDisplay(record.completion.passFIDate)) ?? '--/--/----'}
           </SkyTableTypography>
         </EditableStateCell>
       )
@@ -471,6 +469,7 @@ const FinishPage: React.FC<Props> = () => {
   return (
     <>
       <BaseLayout
+        title='Hoàn thành'
         searchPlaceHolder='Mã hàng...'
         searchValue={searchText}
         // onDateCreationChange={(enable) => table.setDateCreation(enable)}

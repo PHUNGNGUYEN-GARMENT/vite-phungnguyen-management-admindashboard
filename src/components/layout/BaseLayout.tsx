@@ -51,7 +51,7 @@ const BaseLayout: React.FC<Props> = ({
   return (
     <div {...props}>
       <Flex vertical gap={20}>
-        {props.title && <Typography.Title level={3}>{props.title}</Typography.Title>}
+        {props.title && <Typography.Title level={2}>{props.title}</Typography.Title>}
         <Flex justify='space-between' align='center'>
           <Flex gap={10} align='center'>
             <Switch

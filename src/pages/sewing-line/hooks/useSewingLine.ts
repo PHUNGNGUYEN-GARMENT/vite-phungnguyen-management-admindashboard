@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { App as AntApp } from 'antd'
 import { useEffect, useState } from 'react'
-import { RequestBodyType, ResponseDataType, defaultRequestBody } from '~/api/client'
+import { ResponseDataType, defaultRequestBody } from '~/api/client'
 import SewingLineAPI from '~/api/services/SewingLineAPI'
 import { TableItemWithKey, UseTableProps } from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
 import { SewingLine } from '~/typing'
-import { SewingLineTableDataType } from '../SewingLinePage'
+import { SewingLineTableDataType } from '../type'
 
 export default function useSewingLine(table: UseTableProps<SewingLineTableDataType>) {
-  const { setLoading, page, setPage, setDataSource, handleConfirmCancelEditing, handleConfirmDeleting } = table
+  const { setLoading, setDataSource, handleConfirmCancelEditing, handleConfirmDeleting } = table
 
   // Services
   const sewingLineService = useAPIService<SewingLine>(SewingLineAPI)
@@ -30,7 +30,10 @@ export default function useSewingLine(table: UseTableProps<SewingLineTableDataTy
 
   const loadData = async () => {
     await sewingLineService.getListItems(
-      { ...defaultRequestBody, paginator: { page: page, pageSize: defaultRequestBody.paginator?.pageSize } },
+      {
+        ...defaultRequestBody,
+        paginator: { page: sewingLineService.page, pageSize: defaultRequestBody.paginator?.pageSize }
+      },
       setLoading,
       (meta) => {
         if (meta?.success) {
@@ -132,24 +135,16 @@ export default function useSewingLine(table: UseTableProps<SewingLineTableDataTy
   }
 
   const handlePageChange = async (_page: number) => {
-    sewingLineService.setPage(_page)
-    setPage(_page)
-    const body: RequestBodyType = {
-      ...defaultRequestBody,
-      paginator: {
-        page: _page,
-        pageSize: 5
+    await sewingLineService.pageChange(
+      _page,
+      setLoading,
+      (meta) => {
+        if (meta?.success) {
+          selfConvertDataSource(meta?.data as SewingLine[])
+        }
       },
-      search: {
-        field: 'name',
-        term: searchText
-      }
-    }
-    await sewingLineService.getListItems(body, setLoading, (meta) => {
-      if (meta?.success) {
-        selfConvertDataSource(meta?.data as SewingLine[])
-      }
-    })
+      { field: 'name', term: searchText }
+    )
   }
 
   const handleResetClick = async () => {

@@ -58,7 +58,7 @@ const SideNav: React.FC<Props> = ({ openDrawer, setOpenDrawer, ...props }) => {
   return (
     <div {...props} className={cn('bg-white', props.className)}>
       <Link to={'/'} onClick={() => {}} className='relative flex justify-center py-5'>
-        <img src={logo} alt='logo' className='h-10 w-10 object-contain lg:h-10 lg:w-10' />
+        <img src={logo} alt='logo' className='h-16 w-16 object-contain lg:h-10 lg:w-10' />
       </Link>
       <Menu
         onClick={onClick}

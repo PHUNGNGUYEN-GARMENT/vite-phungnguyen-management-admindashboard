@@ -6,7 +6,7 @@ import PrintAPI from '~/api/services/PrintAPI'
 import { TableItemWithKey, UseTableProps } from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
 import { Print } from '~/typing'
-import { PrintTableDataType } from '../PrintPage'
+import { PrintTableDataType } from '../type'
 
 export default function usePrint(table: UseTableProps<PrintTableDataType>) {
   const { setLoading, setDataSource, handleConfirmCancelEditing, handleConfirmDeleting } = table
@@ -29,11 +29,18 @@ export default function usePrint(table: UseTableProps<PrintTableDataType>) {
   const [groupNew, setGroupNew] = useState<Print | undefined>(undefined)
 
   const loadData = async () => {
-    await printService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        setPrints(meta.data as Print[])
+    await printService.getListItems(
+      {
+        ...defaultRequestBody,
+        paginator: { page: printService.page, pageSize: defaultRequestBody.paginator?.pageSize }
+      },
+      setLoading,
+      (meta) => {
+        if (meta?.success) {
+          setPrints(meta.data as Print[])
+        }
       }
-    })
+    )
   }
 
   useEffect(() => {

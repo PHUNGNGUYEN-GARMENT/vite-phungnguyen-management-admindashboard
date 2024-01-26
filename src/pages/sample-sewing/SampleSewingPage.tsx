@@ -72,7 +72,7 @@ const SampleSewingPage = () => {
           onValueChange={(val: Dayjs) => setNewRecord({ ...newRecord, dateSubmissionNPL: dateValidatorChange(val) })}
         >
           <SkyTableTypography status={record.status}>
-            {record.sampleSewing && dateValidatorDisplay(record.sampleSewing.dateSubmissionNPL)}
+            {(record.sampleSewing && dateValidatorDisplay(record.sampleSewing.dateSubmissionNPL)) ?? '--/--/----'}
           </SkyTableTypography>
         </EditableStateCell>
       )
@@ -89,7 +89,7 @@ const SampleSewingPage = () => {
           onValueChange={(val: Dayjs) => setNewRecord({ ...newRecord, dateApprovalPP: dateValidatorChange(val) })}
         >
           <SkyTableTypography status={record.status}>
-            {record.sampleSewing && dateValidatorDisplay(record.sampleSewing.dateApprovalPP)}
+            {(record.sampleSewing && dateValidatorDisplay(record.sampleSewing.dateApprovalPP)) ?? '--/--/----'}
           </SkyTableTypography>
         </EditableStateCell>
       )
@@ -106,7 +106,7 @@ const SampleSewingPage = () => {
           onValueChange={(val: Dayjs) => setNewRecord({ ...newRecord, dateApprovalSO: dateValidatorChange(val) })}
         >
           <SkyTableTypography status={record.status}>
-            {record.sampleSewing && dateValidatorDisplay(record.sampleSewing.dateApprovalSO)}
+            {(record.sampleSewing && dateValidatorDisplay(record.sampleSewing.dateApprovalSO)) ?? '--/--/----'}
           </SkyTableTypography>
         </EditableStateCell>
       )
@@ -318,6 +318,7 @@ const SampleSewingPage = () => {
   return (
     <>
       <BaseLayout
+        title='May mẫu'
         searchPlaceHolder='Mã hàng...'
         searchValue={searchText}
         onDateCreationChange={(enable) => table.setDateCreation(enable)}

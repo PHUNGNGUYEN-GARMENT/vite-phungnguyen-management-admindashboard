@@ -1,27 +1,106 @@
-import { Flex } from 'antd'
-import useDevice from '~/components/hooks/useDevice'
-import { ItemStatusType } from '~/typing'
-import SewingLineList from './components/SewingLineList'
-import SewingLineTable from './components/SewingLineTable'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { ColumnType } from 'antd/es/table'
+import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
+import BaseLayout from '~/components/layout/BaseLayout'
+import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
+import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
+import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
+import ModalAddNewSewingLine from './components/ModalAddNewSewingLine'
+import useSewingLine from './hooks/useSewingLine'
+import { SewingLineTableDataType } from './type'
 
-export type SewingLineTableDataType = {
-  key?: React.Key
-  id?: number
-  name?: string
-  status?: ItemStatusType
-  createdAt?: string
-  updatedAt?: string
-}
+interface Props extends React.HTMLAttributes<HTMLElement> {}
 
-const SewingLinePage = () => {
-  const { width } = useDevice()
+const SewingLinePage: React.FC<Props> = () => {
+  const table = useTable<SewingLineTableDataType>([])
+
+  const {
+    searchText,
+    setSearchText,
+    newRecord,
+    setNewRecord,
+    openModal,
+    setOpenModal,
+    handleResetClick,
+    handleSortChange,
+    handleSearch,
+    handleSaveClick,
+    handleAddNewItem,
+    handleConfirmDelete,
+    handlePageChange,
+    sewingLineService
+  } = useSewingLine(table)
+
+  const columns: ColumnType<SewingLineTableDataType>[] = [
+    {
+      title: 'Tên chuyền',
+      dataIndex: 'name',
+      width: '15%',
+      render: (_value: any, record: TableItemWithKey<SewingLineTableDataType>) => {
+        return (
+          <EditableStateCell
+            isEditing={table.isEditing(record.key!)}
+            dataIndex='name'
+            title='Tên chuyền'
+            inputType='text'
+            required={true}
+            initialValue={record.name}
+            value={newRecord.name}
+            onValueChange={(val) => setNewRecord({ ...newRecord, name: val })}
+          >
+            <SkyTableTypography status={'active'}>{record.name}</SkyTableTypography>
+          </EditableStateCell>
+        )
+      }
+    }
+  ]
 
   return (
     <>
-      <Flex vertical gap={20}>
-        {width >= 768 && <SewingLineTable className='' />}
-        {width <= 768 && <SewingLineList className='' />}
-      </Flex>
+      <BaseLayout
+        title='Chuyền may'
+        searchValue={searchText}
+        onDateCreationChange={(enable) => table.setDateCreation(enable)}
+        onSearchChange={(e) => setSearchText(e.target.value)}
+        onSearch={(value) => handleSearch(value)}
+        onSortChange={(checked, e) => handleSortChange(checked, e)}
+        onResetClick={() => handleResetClick()}
+        onAddNewClick={() => setOpenModal(true)}
+      >
+        <SkyTable
+          bordered
+          loading={table.loading}
+          columns={columns}
+          editingKey={table.editingKey}
+          deletingKey={table.deletingKey}
+          dataSource={table.dataSource}
+          rowClassName='editable-row'
+          metaData={sewingLineService.metaData}
+          onPageChange={handlePageChange}
+          isDateCreation={table.dateCreation}
+          actions={{
+            onEdit: {
+              onClick: (_e, record) => {
+                setNewRecord(record)
+                table.handleStartEditing(record!.key!)
+              }
+            },
+            onSave: {
+              onClick: (_e, record) => handleSaveClick(record!, newRecord)
+            },
+            onDelete: {
+              onClick: (_e, record) => table.handleStartDeleting(record!.key!)
+            },
+            onConfirmCancelEditing: () => table.handleConfirmCancelEditing(),
+            onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),
+            onConfirmDelete: (record) => handleConfirmDelete(record),
+            isShow: true
+          }}
+        />
+      </BaseLayout>
+      {openModal && (
+        <ModalAddNewSewingLine openModal={openModal} setOpenModal={setOpenModal} onAddNew={handleAddNewItem} />
+      )}
     </>
   )
 }

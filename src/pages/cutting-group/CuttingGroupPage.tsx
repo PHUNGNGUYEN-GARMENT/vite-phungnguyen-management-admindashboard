@@ -91,7 +91,7 @@ const SampleSewingPage = () => {
           onValueChange={(val) => setNewRecord({ ...newRecord, quantityRealCut: numberValidatorChange(val) })}
         >
           <SkyTableTypography status={record.status}>
-            {record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityRealCut)}
+            {(record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityRealCut)) ?? '-'}
           </SkyTableTypography>
         </EditableStateCell>
       )
@@ -108,7 +108,7 @@ const SampleSewingPage = () => {
           onValueChange={(val: Dayjs) => setNewRecord({ ...newRecord, timeCut: dateValidatorChange(val) })}
         >
           <SkyTableTypography status={record.status}>
-            {record.cuttingGroup && dateTimeValidatorDisplay(record.cuttingGroup.timeCut)}
+            {(record.cuttingGroup && dateTimeValidatorDisplay(record.cuttingGroup.timeCut)) ?? '--/--/----'}
           </SkyTableTypography>
         </EditableStateCell>
       )
@@ -118,7 +118,8 @@ const SampleSewingPage = () => {
       return (
         <EditableStateCell isEditing={false} dataIndex='remainingAmount' title='Còn lại' inputType='number'>
           <SkyTableTypography status={record.status}>
-            {totalAmount < 0 ? totalAmount * -1 : totalAmount} <span>{totalAmount < 0 && '(Dư)'}</span>
+            {numberValidatorDisplay(totalAmount < 0 ? totalAmount * -1 : totalAmount)}{' '}
+            <span>{totalAmount < 0 && '(Dư)'}</span>
           </SkyTableTypography>
         </EditableStateCell>
       )
@@ -145,7 +146,7 @@ const SampleSewingPage = () => {
               disabled={(record.cuttingGroup && record.cuttingGroup.syncStatus) ?? false}
               status={record.status}
             >
-              {record.cuttingGroup && dateValidatorDisplay(record.cuttingGroup.dateSendEmbroidered)}
+              {(record.cuttingGroup && dateValidatorDisplay(record.cuttingGroup.dateSendEmbroidered)) ?? '--/--/----'}
             </SkyTableTypography>
           </EditableStateCell>
         )
@@ -180,7 +181,7 @@ const SampleSewingPage = () => {
               status={record.status}
               disabled={(record.cuttingGroup && record.cuttingGroup.syncStatus) ?? false}
             >
-              {total}
+              {numberValidatorDisplay(total)}
             </SkyTableTypography>
           </EditableStateCell>
         )
@@ -225,7 +226,7 @@ const SampleSewingPage = () => {
             onValueChange={(val) => setNewRecord({ ...newRecord, quantityDeliveredBTP: val })}
           >
             <SkyTableTypography status={record.status}>
-              {record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityDeliveredBTP)}
+              {(record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityDeliveredBTP)) ?? '-'}
             </SkyTableTypography>
           </EditableStateCell>
         )
@@ -241,7 +242,7 @@ const SampleSewingPage = () => {
             inputType='number'
             required={true}
           >
-            <SkyTableTypography status={record.status}>{amountQuantityBTP}</SkyTableTypography>
+            <SkyTableTypography status={record.status}>{numberValidatorDisplay(amountQuantityBTP)}</SkyTableTypography>
           </EditableStateCell>
         )
       }
@@ -261,7 +262,7 @@ const SampleSewingPage = () => {
               onValueChange={(val) => setNewRecord({ ...newRecord, quantityArrived1Th: numberValidatorChange(val) })}
             >
               <SkyTableTypography status={record.status}>
-                {record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityArrived1Th)}
+                {(record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityArrived1Th)) ?? '-'}
               </SkyTableTypography>
             </EditableStateCell>
           )
@@ -283,7 +284,7 @@ const SampleSewingPage = () => {
               }
             >
               <SkyTableTypography status={record.status}>
-                {record.cuttingGroup && dateValidatorDisplay(record.cuttingGroup.dateArrived1Th)}
+                {(record.cuttingGroup && dateValidatorDisplay(record.cuttingGroup.dateArrived1Th)) ?? '--/--/----'}
               </SkyTableTypography>
             </EditableStateCell>
           )
@@ -303,7 +304,7 @@ const SampleSewingPage = () => {
               onValueChange={(val) => setNewRecord({ ...newRecord, quantityArrived2Th: numberValidatorChange(val) })}
             >
               <SkyTableTypography status={record.status}>
-                {record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityArrived2Th)}
+                {(record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityArrived2Th)) ?? '-'}
               </SkyTableTypography>
             </EditableStateCell>
           )
@@ -325,7 +326,7 @@ const SampleSewingPage = () => {
               }
             >
               <SkyTableTypography status={record.status}>
-                {record.cuttingGroup && dateValidatorDisplay(record.cuttingGroup.dateArrived2Th)}
+                {(record.cuttingGroup && dateValidatorDisplay(record.cuttingGroup.dateArrived2Th)) ?? '--/--/----'}
               </SkyTableTypography>
             </EditableStateCell>
           )
@@ -345,7 +346,7 @@ const SampleSewingPage = () => {
               onValueChange={(val) => setNewRecord({ ...newRecord, quantityArrived3Th: numberValidatorChange(val) })}
             >
               <SkyTableTypography status={record.status}>
-                {record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityArrived3Th)}
+                {(record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityArrived3Th)) ?? '-'}
               </SkyTableTypography>
             </EditableStateCell>
           )
@@ -367,7 +368,7 @@ const SampleSewingPage = () => {
               }
             >
               <SkyTableTypography status={record.status}>
-                {record.cuttingGroup && dateValidatorDisplay(record.cuttingGroup.dateArrived3Th)}
+                {(record.cuttingGroup && dateValidatorDisplay(record.cuttingGroup.dateArrived3Th)) ?? '--/--/----'}
               </SkyTableTypography>
             </EditableStateCell>
           )
@@ -387,7 +388,7 @@ const SampleSewingPage = () => {
               onValueChange={(val) => setNewRecord({ ...newRecord, quantityArrived4Th: numberValidatorChange(val) })}
             >
               <SkyTableTypography status={record.status}>
-                {record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityArrived4Th)}
+                {(record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityArrived4Th)) ?? '-'}
               </SkyTableTypography>
             </EditableStateCell>
           )
@@ -409,7 +410,7 @@ const SampleSewingPage = () => {
               }
             >
               <SkyTableTypography status={record.status}>
-                {record.cuttingGroup && dateValidatorDisplay(record.cuttingGroup.dateArrived4Th)}
+                {(record.cuttingGroup && dateValidatorDisplay(record.cuttingGroup.dateArrived4Th)) ?? '--/--/----'}
               </SkyTableTypography>
             </EditableStateCell>
           )
@@ -429,7 +430,7 @@ const SampleSewingPage = () => {
               onValueChange={(val) => setNewRecord({ ...newRecord, quantityArrived5Th: numberValidatorChange(val) })}
             >
               <SkyTableTypography status={record.status}>
-                {record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityArrived5Th)}
+                {(record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityArrived5Th)) ?? '-'}
               </SkyTableTypography>
             </EditableStateCell>
           )
@@ -451,7 +452,7 @@ const SampleSewingPage = () => {
               }
             >
               <SkyTableTypography status={record.status}>
-                {record.cuttingGroup && dateValidatorDisplay(record.cuttingGroup.dateArrived5Th)}
+                {(record.cuttingGroup && dateValidatorDisplay(record.cuttingGroup.dateArrived5Th)) ?? '--/--/----'}
               </SkyTableTypography>
             </EditableStateCell>
           )
@@ -548,6 +549,7 @@ const SampleSewingPage = () => {
   return (
     <>
       <BaseLayout
+        title='Tổ cắt'
         searchValue={searchText}
         onDateCreationChange={(enable) => table.setDateCreation(enable)}
         onSearchChange={(e) => setSearchText(e.target.value)}

@@ -7,8 +7,8 @@ import BaseLayout from '~/components/layout/BaseLayout'
 import { default as EditableStateCell } from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import { ColorTableDataType } from '../ColorPage'
 import useColor from '../hooks/useColor'
+import { ColorTableDataType } from '../type'
 import ModalAddNewColor from './ModalAddNewColor'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {}

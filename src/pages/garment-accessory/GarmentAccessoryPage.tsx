@@ -120,10 +120,9 @@ const GarmentAccessoryPage: React.FC<Props> = () => {
         )
       },
       remainingAmount: (record: GarmentAccessoryTableDataType) => {
-        const amount =
-          record.garmentAccessory?.amountCutting &&
-          record.garmentAccessory.amountCutting > 0 &&
-          numberValidatorCalc(record.quantityPO) - numberValidatorCalc(record.garmentAccessory?.amountCutting)
+        const amount = record.garmentAccessory?.amountCutting
+          ? numberValidatorCalc(record.quantityPO) - numberValidatorCalc(record.garmentAccessory?.amountCutting)
+          : 0
         return (
           <EditableStateCell
             dataIndex='remainingAmount'
@@ -134,7 +133,7 @@ const GarmentAccessoryPage: React.FC<Props> = () => {
                 status={record.status}
                 disabled={(newRecord.syncStatus && table.isEditing(record.id!)) ?? false}
               >
-                {amount}
+                {numberValidatorDisplay(amount)}
               </SkyTableTypography>
             }
             disabled={(newRecord.syncStatus && table.isEditing(record.id!)) ?? false}
@@ -145,7 +144,7 @@ const GarmentAccessoryPage: React.FC<Props> = () => {
               status={record.status}
               disabled={(record.garmentAccessory && record.garmentAccessory.syncStatus) ?? false}
             >
-              {amount}
+              {numberValidatorDisplay(amount)}
             </SkyTableTypography>
           </EditableStateCell>
         )
@@ -171,7 +170,8 @@ const GarmentAccessoryPage: React.FC<Props> = () => {
               status={record.status}
               disabled={(record.garmentAccessory && record.garmentAccessory.syncStatus) ?? false}
             >
-              {record.garmentAccessory && dateValidatorDisplay(record.garmentAccessory.passingDeliveryDate)}
+              {(record.garmentAccessory && dateValidatorDisplay(record.garmentAccessory.passingDeliveryDate)) ??
+                '--/--/----'}
             </SkyTableTypography>
           </EditableStateCell>
         )
@@ -335,6 +335,7 @@ const GarmentAccessoryPage: React.FC<Props> = () => {
   return (
     <>
       <BaseLayout
+        title='Phụ liệu'
         searchPlaceHolder='Mã hàng...'
         searchValue={searchText}
         onDateCreationChange={(enable) => table.setDateCreation(enable)}
