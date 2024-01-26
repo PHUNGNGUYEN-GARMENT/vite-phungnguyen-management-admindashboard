@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { clsx, type ClassValue } from 'clsx'
-import dayjs, { Dayjs } from 'dayjs'
+import dayjs from 'dayjs'
 import { twMerge } from 'tailwind-merge'
 import DayJS, { DatePattern } from './date-formatter'
 
@@ -57,7 +57,7 @@ export const dateTimeValidatorDisplay = (date?: string | null): string => {
 
 // Validator value change
 
-export const dateValidatorChange = (date: Dayjs): string | null => {
+export const dateValidatorChange = (date?: string | number | dayjs.Dayjs | Date | null | undefined): string | null => {
   return date ? DayJS(date).toISOString() : null
 }
 

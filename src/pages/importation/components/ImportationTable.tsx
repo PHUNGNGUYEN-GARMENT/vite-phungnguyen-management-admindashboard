@@ -1,14 +1,16 @@
-import useDevice from '~/components/hooks/useDevice'
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ColorPicker, Divider, Flex, Space } from 'antd'
-import { ColumnsType } from 'antd/es/table'
+import { Divider, Flex, Space } from 'antd'
+import type { ColumnsType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
+import { useEffect } from 'react'
+import useDevice from '~/components/hooks/useDevice'
 import useTable from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import ExpandableItemRow from '~/components/sky-ui/SkyTable/ExpandableItemRow'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
+import { ProductTableDataType } from '~/pages/product/type'
 import {
   breakpoint,
   dateValidatorChange,
@@ -16,14 +18,17 @@ import {
   dateValidatorInit,
   numberValidatorChange,
   numberValidatorDisplay,
-  numberValidatorInit,
-  textValidatorDisplay
+  numberValidatorInit
 } from '~/utils/helpers'
-import useImportation from './hooks/useImportation'
-import { ImportationPageDataType } from './type'
+import useImportationTable from '../hooks/useImportationTable'
+import { ImportationTableDataType } from '../type'
 
-const ImportationPage = () => {
-  const table = useTable<ImportationPageDataType>([])
+interface Props {
+  productRecord: ProductTableDataType
+}
+
+const ImportationTable: React.FC<Props> = ({ productRecord }) => {
+  const table = useTable<ImportationTableDataType>([])
   const {
     searchText,
     setSearchText,
@@ -36,34 +41,15 @@ const ImportationPage = () => {
     handleConfirmDelete,
     handlePageChange,
     productService
-  } = useImportation(table)
+  } = useImportationTable(table)
   const { width } = useDevice()
 
+  useEffect(() => {
+    console.log(productRecord)
+  }, [productRecord])
+
   const columns = {
-    productCode: (record: ImportationPageDataType) => {
-      return (
-        <EditableStateCell isEditing={false} dataIndex='productCode' title='Mã hàng' inputType='text' required={true}>
-          <SkyTableTypography strong status={record.status}>
-            {textValidatorDisplay(record.productCode)}
-          </SkyTableTypography>
-        </EditableStateCell>
-      )
-    },
-    productColor: (record: ImportationPageDataType) => {
-      return (
-        <EditableStateCell isEditing={false} dataIndex='colorID' title='Màu' inputType='colorselector' required={false}>
-          <Flex justify='space-between' align='center' gap={10} wrap='wrap'>
-            <SkyTableTypography status={record.productColor?.color?.status} className='w-fit'>
-              {textValidatorDisplay(record.productColor?.color?.name)}
-            </SkyTableTypography>
-            {record.productColor && (
-              <ColorPicker size='middle' format='hex' value={record.productColor?.color?.hexColor} disabled />
-            )}
-          </Flex>
-        </EditableStateCell>
-      )
-    },
-    quantity: (record: ImportationPageDataType) => {
+    quantity: (record: ImportationTableDataType) => {
       return (
         <EditableStateCell
           isEditing={table.isEditing(record.key!)}
@@ -71,16 +57,14 @@ const ImportationPage = () => {
           title='Lô nhập'
           inputType='number'
           required={true}
-          initialValue={record.importation && numberValidatorInit(record.importation.quantity)}
+          initialValue={numberValidatorInit(record.quantity)}
           onValueChange={(val: number) => setNewRecord({ ...newRecord, quantity: numberValidatorChange(val) })}
         >
-          <SkyTableTypography status={record.status}>
-            {record.importation && numberValidatorDisplay(record.importation.quantity)}
-          </SkyTableTypography>
+          <SkyTableTypography status={record.status}>{numberValidatorDisplay(record.quantity)}</SkyTableTypography>
         </EditableStateCell>
       )
     },
-    dateImported: (record: ImportationPageDataType) => {
+    dateImported: (record: ImportationTableDataType) => {
       return (
         <EditableStateCell
           isEditing={table.isEditing(record.key!)}
@@ -88,40 +72,22 @@ const ImportationPage = () => {
           title='Ngày nhập'
           inputType='datepicker'
           required={true}
-          initialValue={record.importation && dateValidatorInit(record.importation.dateImported)}
+          initialValue={dateValidatorInit(record.dateImported)}
           onValueChange={(val: Dayjs) => setNewRecord({ ...newRecord, dateImported: dateValidatorChange(val) })}
         >
-          <SkyTableTypography status={record.status}>
-            {record.importation && dateValidatorDisplay(record.importation.dateImported)}
-          </SkyTableTypography>
+          <SkyTableTypography status={record.status}>{dateValidatorDisplay(record.dateImported)}</SkyTableTypography>
         </EditableStateCell>
       )
     }
   }
 
-  const tableColumns: ColumnsType<ImportationPageDataType> = [
-    {
-      title: 'Mã hàng',
-      dataIndex: 'productCode',
-      width: '15%',
-      render: (_value: any, record: ImportationPageDataType) => {
-        return columns.productCode(record)
-      }
-    },
-    {
-      title: 'Màu',
-      dataIndex: 'colorID',
-      width: '10%',
-      render: (_value: any, record: ImportationPageDataType) => {
-        return columns.productColor(record)
-      }
-    },
+  const tableColumns: ColumnsType<ImportationTableDataType> = [
     {
       title: 'Lô nhập',
       dataIndex: 'quantity',
       width: '15%',
       responsive: ['md'],
-      render: (_value: any, record: ImportationPageDataType) => {
+      render: (_value: any, record: ImportationTableDataType) => {
         return columns.quantity(record)
       }
     },
@@ -130,7 +96,7 @@ const ImportationPage = () => {
       dataIndex: 'dateImported',
       width: '15%',
       responsive: ['lg'],
-      render: (_value: any, record: ImportationPageDataType) => {
+      render: (_value: any, record: ImportationTableDataType) => {
         return columns.dateImported(record)
       }
     }
@@ -162,7 +128,7 @@ const ImportationPage = () => {
             onEdit: {
               onClick: (_e, record) => {
                 setNewRecord({
-                  ...record?.importation
+                  ...record
                 })
                 table.handleStartEditing(record!.key!)
               }
@@ -205,4 +171,4 @@ const ImportationPage = () => {
   )
 }
 
-export default ImportationPage
+export default ImportationTable

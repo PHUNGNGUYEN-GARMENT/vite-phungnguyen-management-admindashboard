@@ -7,6 +7,9 @@ import { useSelector } from 'react-redux'
 import useTable from '~/components/hooks/useTable'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
+import ModalAddNewImportation from '~/pages/importation/components/ModalAddNewImportation'
+import useImportationTable from '~/pages/importation/hooks/useImportationTable'
+import { ImportationTableDataType } from '~/pages/importation/type'
 import { ProductTableDataType } from '~/pages/product/type'
 import { RootState } from '~/store/store'
 import {
@@ -17,9 +20,6 @@ import {
   numberValidatorDisplay,
   numberValidatorInit
 } from '~/utils/helpers'
-import useImportation from '../hooks/useImportation'
-import { ImportationTableDataType } from '../type'
-import ModalAddNewImportation from './ModalAddNewImportation'
 
 interface Props {
   productRecord: ProductTableDataType
@@ -38,7 +38,7 @@ const ImportationTable: React.FC<Props> = ({ productRecord }) => {
     handleConfirmDelete,
     handlePageChange,
     importationService
-  } = useImportation(table)
+  } = useImportationTable(table)
   const user = useSelector((state: RootState) => state.user)
   const columns: ColumnType<ImportationTableDataType>[] = [
     {
@@ -144,7 +144,7 @@ const ImportationTable: React.FC<Props> = ({ productRecord }) => {
             },
             onSave: {
               onClick: (_e, record) => {
-                handleSaveClick(record!, newRecord!)
+                handleSaveClick(record!)
               }
             },
             onConfirmCancelEditing: () => table.handleConfirmCancelEditing(),

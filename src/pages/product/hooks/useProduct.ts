@@ -13,8 +13,7 @@ import { TableItemWithKey, UseTableProps } from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
 import { ProductTableDataType } from '~/pages/product/type'
 import { Color, Group, Print, PrintablePlace, Product, ProductColor, ProductGroup } from '~/typing'
-import DayJS, { DatePattern } from '~/utils/date-formatter'
-import { dateComparator, numberComparator, textComparator } from '~/utils/helpers'
+import { dateComparator, dateValidatorChange, numberComparator, textComparator } from '~/utils/helpers'
 import { ProductAddNewProps } from '../components/ModalAddNewProduct'
 
 export interface ProductNewRecordProps {
@@ -48,11 +47,6 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
   const [productColors, setProductColors] = useState<ProductColor[]>([])
   const [productGroups, setProductGroups] = useState<ProductGroup[]>([])
   const [printablePlaces, setPrintablePlaces] = useState<PrintablePlace[]>([])
-
-  const [productNew, setProductNew] = useState<Product | undefined>(undefined)
-  const [productColorNew, setProductColorNew] = useState<Color | undefined>(undefined)
-  const [productGroupNew, setProductGroupNew] = useState<Group | undefined>(undefined)
-  const [printablePlaceNew, setPrintablePlaceNew] = useState<PrintablePlace | undefined>(undefined)
 
   const [colors, setColors] = useState<Color[]>([])
   const [groups, setGroups] = useState<Group[]>([])
@@ -122,7 +116,7 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
 
   useEffect(() => {
     loadData()
-  }, [productNew, productColorNew, productGroupNew, printablePlaceNew])
+  }, [])
 
   useEffect(() => {
     selfConvertDataSource(products, productColors, productGroups, printablePlaces)
@@ -245,11 +239,11 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
         {
           productCode: formAddNew.productCode,
           quantityPO: formAddNew.quantityPO,
-          dateInputNPL: formAddNew.dateInputNPL ? DayJS(formAddNew.dateInputNPL).format(DatePattern.iso8601) : null,
-          dateOutputFCR: formAddNew.dateOutputFCR ? DayJS(formAddNew.dateOutputFCR).format(DatePattern.iso8601) : null
+          dateInputNPL: dateValidatorChange(formAddNew.dateInputNPL),
+          dateOutputFCR: dateValidatorChange(formAddNew.dateOutputFCR)
         },
         setLoading,
-        async (meta, msg) => {
+        async (meta) => {
           if (meta?.success) {
             const productNew = meta.data as Product
             if (formAddNew.colorID) {
@@ -258,8 +252,8 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
                 { productID: productNew.id!, colorID: formAddNew.colorID },
                 setLoading,
                 (meta) => {
-                  if (meta?.success) {
-                    setProductColorNew(meta.data as ProductColor)
+                  if (!meta?.success) {
+                    throw new Error('Create new color item failed!')
                   }
                 }
               )
@@ -270,8 +264,8 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
                 { productID: productNew.id!, groupID: formAddNew.groupID },
                 setLoading,
                 (meta) => {
-                  if (meta?.success) {
-                    setProductGroupNew(meta.data as ProductGroup)
+                  if (!meta?.success) {
+                    throw new Error('Create new group item failed!')
                   }
                 }
               )
@@ -282,25 +276,25 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
                 { productID: productNew.id!, printID: formAddNew.printID },
                 setLoading,
                 (meta) => {
-                  if (meta?.success) {
-                    setPrintablePlaceNew(meta.data as PrintablePlace)
+                  if (!meta?.success) {
+                    throw new Error('Create new print item failed!')
                   }
                 }
               )
             }
-            setProductNew(productNew)
-            message.success(msg)
           } else {
-            console.log('Error')
-            message.error(msg)
+            throw new Error('Create new product item failed!')
           }
         }
       )
+      message.success('Success')
     } catch (error) {
       console.error(error)
+      message.error(`${error}`)
     } finally {
       setLoading(false)
       setOpenModal(false)
+      loadData()
     }
   }
 
