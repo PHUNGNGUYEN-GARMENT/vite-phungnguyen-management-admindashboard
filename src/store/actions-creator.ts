@@ -1,6 +1,6 @@
 import { createAction } from '@reduxjs/toolkit'
-import { UserRole } from '~/typing'
+import { UserRoleType } from '~/typing'
 
 export const setAdminAction = createAction<boolean>('user/setAdmin')
 
-export const setUserRoleAction = createAction<UserRole>('user/setUserRole')
+export const setUserRoleAction = createAction<UserRoleType[]>('user/setUserRole')

@@ -1,10 +1,12 @@
 import type { MenuProps } from 'antd'
-import { Menu } from 'antd'
+import { Flex, Menu } from 'antd'
 import React, { useEffect, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { useSelector } from 'react-redux'
+import { useLocation } from 'react-router-dom'
 import logo from '~/assets/logo.svg'
+import { RootState } from '~/store/store'
 import { cn } from '~/utils/helpers'
-import { appRoutes } from '~/utils/route'
+import { SideType, appRoutes } from '~/utils/route'
 import SideIcon from './SideIcon'
 import SideItem from './SideItem'
 
@@ -24,18 +26,11 @@ function getItem(label: React.ReactNode, key: React.Key, icon?: React.ReactNode,
   } as MenuItem
 }
 
-const items: MenuProps['items'] = appRoutes.map((route) => {
-  if (route.isGroup) {
-    return getItem(SideItem(route), route.key, null, 'group')
-  } else {
-    return getItem(SideItem(route), route.key, SideIcon(route.icon))
-  }
-})
-
 // eslint-disable-next-line no-empty-pattern
 const SideNav: React.FC<Props> = ({ openDrawer, setOpenDrawer, ...props }) => {
   const { pathname } = useLocation()
   const [selectedKey, setSelectedKey] = useState<string>(appRoutes[0].key)
+  const currentUser = useSelector((state: RootState) => state.user)
 
   useEffect(() => {
     const keyFound = appRoutes.find((route) => route.path === lastPath(pathname))
@@ -50,16 +45,32 @@ const SideNav: React.FC<Props> = ({ openDrawer, setOpenDrawer, ...props }) => {
     return path
   }
 
+  const routes = (appRoutes: SideType[]): SideType[] => {
+    const staffRoutes = appRoutes.filter((route) => {
+      return currentUser.isAdmin ? route : route.role !== 'admin'
+    })
+
+    return staffRoutes
+  }
+
+  const items: MenuProps['items'] = routes(appRoutes).map((route) => {
+    if (route.isGroup) {
+      return getItem(SideItem(route), route.key, null, 'group')
+    } else {
+      return getItem(SideItem(route), route.key, SideIcon(route.icon))
+    }
+  })
+
   const onClick: MenuProps['onClick'] = (e) => {
     setSelectedKey(e.key)
     setOpenDrawer(!openDrawer)
   }
 
   return (
-    <div {...props} className={cn('bg-white', props.className)}>
-      <Link to={'/'} onClick={() => {}} className='relative flex justify-center py-5'>
+    <Flex vertical gap={20} {...props} className={cn('bg-white', props.className)}>
+      <Flex align='center' justify='center'>
         <img src={logo} alt='logo' className='h-16 w-16 object-contain lg:h-10 lg:w-10' />
-      </Link>
+      </Flex>
       <Menu
         onClick={onClick}
         selectedKeys={[selectedKey]}
@@ -67,7 +78,7 @@ const SideNav: React.FC<Props> = ({ openDrawer, setOpenDrawer, ...props }) => {
         mode='inline'
         items={items}
       />
-    </div>
+    </Flex>
   )
 }
 export default SideNav

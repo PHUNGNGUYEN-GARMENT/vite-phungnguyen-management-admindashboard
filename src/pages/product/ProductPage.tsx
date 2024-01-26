@@ -2,6 +2,7 @@
 import { Collapse, ColorPicker, Divider, Flex, Space, Typography } from 'antd'
 import type { ColumnType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
+import { useSelector } from 'react-redux'
 import useDevice from '~/components/hooks/useDevice'
 import useTable from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
@@ -9,6 +10,7 @@ import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import ExpandableItemRow from '~/components/sky-ui/SkyTable/ExpandableItemRow'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
+import { RootState } from '~/store/store'
 import {
   breakpoint,
   dateValidatorChange,
@@ -27,6 +29,7 @@ import useProduct from './hooks/useProduct'
 import { ProductTableDataType } from './type'
 
 const ProductPage: React.FC = () => {
+  const currentUser = useSelector((state: RootState) => state.user)
   const table = useTable<ProductTableDataType>([])
   const { width } = useDevice()
   const {
@@ -294,7 +297,8 @@ const ProductPage: React.FC = () => {
             onConfirmCancelEditing: () => table.handleConfirmCancelEditing(),
             onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),
             onConfirmDelete: (record) => handleConfirmDelete(record),
-            isShow: true
+            isShow:
+              currentUser.isAdmin || currentUser.roles?.some((role) => role === 'admin' || role === 'product_manager')
           }}
           expandable={{
             expandedRowRender: (record: ProductTableDataType) => {

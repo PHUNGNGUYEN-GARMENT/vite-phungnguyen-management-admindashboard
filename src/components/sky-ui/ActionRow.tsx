@@ -2,8 +2,6 @@
 import { Button, Flex, Popconfirm as PopConfirm } from 'antd'
 import { BaseButtonProps } from 'antd/es/button/button'
 import React, { HTMLAttributes } from 'react'
-import { useSelector } from 'react-redux'
-import { RootState } from '~/store/store'
 import { cn } from '~/utils/helpers'
 
 export interface ActionButtonProps<T extends { key?: React.Key }> extends BaseButtonProps {
@@ -37,8 +35,6 @@ export interface ActionRowProps<T extends { key?: React.Key }> extends HTMLAttri
 }
 
 const ActionRow = <T extends { key?: React.Key }>({ ...props }: ActionRowProps<T>) => {
-  const user = useSelector((state: RootState) => state.user)
-
   return (
     <Flex className={props.className}>
       <Flex align='center' justify='space-between'>
@@ -68,12 +64,12 @@ const ActionRow = <T extends { key?: React.Key }>({ ...props }: ActionRowProps<T
                 Add
               </Button>
             )}
-            {user.isAdmin && props.onEdit.isShow && (
+            {props.onEdit.isShow && (
               <Button type='dashed' disabled={props.onEdit.disabled} onClick={props.onEdit.onClick}>
                 Edit
               </Button>
             )}
-            {user.isAdmin && props.onDelete?.isShow && (
+            {props.onDelete?.isShow && (
               <PopConfirm
                 title={`Sure to delete?`}
                 onCancel={props.onConfirmCancelDeleting}

@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Table } from 'antd'
 import type { ColumnsType, TableProps } from 'antd/es/table'
+import { ColumnType } from 'antd/lib/table'
 import { useEffect, useRef, useState } from 'react'
-import { useSelector } from 'react-redux'
 import { ResponseDataType, defaultRequestBody } from '~/api/client'
 import { ProductTableDataType } from '~/pages/product/type'
-import { RootState } from '~/store/store'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
 import { cn } from '~/utils/helpers'
 import ActionRow, { ActionProps } from '../ActionRow'
@@ -26,7 +25,6 @@ const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: s
   ...props
 }: SkyTableProps<T>) => {
   const tblRef: Parameters<typeof Table>[0]['ref'] = useRef(null)
-  const user = useSelector((state: RootState) => state.user)
   const [editKey, setEditKey] = useState<React.Key>('-1')
   // const [deleteKey, setDeleteKey] = useState<React.Key>('-1')
   const isEditing = (key?: React.Key): boolean => {
@@ -43,51 +41,47 @@ const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: s
     }
   }, [props.scrollTo])
 
-  const actionsCols: ColumnsType<T> = [
-    {
-      title: 'Operation',
-      width: '1%',
-      dataIndex: 'operation',
-      render: (_value: any, record: T) => {
-        return (
-          <>
-            <ActionRow
-              isEditing={isEditing(record.key)}
-              onAdd={{
-                onClick: (e) => props.actions?.onAdd?.onClick?.(e, record),
-                disabled: props.actions?.onAdd?.disabled ?? isEditing(editKey),
-                isShow: props.actions?.onAdd ? props.actions.onAdd.isShow ?? true : false
-              }}
-              onSave={{
-                onClick: (e) => props.actions?.onSave?.onClick?.(e, record),
-                disabled: props.actions?.onSave?.disabled ?? isEditing(editKey),
-                isShow: props.actions?.onSave ? props.actions.onSave.isShow ?? true : false
-              }}
-              onEdit={{
-                onClick: (e) => {
-                  setEditKey(record.key!)
-                  props.actions?.onEdit?.onClick?.(e, record)
-                },
-                disabled: props.actions?.onEdit?.disabled ?? isEditing(editKey),
-                isShow: props.actions?.onEdit ? props.actions.onEdit.isShow ?? true : false
-              }}
-              onDelete={{
-                onClick: (e) => {
-                  // setDeleteKey(record.key!)
-                  props.actions?.onDelete?.onClick?.(e, record)
-                },
-                disabled: props.actions?.onDelete?.disabled ?? isEditing(editKey),
-                isShow: props.actions?.onDelete ? props.actions.onDelete.isShow ?? true : false
-              }}
-              onConfirmCancelEditing={(e) => props.actions?.onConfirmCancelEditing?.(e)}
-              onConfirmCancelDeleting={props.actions?.onConfirmCancelDeleting}
-              onConfirmDelete={() => props.actions?.onConfirmDelete?.(record)}
-            />
-          </>
-        )
-      }
+  const actionsCols: ColumnType<T> = {
+    title: 'Operation',
+    width: '1%',
+    dataIndex: 'operation',
+    render: (_value: any, record: T) => {
+      return (
+        <ActionRow
+          isEditing={isEditing(record.key)}
+          onAdd={{
+            onClick: (e) => props.actions?.onAdd?.onClick?.(e, record),
+            disabled: props.actions?.onAdd?.disabled ?? isEditing(editKey),
+            isShow: props.actions?.onAdd ? props.actions.onAdd.isShow ?? true : false
+          }}
+          onSave={{
+            onClick: (e) => props.actions?.onSave?.onClick?.(e, record),
+            disabled: props.actions?.onSave?.disabled ?? isEditing(editKey),
+            isShow: props.actions?.onSave ? props.actions.onSave.isShow ?? true : false
+          }}
+          onEdit={{
+            onClick: (e) => {
+              setEditKey(record.key!)
+              props.actions?.onEdit?.onClick?.(e, record)
+            },
+            disabled: props.actions?.onEdit?.disabled ?? isEditing(editKey),
+            isShow: props.actions?.onEdit ? props.actions.onEdit.isShow ?? true : false
+          }}
+          onDelete={{
+            onClick: (e) => {
+              // setDeleteKey(record.key!)
+              props.actions?.onDelete?.onClick?.(e, record)
+            },
+            disabled: props.actions?.onDelete?.disabled ?? isEditing(editKey),
+            isShow: props.actions?.onDelete ? props.actions.onDelete.isShow ?? true : false
+          }}
+          onConfirmCancelEditing={(e) => props.actions?.onConfirmCancelEditing?.(e)}
+          onConfirmCancelDeleting={props.actions?.onConfirmCancelDeleting}
+          onConfirmDelete={() => props.actions?.onConfirmDelete?.(record)}
+        />
+      )
     }
-  ]
+  }
 
   const dateCreationColumns: ColumnsType<T> = [
     {
@@ -109,23 +103,15 @@ const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: s
     }
   ]
 
-  const adminColumns: ColumnsType<T> = props.isDateCreation
+  const columns: ColumnsType<T> = props.columns
     ? props.actions?.isShow
-      ? props.columns
-        ? [...props.columns, ...dateCreationColumns, ...actionsCols]
-        : [...dateCreationColumns, ...actionsCols]
-      : props.columns
+      ? props.isDateCreation
+        ? [...props.columns, ...dateCreationColumns, actionsCols]
+        : [...props.columns, actionsCols]
+      : props.isDateCreation
         ? [...props.columns, ...dateCreationColumns]
-        : [...dateCreationColumns]
-    : props.actions?.isShow
-      ? props.columns
-        ? [...props.columns, ...actionsCols]
-        : [...actionsCols]
-      : props.columns
-        ? [...props.columns!]
-        : []
-
-  const staffColumns: ColumnsType<T> = [...props.columns!]
+        : [...props.columns]
+    : []
 
   return (
     <Table
@@ -134,7 +120,7 @@ const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: s
       className={props.className}
       loading={props.loading}
       bordered
-      columns={user.isAdmin ? adminColumns : staffColumns}
+      columns={columns}
       dataSource={props.dataSource}
       rowClassName={cn('editable-row', props.rowClassName)}
       pagination={
