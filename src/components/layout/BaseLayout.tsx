@@ -2,7 +2,7 @@ import { Button, Flex, Input, Switch, Typography } from 'antd'
 import { SwitchChangeEventHandler } from 'antd/es/switch'
 import { Plus } from 'lucide-react'
 import React from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { RootState } from '~/store/store'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
@@ -44,8 +44,9 @@ const BaseLayout: React.FC<Props> = ({
   children,
   ...props
 }) => {
-  const user = useSelector((state: RootState) => state.user)
-  const dispatch = useDispatch()
+  const currentUser = useSelector((state: RootState) => state.user)
+  // const dispatch = useDispatch()
+  // dispatch(setUserAction)
 
   return (
     <div {...props}>
@@ -85,7 +86,7 @@ const BaseLayout: React.FC<Props> = ({
                   onChange={onSortChange}
                 />
               )}
-              {user.isAdmin && onDateCreationChange && (
+              {currentUser.user.isAdmin && onDateCreationChange && (
                 <Switch
                   checkedChildren='DateCreation'
                   unCheckedChildren='DateCreation'
@@ -114,7 +115,7 @@ const BaseLayout: React.FC<Props> = ({
                   Reset
                 </Button>
               )}
-              {user.isAdmin && onAddNewClick && (
+              {currentUser.user.isAdmin && onAddNewClick && (
                 <Button onClick={onAddNewClick} className='flex items-center' type='primary' icon={<Plus size={20} />}>
                   New
                 </Button>

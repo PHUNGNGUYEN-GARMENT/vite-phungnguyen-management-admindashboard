@@ -23,7 +23,7 @@ import {
   textValidatorDisplay,
   textValidatorInit
 } from '~/utils/helpers'
-import ImportationTable from '../importations/components/ImportationTable'
+import ImportationTable from '../importation/components/ImportationTable'
 import ModalAddNewProduct from './components/ModalAddNewProduct'
 import useProduct from './hooks/useProduct'
 import { ProductTableDataType } from './type'
@@ -298,7 +298,8 @@ const ProductPage: React.FC = () => {
             onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),
             onConfirmDelete: (record) => handleConfirmDelete(record),
             isShow:
-              currentUser.isAdmin || currentUser.roles?.some((role) => role === 'admin' || role === 'product_manager')
+              currentUser.user.isAdmin ||
+              currentUser.userRoles?.some((role) => role === 'admin' || role === 'product_manager')
           }}
           expandable={{
             expandedRowRender: (record: ProductTableDataType) => {

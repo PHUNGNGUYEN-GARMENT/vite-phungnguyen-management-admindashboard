@@ -1,19 +1,31 @@
-import { Route, Routes } from 'react-router-dom'
-import SignIn from './pages/auth/signin/SignIn'
-import SignUp from './pages/auth/signup/Signup'
+import { Route, Routes, useNavigate } from 'react-router-dom'
 
-import { Suspense } from 'react'
+import { Suspense, useEffect } from 'react'
 import Main from './components/layout/Main'
+import useLocalStorage from './hooks/useLocalStorage'
+import LoginPage from './pages/authen/LoginPage'
 import { appRoutes } from './utils/route'
 
 function App() {
+  const navigate = useNavigate()
+  const [accessToken] = useLocalStorage('accessToken', null)
+  // const navigate = useNavigate()
+  // const currentUser = useSelector((state: RootState) => state.user)
+  // const [loading, setLoading] = useState<boolean>(false)
+  // const { isAuth } = useAuth(setLoading)
+
+  useEffect(() => {
+    if (!accessToken) {
+      navigate('/login')
+    }
+  }, [accessToken])
+
   return (
     <>
       <div className='App'>
         <Suspense fallback={<div>Loading...</div>}>
           <Routes>
-            <Route path='signup' element={<SignUp />} />
-            <Route path='signin' element={<SignIn />} />
+            <Route path='login' element={<LoginPage />} />
             <Route element={<Main />}>
               {appRoutes.map((route, i) => {
                 return (

@@ -14,6 +14,7 @@ import {
   dateValidatorChange,
   dateValidatorDisplay,
   dateValidatorInit,
+  numberValidatorCalc,
   numberValidatorChange,
   numberValidatorDisplay,
   numberValidatorInit,
@@ -159,10 +160,9 @@ const GarmentAccessoryTable: React.FC<Props> = () => {
           dataIndex: 'remainingAmount',
           width: '10%',
           render: (_value: any, record: TableItemWithKey<GarmentAccessoryTableDataType>) => {
-            const amount =
-              record.garmentAccessory?.amountCutting &&
-              record.garmentAccessory.amountCutting > 0 &&
-              numberValidatorDisplay(record.quantityPO) - numberValidatorDisplay(record.garmentAccessory?.amountCutting)
+            const amount = record.garmentAccessory?.amountCutting
+              ? numberValidatorCalc(record.quantityPO) - numberValidatorCalc(record.garmentAccessory?.amountCutting)
+              : 0
             return (
               <EditableStateCell
                 dataIndex='remainingAmount'

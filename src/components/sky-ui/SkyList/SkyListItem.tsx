@@ -38,7 +38,7 @@ const SkyListItem = <
       <Flex vertical className='w-full' gap={10}>
         <Flex align='center' justify='space-between' gap={10}>
           <Flex>
-            <EditableStateCell {...props} isEditing={(labelEditing && props.isEditing && user.isAdmin) ?? false}>
+            <EditableStateCell {...props} isEditing={(labelEditing && props.isEditing && user.user.isAdmin) ?? false}>
               <SkyTableTypography className='text-lg font-semibold' status={record.status}>
                 {label}
               </SkyTableTypography>
@@ -74,7 +74,7 @@ const SkyListItem = <
           />
         </Flex>
         {children}
-        {user.isAdmin && isDateCreation && (
+        {user.user.isAdmin && isDateCreation && (
           <Flex vertical gap={10}>
             <Flex className='w-full' align='center' justify='start' gap={5}>
               <Typography.Text type='secondary' className='w-40 font-medium'>

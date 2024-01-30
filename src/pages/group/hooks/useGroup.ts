@@ -6,7 +6,7 @@ import GroupAPI from '~/api/services/GroupAPI'
 import { TableItemWithKey, UseTableProps } from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
 import { Group } from '~/typing'
-import { GroupTableDataType } from '../GroupPage'
+import { GroupTableDataType } from '../type'
 
 export default function useGroup(table: UseTableProps<GroupTableDataType>) {
   const { setLoading, setDataSource, handleConfirmCancelEditing, handleConfirmDeleting } = table

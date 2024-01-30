@@ -40,7 +40,7 @@ const ImportationTable: React.FC<Props> = ({ productRecord }) => {
     handleSaveClick,
     handleConfirmDelete,
     handlePageChange,
-    productService
+    importationService
   } = useImportationTable(table)
   const { width } = useDevice()
 
@@ -121,7 +121,7 @@ const ImportationTable: React.FC<Props> = ({ productRecord }) => {
           deletingKey={table.deletingKey}
           dataSource={table.dataSource}
           rowClassName='editable-row'
-          metaData={productService.metaData}
+          metaData={importationService.metaData}
           onPageChange={handlePageChange}
           isDateCreation={table.dateCreation}
           actions={{

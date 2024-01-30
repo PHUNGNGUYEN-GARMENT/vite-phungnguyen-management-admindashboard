@@ -1,10 +1,10 @@
 import type { MenuProps } from 'antd'
 import { Flex, Menu } from 'antd'
 import React, { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
 import { useLocation } from 'react-router-dom'
 import logo from '~/assets/logo.svg'
-import { RootState } from '~/store/store'
+import useLocalStorage from '~/hooks/useLocalStorage'
+import { UserRoleType } from '~/typing'
 import { cn } from '~/utils/helpers'
 import { SideType, appRoutes } from '~/utils/route'
 import SideIcon from './SideIcon'
@@ -30,7 +30,7 @@ function getItem(label: React.ReactNode, key: React.Key, icon?: React.ReactNode,
 const SideNav: React.FC<Props> = ({ openDrawer, setOpenDrawer, ...props }) => {
   const { pathname } = useLocation()
   const [selectedKey, setSelectedKey] = useState<string>(appRoutes[0].key)
-  const currentUser = useSelector((state: RootState) => state.user)
+  const [userRolesLocalStorage] = useLocalStorage('userRoles', [])
 
   useEffect(() => {
     const keyFound = appRoutes.find((route) => route.path === lastPath(pathname))
@@ -46,11 +46,12 @@ const SideNav: React.FC<Props> = ({ openDrawer, setOpenDrawer, ...props }) => {
   }
 
   const routes = (appRoutes: SideType[]): SideType[] => {
-    const staffRoutes = appRoutes.filter((route) => {
-      return currentUser.isAdmin ? route : route.role !== 'admin'
+    const userRoles: UserRoleType[] = userRolesLocalStorage
+    const routesMapping = appRoutes.filter((route) => {
+      return userRoles.includes('admin') ? route.role === 'admin' : route.role !== 'admin'
     })
 
-    return staffRoutes
+    return routesMapping
   }
 
   const items: MenuProps['items'] = routes(appRoutes).map((route) => {

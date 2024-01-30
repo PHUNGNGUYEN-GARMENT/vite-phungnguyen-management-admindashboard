@@ -33,7 +33,7 @@ export type SideType = {
   key: string
   name: string
   path: string
-  role: UserRoleType
+  role?: UserRoleType
   component:
     | React.LazyExoticComponent<() => JSX.Element>
     | React.ReactNode
@@ -50,7 +50,6 @@ export const appRoutes: SideType[] = [
     path: '/',
     component: Dashboard,
     isGroup: false,
-    role: 'admin',
     icon: DashboardIcon
   },
   {

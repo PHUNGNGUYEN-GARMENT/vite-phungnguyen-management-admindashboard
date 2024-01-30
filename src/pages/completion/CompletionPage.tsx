@@ -379,92 +379,92 @@ const FinishPage: React.FC<Props> = () => {
     }
   ]
 
-  const expandableColumns: ColumnsType<CompletionTableDataType> = [
-    {
-      title: 'Ủi',
-      responsive: ['md'],
-      children: [
-        {
-          title: 'SL ủi được',
-          dataIndex: 'quantityIroned',
-          width: '10%',
-          render: (_value: any, record: TableItemWithKey<CompletionTableDataType>) => {
-            return columns.ironed.quantityIroned(record)
-          }
-        },
-        {
-          title: 'Còn lại',
-          dataIndex: 'remainingAmount',
-          width: '10%',
-          render: (_value: any, record: TableItemWithKey<CompletionTableDataType>) => {
-            return columns.ironed.remainingAmount(record)
-          }
-        }
-      ]
-    },
-    {
-      title: 'Kiểm',
-      responsive: ['lg'],
-      children: [
-        {
-          title: 'SL kiểm đạt',
-          dataIndex: 'quantityCheckPassed',
-          width: '10%',
-          render: (_value: any, record: TableItemWithKey<CompletionTableDataType>) => {
-            return columns.checkPass.quantityCheckPassed(record)
-          }
-        },
-        {
-          title: 'Còn lại',
-          dataIndex: 'remainingAmount',
-          width: '10%',
-          render: (_value: any, record: TableItemWithKey<CompletionTableDataType>) => {
-            return columns.checkPass.remainingAmount(record)
-          }
-        }
-      ]
-    },
-    {
-      title: 'Đóng gói',
-      responsive: ['xl'],
-      children: [
-        {
-          title: 'SL đóng được',
-          dataIndex: 'quantityCheckPassed',
-          width: '10%',
-          render: (_value: any, record: TableItemWithKey<CompletionTableDataType>) => {
-            return columns.packaged.quantityPackaged(record)
-          }
-        },
-        {
-          title: 'Còn lại',
-          dataIndex: 'remainingAmount',
-          width: '10%',
-          render: (_value: any, record: TableItemWithKey<CompletionTableDataType>) => {
-            return columns.packaged.remainingAmount(record)
-          }
-        }
-      ]
-    },
-    {
-      title: 'Ngày xuất hàng',
-      dataIndex: 'exportedDate',
-      responsive: ['xxl'],
-      width: '10%',
-      render: (_value: any, record: TableItemWithKey<CompletionTableDataType>) => {
-        return columns.exportedDate(record)
-      }
-    },
-    {
-      title: 'Pass FI',
-      dataIndex: 'passFIDate',
-      responsive: ['xxl'],
-      width: '15%',
-      render: (_value: any, record: TableItemWithKey<CompletionTableDataType>) => {
-        return columns.passFIDate(record)
-      }
-    }
-  ]
+  // const expandableColumns: ColumnsType<CompletionTableDataType> = [
+  //   {
+  //     title: 'Ủi',
+  //     responsive: ['md'],
+  //     children: [
+  //       {
+  //         title: 'SL ủi được',
+  //         dataIndex: 'quantityIroned',
+  //         width: '10%',
+  //         render: (_value: any, record: TableItemWithKey<CompletionTableDataType>) => {
+  //           return columns.ironed.quantityIroned(record)
+  //         }
+  //       },
+  //       {
+  //         title: 'Còn lại',
+  //         dataIndex: 'remainingAmount',
+  //         width: '10%',
+  //         render: (_value: any, record: TableItemWithKey<CompletionTableDataType>) => {
+  //           return columns.ironed.remainingAmount(record)
+  //         }
+  //       }
+  //     ]
+  //   },
+  //   {
+  //     title: 'Kiểm',
+  //     responsive: ['lg'],
+  //     children: [
+  //       {
+  //         title: 'SL kiểm đạt',
+  //         dataIndex: 'quantityCheckPassed',
+  //         width: '10%',
+  //         render: (_value: any, record: TableItemWithKey<CompletionTableDataType>) => {
+  //           return columns.checkPass.quantityCheckPassed(record)
+  //         }
+  //       },
+  //       {
+  //         title: 'Còn lại',
+  //         dataIndex: 'remainingAmount',
+  //         width: '10%',
+  //         render: (_value: any, record: TableItemWithKey<CompletionTableDataType>) => {
+  //           return columns.checkPass.remainingAmount(record)
+  //         }
+  //       }
+  //     ]
+  //   },
+  //   {
+  //     title: 'Đóng gói',
+  //     responsive: ['xl'],
+  //     children: [
+  //       {
+  //         title: 'SL đóng được',
+  //         dataIndex: 'quantityCheckPassed',
+  //         width: '10%',
+  //         render: (_value: any, record: TableItemWithKey<CompletionTableDataType>) => {
+  //           return columns.packaged.quantityPackaged(record)
+  //         }
+  //       },
+  //       {
+  //         title: 'Còn lại',
+  //         dataIndex: 'remainingAmount',
+  //         width: '10%',
+  //         render: (_value: any, record: TableItemWithKey<CompletionTableDataType>) => {
+  //           return columns.packaged.remainingAmount(record)
+  //         }
+  //       }
+  //     ]
+  //   },
+  //   {
+  //     title: 'Ngày xuất hàng',
+  //     dataIndex: 'exportedDate',
+  //     responsive: ['xxl'],
+  //     width: '10%',
+  //     render: (_value: any, record: TableItemWithKey<CompletionTableDataType>) => {
+  //       return columns.exportedDate(record)
+  //     }
+  //   },
+  //   {
+  //     title: 'Pass FI',
+  //     dataIndex: 'passFIDate',
+  //     responsive: ['xxl'],
+  //     width: '15%',
+  //     render: (_value: any, record: TableItemWithKey<CompletionTableDataType>) => {
+  //       return columns.passFIDate(record)
+  //     }
+  //   }
+  // ]
 
   return (
     <>

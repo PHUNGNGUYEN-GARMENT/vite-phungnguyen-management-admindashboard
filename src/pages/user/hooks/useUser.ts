@@ -149,7 +149,7 @@ export default function useUser(table: UseTableProps<UserTableDataType>) {
       })
       console.log(formAddNew)
       setLoading(true)
-      await userService.register(
+      await userService.createNewItem(
         {
           ...userNew,
           isAdmin: roles.some((role) => role.role === 'admin')

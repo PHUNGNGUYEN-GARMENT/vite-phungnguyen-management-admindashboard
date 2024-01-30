@@ -88,6 +88,7 @@ export interface User {
   password?: string | null
   avatar?: string | null
   phone?: string | null
+  accessToken?: string | null
   isAdmin?: boolean
   workDescription?: string | null
   birthday?: string | null

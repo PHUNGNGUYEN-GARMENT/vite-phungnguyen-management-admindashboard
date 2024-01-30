@@ -10,8 +10,6 @@ export interface ItemWithId {
 }
 
 export interface APIService<T extends ItemWithId> {
-  register?: (itemNew: Partial<T>) => Promise<ResponseDataType | undefined>
-  login?: (itemNew: Partial<T>) => Promise<ResponseDataType | undefined>
   createNewItem: (itemNew: Partial<T>) => Promise<ResponseDataType | undefined>
   createNewItems?: (itemsNew: Partial<T>[]) => Promise<ResponseDataType | undefined>
   createOrUpdateItemByPk?: (id: number, item: Partial<T>) => Promise<ResponseDataType | undefined>
@@ -41,50 +39,6 @@ export interface APIService<T extends ItemWithId> {
 export default function useAPIService<T extends { id?: number }>(apiService: APIService<ItemWithId>) {
   const [metaData, setMetaData] = useState<ResponseDataType | undefined>(undefined)
   const [page, setPage] = useState<number>(1)
-
-  const register = async (
-    itemNew: T,
-    setLoading?: (enable: boolean) => void,
-    onDataSuccess?: (meta: ResponseDataType | undefined, message?: string) => void
-  ) => {
-    try {
-      setLoading?.(true)
-      const meta = await apiService.register?.(itemNew)
-      if (meta?.success) {
-        onDataSuccess?.(meta, 'Registered!')
-      } else {
-        onDataSuccess?.(undefined, 'Failed!')
-      }
-      setMetaData(meta)
-    } catch (err) {
-      console.error(err)
-      onDataSuccess?.(undefined, 'Error!')
-    } finally {
-      setLoading?.(false)
-    }
-  }
-
-  const login = async (
-    itemNew: T,
-    setLoading?: (enable: boolean) => void,
-    onDataSuccess?: (meta: ResponseDataType | undefined, message?: string) => void
-  ) => {
-    try {
-      setLoading?.(true)
-      const meta = await apiService.login?.(itemNew)
-      if (meta?.success) {
-        onDataSuccess?.(meta, 'Logged!')
-      } else {
-        onDataSuccess?.(undefined, 'Failed!')
-      }
-      setMetaData(meta)
-    } catch (err) {
-      console.error(err)
-      onDataSuccess?.(undefined, 'Error!')
-    } finally {
-      setLoading?.(false)
-    }
-  }
 
   const createNewItem = async (
     itemNew: T,
@@ -436,9 +390,7 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
     sortedListItems,
     pageChange,
     createOrUpdateItemBy,
-    createOrUpdateItemByPk,
-    register,
-    login
+    createOrUpdateItemByPk
   }
 }
 
