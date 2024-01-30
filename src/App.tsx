@@ -8,17 +8,17 @@ import { appRoutes } from './utils/route'
 
 function App() {
   const navigate = useNavigate()
-  const [accessToken] = useLocalStorage('accessToken', null)
+  const [accessTokenStored] = useLocalStorage('accessToken', null)
   // const navigate = useNavigate()
   // const currentUser = useSelector((state: RootState) => state.user)
   // const [loading, setLoading] = useState<boolean>(false)
   // const { isAuth } = useAuth(setLoading)
 
   useEffect(() => {
-    if (!accessToken) {
+    if (!accessTokenStored) {
       navigate('/login')
     }
-  }, [accessToken])
+  }, [accessTokenStored])
 
   return (
     <>

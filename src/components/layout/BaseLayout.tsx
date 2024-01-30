@@ -1,9 +1,14 @@
-import { Button, Flex, Input, Switch, Typography } from 'antd'
+import { Button, Flex, Input, Spin, Switch, Typography } from 'antd'
 import { SwitchChangeEventHandler } from 'antd/es/switch'
 import { Plus } from 'lucide-react'
-import React from 'react'
-import { useSelector } from 'react-redux'
+import React, { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
+import AuthAPI from '~/api/services/AuthAPI'
+import useLocalStorage from '~/hooks/useLocalStorage'
+import { setAdminAction } from '~/store/actions-creator'
 import { RootState } from '~/store/store'
+import { UserRoleType } from '~/typing'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
   searchPlaceHolder?: string
@@ -20,6 +25,7 @@ interface Props extends React.HTMLAttributes<HTMLElement> {
       source?: 'clear' | 'input'
     }
   ) => void
+  onLoading?: (enable: boolean) => void
   onSearchChange?: React.ChangeEventHandler<HTMLInputElement> | undefined
   dateCreation?: boolean
   onSortChange?: SwitchChangeEventHandler
@@ -42,11 +48,48 @@ const BaseLayout: React.FC<Props> = ({
   onResetClick,
   onAddNewClick,
   children,
+  onLoading,
   ...props
 }) => {
+  const [loading, setLoading] = useState<boolean>(true)
+  const [accessTokenStored] = useLocalStorage<string>('accessToken', '')
+  const [userRolesStored] = useLocalStorage<UserRoleType[]>('userRoles', [])
   const currentUser = useSelector((state: RootState) => state.user)
-  // const dispatch = useDispatch()
+  const dispatch = useDispatch()
   // dispatch(setUserAction)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    const callApi = async () => {
+      try {
+        onLoading?.(true)
+        setLoading(true)
+        if (accessTokenStored) {
+          AuthAPI.checkAdmin(accessTokenStored)
+            .then((meta) => {
+              if (!meta?.success) {
+                throw new Error(meta?.message)
+              }
+              dispatch(setAdminAction(meta.data.isAdmin))
+            })
+            .catch((error) => {
+              console.error(error)
+            })
+        }
+      } catch (error) {
+        console.error(error)
+      } finally {
+        onLoading?.(false)
+        setLoading(false)
+      }
+    }
+
+    callApi()
+  }, [accessTokenStored])
+
+  useEffect(() => {
+    if (!accessTokenStored && !userRolesStored) navigate('/login')
+  }, [accessTokenStored, userRolesStored])
 
   return (
     <div {...props}>
@@ -86,7 +129,7 @@ const BaseLayout: React.FC<Props> = ({
                   onChange={onSortChange}
                 />
               )}
-              {currentUser.user.isAdmin && onDateCreationChange && (
+              {currentUser.isAdmin && onDateCreationChange && (
                 <Switch
                   checkedChildren='DateCreation'
                   unCheckedChildren='DateCreation'
@@ -115,7 +158,7 @@ const BaseLayout: React.FC<Props> = ({
                   Reset
                 </Button>
               )}
-              {currentUser.user.isAdmin && onAddNewClick && (
+              {currentUser.isAdmin && onAddNewClick && (
                 <Button onClick={onAddNewClick} className='flex items-center' type='primary' icon={<Plus size={20} />}>
                   New
                 </Button>
@@ -123,7 +166,7 @@ const BaseLayout: React.FC<Props> = ({
             </Flex>
           </Flex>
         </Flex>
-        {children}
+        {loading ? <Spin /> : children}
       </Flex>
     </div>
   )

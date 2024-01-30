@@ -143,16 +143,16 @@ export default function useUser(table: UseTableProps<UserTableDataType>) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleAddNewItem = async (formAddNew: any) => {
     try {
+      console.log(formAddNew)
       const userNew: User = { ...formAddNew }
-      const roles: Role[] = (formAddNew.roles as number[]).map((roleID) => {
+      const rolesNew: Role[] = (formAddNew.roles as number[]).map((roleID) => {
         return roles.find((role) => role.id === roleID) as Role
       })
-      console.log(formAddNew)
       setLoading(true)
       await userService.createNewItem(
         {
           ...userNew,
-          isAdmin: roles.some((role) => role.role === 'admin')
+          isAdmin: rolesNew.some((role) => role.role === 'admin')
         },
         setLoading,
         async (meta, msg) => {
@@ -162,7 +162,7 @@ export default function useUser(table: UseTableProps<UserTableDataType>) {
           }
           await userRoleService.updateItemsBy?.(
             { field: 'userID', key: newUser.id! },
-            roles.map((roleID) => {
+            rolesNew.map((roleID) => {
               return {
                 userID: newUser.id,
                 roleID: roleID

@@ -36,5 +36,23 @@ export default {
       .catch(function (error) {
         errorFormatter(error)
       })
+  },
+  checkAdmin: async (accessToken: string): Promise<ResponseDataType | undefined> => {
+    return await client
+      .get(`${NAMESPACE}/check-admin`, {
+        headers: {
+          authorization: accessToken
+        }
+      })
+      .then((res) => {
+        console.log(res)
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
   }
 }

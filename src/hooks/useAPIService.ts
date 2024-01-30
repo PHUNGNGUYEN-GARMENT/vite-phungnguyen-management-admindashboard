@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { RequestBodyType, ResponseDataType, defaultRequestBody } from '~/api/client'
 import { ItemStatusType, SortDirection } from '~/typing'
+import useLocalStorage from './useLocalStorage'
 
 export interface ItemWithId {
   id?: number
@@ -10,33 +11,40 @@ export interface ItemWithId {
 }
 
 export interface APIService<T extends ItemWithId> {
-  createNewItem: (itemNew: Partial<T>) => Promise<ResponseDataType | undefined>
-  createNewItems?: (itemsNew: Partial<T>[]) => Promise<ResponseDataType | undefined>
-  createOrUpdateItemByPk?: (id: number, item: Partial<T>) => Promise<ResponseDataType | undefined>
+  createNewItem: (itemNew: Partial<T>, accessToken: string) => Promise<ResponseDataType | undefined>
+  createNewItems?: (itemsNew: Partial<T>[], accessToken: string) => Promise<ResponseDataType | undefined>
+  createOrUpdateItemByPk?: (id: number, item: Partial<T>, accessToken: string) => Promise<ResponseDataType | undefined>
   createOrUpdateItemBy?: (
     query: { field: string; key: React.Key },
-    item: Partial<T>
+    item: Partial<T>,
+    accessToken: string
   ) => Promise<ResponseDataType | undefined>
-  getItemByPk: (id: number) => Promise<ResponseDataType | undefined>
-  getItemBy: (query: { field: string; key: React.Key }) => Promise<ResponseDataType | undefined>
-  getItems: (params: RequestBodyType) => Promise<ResponseDataType | undefined>
-  updateItemByPk: (id: number, itemToUpdate: Partial<T>) => Promise<ResponseDataType | undefined>
+  getItemByPk: (id: number, accessToken: string) => Promise<ResponseDataType | undefined>
+  getItemBy: (query: { field: string; key: React.Key }, accessToken: string) => Promise<ResponseDataType | undefined>
+  getItems: (params: RequestBodyType, accessToken: string) => Promise<ResponseDataType | undefined>
+  updateItemByPk: (id: number, itemToUpdate: Partial<T>, accessToken: string) => Promise<ResponseDataType | undefined>
   updateItemsBy?: (
     query: { field: string; key: React.Key },
-    recordsToUpdate: Partial<T>[]
+    recordsToUpdate: Partial<T>[],
+    accessToken: string
   ) => Promise<ResponseDataType | undefined>
   updateItemBy: (
     query: {
       field: string
       key: React.Key
     },
-    itemToUpdate: Partial<T>
+    itemToUpdate: Partial<T>,
+    accessToken: string
   ) => Promise<ResponseDataType | undefined>
-  deleteItemByPk: (id: number) => Promise<ResponseDataType | undefined>
-  deleteItemBy?: (query: { field: string; key: React.Key }) => Promise<ResponseDataType | undefined>
+  deleteItemByPk: (id: number, accessToken: string) => Promise<ResponseDataType | undefined>
+  deleteItemBy?: (
+    query: { field: string; key: React.Key },
+    accessToken: string
+  ) => Promise<ResponseDataType | undefined>
 }
 
 export default function useAPIService<T extends { id?: number }>(apiService: APIService<ItemWithId>) {
+  const [accessTokenStored] = useLocalStorage<string>('accessToken', '')
   const [metaData, setMetaData] = useState<ResponseDataType | undefined>(undefined)
   const [page, setPage] = useState<number>(1)
 
@@ -47,7 +55,7 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
   ) => {
     try {
       setLoading?.(true)
-      const meta = await apiService.createNewItem(itemNew)
+      const meta = await apiService.createNewItem(itemNew, accessTokenStored ?? '')
       if (meta?.success) {
         onDataSuccess?.(meta, 'Created!')
       } else {
@@ -69,7 +77,7 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
   ) => {
     try {
       setLoading?.(true)
-      const meta = await apiService.createNewItems?.(itemsNew)
+      const meta = await apiService.createNewItems?.(itemsNew, accessTokenStored ?? '')
       if (meta?.success) {
         onDataSuccess?.(meta, 'Created!')
       } else {
@@ -91,7 +99,7 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
   ) => {
     try {
       setLoading?.(true)
-      const meta = await apiService.getItemByPk(id)
+      const meta = await apiService.getItemByPk(id, accessTokenStored ?? '')
       if (meta?.success) {
         onDataSuccess?.(meta, 'Success!')
       } else {
@@ -116,7 +124,7 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
   ) => {
     try {
       setLoading?.(true)
-      const meta = await apiService.getItemBy?.(query)
+      const meta = await apiService.getItemBy?.(query, accessTokenStored ?? '')
       if (meta?.success) {
         onDataSuccess?.(meta, 'Success!')
       } else {
@@ -138,7 +146,7 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
   ) => {
     try {
       setLoading?.(true)
-      const meta = await apiService.getItems(params)
+      const meta = await apiService.getItems(params, accessTokenStored ?? '')
       if (meta?.success) {
         onDataSuccess?.(meta, 'Success!')
       } else {
@@ -218,7 +226,7 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
   ) => {
     try {
       setLoading?.(true)
-      const meta = await apiService.updateItemByPk(id, itemToUpdate)
+      const meta = await apiService.updateItemByPk(id, itemToUpdate, accessTokenStored ?? '')
       if (meta?.success) {
         onDataSuccess?.(meta, 'Updated!')
       } else {
@@ -244,7 +252,7 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
   ) => {
     try {
       setLoading?.(true)
-      const meta = await apiService.updateItemsBy?.(query, recordsToUpdate)
+      const meta = await apiService.updateItemsBy?.(query, recordsToUpdate, accessTokenStored ?? '')
       if (meta?.success) {
         onDataSuccess?.(meta, 'Updated!')
       } else {
@@ -270,7 +278,7 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
   ) => {
     try {
       setLoading?.(true)
-      const meta = await apiService.updateItemBy(query, itemToUpdate)
+      const meta = await apiService.updateItemBy(query, itemToUpdate, accessTokenStored ?? '')
       if (meta?.success) {
         onDataSuccess?.(meta, 'Updated!')
       } else {
@@ -292,7 +300,7 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
   ) => {
     try {
       setLoading?.(true)
-      const meta = await apiService.deleteItemByPk(id)
+      const meta = await apiService.deleteItemByPk(id, accessTokenStored ?? '')
       if (meta?.success) {
         onDataSuccess?.(meta, 'Deleted!')
       } else {
@@ -317,7 +325,7 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
   ) => {
     try {
       setLoading?.(true)
-      const meta = await apiService.deleteItemBy?.(query)
+      const meta = await apiService.deleteItemBy?.(query, accessTokenStored ?? '')
       if (meta?.success) {
         onDataSuccess?.(meta, 'Deleted!')
       } else {
@@ -340,7 +348,7 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
   ) => {
     try {
       setLoading?.(true)
-      const meta = await apiService.createOrUpdateItemByPk?.(id, item)
+      const meta = await apiService.createOrUpdateItemByPk?.(id, item, accessTokenStored ?? '')
       onDataSuccess?.(meta, meta?.message)
       setMetaData(meta)
     } catch (err) {
@@ -362,7 +370,7 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
   ) => {
     try {
       setLoading?.(true)
-      const meta = await apiService.createOrUpdateItemBy?.(query, item)
+      const meta = await apiService.createOrUpdateItemBy?.(query, item, accessTokenStored ?? '')
       onDataSuccess?.(meta, meta?.message)
       setMetaData(meta)
     } catch (err) {
@@ -391,34 +399,5 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
     pageChange,
     createOrUpdateItemBy,
     createOrUpdateItemByPk
-  }
-}
-
-export async function serviceActionUpdate<T extends { id?: number }>(
-  query: {
-    field: string
-    key: React.Key
-  },
-  service: APIService<ItemWithId>,
-  itemToUpdate: Partial<T>,
-  setLoading?: (enable: boolean) => void,
-  onDataSuccess?: (data: ResponseDataType | undefined, message: string) => void
-) {
-  try {
-    setLoading?.(true)
-    const itemUpdated =
-      query.field === 'id'
-        ? await service.updateItemByPk(Number(query.key), { ...itemToUpdate })
-        : await service.updateItemBy(query, { ...itemToUpdate })
-    if (itemUpdated?.success) {
-      onDataSuccess?.(itemUpdated, 'Updated!')
-    } else {
-      onDataSuccess?.(itemUpdated, 'Update failed!')
-    }
-  } catch (err) {
-    console.log(err)
-    setLoading?.(false)
-  } finally {
-    setLoading?.(false)
   }
 }

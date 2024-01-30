@@ -10,6 +10,10 @@ import { textValidatorChange, textValidatorDisplay, textValidatorInit } from '~/
 import ModalAddNewRole from './components/ModalAddNewRole'
 import useRole from './hooks/useRole'
 import { RoleTableDataType } from './type'
+import { useSelector } from 'react-redux'
+import { RootState } from '~/store/store'
+import { useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
 
 const RolePage = () => {
   const table = useTable<RoleTableDataType>([])
@@ -29,6 +33,12 @@ const RolePage = () => {
     handlePageChange,
     roleService
   } = useRole(table)
+  const currentUser = useSelector((state: RootState) => state.user)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!currentUser.isAdmin) navigate('/')
+  }, [currentUser.isAdmin])
 
   const columns = {
     role: (record: RoleTableDataType) => {

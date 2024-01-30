@@ -2,6 +2,9 @@
 import { Divider, Flex, Space } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
+import { useEffect } from 'react'
+import { useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 import useDevice from '~/components/hooks/useDevice'
 import useTable from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
@@ -10,6 +13,7 @@ import ExpandableItemRow from '~/components/sky-ui/SkyTable/ExpandableItemRow'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import TextHint from '~/components/sky-ui/TextHint'
+import { RootState } from '~/store/store'
 import { UserRole } from '~/typing'
 import {
   breakpoint,
@@ -26,6 +30,7 @@ import { UserTableDataType } from './type'
 
 const UserPage = () => {
   const table = useTable<UserTableDataType>([])
+  const { setLoading } = table
   const {
     searchText,
     setSearchText,
@@ -44,6 +49,12 @@ const UserPage = () => {
     roles
   } = useUser(table)
   const { width } = useDevice()
+  const currentUser = useSelector((state: RootState) => state.user)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!currentUser.isAdmin) navigate('/')
+  }, [currentUser.isAdmin])
 
   const columns = {
     username: (record: UserTableDataType) => {
@@ -269,6 +280,7 @@ const UserPage = () => {
   return (
     <>
       <BaseLayout
+        onLoading={(enable) => setLoading(enable)}
         title='Danh sách người dùng'
         searchValue={searchText}
         onDateCreationChange={(enable) => table.setDateCreation(enable)}

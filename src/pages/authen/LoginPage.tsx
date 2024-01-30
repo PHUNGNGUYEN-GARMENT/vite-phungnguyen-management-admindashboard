@@ -22,7 +22,7 @@ const LoginPage: React.FC<Props> = ({ ...props }) => {
   const { message } = AntApp.useApp()
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const [accessTokenLocalStorage, setAccessTokenLocalStorage] = useLocalStorage('accessToken', '')
+  const [accessTokenStored, setAccessTokenStored] = useLocalStorage('accessToken', '')
   const [, setUserRolesLocalStorage] = useLocalStorage<UserRoleType[]>('userRoles', [])
   const userRoleService = useAPIService<UserRole>(UserRoleAPI)
   const [loading, setLoading] = useState<boolean>(false)
@@ -31,16 +31,16 @@ const LoginPage: React.FC<Props> = ({ ...props }) => {
   const [formLayout, setFormLayout] = useState<LayoutType>('horizontal')
 
   useEffect(() => {
-    if (accessTokenLocalStorage) {
+    if (accessTokenStored) {
       navigate('/')
     }
-  }, [accessTokenLocalStorage])
+  }, [accessTokenStored])
 
   const onFormLayoutChange = ({ layout }: { layout: LayoutType }) => {
     setFormLayout(layout)
   }
 
-  const onFinish = async (user: { username: string; password: string; remember: boolean }) => {
+  const onFinish = async (user: { username: string; password: string }) => {
     try {
       setLoading(true)
       // Create a new request to login user
@@ -51,7 +51,7 @@ const LoginPage: React.FC<Props> = ({ ...props }) => {
         const userLogged = meta.data as User
         if (userLogged) {
           // Save to local storage
-          setAccessTokenLocalStorage(userLogged.accessToken)
+          setAccessTokenStored(userLogged.accessToken)
           // Save to redux state
           dispatch(setUserAction(userLogged))
           // Create request to get all user roles

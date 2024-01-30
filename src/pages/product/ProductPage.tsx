@@ -298,7 +298,7 @@ const ProductPage: React.FC = () => {
             onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),
             onConfirmDelete: (record) => handleConfirmDelete(record),
             isShow:
-              currentUser.user.isAdmin ||
+              currentUser.isAdmin ||
               currentUser.userRoles?.some((role) => role === 'admin' || role === 'product_manager')
           }}
           expandable={{

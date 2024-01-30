@@ -3,14 +3,14 @@ import { Color as AntColor } from 'antd/es/color-picker'
 import { ColumnsType } from 'antd/es/table'
 import { ColorPicker } from 'antd/lib'
 import { useEffect } from 'react'
+import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import useLocalStorage from '~/hooks/useLocalStorage'
-import { UserRoleType } from '~/typing'
+import { RootState } from '~/store/store'
 import { textValidatorDisplay } from '~/utils/helpers'
 import ModalAddNewColor from './components/ModalAddNewColor'
 import useColor from './hooks/useColor'
@@ -21,8 +21,6 @@ interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 const ColorPage: React.FC<Props> = () => {
   const table = useTable<ColorTableDataType>([])
-  const [accessTokenLocalStorage] = useLocalStorage('accessToken', null)
-  const [userRolesLocalStorage] = useLocalStorage<UserRoleType[]>('userRoles', null)
   const {
     searchText,
     setSearchText,
@@ -39,12 +37,12 @@ const ColorPage: React.FC<Props> = () => {
     handlePageChange,
     colorService
   } = useColor(table)
+  const currentUser = useSelector((state: RootState) => state.user)
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (!accessTokenLocalStorage) navigate('/login')
-    if (!userRolesLocalStorage?.includes('admin')) navigate('/login')
-  }, [accessTokenLocalStorage, userRolesLocalStorage])
+    if (!currentUser.isAdmin) navigate('/')
+  }, [currentUser.isAdmin])
 
   const columns: ColumnsType<ColorTableDataType> = [
     {
