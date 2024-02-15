@@ -47,7 +47,7 @@ const SideNav: React.FC<Props> = ({ openDrawer, setOpenDrawer, ...props }) => {
 
   const routes = (appRoutes: SideType[]): SideType[] => {
     const routesMapping = appRoutes.filter((route) => {
-      return currentUser.isAdmin ? route : route.role !== 'admin'
+      return currentUser.userRoles.includes('admin') ? route : route.role !== 'admin'
     })
 
     return routesMapping

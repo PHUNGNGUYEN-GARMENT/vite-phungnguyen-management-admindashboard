@@ -267,8 +267,12 @@ const ProductPage: React.FC = () => {
         onSearchChange={(e) => setSearchText(e.target.value)}
         onSearch={(value) => handleSearch(value)}
         onSortChange={(checked, e) => handleSortChange(checked, e)}
-        onResetClick={() => handleResetClick()}
-        onAddNewClick={() => setOpenModal(true)}
+        onResetClick={{
+          onClick: () => handleResetClick()
+        }}
+        onAddNewClick={{
+          onClick: () => setOpenModal(true)
+        }}
       >
         <SkyTable
           bordered
@@ -297,9 +301,7 @@ const ProductPage: React.FC = () => {
             onConfirmCancelEditing: () => table.handleConfirmCancelEditing(),
             onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),
             onConfirmDelete: (record) => handleConfirmDelete(record),
-            isShow:
-              currentUser.isAdmin ||
-              currentUser.userRoles?.some((role) => role === 'admin' || role === 'product_manager')
+            isShow: currentUser.userRoles.includes('admin' || 'product_manager')
           }}
           expandable={{
             expandedRowRender: (record: ProductTableDataType) => {

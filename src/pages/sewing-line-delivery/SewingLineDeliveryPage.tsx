@@ -566,7 +566,9 @@ const SewingLineDeliveryPage = () => {
         onSearchChange={(e) => setSearchText(e.target.value)}
         onSearch={(value) => handleSearch(value)}
         onSortChange={(checked, e) => handleSortChange(checked, e)}
-        onResetClick={() => handleResetClick()}
+        onResetClick={{
+          onClick: () => handleResetClick()
+        }}
       >
         <SkyTable
           bordered

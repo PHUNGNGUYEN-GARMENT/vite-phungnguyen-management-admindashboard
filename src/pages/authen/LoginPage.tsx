@@ -2,16 +2,11 @@
 import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons'
 import { App as AntApp, Button, Flex, Form, Input, Typography } from 'antd'
 import React, { HTMLAttributes, useEffect, useState } from 'react'
-import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import { defaultRequestBody } from '~/api/client'
 import AuthAPI from '~/api/services/AuthAPI'
-import UserRoleAPI from '~/api/services/UserRoleAPI'
 import logo from '~/assets/logo.svg'
-import useAPIService from '~/hooks/useAPIService'
 import useLocalStorage from '~/hooks/useLocalStorage'
-import { setUserAction, setUserRoleAction } from '~/store/actions-creator'
-import { User, UserRole, UserRoleType } from '~/typing'
+import { User } from '~/typing'
 
 interface Props extends HTMLAttributes<HTMLElement> {}
 
@@ -20,18 +15,15 @@ type LayoutType = Parameters<typeof Form>[0]['layout']
 const LoginPage: React.FC<Props> = ({ ...props }) => {
   const [form] = Form.useForm()
   const { message } = AntApp.useApp()
-  const dispatch = useDispatch()
   const navigate = useNavigate()
   const [accessTokenStored, setAccessTokenStored] = useLocalStorage('accessToken', '')
-  const [, setUserRolesLocalStorage] = useLocalStorage<UserRoleType[]>('userRoles', [])
-  const userRoleService = useAPIService<UserRole>(UserRoleAPI)
   const [loading, setLoading] = useState<boolean>(false)
   const [username, setUsername] = useState<string>('')
   const [password, setPassword] = useState<string>('')
   const [formLayout, setFormLayout] = useState<LayoutType>('horizontal')
 
   useEffect(() => {
-    if (accessTokenStored) {
+    if (accessTokenStored && accessTokenStored.length !== 0) {
       navigate('/')
     }
   }, [accessTokenStored])
@@ -52,40 +44,10 @@ const LoginPage: React.FC<Props> = ({ ...props }) => {
         if (userLogged) {
           // Save to local storage
           setAccessTokenStored(userLogged.accessToken)
-          // Save to redux state
-          dispatch(setUserAction(userLogged))
-          // Create request to get all user roles
-          userRoleService.getListItems(
-            {
-              ...defaultRequestBody,
-              paginator: { page: 1, pageSize: -1 },
-              filter: { field: 'userID', items: [userLogged.id!], status: 'active' }
-            },
-            setLoading,
-            (meta2, msg) => {
-              if (!meta2?.success) throw new Error(msg)
-              const userRoles = meta2.data as UserRole[]
-              console.log(userRoles)
-              setUserRolesLocalStorage(
-                userRoles
-                  .filter((userRole) => userRole.userID === userLogged.id)
-                  .map((userRole) => {
-                    return userRole.role?.role as UserRoleType
-                  })
-              )
-              dispatch(
-                setUserRoleAction(
-                  userRoles.map((userRole) => {
-                    return userRole.role?.role as UserRoleType
-                  })
-                )
-              )
-            }
-          )
         }
         // Send message app
         message.success('Success!')
-        // Navigation to '/' (Home page) if login success
+        // Navigation to '/' (Dashboard page) if login success
         navigate('/')
       })
     } catch (error) {
@@ -149,7 +111,7 @@ const LoginPage: React.FC<Props> = ({ ...props }) => {
               <Form.Item
                 label='Username'
                 name='username'
-                className='m-0 p-0'
+                className='m-0 w-full p-0'
                 rules={[{ required: true, message: 'Please input your username!' }]}
               >
                 <Input
@@ -165,7 +127,7 @@ const LoginPage: React.FC<Props> = ({ ...props }) => {
               <Form.Item
                 label='Password'
                 name='password'
-                className='m-0 w-full'
+                className='m-0 w-full p-0'
                 rules={[{ required: true, message: 'Please input your password!' }]}
               >
                 <Input.Password

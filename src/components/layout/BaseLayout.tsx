@@ -4,11 +4,17 @@ import { Plus } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import AuthAPI from '~/api/services/AuthAPI'
+import UserAPI from '~/api/services/UserAPI'
 import useLocalStorage from '~/hooks/useLocalStorage'
-import { setAdminAction } from '~/store/actions-creator'
+import { setUserRoleAction } from '~/store/actions-creator'
 import { RootState } from '~/store/store'
-import { UserRoleType } from '~/typing'
+import { UserRole, UserRoleType } from '~/typing'
+
+interface ActionProps {
+  onClick?: (e: React.MouseEvent<HTMLElement, MouseEvent>) => void
+  isShow?: boolean
+  disabled?: boolean
+}
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
   searchPlaceHolder?: string
@@ -30,8 +36,8 @@ interface Props extends React.HTMLAttributes<HTMLElement> {
   dateCreation?: boolean
   onSortChange?: SwitchChangeEventHandler
   onDateCreationChange?: SwitchChangeEventHandler
-  onResetClick?: React.MouseEventHandler<HTMLElement> | undefined
-  onAddNewClick?: React.MouseEventHandler<HTMLElement> | undefined
+  onResetClick?: ActionProps
+  onAddNewClick?: ActionProps
 }
 
 const { Search } = Input
@@ -53,43 +59,49 @@ const BaseLayout: React.FC<Props> = ({
 }) => {
   const [loading, setLoading] = useState<boolean>(true)
   const [accessTokenStored] = useLocalStorage<string>('accessToken', '')
-  const [userRolesStored] = useLocalStorage<UserRoleType[]>('userRoles', [])
   const currentUser = useSelector((state: RootState) => state.user)
   const dispatch = useDispatch()
   // dispatch(setUserAction)
   const navigate = useNavigate()
 
-  useEffect(() => {
-    const callApi = async () => {
-      try {
-        onLoading?.(true)
-        setLoading(true)
-        if (accessTokenStored) {
-          AuthAPI.checkAdmin(accessTokenStored)
-            .then((meta) => {
-              if (!meta?.success) {
-                throw new Error(meta?.message)
-              }
-              dispatch(setAdminAction(meta.data.isAdmin))
-            })
-            .catch((error) => {
-              console.error(error)
-            })
-        }
-      } catch (error) {
-        console.error(error)
-      } finally {
-        onLoading?.(false)
-        setLoading(false)
+  const callApi = async () => {
+    try {
+      onLoading?.(true)
+      setLoading(true)
+      if (accessTokenStored) {
+        UserAPI.userRolesFromAccessToken(accessTokenStored)
+          .then((meta) => {
+            if (!meta?.success) {
+              throw new Error(meta?.message)
+            }
+            const userRoles = meta.data as UserRole[]
+            dispatch(
+              setUserRoleAction(
+                userRoles.map((userRole) => {
+                  return userRole.role?.role as UserRoleType
+                })
+              )
+            )
+          })
+          .catch((error) => {
+            console.error(error)
+          })
       }
+    } catch (error) {
+      console.error(error)
+    } finally {
+      onLoading?.(false)
+      setLoading(false)
     }
-
-    callApi()
-  }, [accessTokenStored])
+  }
 
   useEffect(() => {
-    if (!accessTokenStored && !userRolesStored) navigate('/login')
-  }, [accessTokenStored, userRolesStored])
+    callApi()
+  }, [])
+
+  useEffect(() => {
+    if (!accessTokenStored) navigate('/login')
+  }, [accessTokenStored])
 
   return (
     <div {...props}>
@@ -129,7 +141,7 @@ const BaseLayout: React.FC<Props> = ({
                   onChange={onSortChange}
                 />
               )}
-              {currentUser.isAdmin && onDateCreationChange && (
+              {currentUser.userRoles.includes('admin') && onDateCreationChange && (
                 <Switch
                   checkedChildren='DateCreation'
                   unCheckedChildren='DateCreation'
@@ -153,13 +165,18 @@ const BaseLayout: React.FC<Props> = ({
               )}
             </Flex>
             <Flex gap={10} align='center'>
-              {onResetClick && (
-                <Button onClick={onResetClick} className='flex items-center' type='default'>
+              {onResetClick?.isShow && (
+                <Button onClick={onResetClick.onClick} className='flex items-center' type='default'>
                   Reset
                 </Button>
               )}
-              {currentUser.isAdmin && onAddNewClick && (
-                <Button onClick={onAddNewClick} className='flex items-center' type='primary' icon={<Plus size={20} />}>
+              {onAddNewClick?.isShow && (
+                <Button
+                  onClick={onAddNewClick.onClick}
+                  className='flex items-center'
+                  type='primary'
+                  icon={<Plus size={20} />}
+                >
                   New
                 </Button>
               )}

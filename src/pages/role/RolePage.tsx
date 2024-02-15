@@ -1,19 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ColumnsType } from 'antd/es/table'
+import { useEffect } from 'react'
+import { useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 import useTable from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
+import { RootState } from '~/store/store'
 import { UserRoleType } from '~/typing'
 import { textValidatorChange, textValidatorDisplay, textValidatorInit } from '~/utils/helpers'
 import ModalAddNewRole from './components/ModalAddNewRole'
 import useRole from './hooks/useRole'
 import { RoleTableDataType } from './type'
-import { useSelector } from 'react-redux'
-import { RootState } from '~/store/store'
-import { useNavigate } from 'react-router-dom'
-import { useEffect } from 'react'
 
 const RolePage = () => {
   const table = useTable<RoleTableDataType>([])
@@ -129,8 +129,12 @@ const RolePage = () => {
         onSearchChange={(e) => setSearchText(e.target.value)}
         onSearch={(value) => handleSearch(value)}
         onSortChange={(checked, e) => handleSortChange(checked, e)}
-        onResetClick={() => handleResetClick()}
-        onAddNewClick={() => setOpenModal(true)}
+        onResetClick={{
+          onClick: () => handleResetClick()
+        }}
+        onAddNewClick={{
+          onClick: () => setOpenModal(true)
+        }}
       >
         <SkyTable
           bordered

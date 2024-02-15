@@ -74,8 +74,12 @@ const SewingLinePage: React.FC<Props> = () => {
         onSearchChange={(e) => setSearchText(e.target.value)}
         onSearch={(value) => handleSearch(value)}
         onSortChange={(checked, e) => handleSortChange(checked, e)}
-        onResetClick={() => handleResetClick()}
-        onAddNewClick={() => setOpenModal(true)}
+        onResetClick={{
+          onClick: () => handleResetClick()
+        }}
+        onAddNewClick={{
+          onClick: () => setOpenModal(true)
+        }}
       >
         <SkyTable
           bordered

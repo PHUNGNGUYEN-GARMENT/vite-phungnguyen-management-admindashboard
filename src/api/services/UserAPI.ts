@@ -62,6 +62,23 @@ export default {
         errorFormatter(error)
       })
   },
+  userRolesFromAccessToken: async (accessToken: string): Promise<ResponseDataType | undefined> => {
+    return await client
+      .get(`${NAMESPACE}/user-roles`, {
+        headers: {
+          authorization: accessToken
+        }
+      })
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
   updateItemByPk: async (id: number, item: User): Promise<ResponseDataType | undefined> => {
     return client
       .put(`${NAMESPACE}/${id}`, {

@@ -53,8 +53,8 @@ const UserPage = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (!currentUser.isAdmin) navigate('/')
-  }, [currentUser.isAdmin])
+    if (!currentUser.userRoles.includes('admin')) navigate('/')
+  }, [currentUser.userRoles])
 
   const columns = {
     username: (record: UserTableDataType) => {
@@ -288,8 +288,12 @@ const UserPage = () => {
         onSearch={(value) => handleSearch(value)}
         searchPlaceHolder='Tên...'
         onSortChange={(checked, e) => handleSortChange(checked, e)}
-        onResetClick={() => handleResetClick()}
-        onAddNewClick={() => setOpenModal(true)}
+        onResetClick={{
+          onClick: () => handleResetClick()
+        }}
+        onAddNewClick={{
+          onClick: () => setOpenModal(true)
+        }}
       >
         <SkyTable
           bordered

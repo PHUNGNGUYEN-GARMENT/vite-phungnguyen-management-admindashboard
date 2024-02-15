@@ -1,25 +1,11 @@
-import { Route, Routes, useNavigate } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 
-import { Suspense, useEffect } from 'react'
+import { Suspense } from 'react'
 import Main from './components/layout/Main'
-import useLocalStorage from './hooks/useLocalStorage'
 import LoginPage from './pages/authen/LoginPage'
 import { appRoutes } from './utils/route'
 
 function App() {
-  const navigate = useNavigate()
-  const [accessTokenStored] = useLocalStorage('accessToken', null)
-  // const navigate = useNavigate()
-  // const currentUser = useSelector((state: RootState) => state.user)
-  // const [loading, setLoading] = useState<boolean>(false)
-  // const { isAuth } = useAuth(setLoading)
-
-  useEffect(() => {
-    if (!accessTokenStored) {
-      navigate('/login')
-    }
-  }, [accessTokenStored])
-
   return (
     <>
       <div className='App'>
