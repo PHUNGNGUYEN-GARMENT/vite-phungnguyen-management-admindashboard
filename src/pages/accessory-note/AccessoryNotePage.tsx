@@ -1,14 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ColumnType } from 'antd/es/table'
-import { useEffect } from 'react'
-import { useSelector } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
+import ProtectedLayout from '~/components/layout/ProtectedLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import { RootState } from '~/store/store'
 import ModalAddNewAccessoryNote from './components/ModalAddNewAccessoryNote'
 import useAccessoryNote from './hooks/useAccessoryNote'
 import { AccessoryNoteTableDataType } from './type'
@@ -34,12 +31,6 @@ const AccessoryNotePage: React.FC<Props> = () => {
     handlePageChange,
     accessoryNoteService
   } = useAccessoryNote(table)
-  const currentUser = useSelector((state: RootState) => state.user)
-  const navigate = useNavigate()
-
-  useEffect(() => {
-    if (!currentUser.isAdmin) navigate('/')
-  }, [currentUser.isAdmin])
 
   const columns: ColumnType<AccessoryNoteTableDataType>[] = [
     {
@@ -86,7 +77,7 @@ const AccessoryNotePage: React.FC<Props> = () => {
   ]
 
   return (
-    <>
+    <ProtectedLayout>
       <BaseLayout
         title='Ghi chú phụ liệu'
         searchValue={searchText}
@@ -135,7 +126,7 @@ const AccessoryNotePage: React.FC<Props> = () => {
       {openModal && (
         <ModalAddNewAccessoryNote openModal={openModal} setOpenModal={setOpenModal} onAddNew={handleAddNewItem} />
       )}
-    </>
+    </ProtectedLayout>
   )
 }
 

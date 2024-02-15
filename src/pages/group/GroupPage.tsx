@@ -1,14 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ColumnsType } from 'antd/es/table'
-import { useEffect } from 'react'
-import { useSelector } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
+import ProtectedLayout from '~/components/layout/ProtectedLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import { RootState } from '~/store/store'
 import ModalAddNewGroup from './components/ModalAddNewGroup'
 import useGroup from './hooks/useGroup'
 import { GroupTableDataType } from './type'
@@ -34,12 +31,6 @@ const GroupPage: React.FC<Props> = () => {
     handlePageChange,
     groupService
   } = useGroup(table)
-  const currentUser = useSelector((state: RootState) => state.user)
-  const navigate = useNavigate()
-
-  useEffect(() => {
-    if (!currentUser.isAdmin) navigate('/')
-  }, [currentUser.isAdmin])
 
   const columns: ColumnsType<GroupTableDataType> = [
     {
@@ -66,7 +57,7 @@ const GroupPage: React.FC<Props> = () => {
   ]
 
   return (
-    <>
+    <ProtectedLayout>
       <BaseLayout
         title='Nhóm'
         searchValue={searchText}
@@ -113,7 +104,7 @@ const GroupPage: React.FC<Props> = () => {
         />
       </BaseLayout>
       {openModal && <ModalAddNewGroup openModal={openModal} setOpenModal={setOpenModal} onAddNew={handleAddNewItem} />}
-    </>
+    </ProtectedLayout>
   )
 }
 

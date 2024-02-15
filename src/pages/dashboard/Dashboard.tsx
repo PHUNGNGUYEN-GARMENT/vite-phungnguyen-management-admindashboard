@@ -204,7 +204,7 @@ const Dashboard = () => {
     <>
       <Flex vertical gap={30}>
         <Typography.Title className='my-0' level={2}>
-          Dashboards
+          Dashboard
         </Typography.Title>
         <Flex className='w-full'>
           <StatisticSlide className='w-full' />

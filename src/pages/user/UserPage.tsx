@@ -2,18 +2,15 @@
 import { Divider, Flex, Space } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
-import { useEffect } from 'react'
-import { useSelector } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
 import useDevice from '~/components/hooks/useDevice'
 import useTable from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
+import ProtectedLayout from '~/components/layout/ProtectedLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import ExpandableItemRow from '~/components/sky-ui/SkyTable/ExpandableItemRow'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import TextHint from '~/components/sky-ui/TextHint'
-import { RootState } from '~/store/store'
 import { UserRole } from '~/typing'
 import {
   breakpoint,
@@ -49,12 +46,6 @@ const UserPage = () => {
     roles
   } = useUser(table)
   const { width } = useDevice()
-  const currentUser = useSelector((state: RootState) => state.user)
-  const navigate = useNavigate()
-
-  useEffect(() => {
-    if (!currentUser.userRoles.includes('admin')) navigate('/')
-  }, [currentUser.userRoles])
 
   const columns = {
     username: (record: UserTableDataType) => {
@@ -278,7 +269,7 @@ const UserPage = () => {
   ]
 
   return (
-    <>
+    <ProtectedLayout>
       <BaseLayout
         onLoading={(enable) => setLoading(enable)}
         title='Danh sách người dùng'
@@ -364,7 +355,7 @@ const UserPage = () => {
         />
       </BaseLayout>
       {openModal && <ModalAddNewUser openModal={openModal} setOpenModal={setOpenModal} onAddNew={handleAddNewItem} />}
-    </>
+    </ProtectedLayout>
   )
 }
 

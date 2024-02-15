@@ -61,7 +61,6 @@ const BaseLayout: React.FC<Props> = ({
   const [accessTokenStored] = useLocalStorage<string>('accessToken', '')
   const currentUser = useSelector((state: RootState) => state.user)
   const dispatch = useDispatch()
-  // dispatch(setUserAction)
   const navigate = useNavigate()
 
   const callApi = async () => {
@@ -86,6 +85,8 @@ const BaseLayout: React.FC<Props> = ({
           .catch((error) => {
             console.error(error)
           })
+      } else {
+        navigate('/login')
       }
     } catch (error) {
       console.error(error)
@@ -99,9 +100,9 @@ const BaseLayout: React.FC<Props> = ({
     callApi()
   }, [])
 
-  useEffect(() => {
-    if (!accessTokenStored) navigate('/login')
-  }, [accessTokenStored])
+  // useEffect(() => {
+  //   if (!accessTokenStored) navigate('/login')
+  // }, [accessTokenStored])
 
   return (
     <div {...props}>

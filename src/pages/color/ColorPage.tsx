@@ -2,15 +2,12 @@
 import { Color as AntColor } from 'antd/es/color-picker'
 import { ColumnsType } from 'antd/es/table'
 import { ColorPicker } from 'antd/lib'
-import { useEffect } from 'react'
-import { useSelector } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
+import ProtectedLayout from '~/components/layout/ProtectedLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import { RootState } from '~/store/store'
 import { textValidatorDisplay } from '~/utils/helpers'
 import ModalAddNewColor from './components/ModalAddNewColor'
 import useColor from './hooks/useColor'
@@ -37,12 +34,6 @@ const ColorPage: React.FC<Props> = () => {
     handlePageChange,
     colorService
   } = useColor(table)
-  const currentUser = useSelector((state: RootState) => state.user)
-  const navigate = useNavigate()
-
-  useEffect(() => {
-    if (!currentUser.isAdmin) navigate('/')
-  }, [currentUser.isAdmin])
 
   const columns: ColumnsType<ColorTableDataType> = [
     {
@@ -97,7 +88,7 @@ const ColorPage: React.FC<Props> = () => {
   ]
 
   return (
-    <>
+    <ProtectedLayout>
       <BaseLayout
         searchValue={searchText}
         onDateCreationChange={(enable) => table.setDateCreation(enable)}
@@ -143,7 +134,7 @@ const ColorPage: React.FC<Props> = () => {
         />
       </BaseLayout>
       {openModal && <ModalAddNewColor openModal={openModal} setOpenModal={setOpenModal} onAddNew={handleAddNewItem} />}
-    </>
+    </ProtectedLayout>
   )
 }
 

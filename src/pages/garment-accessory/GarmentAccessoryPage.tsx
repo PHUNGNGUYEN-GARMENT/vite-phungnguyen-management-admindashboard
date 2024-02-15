@@ -260,7 +260,7 @@ const GarmentAccessoryPage: React.FC<Props> = () => {
     {
       title: 'Mã hàng',
       dataIndex: 'productCode',
-      width: '10%',
+      width: '12%',
       render: (_value: any, record: GarmentAccessoryTableDataType) => {
         return columns.productCode(record)
       }
@@ -277,7 +277,7 @@ const GarmentAccessoryPage: React.FC<Props> = () => {
     {
       title: 'Màu',
       dataIndex: 'colorID',
-      width: '10%',
+      width: '15%',
       render: (_value: any, record: GarmentAccessoryTableDataType) => {
         return columns.productColor(record)
       }
