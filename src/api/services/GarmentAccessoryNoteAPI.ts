@@ -5,14 +5,36 @@ import { errorFormatter } from '~/utils/promise-formatter'
 const NAMESPACE = 'garment-accessory-notes'
 
 export default {
-  createNewItem: async (item: GarmentAccessoryNote): Promise<ResponseDataType | undefined> => {
+  createNewItem: async (item: GarmentAccessoryNote, accessToken: string): Promise<ResponseDataType | undefined> => {
     return await client
-      .post(`${NAMESPACE}`, {
-        productID: item.productID,
-        accessoryNoteID: item.accessoryNoteID,
-        garmentAccessoryID: item.garmentAccessoryID,
-        noteStatus: item.noteStatus,
-        status: item.status ?? 'active'
+      .post(
+        `${NAMESPACE}`,
+        {
+          ...item,
+          status: item.status ?? 'active'
+        },
+        {
+          headers: {
+            authorization: accessToken
+          }
+        }
+      )
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  createNewItems: async (items: GarmentAccessoryNote[], accessToken: string): Promise<ResponseDataType | undefined> => {
+    return await client
+      .post(`${NAMESPACE}/items`, items, {
+        headers: {
+          authorization: accessToken
+        }
       })
       .then((res) => {
         if (res.data) {
@@ -24,28 +46,24 @@ export default {
         errorFormatter(error)
       })
   },
-  createNewItems: async (items: GarmentAccessoryNote[]): Promise<ResponseDataType | undefined> => {
+  createOrUpdateItemByPk: async (
+    id: number,
+    item: GarmentAccessoryNote,
+    accessToken: string
+  ): Promise<ResponseDataType | undefined> => {
     return await client
-      .post(`${NAMESPACE}/items`, items)
-      .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
+      .post(
+        `${NAMESPACE}/createOrUpdate/${id}`,
+        {
+          ...item,
+          status: item.status ?? 'active'
+        },
+        {
+          headers: {
+            authorization: accessToken
+          }
         }
-        return res.data
-      })
-      .catch(function (error) {
-        errorFormatter(error)
-      })
-  },
-  createOrUpdateItemByPk: async (id: number, item: GarmentAccessoryNote): Promise<ResponseDataType | undefined> => {
-    return await client
-      .post(`${NAMESPACE}/createOrUpdate/${id}`, {
-        productID: item.productID,
-        garmentAccessoryID: item.garmentAccessoryID,
-        accessoryNoteID: item.accessoryNoteID,
-        noteStatus: item.noteStatus,
-        status: item.status ?? 'active'
-      })
+      )
       .then((res) => {
         if (res.data) {
           return res.data as ResponseDataType
@@ -58,15 +76,22 @@ export default {
   },
   createOrUpdateItemByProductID: async (
     productID: number,
-    item: GarmentAccessoryNote
+    item: GarmentAccessoryNote,
+    accessToken: string
   ): Promise<ResponseDataType | undefined> => {
     return await client
-      .post(`${NAMESPACE}/createOrUpdate/productID/${productID}`, {
-        garmentAccessoryID: item.garmentAccessoryID,
-        accessoryNoteID: item.accessoryNoteID,
-        noteStatus: item.noteStatus,
-        status: item.status ?? 'active'
-      })
+      .post(
+        `${NAMESPACE}/createOrUpdate/productID/${productID}`,
+        {
+          ...item,
+          status: item.status ?? 'active'
+        },
+        {
+          headers: {
+            authorization: accessToken
+          }
+        }
+      )
       .then((res) => {
         if (res.data) {
           return res.data as ResponseDataType
@@ -77,9 +102,13 @@ export default {
         errorFormatter(error)
       })
   },
-  getItemByPk: async (id: number): Promise<ResponseDataType | undefined> => {
+  getItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType | undefined> => {
     return client
-      .get(`${NAMESPACE}/${id}`)
+      .get(`${NAMESPACE}/${id}`, {
+        headers: {
+          authorization: accessToken
+        }
+      })
       .then((res) => {
         if (res.data) {
           return res.data as ResponseDataType
@@ -90,9 +119,16 @@ export default {
         errorFormatter(error)
       })
   },
-  getItemBy: async (query: { field: string; key: React.Key }): Promise<ResponseDataType | undefined> => {
+  getItemBy: async (
+    query: { field: string; key: React.Key },
+    accessToken: string
+  ): Promise<ResponseDataType | undefined> => {
     return client
-      .get(`${NAMESPACE}/${query.field}/${query.key}`)
+      .get(`${NAMESPACE}/${query.field}/${query.key}`, {
+        headers: {
+          authorization: accessToken
+        }
+      })
       .then((res) => {
         if (res.data) {
           return res.data as ResponseDataType
@@ -103,11 +139,19 @@ export default {
         errorFormatter(error)
       })
   },
-  getItems: async (bodyRequest: RequestBodyType): Promise<ResponseDataType | undefined> => {
+  getItems: async (bodyRequest: RequestBodyType, accessToken: string): Promise<ResponseDataType | undefined> => {
     return await client
-      .post(`${NAMESPACE}/find`, {
-        ...bodyRequest
-      })
+      .post(
+        `${NAMESPACE}/find`,
+        {
+          ...bodyRequest
+        },
+        {
+          headers: {
+            authorization: accessToken
+          }
+        }
+      )
       .then((res) => {
         if (res.data) {
           return res.data as ResponseDataType
@@ -118,11 +162,23 @@ export default {
         errorFormatter(error)
       })
   },
-  updateItemByPk: async (id: number, item: GarmentAccessoryNote): Promise<ResponseDataType | undefined> => {
+  updateItemByPk: async (
+    id: number,
+    item: GarmentAccessoryNote,
+    accessToken: string
+  ): Promise<ResponseDataType | undefined> => {
     return client
-      .put(`${NAMESPACE}/${id}`, {
-        ...item
-      })
+      .put(
+        `${NAMESPACE}/${id}`,
+        {
+          ...item
+        },
+        {
+          headers: {
+            authorization: accessToken
+          }
+        }
+      )
       .then((res) => {
         if (res.data) {
           return res.data as ResponseDataType
@@ -138,10 +194,15 @@ export default {
       field: string
       key: React.Key
     },
-    recordsToUpdate: GarmentAccessoryNote[]
+    recordsToUpdate: GarmentAccessoryNote[],
+    accessToken: string
   ): Promise<ResponseDataType | undefined> => {
     return client
-      .post(`${NAMESPACE}/updateItems/${query.field}/${query.key}`, recordsToUpdate)
+      .post(`${NAMESPACE}/updateItems/${query.field}/${query.key}`, recordsToUpdate, {
+        headers: {
+          authorization: accessToken
+        }
+      })
       .then((res) => {
         if (res.data) {
           return res.data as ResponseDataType
@@ -157,11 +218,37 @@ export default {
       field: string
       key: React.Key
     },
-    item: GarmentAccessoryNote
+    item: GarmentAccessoryNote,
+    accessToken: string
   ): Promise<ResponseDataType | undefined> => {
     return client
-      .put(`${NAMESPACE}/${query.field}/${query.key}`, {
-        ...item
+      .put(
+        `${NAMESPACE}/${query.field}/${query.key}`,
+        {
+          ...item
+        },
+        {
+          headers: {
+            authorization: accessToken
+          }
+        }
+      )
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
+  deleteItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType | undefined> => {
+    return client
+      .delete(`${NAMESPACE}/${id}`, {
+        headers: {
+          authorization: accessToken
+        }
       })
       .then((res) => {
         if (res.data) {
@@ -173,22 +260,16 @@ export default {
         errorFormatter(error)
       })
   },
-  deleteItemByPk: async (id: number): Promise<ResponseDataType | undefined> => {
+  deleteItemBy: async (
+    query: { field: string; key: React.Key },
+    accessToken: string
+  ): Promise<ResponseDataType | undefined> => {
     return client
-      .delete(`${NAMESPACE}/${id}`)
-      .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
+      .delete(`${NAMESPACE}/${query.field}/${query.key}`, {
+        headers: {
+          authorization: accessToken
         }
-        return res.data
       })
-      .catch(function (error) {
-        errorFormatter(error)
-      })
-  },
-  deleteItemBy: async (query: { field: string; key: React.Key }): Promise<ResponseDataType | undefined> => {
-    return client
-      .delete(`${NAMESPACE}/${query.field}/${query.key}`)
       .then((res) => {
         if (res.data) {
           return res.data as ResponseDataType

@@ -6,9 +6,9 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import UserAPI from '~/api/services/UserAPI'
 import useLocalStorage from '~/hooks/useLocalStorage'
-import { setUserRoleAction } from '~/store/actions-creator'
+import { setUserAction, setUserRoleAction } from '~/store/actions-creator'
 import { RootState } from '~/store/store'
-import { UserRole, UserRoleType } from '~/typing'
+import { User, UserRole, UserRoleType } from '~/typing'
 
 interface ActionProps {
   onClick?: (e: React.MouseEvent<HTMLElement, MouseEvent>) => void
@@ -81,6 +81,7 @@ const BaseLayout: React.FC<Props> = ({
                 })
               )
             )
+            dispatch(setUserAction(meta.meta as User))
           })
           .catch((error) => {
             console.error(error)

@@ -5,16 +5,13 @@ import { errorFormatter } from '~/utils/promise-formatter'
 const NAMESPACE = 'products'
 
 export default {
-  createNewItem: async (product: Product, accessToken: string): Promise<ResponseDataType | undefined> => {
+  createNewItem: async (item: Product, accessToken: string): Promise<ResponseDataType | undefined> => {
     return await client
       .post(
         `${NAMESPACE}`,
         {
-          productCode: product.productCode,
-          quantityPO: product.quantityPO,
-          status: product.status ?? 'active',
-          dateInputNPL: product.dateInputNPL,
-          dateOutputFCR: product.dateOutputFCR
+          ...item,
+          status: item.status ?? 'active'
         },
         {
           headers: {
@@ -34,15 +31,15 @@ export default {
   },
   createOrUpdateItemByPk: async (
     id: number,
-    product: Product,
+    item: Product,
     accessToken: string
   ): Promise<ResponseDataType | undefined> => {
     return await client
       .post(
         `${NAMESPACE}/createOrUpdate/${id}`,
         {
-          ...product,
-          status: product.status ?? 'active'
+          ...item,
+          status: item.status ?? 'active'
         },
         {
           headers: {
@@ -120,23 +117,13 @@ export default {
         errorFormatter(error)
       })
   },
-  updateItemByPk: async (id: number, product: Product, accessToken: string): Promise<ResponseDataType | undefined> => {
+  updateItemByPk: async (id: number, item: Product, accessToken: string): Promise<ResponseDataType | undefined> => {
     return client
-      .put(
-        `${NAMESPACE}/${id}`,
-        {
-          productCode: product.productCode,
-          quantityPO: product.quantityPO,
-          dateInputNPL: product.dateInputNPL,
-          dateOutputFCR: product.dateOutputFCR,
-          status: product.status
-        },
-        {
-          headers: {
-            authorization: accessToken
-          }
+      .put(`${NAMESPACE}/${id}`, item, {
+        headers: {
+          authorization: accessToken
         }
-      )
+      })
       .then((res) => {
         if (res.data) {
           return res.data as ResponseDataType
@@ -156,17 +143,11 @@ export default {
     accessToken: string
   ): Promise<ResponseDataType | undefined> => {
     return client
-      .put(
-        `${NAMESPACE}/${query.field}/${query.key}`,
-        {
-          ...item
-        },
-        {
-          headers: {
-            authorization: accessToken
-          }
+      .put(`${NAMESPACE}/${query.field}/${query.key}`, item, {
+        headers: {
+          authorization: accessToken
         }
-      )
+      })
       .then((res) => {
         if (res.data) {
           return res.data as ResponseDataType

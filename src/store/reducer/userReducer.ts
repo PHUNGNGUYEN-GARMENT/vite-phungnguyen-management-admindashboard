@@ -1,20 +1,20 @@
 import { createReducer } from '@reduxjs/toolkit'
-import { UserRoleType } from '~/typing'
-import { setAdminAction, setUserRoleAction } from '../actions-creator'
+import { User, UserRoleType } from '~/typing'
+import { setUserAction, setUserRoleAction } from '../actions-creator'
 
 interface AppUser {
-  isAdmin: boolean
+  user: User
   userRoles: UserRoleType[]
 }
 
 const initialState: AppUser = {
-  isAdmin: false,
+  user: {},
   userRoles: ['staff']
 }
 
 const userReducer = createReducer(initialState, (builder) => {
-  builder.addCase(setAdminAction, (state, action) => {
-    state.isAdmin = action.payload
+  builder.addCase(setUserAction, (state, action) => {
+    state.user = action.payload
   })
   builder.addCase(setUserRoleAction, (state, action) => {
     state.userRoles = action.payload

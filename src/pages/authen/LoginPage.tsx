@@ -89,9 +89,7 @@ const LoginPage: React.FC<Props> = ({ ...props }) => {
         </Flex>
 
         <Flex vertical align='center'>
-          <Typography.Title className='uppercase' level={1}>
-            Login
-          </Typography.Title>
+          <Typography.Title level={3}>Welcome to PHUNGNGUYEN</Typography.Title>
           <Typography.Text type='secondary'>Please login to your account</Typography.Text>
         </Flex>
         <Form

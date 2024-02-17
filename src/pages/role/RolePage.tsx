@@ -1,14 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ColumnsType } from 'antd/es/table'
-import { useEffect } from 'react'
-import { useSelector } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
 import useTable from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
+import ProtectedLayout from '~/components/layout/ProtectedLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import { RootState } from '~/store/store'
 import { UserRoleType } from '~/typing'
 import { textValidatorChange, textValidatorDisplay, textValidatorInit } from '~/utils/helpers'
 import ModalAddNewRole from './components/ModalAddNewRole'
@@ -33,12 +30,6 @@ const RolePage = () => {
     handlePageChange,
     roleService
   } = useRole(table)
-  const currentUser = useSelector((state: RootState) => state.user)
-  const navigate = useNavigate()
-
-  useEffect(() => {
-    if (!currentUser.isAdmin) navigate('/')
-  }, [currentUser.isAdmin])
 
   const columns = {
     role: (record: RoleTableDataType) => {
@@ -121,7 +112,7 @@ const RolePage = () => {
   ]
 
   return (
-    <>
+    <ProtectedLayout>
       <BaseLayout
         searchPlaceHolder='Search..'
         searchValue={searchText}
@@ -168,7 +159,7 @@ const RolePage = () => {
         />
       </BaseLayout>
       {openModal && <ModalAddNewRole openModal={openModal} setOpenModal={setOpenModal} onAddNew={handleAddNewItem} />}
-    </>
+    </ProtectedLayout>
   )
 }
 

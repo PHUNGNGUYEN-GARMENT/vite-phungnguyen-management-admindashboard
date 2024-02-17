@@ -19,7 +19,7 @@ interface Props extends React.HTMLAttributes<HTMLElement> {
 
 const ModalAddNewUser: React.FC<Props> = ({ openModal, setOpenModal, onAddNew, ...props }) => {
   const [form] = Form.useForm()
-  const [visible, setVisible] = useState<boolean>(false)
+  const [passwordVisible, setPasswordVisible] = useState<boolean>(false)
   const [loading, setLoading] = useState<boolean>(false)
   const roleService = useAPIService<Role>(RoleAPI)
   const [roles, setRoles] = useState<Role[]>([])
@@ -99,10 +99,10 @@ const ModalAddNewUser: React.FC<Props> = ({ openModal, setOpenModal, onAddNew, .
                 className='m-0 w-full p-0'
               >
                 <Input
-                  type={visible ? 'text' : 'password'}
+                  type={passwordVisible ? 'text' : 'password'}
                   suffix={
-                    <Button onClick={() => setVisible((prev) => !prev)} type='link' className='p-2'>
-                      {visible ? (
+                    <Button onClick={() => setPasswordVisible((prev) => !prev)} type='link' className='p-2'>
+                      {passwordVisible ? (
                         <Eye color='var(--foreground)' size={16} />
                       ) : (
                         <EyeOff size={16} color='var(--foreground)' />
