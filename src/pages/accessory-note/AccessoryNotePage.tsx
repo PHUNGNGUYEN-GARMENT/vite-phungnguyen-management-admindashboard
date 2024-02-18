@@ -1,11 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ColumnType } from 'antd/es/table'
+import { useSelector } from 'react-redux'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import ProtectedLayout from '~/components/layout/ProtectedLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
+import { RootState } from '~/store/store'
 import ModalAddNewAccessoryNote from './components/ModalAddNewAccessoryNote'
 import useAccessoryNote from './hooks/useAccessoryNote'
 import { AccessoryNoteTableDataType } from './type'
@@ -14,7 +16,6 @@ interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 const AccessoryNotePage: React.FC<Props> = () => {
   const table = useTable<AccessoryNoteTableDataType>([])
-
   const {
     searchText,
     setSearchText,
@@ -31,6 +32,7 @@ const AccessoryNotePage: React.FC<Props> = () => {
     handlePageChange,
     accessoryNoteService
   } = useAccessoryNote(table)
+  const currentUser = useSelector((state: RootState) => state.user)
 
   const columns: ColumnType<AccessoryNoteTableDataType>[] = [
     {
@@ -86,10 +88,12 @@ const AccessoryNotePage: React.FC<Props> = () => {
         onSearch={(value) => handleSearch(value)}
         onSortChange={(checked, e) => handleSortChange(checked, e)}
         onResetClick={{
-          onClick: () => handleResetClick()
+          onClick: () => handleResetClick(),
+          isShow: currentUser.userRoles.includes('admin')
         }}
         onAddNewClick={{
-          onClick: () => setOpenModal(true)
+          onClick: () => setOpenModal(true),
+          isShow: currentUser.userRoles.includes('admin')
         }}
       >
         <SkyTable
@@ -119,7 +123,7 @@ const AccessoryNotePage: React.FC<Props> = () => {
             onConfirmCancelEditing: () => table.handleConfirmCancelEditing(),
             onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),
             onConfirmDelete: (record) => handleConfirmDelete(record),
-            isShow: true
+            isShow: currentUser.userRoles.includes('admin')
           }}
         />
       </BaseLayout>

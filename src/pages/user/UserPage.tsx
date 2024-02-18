@@ -2,6 +2,7 @@
 import { Divider, Flex, Space } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
+import { useSelector } from 'react-redux'
 import useDevice from '~/components/hooks/useDevice'
 import useTable from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
@@ -11,6 +12,7 @@ import ExpandableItemRow from '~/components/sky-ui/SkyTable/ExpandableItemRow'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import TextHint from '~/components/sky-ui/TextHint'
+import { RootState } from '~/store/store'
 import { UserRole } from '~/typing'
 import {
   breakpoint,
@@ -46,6 +48,7 @@ const UserPage = () => {
     roles
   } = useUser(table)
   const { width } = useDevice()
+  const currentUser = useSelector((state: RootState) => state.user)
 
   const columns = {
     username: (record: UserTableDataType) => {
@@ -199,22 +202,22 @@ const UserPage = () => {
 
   const tableColumns: ColumnsType<UserTableDataType> = [
     {
-      title: 'Username',
-      key: 'username',
-      dataIndex: 'username',
-      width: '15%',
-      render: (_value: any, record: UserTableDataType) => {
-        return columns.username(record)
-      }
-    },
-    {
       title: 'Full name',
       key: 'fullName',
       dataIndex: 'fullName',
       width: '15%',
-      responsive: ['lg'],
       render: (_value: any, record: UserTableDataType) => {
         return columns.fullName(record)
+      }
+    },
+    {
+      title: 'Username',
+      key: 'username',
+      dataIndex: 'username',
+      width: '15%',
+      responsive: ['lg'],
+      render: (_value: any, record: UserTableDataType) => {
+        return columns.username(record)
       }
     },
     {
@@ -222,6 +225,7 @@ const UserPage = () => {
       key: 'password',
       dataIndex: 'password',
       width: '15%',
+      responsive: ['md'],
       render: (_value: any, record: UserTableDataType) => {
         return columns.password(record)
       }
@@ -230,7 +234,7 @@ const UserPage = () => {
       title: 'Roles',
       key: 'roles',
       dataIndex: 'roles',
-      responsive: ['md'],
+      responsive: ['sm'],
       width: '20%',
       render: (_value: any, record: UserTableDataType) => {
         return columns.role(record)
@@ -280,10 +284,12 @@ const UserPage = () => {
         searchPlaceHolder='Tên...'
         onSortChange={(checked, e) => handleSortChange(checked, e)}
         onResetClick={{
-          onClick: () => handleResetClick()
+          onClick: () => handleResetClick(),
+          isShow: currentUser.userRoles.includes('admin')
         }}
         onAddNewClick={{
-          onClick: () => setOpenModal(true)
+          onClick: () => setOpenModal(true),
+          isShow: currentUser.userRoles.includes('admin')
         }}
       >
         <SkyTable
@@ -313,7 +319,7 @@ const UserPage = () => {
             onConfirmCancelEditing: () => table.handleConfirmCancelEditing(),
             onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),
             onConfirmDelete: (record) => handleConfirmDelete(record),
-            isShow: true
+            isShow: currentUser.userRoles.includes('admin')
           }}
           expandable={{
             expandedRowRender: (record) => {
@@ -321,13 +327,18 @@ const UserPage = () => {
                 <Flex vertical className='w-full lg:w-1/2'>
                   <Space direction='vertical' size={10} split={<Divider className='my-0 w-full py-0' />}>
                     {!(width >= breakpoint.lg) && (
-                      <ExpandableItemRow title='Full name:' isEditing={table.isEditing(record.id!)}>
-                        {columns.fullName(record)}
+                      <ExpandableItemRow title='Username:' isEditing={table.isEditing(record.id!)}>
+                        {columns.username(record)}
+                      </ExpandableItemRow>
+                    )}
+                    {!(width >= breakpoint.sm) && (
+                      <ExpandableItemRow title='Roles:' isEditing={table.isEditing(record.id!)}>
+                        {columns.role(record)}
                       </ExpandableItemRow>
                     )}
                     {!(width >= breakpoint.md) && (
-                      <ExpandableItemRow title='Roles:' isEditing={table.isEditing(record.id!)}>
-                        {columns.role(record)}
+                      <ExpandableItemRow title='Password:' isEditing={table.isEditing(record.id!)}>
+                        {columns.password(record)}
                       </ExpandableItemRow>
                     )}
                     {!(width >= breakpoint.xl) && (

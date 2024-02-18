@@ -7,7 +7,7 @@ const NAMESPACE = 'users'
 export default {
   register: async (user: User): Promise<ResponseDataType | undefined> => {
     return await client
-      .post(`${NAMESPACE}/register`, {
+      .post(`${NAMESPACE}/auth/register`, {
         ...user,
         status: user.status ?? 'active'
       })
@@ -23,27 +23,7 @@ export default {
   },
   login: async (user: User): Promise<ResponseDataType | undefined> => {
     return await client
-      .post(`${NAMESPACE}/login`, {
-        ...user
-      })
-      .then((res) => {
-        console.log(res)
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
-      })
-      .catch(function (error) {
-        errorFormatter(error)
-      })
-  },
-  checkAdmin: async (accessToken: string): Promise<ResponseDataType | undefined> => {
-    return await client
-      .get(`${NAMESPACE}/check-admin`, {
-        headers: {
-          authorization: accessToken
-        }
-      })
+      .post(`${NAMESPACE}/auth/login`, user)
       .then((res) => {
         console.log(res)
         if (res.data) {

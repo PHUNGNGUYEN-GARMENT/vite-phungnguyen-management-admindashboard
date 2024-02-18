@@ -82,7 +82,7 @@ const LoginPage: React.FC<Props> = ({ ...props }) => {
         vertical
         gap={20}
         align='center'
-        className='absolute top-1/2 w-[450px] -translate-y-1/2 rounded-lg bg-white p-10 shadow-lg'
+        className='absolute top-1/2 w-[350px] -translate-y-1/2 rounded-lg bg-white p-10 shadow-lg'
       >
         <Flex align='center' className='relative h-fit w-full' justify='center'>
           <img src={logo} alt='logo' className='h-24 w-24 object-contain' />
@@ -97,6 +97,8 @@ const LoginPage: React.FC<Props> = ({ ...props }) => {
           {...formItemLayout}
           layout={formLayout}
           name='basic'
+          labelCol={{ flex: '100px' }}
+          labelAlign='left'
           initialValues={{ layout: formLayout }}
           onValuesChange={onFormLayoutChange}
           onFinish={onFinish}

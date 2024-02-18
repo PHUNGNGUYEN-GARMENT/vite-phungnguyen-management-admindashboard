@@ -171,6 +171,32 @@ export default {
         errorFormatter(error)
       })
   },
+  updateIDsBy: async (
+    query: {
+      field: string
+      key: React.Key
+    },
+    recordsToUpdate: {
+      roleIDs: number[]
+    },
+    accessToken: string
+  ): Promise<ResponseDataType | undefined> => {
+    return client
+      .post(`${NAMESPACE}/updateItems/${query.field}/${query.key}`, recordsToUpdate, {
+        headers: {
+          authorization: accessToken
+        }
+      })
+      .then((res) => {
+        if (res.data) {
+          return res.data as ResponseDataType
+        }
+        return res.data
+      })
+      .catch(function (error) {
+        errorFormatter(error)
+      })
+  },
   deleteItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType | undefined> => {
     return client
       .delete(`${NAMESPACE}/${id}`, {

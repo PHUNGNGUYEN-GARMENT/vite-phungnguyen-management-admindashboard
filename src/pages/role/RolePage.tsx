@@ -1,11 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ColumnsType } from 'antd/es/table'
+import { useSelector } from 'react-redux'
 import useTable from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import ProtectedLayout from '~/components/layout/ProtectedLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
+import { RootState } from '~/store/store'
 import { UserRoleType } from '~/typing'
 import { textValidatorChange, textValidatorDisplay, textValidatorInit } from '~/utils/helpers'
 import ModalAddNewRole from './components/ModalAddNewRole'
@@ -30,6 +32,7 @@ const RolePage = () => {
     handlePageChange,
     roleService
   } = useRole(table)
+  const currentUser = useSelector((state: RootState) => state.user)
 
   const columns = {
     role: (record: RoleTableDataType) => {
@@ -72,7 +75,7 @@ const RolePage = () => {
           isEditing={table.isEditing(record.key!)}
           dataIndex='desc'
           title='Description'
-          inputType='text'
+          inputType='textarea'
           required={true}
           initialValue={textValidatorInit(record.desc)}
           value={newRecord.desc}
@@ -124,7 +127,8 @@ const RolePage = () => {
           onClick: () => handleResetClick()
         }}
         onAddNewClick={{
-          onClick: () => setOpenModal(true)
+          onClick: () => setOpenModal(true),
+          isShow: true
         }}
       >
         <SkyTable
@@ -154,7 +158,7 @@ const RolePage = () => {
             onConfirmCancelEditing: () => table.handleConfirmCancelEditing(),
             onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),
             onConfirmDelete: (record) => handleConfirmDelete(record),
-            isShow: true
+            isShow: currentUser.userRoles.includes('admin')
           }}
         />
       </BaseLayout>

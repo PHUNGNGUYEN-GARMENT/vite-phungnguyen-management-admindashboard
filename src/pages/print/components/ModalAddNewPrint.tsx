@@ -1,7 +1,8 @@
 /* eslint-disable react-refresh/only-export-components */
-import { Flex, Form, Input, Modal, Typography } from 'antd'
+import { Form, Modal } from 'antd'
 import React, { memo } from 'react'
 import AddNewTitle from '~/components/sky-ui/AddNewTitle'
+import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
 import { SewingLine } from '~/typing'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
@@ -16,7 +17,7 @@ const ModalAddNewPrint: React.FC<Props> = ({ openModal, setOpenModal, onAddNew, 
   async function handleOk() {
     const row = await form.validateFields()
     onAddNew({
-      name: row.name
+      ...row
     })
   }
 
@@ -25,32 +26,17 @@ const ModalAddNewPrint: React.FC<Props> = ({ openModal, setOpenModal, onAddNew, 
   }
 
   return (
-    <Modal
-      title={<AddNewTitle title='Add new' />}
-      open={openModal}
-      onOk={handleOk}
-      onCancel={handleCancel}
-      centered
-      width='auto'
-    >
-      <Form form={form} {...props}>
-        <Flex vertical gap={10}>
-          <Flex align='center' gap={5}>
-            <Typography.Text className='w-24 flex-shrink-0'>Nơi in:</Typography.Text>
-            <Form.Item
-              rules={[
-                {
-                  required: true,
-                  message: `Please input this field!`
-                }
-              ]}
-              name='name'
-              className='m-0'
-            >
-              <Input className='w-52' allowClear placeholder='' />
-            </Form.Item>
-          </Flex>
-        </Flex>
+    <Modal title={<AddNewTitle title='Add new' />} open={openModal} onOk={handleOk} onCancel={handleCancel} centered>
+      <Form form={form} labelCol={{ flex: '100px' }} {...props}>
+        <EditableFormCell
+          isEditing
+          allowClear
+          dataIndex='print-place'
+          title='Print place'
+          subtitle='Please enter print place!'
+          placeholder='TIẾN THẮNG, ĐẠI VIỆT PHÁT, v.v..'
+          required
+        />
       </Form>
     </Modal>
   )

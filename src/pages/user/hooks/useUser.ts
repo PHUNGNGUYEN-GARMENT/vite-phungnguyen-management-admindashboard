@@ -1,19 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { App as AntApp } from 'antd'
 import { useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
 import { ResponseDataType, defaultRequestBody } from '~/api/client'
 import RoleAPI from '~/api/services/RoleAPI'
 import UserAPI from '~/api/services/UserAPI'
 import UserRoleAPI from '~/api/services/UserRoleAPI'
 import { TableItemWithKey, UseTableProps } from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
+import { RootState } from '~/store/store'
 import { Role, User, UserRole } from '~/typing'
 import { textComparator } from '~/utils/helpers'
 import { UserNewRecordProps, UserTableDataType } from '../type'
 
 export default function useUser(table: UseTableProps<UserTableDataType>) {
   const { setLoading, setDataSource, handleConfirmCancelEditing, handleConfirmDeleting } = table
-
+  const currentUser = useSelector((state: RootState) => state.user)
   // Services
   const userService = useAPIService<User>(UserAPI)
   const roleService = useAPIService<Role>(RoleAPI)
@@ -145,14 +147,14 @@ export default function useUser(table: UseTableProps<UserTableDataType>) {
     try {
       console.log(formAddNew)
       const userNew: User = { ...formAddNew }
-      const rolesNew: Role[] = (formAddNew.roles as number[]).map((roleID) => {
-        return roles.find((role) => role.id === roleID) as Role
-      })
+      // const rolesNew: Role[] = (formAddNew.roles as number[]).map((roleID) => {
+      //   return roles.find((role) => role.id === roleID) as Role
+      // })
+      const newRoleIDs: number[] = formAddNew.roles as number[]
       setLoading(true)
       await userService.createNewItem(
         {
-          ...userNew,
-          isAdmin: rolesNew.some((role) => role.role === 'admin')
+          ...userNew
         },
         setLoading,
         async (meta, msg) => {
@@ -160,21 +162,13 @@ export default function useUser(table: UseTableProps<UserTableDataType>) {
           if (!meta?.success) {
             throw new Error(msg)
           }
-          await userRoleService.updateItemsBy?.(
+          await UserRoleAPI.updateIDsBy?.(
             { field: 'userID', key: newUser.id! },
-            rolesNew.map((roleID) => {
-              return {
-                userID: newUser.id,
-                roleID: roleID
-              } as UserRole
-            }),
-            setLoading,
-            (meta) => {
-              if (!meta?.success) {
-                throw new Error('API update UserRole failed')
-              }
-            }
-          )
+            { roleIDs: newRoleIDs },
+            currentUser.user.accessToken ?? ''
+          ).then((meta) => {
+            if (!meta?.success) throw new Error(`${meta?.message}`)
+          })
           message.success(msg)
         }
       )
@@ -192,16 +186,10 @@ export default function useUser(table: UseTableProps<UserTableDataType>) {
     record: TableItemWithKey<UserTableDataType>,
     onDataSuccess?: (meta: ResponseDataType | undefined) => void
   ) => {
-    console.log(record)
     await userService.deleteItemByPk(record.id!, setLoading, (meta, msg) => {
-      if (meta) {
-        if (meta.success) {
-          handleConfirmDeleting(record.id!)
-          message.success(msg)
-        }
-      } else {
-        message.error(msg)
-      }
+      if (!meta?.success) throw new Error(`${msg}`)
+      handleConfirmDeleting(record.id!)
+      message.success(msg)
       onDataSuccess?.(meta)
     })
   }

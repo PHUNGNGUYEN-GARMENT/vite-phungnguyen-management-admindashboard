@@ -1,15 +1,12 @@
 /* eslint-disable react-refresh/only-export-components */
-import { Button, Flex, Form, Input, Modal, Spin, Typography } from 'antd'
-import { Eye, EyeOff } from 'lucide-react'
+import { Flex, Form, Modal, Spin } from 'antd'
 import React, { memo, useEffect, useState } from 'react'
 import { defaultRequestBody } from '~/api/client'
 import RoleAPI from '~/api/services/RoleAPI'
 import AddNewTitle from '~/components/sky-ui/AddNewTitle'
 import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
-import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import useAPIService from '~/hooks/useAPIService'
 import { Role, User } from '~/typing'
-import DayJS from '~/utils/date-formatter'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
   openModal: boolean
@@ -19,7 +16,6 @@ interface Props extends React.HTMLAttributes<HTMLElement> {
 
 const ModalAddNewUser: React.FC<Props> = ({ openModal, setOpenModal, onAddNew, ...props }) => {
   const [form] = Form.useForm()
-  const [passwordVisible, setPasswordVisible] = useState<boolean>(false)
   const [loading, setLoading] = useState<boolean>(false)
   const roleService = useAPIService<Role>(RoleAPI)
   const [roles, setRoles] = useState<Role[]>([])
@@ -65,108 +61,75 @@ const ModalAddNewUser: React.FC<Props> = ({ openModal, setOpenModal, onAddNew, .
           <Spin />
         </Flex>
       ) : (
-        <Form form={form} {...props}>
+        <Form form={form} {...props} autoComplete='aaa' labelWrap labelCol={{ flex: '100px' }} labelAlign='left'>
           <Flex vertical gap={10}>
-            <Flex align='center' gap={5}>
-              <SkyTableTypography required className='w-24 flex-shrink-0'>
-                Username:
-              </SkyTableTypography>
-              <EditableFormCell
-                isEditing={true}
-                title=''
-                required
-                dataIndex='username'
-                inputType='text'
-                placeholder='Username...'
-              />
-            </Flex>
-            <Flex align='center' gap={5}>
-              <Typography.Text className='w-24 flex-shrink-0'>Full name:</Typography.Text>
-              <EditableFormCell isEditing={true} title='' dataIndex='fullName' inputType='text' placeholder='' />
-            </Flex>
-            <Flex align='center' gap={5}>
-              <SkyTableTypography required className='w-24 flex-shrink-0'>
-                Password:
-              </SkyTableTypography>
-              <Form.Item
-                rules={[
-                  {
-                    required: true,
-                    message: `Please input this field!`
+            <EditableFormCell
+              isEditing={true}
+              title='Username'
+              required
+              dataIndex='username'
+              subtitle='Please enter username!'
+              inputType='text'
+              placeholder='Enter username'
+            />
+            <EditableFormCell
+              isEditing={true}
+              title='Password'
+              required
+              dataIndex='password'
+              subtitle='Please enter password!'
+              inputType='password'
+              placeholder='Enter password'
+            />
+            <EditableFormCell
+              isEditing={true}
+              title='Full name'
+              required
+              subtitle='Please enter full name!'
+              dataIndex='fullName'
+              inputType='text'
+              placeholder='Enter full name'
+            />
+            <EditableFormCell
+              isEditing={true}
+              title='Role'
+              required
+              subtitle='Please select role!'
+              dataIndex='roles'
+              inputType='multipleselect'
+              placeholder='Select role'
+              selectProps={{
+                options: roles.map((role) => {
+                  return {
+                    label: role.desc,
+                    value: role.id,
+                    key: role.id
                   }
-                ]}
-                name='password'
-                className='m-0 w-full p-0'
-              >
-                <Input
-                  type={passwordVisible ? 'text' : 'password'}
-                  suffix={
-                    <Button onClick={() => setPasswordVisible((prev) => !prev)} type='link' className='p-2'>
-                      {passwordVisible ? (
-                        <Eye color='var(--foreground)' size={16} />
-                      ) : (
-                        <EyeOff size={16} color='var(--foreground)' />
-                      )}
-                    </Button>
-                  }
-                  allowClear
-                  placeholder=''
-                />
-              </Form.Item>
-            </Flex>
-            <Flex align='center' gap={5}>
-              <SkyTableTypography required className='w-24 flex-shrink-0' status={'active'}>
-                Role:
-              </SkyTableTypography>
-              <EditableFormCell
-                isEditing={true}
-                title='Vai trò:'
-                required
-                dataIndex='roles'
-                inputType='multipleselect'
-                placeholder='Select role...'
-                selectProps={{
-                  options: roles.map((role) => {
-                    return {
-                      label: role.desc,
-                      value: role.id,
-                      key: role.id
-                    }
-                  })
-                }}
-              />
-            </Flex>
-            <Flex align='center' gap={5}>
-              <SkyTableTypography className='w-24 flex-shrink-0'>Phone:</SkyTableTypography>
-              <EditableFormCell
-                isEditing={true}
-                title=''
-                dataIndex='phone'
-                inputType='text'
-                placeholder='Phone number...'
-              />
-            </Flex>
-            <Flex align='center' gap={5}>
-              <SkyTableTypography className='w-24'>Work description:</SkyTableTypography>
-              <EditableFormCell
-                isEditing={true}
-                title=''
-                dataIndex='workDescription'
-                inputType='textarea'
-                placeholder='Chi tiết...'
-              />
-            </Flex>
-            <Flex align='center' gap={5}>
-              <SkyTableTypography className='w-24'>Birthday:</SkyTableTypography>
-              <EditableFormCell
-                isEditing={true}
-                title='Sinh nhật:'
-                dataIndex='birthday'
-                inputType='datepicker'
-                placeholder='Ngày sinh...'
-                initialValue={DayJS(Date.now())}
-              />
-            </Flex>
+                })
+              }}
+            />
+            <EditableFormCell
+              isEditing={true}
+              title='Phone'
+              dataIndex='phone'
+              inputType='text'
+              placeholder='Enter phone'
+            />
+            <EditableFormCell
+              isEditing={true}
+              title='Work description'
+              dataIndex='workDescription'
+              inputType='textarea'
+              placeholder='Enter description'
+            />
+            <EditableFormCell
+              isEditing={true}
+              title='Birthday'
+              dataIndex='birthday'
+              inputType='datepicker'
+              // placeholder=''
+              // initialValue={DayJS(Date.now())}
+            />
           </Flex>
         </Form>
       )}

@@ -1,7 +1,8 @@
 /* eslint-disable react-refresh/only-export-components */
-import { Flex, Form, Input, Modal, Typography } from 'antd'
+import { Flex, Form, Modal } from 'antd'
 import React, { memo } from 'react'
 import AddNewTitle from '~/components/sky-ui/AddNewTitle'
+import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
 import { SewingLine } from '~/typing'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
@@ -16,7 +17,7 @@ const ModalAddNewSewingLine: React.FC<Props> = ({ openModal, setOpenModal, onAdd
   async function handleOk() {
     const row = await form.validateFields()
     onAddNew({
-      name: row.name
+      ...row
     })
   }
 
@@ -31,25 +32,19 @@ const ModalAddNewSewingLine: React.FC<Props> = ({ openModal, setOpenModal, onAdd
       onOk={handleOk}
       onCancel={handleCancel}
       centered
-      width='auto'
+      width={450}
     >
-      <Form form={form} {...props}>
+      <Form form={form} labelCol={{ flex: '100px' }} labelAlign='left' {...props}>
         <Flex vertical gap={10}>
-          <Flex align='center' gap={5}>
-            <Typography.Text className='w-24 flex-shrink-0'>Tên chuyền:</Typography.Text>
-            <Form.Item
-              rules={[
-                {
-                  required: true,
-                  message: `Please input this field!`
-                }
-              ]}
-              name='name'
-              className='m-0'
-            >
-              <Input className='w-52' allowClear placeholder='C1, C2,...' />
-            </Form.Item>
-          </Flex>
+          <EditableFormCell
+            isEditing={true}
+            title='Name:'
+            required
+            subtitle='Please enter name!'
+            dataIndex='name'
+            inputType='text'
+            placeholder='C1, C2, v.v..'
+          />
         </Flex>
       </Form>
     </Modal>

@@ -4,7 +4,6 @@ import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
 import UserAPI from '~/api/services/UserAPI'
 import useAPIService from '~/hooks/useAPIService'
-import useLocalStorage from '~/hooks/useLocalStorage'
 import { RootState } from '~/store/store'
 import { User } from '~/typing'
 import DayJS, { DatePattern } from '~/utils/date-formatter'
@@ -20,7 +19,6 @@ function ProfileDialog({ open, setOpen }: Props) {
   const [form] = Form.useForm()
   const userService = useAPIService<User>(UserAPI)
   const [loading, setLoading] = useState<boolean>(false)
-  const [accessTokenStored] = useLocalStorage<string>('accessToken', '')
   const currentUser = useSelector((state: RootState) => state.user)
   // const [imageUrl, setImageUrl] = useState<string>()
 
@@ -139,13 +137,13 @@ function ProfileDialog({ open, setOpen }: Props) {
               Account Details
             </Typography.Title>
             <Flex vertical className='w-full'>
-              <Form.Item label='Full name' required name='fullName' initialValue={currentUser.user.fullName}>
+              <Form.Item label='Full name' required name='fullname-profile' initialValue={currentUser.user.fullName}>
                 <Input placeholder='Nguyen Van A' required className='w-full' name='fullName' />
               </Form.Item>
-              <Form.Item label='Phone' name='phone' required initialValue={currentUser.user.phone}>
+              <Form.Item label='Phone' name='phone-profile' required initialValue={currentUser.user.phone}>
                 <InputNumber placeholder='123456789' required name='phone' className='w-full' />
               </Form.Item>
-              <Form.Item label='Birthday' name='birthday' initialValue={DayJS(currentUser.user.birthday)}>
+              <Form.Item label='Birthday' name='birthday-profile' initialValue={DayJS(currentUser.user.birthday)}>
                 <DatePicker className='w-full' name='birthday' format={DatePattern.display} />
               </Form.Item>
             </Flex>

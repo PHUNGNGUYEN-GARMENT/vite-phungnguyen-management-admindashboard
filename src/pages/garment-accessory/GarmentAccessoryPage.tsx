@@ -4,6 +4,7 @@ import { Checkbox, ColorPicker, Divider, Flex, Space } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
 import { Check } from 'lucide-react'
+import { useSelector } from 'react-redux'
 import useDevice from '~/components/hooks/useDevice'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
@@ -11,6 +12,7 @@ import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import ExpandableItemRow from '~/components/sky-ui/SkyTable/ExpandableItemRow'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
+import { RootState } from '~/store/store'
 import { GarmentAccessoryNote } from '~/typing'
 import {
   breakpoint,
@@ -45,6 +47,7 @@ const GarmentAccessoryPage: React.FC<Props> = () => {
     accessoryNotes
   } = useGarmentAccessory(table)
   const { width } = useDevice()
+  const currentUser = useSelector((state: RootState) => state.user)
 
   const columns = {
     productCode: (record: GarmentAccessoryTableDataType) => {
@@ -380,7 +383,7 @@ const GarmentAccessoryPage: React.FC<Props> = () => {
             onConfirmCancelEditing: () => table.handleConfirmCancelEditing(),
             onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),
             onConfirmDelete: (record) => handleConfirmDelete(record),
-            isShow: true
+            isShow: currentUser.userRoles.includes('admin') || currentUser.userRoles.includes('accessory_manager')
           }}
           expandable={{
             expandedRowRender: (record) => {

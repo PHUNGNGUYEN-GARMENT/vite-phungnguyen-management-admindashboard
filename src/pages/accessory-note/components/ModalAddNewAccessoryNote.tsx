@@ -3,7 +3,6 @@ import { Flex, Form, Modal } from 'antd'
 import React, { memo } from 'react'
 import AddNewTitle from '~/components/sky-ui/AddNewTitle'
 import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
-import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import { AccessoryNote } from '~/typing'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
@@ -28,28 +27,25 @@ const ModalAddNewAccessoryNote: React.FC<Props> = ({ openModal, setOpenModal, on
   }
 
   return (
-    <Modal
-      title={<AddNewTitle title='Add new' />}
-      open={openModal}
-      onOk={handleOk}
-      onCancel={handleCancel}
-      centered
-      width='auto'
-    >
-      <Form form={form} {...props}>
-        <Flex vertical gap={10} className='w-full sm:w-[400px]'>
-          <Flex align='center' gap={5}>
-            <SkyTableTypography className='w-32' required status={'active'}>
-              Title:
-            </SkyTableTypography>
-            <EditableFormCell isEditing={true} required title='Title:' dataIndex='title' inputType='text' />
-          </Flex>
-          <Flex align='center' gap={5}>
-            <SkyTableTypography className='w-32' status={'active'}>
-              Summary:
-            </SkyTableTypography>
-            <EditableFormCell isEditing={true} title='Chi tiết:' dataIndex='summary' inputType='textarea' />
-          </Flex>
+    <Modal title={<AddNewTitle title='Add new' />} open={openModal} onOk={handleOk} onCancel={handleCancel} centered>
+      <Form form={form} labelWrap labelCol={{ flex: '100px' }} labelAlign='left' {...props}>
+        <Flex vertical gap={10} className=''>
+          <EditableFormCell
+            isEditing={true}
+            required
+            title='Title:'
+            placeholder='Enter title'
+            subtitle='Please enter title!'
+            dataIndex='title'
+            inputType='text'
+          />
+          <EditableFormCell
+            isEditing={true}
+            title='Chi tiết:'
+            placeholder='Enter description'
+            dataIndex='desc'
+            inputType='textarea'
+          />
         </Flex>
       </Form>
     </Modal>

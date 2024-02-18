@@ -1,11 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ColumnType } from 'antd/es/table'
+import { useSelector } from 'react-redux'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import ProtectedLayout from '~/components/layout/ProtectedLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
+import { RootState } from '~/store/store'
 import ModalAddNewSewingLine from './components/ModalAddNewSewingLine'
 import useSewingLine from './hooks/useSewingLine'
 import { SewingLineTableDataType } from './type'
@@ -31,6 +33,7 @@ const SewingLinePage: React.FC<Props> = () => {
     handlePageChange,
     sewingLineService
   } = useSewingLine(table)
+  const currentUser = useSelector((state: RootState) => state.user)
 
   const columns: ColumnType<SewingLineTableDataType>[] = [
     {
@@ -66,10 +69,12 @@ const SewingLinePage: React.FC<Props> = () => {
         onSearch={(value) => handleSearch(value)}
         onSortChange={(checked, e) => handleSortChange(checked, e)}
         onResetClick={{
-          onClick: () => handleResetClick()
+          onClick: () => handleResetClick(),
+          isShow: currentUser.userRoles.includes('admin')
         }}
         onAddNewClick={{
-          onClick: () => setOpenModal(true)
+          onClick: () => setOpenModal(true),
+          isShow: currentUser.userRoles.includes('admin')
         }}
       >
         <SkyTable
@@ -99,7 +104,7 @@ const SewingLinePage: React.FC<Props> = () => {
             onConfirmCancelEditing: () => table.handleConfirmCancelEditing(),
             onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),
             onConfirmDelete: (record) => handleConfirmDelete(record),
-            isShow: true
+            isShow: currentUser.userRoles.includes('admin') || currentUser.userRoles.includes('cutting_group_manager')
           }}
         />
       </BaseLayout>

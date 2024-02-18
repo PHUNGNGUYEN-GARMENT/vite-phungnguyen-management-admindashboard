@@ -2,6 +2,7 @@
 import { Checkbox, ColorPicker, Divider, Flex, Space } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
+import { useSelector } from 'react-redux'
 import useDevice from '~/components/hooks/useDevice'
 import useTable from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
@@ -9,6 +10,7 @@ import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import ExpandableItemRow from '~/components/sky-ui/SkyTable/ExpandableItemRow'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
+import { RootState } from '~/store/store'
 import {
   breakpoint,
   dateTimeValidatorDisplay,
@@ -40,6 +42,7 @@ const SampleSewingPage = () => {
     handlePageChange,
     productService
   } = useCuttingGroup(table)
+  const currentUser = useSelector((state: RootState) => state.user)
 
   const columns = {
     productCode: (record: CuttingGroupTableDataType) => {
@@ -590,7 +593,7 @@ const SampleSewingPage = () => {
             onConfirmCancelEditing: () => table.handleConfirmCancelEditing(),
             onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),
             onConfirmDelete: (record) => handleConfirmDelete(record),
-            isShow: true
+            isShow: currentUser.userRoles.includes('admin') || currentUser.userRoles.includes('cutting_group_manager')
           }}
           expandable={{
             expandedRowRender: (record) => {

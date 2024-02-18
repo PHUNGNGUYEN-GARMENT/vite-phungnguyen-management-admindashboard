@@ -1,35 +1,28 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-refresh/only-export-components */
-import { Checkbox, ColorPicker, DatePicker, Flex, Form, Input, InputNumber, Select, Table, Typography } from 'antd'
-import { InputProps, TextAreaProps } from 'antd/es/input'
-import { SelectProps } from 'antd/es/select'
-import { CheckboxProps, ColorPickerProps, InputNumberProps } from 'antd/lib'
-import { HTMLAttributes, memo } from 'react'
-import { InputType } from '~/typing'
+import {
+  Button,
+  Checkbox,
+  ColorPicker,
+  DatePicker,
+  Flex,
+  Form,
+  Input,
+  InputNumber,
+  Select,
+  Table,
+  Typography
+} from 'antd'
+import { Eye, EyeOff } from 'lucide-react'
+import { memo, useState } from 'react'
 import { DatePattern } from '~/utils/date-formatter'
 import { cn } from '~/utils/helpers'
+import { EditableStateCellProps } from './EditableStateCell'
 
 export type EditableCellRequiredType = { key?: React.Key; name?: string; id?: number }
 
-export interface EditableFormCellProps extends HTMLAttributes<HTMLElement> {
-  isEditing: boolean
-  dataIndex?: string
-  value?: any
-  setLoading?: (enable: boolean) => void
-  initialValue?: any
-  onValueChange?: (value: any, option?: any) => void
-  selectProps?: SelectProps
-  colorPickerProps?: ColorPickerProps
-  checkboxProps?: CheckboxProps
-  inputNumberProps?: InputNumberProps
-  textAreaProps?: TextAreaProps
-  inputProps?: InputProps
-  inputType?: InputType
-  required?: boolean
-  title?: string
-  disabled?: boolean
-}
+export interface EditableFormCellProps extends EditableStateCellProps {}
 
 export type EditableTableProps = Parameters<typeof Table>[0]
 
@@ -37,6 +30,9 @@ function EditableFormCell({
   isEditing,
   dataIndex,
   title,
+  subtitle,
+  placeholder,
+  allowClear,
   value,
   colorPickerProps,
   checkboxProps,
@@ -49,9 +45,12 @@ function EditableFormCell({
   setLoading,
   required,
   inputType,
+  readonly,
   disabled,
   ...restProps
 }: EditableFormCellProps) {
+  const [passwordVisible, setPasswordVisible] = useState<boolean>(false)
+
   const inputNode = ((): React.ReactNode => {
     switch (inputType) {
       case 'colorpicker':
@@ -69,7 +68,8 @@ function EditableFormCell({
         return (
           <Select
             {...selectProps}
-            placeholder={`Select ${title}`}
+            title={title}
+            placeholder={placeholder}
             virtual={false}
             disabled={disabled}
             optionRender={(ori, info) => {
@@ -93,7 +93,9 @@ function EditableFormCell({
           <InputNumber
             {...inputNumberProps}
             name={dataIndex}
-            placeholder={`Enter ${title}`}
+            title={title}
+            required={required}
+            placeholder={placeholder}
             value={value}
             disabled={disabled}
             className={cn('w-full', restProps.className)}
@@ -103,6 +105,8 @@ function EditableFormCell({
         return (
           <Checkbox
             {...checkboxProps}
+            required={required}
+            title={title}
             name={dataIndex}
             checked={value}
             disabled={disabled}
@@ -113,7 +117,9 @@ function EditableFormCell({
         return (
           <Select
             {...selectProps}
-            placeholder={`Select ${title}`}
+            title={title}
+            placeholder={placeholder}
+            disabled={disabled}
             optionRender={
               selectProps
                 ? selectProps.optionRender
@@ -141,8 +147,11 @@ function EditableFormCell({
           <Input.TextArea
             {...textAreaProps}
             name={dataIndex}
-            placeholder={`Enter ${title}`}
+            title={title}
+            placeholder={`${placeholder}`}
             value={value}
+            readOnly={readonly}
+            required={required}
             disabled={disabled}
             className={cn('w-full', restProps.className)}
           />
@@ -151,9 +160,11 @@ function EditableFormCell({
         return (
           <Select
             {...selectProps}
-            placeholder={`Select ${title}`}
+            title={title}
+            placeholder={placeholder}
             mode='multiple'
             virtual={false}
+            disabled={disabled}
             value={value}
             className='w-full'
           />
@@ -162,22 +173,49 @@ function EditableFormCell({
         return (
           <DatePicker
             name={dataIndex}
-            placeholder={`Pick ${title}`}
+            title={title}
+            placeholder={placeholder}
             value={value}
+            required={required}
             onChange={(_val, dateString) => onValueChange?.(dateString)}
             disabled={disabled}
             format={DatePattern.display}
             className={cn('w-full', restProps.className)}
           />
         )
+      case 'password':
+        return (
+          <Input
+            type={passwordVisible ? 'text' : 'password'}
+            suffix={
+              <Button onClick={() => setPasswordVisible((prev) => !prev)} type='link' className='p-2'>
+                {passwordVisible ? (
+                  <Eye color='var(--foreground)' size={16} />
+                ) : (
+                  <EyeOff size={16} color='var(--foreground)' />
+                )}
+              </Button>
+            }
+            title={title}
+            required={required}
+            allowClear={allowClear}
+            placeholder={placeholder ?? 'Enter password'}
+            readOnly={readonly}
+          />
+        )
       default:
         return (
           <Input
             {...inputProps}
+            title={title}
+            required={required}
+            placeholder={placeholder}
             name={dataIndex}
-            placeholder={`Enter ${title}`}
             value={value}
+            autoComplete='give-text'
+            allowClear={allowClear}
             disabled={disabled}
+            readOnly={readonly}
             className={cn('w-full', restProps.className)}
           />
         )
@@ -191,11 +229,14 @@ function EditableFormCell({
           name={dataIndex}
           className={cn('w-full', restProps.className)}
           initialValue={initialValue}
+          required={required}
+          label={title}
+          validateTrigger='onBlur'
           style={{ margin: 0 }}
           rules={[
             {
               required: required,
-              message: `Please Input ${title}!`
+              message: subtitle
             }
           ]}
         >

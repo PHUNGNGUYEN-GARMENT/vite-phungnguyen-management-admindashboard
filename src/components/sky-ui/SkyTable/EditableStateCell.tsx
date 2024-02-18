@@ -39,8 +39,11 @@ export interface EditableStateCellProps extends HTMLAttributes<HTMLElement> {
   inputProps?: InputProps
   inputType?: InputType
   required?: boolean
+  allowClear?: boolean
   title?: string
+  placeholder?: string
   disabled?: boolean
+  subtitle?: string
   readonly?: boolean
   editableRender?: React.ReactNode
 }
@@ -51,6 +54,9 @@ function EditableStateCell({
   isEditing,
   dataIndex,
   title,
+  subtitle,
+  placeholder,
+  allowClear,
   value,
   colorPickerProps,
   checkboxProps,
@@ -89,6 +95,8 @@ function EditableStateCell({
         return (
           <Checkbox
             {...checkboxProps}
+            required={required}
+            title={title}
             name={dataIndex}
             // defaultChecked={initialValue ?? checkboxProps?.defaultChecked ?? undefined}
             checked={value ?? checkboxProps?.value ?? initialValue ?? checkboxProps?.defaultChecked ?? undefined}
@@ -101,9 +109,10 @@ function EditableStateCell({
         return (
           <InputNumber
             {...inputNumberProps}
-            placeholder={`Enter ${title}`}
             name={dataIndex}
-            required
+            title={title}
+            required={required}
+            placeholder={placeholder}
             value={value ?? inputNumberProps?.value ?? ''}
             disabled={disabled}
             readOnly={readonly}
@@ -116,11 +125,13 @@ function EditableStateCell({
         return (
           <Input.TextArea
             {...textAreaProps}
-            placeholder={`Enter ${title}`}
+            title={title}
+            placeholder={`${placeholder}`}
             name={dataIndex}
             value={value ?? textAreaProps?.value ?? ''}
             disabled={disabled}
             readOnly={readonly}
+            required={required}
             onChange={(val) => onValueChange?.(val.target.value)}
             defaultValue={initialValue ?? textAreaProps?.defaultValue ?? ''}
             className={cn('w-full', restProps.className)}
@@ -130,7 +141,8 @@ function EditableStateCell({
         return (
           <Select
             {...selectProps}
-            placeholder={`Select ${title}`}
+            title={title}
+            placeholder={placeholder}
             defaultValue={initialValue ?? selectProps?.defaultValue}
             // value={value ?? selectProps?.value ?? ''}
             onChange={(val, option) => onValueChange?.(val, option)}
@@ -143,7 +155,8 @@ function EditableStateCell({
         return (
           <Select
             {...selectProps}
-            placeholder={`Select ${title}`}
+            title={title}
+            placeholder={placeholder}
             mode='multiple'
             virtual={false}
             defaultValue={initialValue ?? selectProps?.defaultValue}
@@ -157,7 +170,8 @@ function EditableStateCell({
         return (
           <Select
             {...selectProps}
-            placeholder={`Select ${title}`}
+            title={title}
+            placeholder={placeholder}
             defaultValue={initialValue ?? selectProps?.defaultValue ?? ''}
             // value={value ?? selectProps?.value ?? ''}
             onChange={(val, option) => onValueChange?.(val, option)}
@@ -184,8 +198,10 @@ function EditableStateCell({
       case 'datepicker':
         return (
           <DatePicker
-            placeholder={`Pick ${title}`}
+            title={title}
+            placeholder={placeholder}
             name={dataIndex}
+            required={required}
             onChange={(val) => onValueChange?.(val)}
             disabled={disabled}
             // value={value && DayJS(value)}
@@ -199,7 +215,7 @@ function EditableStateCell({
           <Input
             {...inputProps}
             required
-            placeholder={`Enter ${title}`}
+            placeholder={placeholder ?? 'Enter password'}
             name={dataIndex}
             type={visible ? 'text' : 'password'}
             onChange={(event) => onValueChange?.(event.target.value)}
@@ -207,6 +223,8 @@ function EditableStateCell({
             value={value ?? inputProps?.value ?? ''}
             disabled={disabled}
             readOnly={readonly}
+            autoComplete='give-text'
+            allowClear={allowClear}
             suffix={
               <Button onClick={() => setVisible((prev) => !prev)} type='link' className='p-2'>
                 {visible ? <Eye color='var(--foreground)' size={16} /> : <EyeOff size={16} color='var(--foreground)' />}
@@ -220,8 +238,11 @@ function EditableStateCell({
           <Input
             {...inputProps}
             required
-            placeholder={`Enter ${title}`}
+            title={title}
+            placeholder={placeholder}
             name={dataIndex}
+            autoComplete='give-text'
+            allowClear={allowClear}
             onChange={(event) => onValueChange?.(event.target.value)}
             defaultValue={initialValue ?? inputProps?.defaultValue ?? ''}
             value={value ?? inputProps?.value ?? ''}

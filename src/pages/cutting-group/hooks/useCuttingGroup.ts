@@ -83,10 +83,6 @@ export default function useCuttingGroup(table: UseTableProps<CuttingGroupTableDa
   }
 
   useEffect(() => {
-    console.log(newRecord)
-  }, [newRecord])
-
-  useEffect(() => {
     loadData()
   }, [sampleSewingNew])
 

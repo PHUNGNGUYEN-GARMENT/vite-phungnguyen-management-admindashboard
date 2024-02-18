@@ -89,9 +89,9 @@ export default function useSewingLine(table: UseTableProps<SewingLineTableDataTy
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleAddNewItem = async (formAddNew: any) => {
+  const handleAddNewItem = async (formAddNew: SewingLine) => {
     try {
-      console.log(formAddNew)
+      // console.log(formAddNew)
       setLoading(true)
       await sewingLineService.createNewItem(
         {

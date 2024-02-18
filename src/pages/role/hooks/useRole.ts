@@ -6,7 +6,6 @@ import RoleAPI from '~/api/services/RoleAPI'
 import { TableItemWithKey, UseTableProps } from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
 import { Role } from '~/typing'
-import { textComparator } from '~/utils/helpers'
 import { RoleTableDataType } from '../type'
 
 export default function useRole(table: UseTableProps<RoleTableDataType>) {
@@ -58,21 +57,11 @@ export default function useRole(table: UseTableProps<RoleTableDataType>) {
     // const row = (await form.validateFields()) as any
     console.log({ old: record, new: newRecord })
     try {
-      if (
-        !record.role ||
-        textComparator(newRecord.role, record.role) ||
-        !record.shortName ||
-        textComparator(newRecord.shortName, record.shortName) ||
-        !record.desc ||
-        textComparator(newRecord.desc, record.desc)
-      ) {
-        console.log('Role progressing...')
-        await roleService.updateItemByPk(record.id!, { ...newRecord }, setLoading, (meta) => {
-          if (!meta?.success) {
-            throw new Error('API update failed')
-          }
-        })
-      }
+      await roleService.updateItemByPk(record.id!, { ...newRecord }, setLoading, (meta) => {
+        if (!meta?.success) {
+          throw new Error('API update failed')
+        }
+      })
       message.success('Success!')
     } catch (error) {
       console.error(error)
