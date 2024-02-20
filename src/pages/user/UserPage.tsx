@@ -51,19 +51,19 @@ const UserPage = () => {
   const currentUser = useSelector((state: RootState) => state.user)
 
   const columns = {
-    username: (record: UserTableDataType) => {
+    email: (record: UserTableDataType) => {
       return (
         <EditableStateCell
           isEditing={table.isEditing(record.key!)}
-          dataIndex='username'
-          title='Username'
+          dataIndex='email'
+          title='Email'
           inputType='text'
           required={true}
-          initialValue={textValidatorInit(record.username)}
-          value={newRecord.username}
-          onValueChange={(val) => setNewRecord({ ...newRecord, username: textValidatorChange(val) })}
+          initialValue={textValidatorInit(record.email)}
+          value={newRecord.email}
+          onValueChange={(val) => setNewRecord({ ...newRecord, email: textValidatorChange(val) })}
         >
-          <SkyTableTypography status={'active'}>{textValidatorDisplay(record.username)}</SkyTableTypography>
+          <SkyTableTypography status={'active'}>{textValidatorDisplay(record.email)}</SkyTableTypography>
         </EditableStateCell>
       )
     },
@@ -211,13 +211,13 @@ const UserPage = () => {
       }
     },
     {
-      title: 'Username',
-      key: 'username',
-      dataIndex: 'username',
+      title: 'Email',
+      key: 'email',
+      dataIndex: 'email',
       width: '15%',
       responsive: ['lg'],
       render: (_value: any, record: UserTableDataType) => {
-        return columns.username(record)
+        return columns.email(record)
       }
     },
     {
@@ -327,8 +327,8 @@ const UserPage = () => {
                 <Flex vertical className='w-full lg:w-1/2'>
                   <Space direction='vertical' size={10} split={<Divider className='my-0 w-full py-0' />}>
                     {!(width >= breakpoint.lg) && (
-                      <ExpandableItemRow title='Username:' isEditing={table.isEditing(record.id!)}>
-                        {columns.username(record)}
+                      <ExpandableItemRow title='Email:' isEditing={table.isEditing(record.id!)}>
+                        {columns.email(record)}
                       </ExpandableItemRow>
                     )}
                     {!(width >= breakpoint.sm) && (

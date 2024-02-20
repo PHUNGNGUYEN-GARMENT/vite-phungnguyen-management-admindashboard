@@ -1,6 +1,5 @@
 import client, { RequestBodyType, ResponseDataType } from '~/api/client'
 import { Group } from '~/typing'
-import { errorFormatter } from '~/utils/promise-formatter'
 
 const NAMESPACE = 'groups'
 
@@ -26,7 +25,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
-        errorFormatter(error)
+        throw Error(`${error}`)
       })
   },
   getItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType | undefined> => {
@@ -43,7 +42,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
-        errorFormatter(error)
+        throw Error(`${error}`)
       })
   },
   getItemBy: async (
@@ -63,7 +62,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
-        errorFormatter(error)
+        throw Error(`${error}`)
       })
   },
   getItems: async (bodyRequest: RequestBodyType, accessToken: string): Promise<ResponseDataType | undefined> => {
@@ -86,7 +85,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
-        errorFormatter(error)
+        throw Error(`${error}`)
       })
   },
   updateItemByPk: async (id: number, item: Group, accessToken: string): Promise<ResponseDataType | undefined> => {
@@ -109,7 +108,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
-        errorFormatter(error)
+        throw Error(`${error}`)
       })
   },
   updateItemBy: async (
@@ -139,7 +138,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
-        errorFormatter(error)
+        throw Error(`${error}`)
       })
   },
   deleteItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType | undefined> => {
@@ -156,7 +155,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
-        errorFormatter(error)
+        throw Error(`${error}`)
       })
   }
 }

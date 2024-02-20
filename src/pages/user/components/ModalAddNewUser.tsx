@@ -65,12 +65,12 @@ const ModalAddNewUser: React.FC<Props> = ({ openModal, setOpenModal, onAddNew, .
           <Flex vertical gap={10}>
             <EditableFormCell
               isEditing={true}
-              title='Username'
+              title='Email'
               required
-              dataIndex='username'
-              subtitle='Please enter username!'
+              dataIndex='email'
+              subtitle='Please enter email!'
               inputType='text'
-              placeholder='Enter username'
+              placeholder='Enter email'
             />
             <EditableFormCell
               isEditing={true}

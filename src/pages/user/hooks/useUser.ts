@@ -94,8 +94,8 @@ export default function useUser(table: UseTableProps<UserTableDataType>) {
     if (newRecord) {
       try {
         if (
-          !record.username ||
-          textComparator(newRecord.username, record.username) ||
+          !record.email ||
+          textComparator(newRecord.email, record.email) ||
           !record.password ||
           textComparator(newRecord.password, record.password) ||
           !record.fullName ||

@@ -59,7 +59,7 @@ export const defaultRequestBody: RequestBodyType = {
 
 const client: AxiosInstance = axios.create({
   baseURL: appConfig.baseUrl,
-  timeout: 1000
+  timeout: 10000
 })
 
 export default client

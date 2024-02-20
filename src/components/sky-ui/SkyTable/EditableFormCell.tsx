@@ -1,20 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-refresh/only-export-components */
-import {
-  Button,
-  Checkbox,
-  ColorPicker,
-  DatePicker,
-  Flex,
-  Form,
-  Input,
-  InputNumber,
-  Select,
-  Table,
-  Typography
-} from 'antd'
-import { Eye, EyeOff } from 'lucide-react'
+import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons'
+import { Checkbox, ColorPicker, DatePicker, Flex, Form, Input, InputNumber, Select, Table, Typography } from 'antd'
 import { memo, useState } from 'react'
 import { DatePattern } from '~/utils/date-formatter'
 import { cn } from '~/utils/helpers'
@@ -185,22 +173,15 @@ function EditableFormCell({
         )
       case 'password':
         return (
-          <Input
-            type={passwordVisible ? 'text' : 'password'}
-            suffix={
-              <Button onClick={() => setPasswordVisible((prev) => !prev)} type='link' className='p-2'>
-                {passwordVisible ? (
-                  <Eye color='var(--foreground)' size={16} />
-                ) : (
-                  <EyeOff size={16} color='var(--foreground)' />
-                )}
-              </Button>
-            }
+          <Input.Password
+            {...inputProps}
+            placeholder={placeholder}
+            type='password'
             title={title}
             required={required}
-            allowClear={allowClear}
-            placeholder={placeholder ?? 'Enter password'}
             readOnly={readonly}
+            allowClear={allowClear}
+            iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
           />
         )
       default:

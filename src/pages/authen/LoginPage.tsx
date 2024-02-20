@@ -17,10 +17,19 @@ const LoginPage: React.FC<Props> = ({ ...props }) => {
   const { message } = AntApp.useApp()
   const navigate = useNavigate()
   const [accessTokenStored, setAccessTokenStored] = useLocalStorage('accessToken', '')
+  const [emailStored, setEmailStored] = useLocalStorage('email-stored', '')
+  const [otpStored, setOtpStored] = useLocalStorage('otp-stored', '')
   const [loading, setLoading] = useState<boolean>(false)
-  const [username, setUsername] = useState<string>('')
+  const [email, setEmail] = useState<string>('')
   const [password, setPassword] = useState<string>('')
   const [formLayout, setFormLayout] = useState<LayoutType>('horizontal')
+
+  useEffect(() => {
+    if (emailStored || otpStored) {
+      setEmailStored(null)
+      setOtpStored(null)
+    }
+  }, [emailStored, otpStored])
 
   useEffect(() => {
     if (accessTokenStored && accessTokenStored.length !== 0) {
@@ -32,7 +41,7 @@ const LoginPage: React.FC<Props> = ({ ...props }) => {
     setFormLayout(layout)
   }
 
-  const onFinish = async (user: { username: string; password: string }) => {
+  const onFinish = async (user: { email: string; password: string }) => {
     try {
       setLoading(true)
       // Create a new request to login user
@@ -76,22 +85,26 @@ const LoginPage: React.FC<Props> = ({ ...props }) => {
         }
       : null
 
+  const forgerPasswordHandler = () => {
+    navigate('/verify-email')
+  }
+
   return (
-    <Flex {...props} className='relative h-screen bg-background' align='center' justify='center'>
+    <Flex {...props} className='relative bg-background' align='center' justify='center'>
       <Flex
         vertical
-        gap={20}
+        gap={30}
         align='center'
-        className='absolute top-1/2 w-[350px] -translate-y-1/2 rounded-lg bg-white p-10 shadow-lg'
+        className='fixed top-1/2 h-fit w-fit -translate-y-1/2 rounded-lg bg-white p-10 shadow-lg sm:w-[400px]'
       >
-        <Flex align='center' className='relative h-fit w-full' justify='center'>
+        <Flex vertical align='center' className='relative h-fit w-full' justify='center'>
           <img src={logo} alt='logo' className='h-24 w-24 object-contain' />
+          <Flex vertical align='center'>
+            <Typography.Title level={3}>Welcome to PHUNGNGUYEN</Typography.Title>
+            <Typography.Text type='secondary'>Please login to your account</Typography.Text>
+          </Flex>
         </Flex>
 
-        <Flex vertical align='center'>
-          <Typography.Title level={3}>Welcome to PHUNGNGUYEN</Typography.Title>
-          <Typography.Text type='secondary'>Please login to your account</Typography.Text>
-        </Flex>
         <Form
           form={form}
           {...formItemLayout}
@@ -109,17 +122,19 @@ const LoginPage: React.FC<Props> = ({ ...props }) => {
           <Flex className='w-full' vertical gap={20}>
             <Flex className='w-full' vertical gap={16}>
               <Form.Item
-                label='Username'
-                name='username'
+                label='Email'
+                name='email'
                 className='m-0 w-full p-0'
-                rules={[{ required: true, message: 'Please input your username!' }]}
+                rules={[
+                  { required: true, message: 'Please input your email!', validateTrigger: 'onBlur', type: 'email' }
+                ]}
               >
                 <Input
-                  placeholder='Username'
+                  placeholder='Email'
                   className='w-full'
-                  type='text'
-                  onChange={(e) => setUsername(e.target.value)}
-                  value={username}
+                  type='email'
+                  onChange={(e) => setEmail(e.target.value)}
+                  value={email}
                   allowClear
                 />
               </Form.Item>
@@ -147,6 +162,12 @@ const LoginPage: React.FC<Props> = ({ ...props }) => {
                 Login
               </Button>
             </Form.Item>
+
+            <Flex>
+              <Button className='w-full' onClick={forgerPasswordHandler} type='link' loading={loading}>
+                Forget password?
+              </Button>
+            </Flex>
           </Flex>
         </Form>
       </Flex>

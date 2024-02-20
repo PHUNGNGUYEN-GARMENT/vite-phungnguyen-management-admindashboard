@@ -24,6 +24,7 @@
     "@reduxjs/toolkit": "^1.9.7",
     "antd": "5.14.1",
     "antd-img-crop": "^4.21.0",
+    "antd-input-otp": "^2.0.5",
     "axios": "^1.6.2",
     "class-variance-authority": "^0.7.0",
     "dotenv": "^16.3.1",

@@ -233,6 +233,26 @@ function EditableStateCell({
             className={cn('w-full', restProps.className)}
           />
         )
+
+      case 'email':
+        return (
+          <Input
+            {...inputProps}
+            required
+            title={title}
+            placeholder={placeholder}
+            name={dataIndex}
+            type='email'
+            autoComplete='give-text'
+            allowClear={allowClear}
+            onChange={(event) => onValueChange?.(event.target.value)}
+            defaultValue={initialValue ?? inputProps?.defaultValue ?? ''}
+            value={value ?? inputProps?.value ?? ''}
+            disabled={disabled}
+            readOnly={readonly}
+            className={cn('w-full', restProps.className)}
+          />
+        )
       default:
         return (
           <Input

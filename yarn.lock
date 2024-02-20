@@ -983,6 +983,11 @@ antd-img-crop@^4.21.0:
     react-easy-crop "^5.0.4"
     tslib "^2.6.2"
 
+antd-input-otp@^2.0.5:
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/antd-input-otp/-/antd-input-otp-2.0.5.tgz#cb034d0219f74ad5a715b08eb1ff515a40e32296"
+  integrity sha512-n18BmMP4fxjHmijj8RhfaDEdkAgtnwhkdkwRJDmksGCf95kFtrLjcaQhteL1pvOaCjQFv8Fjb4dAhYnUMAbwPg==
+
 antd@5.14.1:
   version "5.14.1"
   resolved "https://registry.yarnpkg.com/antd/-/antd-5.14.1.tgz#e56faf6a421911543a0d232e2564a6b42d3696fa"

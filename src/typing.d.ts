@@ -29,6 +29,7 @@ export type InputType =
   | 'checkbox'
   | 'multipleselect'
   | 'password'
+  | 'email'
 
 export type ItemWithKeyAndTitleType = {
   key?: React.Key
@@ -85,10 +86,12 @@ export interface UserRole {
 export interface User {
   id?: number
   fullName?: string | null
-  username?: string | null
+  email?: string | null
   password?: string | null
   avatar?: string | null
   phone?: string | null
+  otp?: string | null
+  appPassword?: string | null
   accessToken?: string | null
   isAdmin?: boolean
   workDescription?: string | null

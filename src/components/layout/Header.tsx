@@ -97,7 +97,7 @@ const Header: React.FC<Props> = ({ onMenuClick, ...props }) => {
                 <Flex className='h-full'>
                   <Button type='link' shape='circle' className='' onClick={(e) => e.preventDefault()}>
                     <Flex gap={4} justify='center' className='h-full text-foreground'>
-                      <Typography.Text className='m-0'>{currentUser.user.username}</Typography.Text>
+                      <Typography.Text className='m-0'>{currentUser.user.email}</Typography.Text>
                       <CaretDownOutlined />
                     </Flex>
                   </Button>
