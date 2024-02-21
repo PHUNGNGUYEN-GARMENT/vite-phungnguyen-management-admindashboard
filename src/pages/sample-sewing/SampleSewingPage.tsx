@@ -366,36 +366,64 @@ const SampleSewingPage = () => {
           expandable={{
             expandedRowRender: (record) => {
               return (
-                <Flex vertical className='w-full md:w-1/2'>
+                <Flex vertical className='w-full'>
                   <Space direction='vertical' size={10} split={<Divider className='my-0 py-0' />}>
                     {!(width >= breakpoint.md) && (
-                      <ExpandableItemRow title='NPL may mẫu:' isEditing={table.isEditing(record.id!)}>
+                      <ExpandableItemRow className='w-1/2' title='NPL may mẫu:' isEditing={table.isEditing(record.id!)}>
                         {columns.dateSubmissionNPL(record)}
                       </ExpandableItemRow>
                     )}
                     {!(width >= breakpoint.lg) && (
-                      <ExpandableItemRow title='Ngày duyệt mẫu PP:' isEditing={table.isEditing(record.id!)}>
+                      <ExpandableItemRow
+                        className='w-1/2'
+                        title='Ngày duyệt mẫu PP:'
+                        isEditing={table.isEditing(record.id!)}
+                      >
                         {columns.dateApprovalPP(record)}
                       </ExpandableItemRow>
                     )}
                     {!(width >= breakpoint.xl) && (
-                      <ExpandableItemRow title='Ngày duyệt SO:' isEditing={table.isEditing(record.id!)}>
+                      <ExpandableItemRow
+                        className='w-1/2'
+                        title='Ngày duyệt SO:'
+                        isEditing={table.isEditing(record.id!)}
+                      >
                         {columns.dateApprovalSO(record)}
                       </ExpandableItemRow>
                     )}
-                    <ExpandableItemRow title='Ngày gửi mẫu lần 1:' isEditing={table.isEditing(record.id!)}>
+                    <ExpandableItemRow
+                      className='w-1/2'
+                      title='Ngày gửi mẫu lần 1:'
+                      isEditing={table.isEditing(record.id!)}
+                    >
                       {expandableColumns.dateSubmissionFirstTime(record)}
                     </ExpandableItemRow>
-                    <ExpandableItemRow title='Ngày gửi mẫu lần 2:' isEditing={table.isEditing(record.id!)}>
+                    <ExpandableItemRow
+                      className='w-1/2'
+                      title='Ngày gửi mẫu lần 2:'
+                      isEditing={table.isEditing(record.id!)}
+                    >
                       {expandableColumns.dateSubmissionSecondTime(record)}
                     </ExpandableItemRow>
-                    <ExpandableItemRow title='Ngày gửi mẫu lần 3:' isEditing={table.isEditing(record.id!)}>
+                    <ExpandableItemRow
+                      className='w-1/2'
+                      title='Ngày gửi mẫu lần 3:'
+                      isEditing={table.isEditing(record.id!)}
+                    >
                       {expandableColumns.dateSubmissionThirdTime(record)}
                     </ExpandableItemRow>
-                    <ExpandableItemRow title='Ngày gửi mẫu lần 4:' isEditing={table.isEditing(record.id!)}>
+                    <ExpandableItemRow
+                      className='w-1/2'
+                      title='Ngày gửi mẫu lần 4:'
+                      isEditing={table.isEditing(record.id!)}
+                    >
                       {expandableColumns.dateSubmissionForthTime(record)}
                     </ExpandableItemRow>
-                    <ExpandableItemRow title='Ngày gửi mẫu lần 5:' isEditing={table.isEditing(record.id!)}>
+                    <ExpandableItemRow
+                      className='w-1/2'
+                      title='Ngày gửi mẫu lần 5:'
+                      isEditing={table.isEditing(record.id!)}
+                    >
                       {expandableColumns.dateSubmissionFifthTime(record)}
                     </ExpandableItemRow>
                   </Space>

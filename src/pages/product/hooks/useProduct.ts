@@ -73,45 +73,52 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
   }, [table.editingKey])
 
   const loadData = async () => {
-    await productService.getListItems(
-      {
-        ...defaultRequestBody,
-        paginator: { page: productService.page, pageSize: defaultRequestBody.paginator?.pageSize }
-      },
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          setProducts(meta.data as Product[])
+    try {
+      setLoading(true)
+      await productService.getListItems(
+        {
+          ...defaultRequestBody,
+          paginator: { page: productService.page, pageSize: defaultRequestBody.paginator?.pageSize }
+        },
+        setLoading,
+        (meta) => {
+          if (meta?.success) {
+            setProducts(meta.data as Product[])
+          }
         }
-      }
-    )
-    await productColorService.getListItems(
-      { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          setProductColors(meta.data as ProductColor[])
+      )
+      await productColorService.getListItems(
+        { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
+        setLoading,
+        (meta) => {
+          if (meta?.success) {
+            setProductColors(meta.data as ProductColor[])
+          }
         }
-      }
-    )
-    await productGroupService.getListItems(
-      { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          setProductGroups(meta.data as ProductGroup[])
+      )
+      await productGroupService.getListItems(
+        { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
+        setLoading,
+        (meta) => {
+          if (meta?.success) {
+            setProductGroups(meta.data as ProductGroup[])
+          }
         }
-      }
-    )
-    await printablePlaceService.getListItems(
-      { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          setPrintablePlaces(meta.data as PrintablePlace[])
+      )
+      await printablePlaceService.getListItems(
+        { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
+        setLoading,
+        (meta) => {
+          if (meta?.success) {
+            setPrintablePlaces(meta.data as PrintablePlace[])
+          }
         }
-      }
-    )
+      )
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -155,7 +162,7 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
         ) {
           console.log('Product progressing...')
           await productService.updateItemByPk(
-            Number(record.id!),
+            record.id!,
             {
               productCode: newRecord.productCode,
               quantityPO: newRecord.quantityPO,
@@ -164,9 +171,7 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
             },
             setLoading,
             (meta) => {
-              if (!meta?.success) {
-                throw new Error('API update Product failed')
-              }
+              if (!meta?.success) throw new Error('API update Product failed')
             }
           )
         }
@@ -180,9 +185,7 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
             { colorID: newRecord.colorID },
             setLoading,
             (meta) => {
-              if (!meta?.success) {
-                throw new Error('API update ProductColor failed')
-              }
+              if (!meta?.success) throw new Error('API update ProductColor failed')
             }
           )
         }
@@ -196,9 +199,7 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
             { groupID: newRecord.groupID },
             setLoading,
             (meta) => {
-              if (!meta?.success) {
-                throw new Error('API update ProductGroup failed')
-              }
+              if (!meta?.success) throw new Error('API update ProductGroup failed')
             }
           )
         }
@@ -212,9 +213,7 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
             { printID: newRecord.printID },
             setLoading,
             (meta) => {
-              if (!meta?.success) {
-                throw new Error('API update PrintablePlace failed')
-              }
+              if (!meta?.success) throw new Error('API update PrintablePlace failed')
             }
           )
         }

@@ -6,7 +6,6 @@ import UserAPI from '~/api/services/UserAPI'
 import useAPIService from '~/hooks/useAPIService'
 import { RootState } from '~/store/store'
 import { User } from '~/typing'
-import DayJS, { DatePattern } from '~/utils/date-formatter'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
   open: boolean
@@ -143,8 +142,8 @@ function ProfileDialog({ open, setOpen }: Props) {
               <Form.Item label='Phone' name='phone-profile' required initialValue={currentUser.user.phone}>
                 <InputNumber placeholder='123456789' required name='phone' className='w-full' />
               </Form.Item>
-              <Form.Item label='Birthday' name='birthday-profile' initialValue={DayJS(currentUser.user.birthday)}>
-                <DatePicker className='w-full' name='birthday' format={DatePattern.display} />
+              <Form.Item label='Birthday' name='birthday-profile' initialValue={dayjs(currentUser.user.birthday)}>
+                <DatePicker className='w-full' name='birthday' format={'DD/MM/YYYY'} />
               </Form.Item>
             </Flex>
           </Flex>

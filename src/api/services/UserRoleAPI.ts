@@ -1,6 +1,6 @@
 import client, { RequestBodyType, ResponseDataType } from '~/api/client'
 import { UserRole } from '~/typing'
-
+import { errorFormatter } from '~/utils/promise-formatter'
 const NAMESPACE = 'user-roles'
 
 export default {
@@ -25,6 +25,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -42,6 +43,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -59,6 +61,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -79,6 +82,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -102,6 +106,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -119,6 +124,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -143,6 +149,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -167,6 +174,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -175,17 +183,19 @@ export default {
       field: string
       key: React.Key
     },
-    recordsToUpdate: {
-      roleIDs: number[]
-    },
+    roleIDs: number[],
     accessToken: string
   ): Promise<ResponseDataType | undefined> => {
     return client
-      .post(`${NAMESPACE}/updateItems/${query.field}/${query.key}`, recordsToUpdate, {
-        headers: {
-          authorization: accessToken
+      .post(
+        `${NAMESPACE}/updateItems/${query.field}/${query.key}`,
+        { roleIDs: roleIDs },
+        {
+          headers: {
+            authorization: accessToken
+          }
         }
-      })
+      )
       .then((res) => {
         if (res.data) {
           return res.data as ResponseDataType
@@ -193,6 +203,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -210,6 +221,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   }

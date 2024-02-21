@@ -18,10 +18,10 @@ import {
 } from 'antd'
 import { InputProps, TextAreaProps } from 'antd/es/input'
 import { SelectProps } from 'antd/es/select'
+import dayjs from 'dayjs'
 import { Eye, EyeOff } from 'lucide-react'
 import { HTMLAttributes, memo, useState } from 'react'
 import { InputType } from '~/typing'
-import DayJS, { DatePattern } from '~/utils/date-formatter'
 import { cn } from '~/utils/helpers'
 
 export interface EditableStateCellProps extends HTMLAttributes<HTMLElement> {
@@ -205,8 +205,8 @@ function EditableStateCell({
             onChange={(val) => onValueChange?.(val)}
             disabled={disabled}
             // value={value && DayJS(value)}
-            defaultValue={initialValue && DayJS(initialValue)}
-            format={DatePattern.display}
+            defaultValue={dayjs(initialValue)}
+            format={'DD/MM/YYYY'}
             className={cn('w-full', restProps.className)}
           />
         )

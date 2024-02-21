@@ -1,6 +1,6 @@
 import client, { RequestBodyType, ResponseDataType } from '~/api/client'
 import { ProductColor } from '~/typing'
-
+import { errorFormatter } from '~/utils/promise-formatter'
 const NAMESPACE = 'product-colors'
 
 export default {
@@ -25,6 +25,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -53,6 +54,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -89,6 +91,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -117,6 +120,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -145,6 +149,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -162,6 +167,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -182,6 +188,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -205,6 +212,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -232,6 +240,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -262,6 +271,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -279,6 +289,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   }

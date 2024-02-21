@@ -1,6 +1,6 @@
 import client, { RequestBodyType, ResponseDataType } from '~/api/client'
 import { SampleSewing } from '~/typing'
-
+import { errorFormatter } from '~/utils/promise-formatter'
 const NAMESPACE = 'sample-sewings'
 
 export default {
@@ -25,6 +25,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -42,6 +43,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -62,6 +64,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -85,6 +88,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -106,6 +110,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -130,6 +135,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -147,6 +153,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   }

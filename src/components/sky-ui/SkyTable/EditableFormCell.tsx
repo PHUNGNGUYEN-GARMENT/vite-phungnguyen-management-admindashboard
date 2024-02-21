@@ -4,7 +4,6 @@
 import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons'
 import { Checkbox, ColorPicker, DatePicker, Flex, Form, Input, InputNumber, Select, Table, Typography } from 'antd'
 import { memo, useState } from 'react'
-import { DatePattern } from '~/utils/date-formatter'
 import { cn } from '~/utils/helpers'
 import { EditableStateCellProps } from './EditableStateCell'
 
@@ -167,7 +166,7 @@ function EditableFormCell({
             required={required}
             onChange={(_val, dateString) => onValueChange?.(dateString)}
             disabled={disabled}
-            format={DatePattern.display}
+            format={'DD/MM/YYYY'}
             className={cn('w-full', restProps.className)}
           />
         )

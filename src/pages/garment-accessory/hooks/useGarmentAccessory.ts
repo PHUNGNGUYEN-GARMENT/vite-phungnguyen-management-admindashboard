@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { App as AntApp } from 'antd'
 import { useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
 import { RequestBodyType, ResponseDataType, defaultRequestBody } from '~/api/client'
 import AccessoryNoteAPI from '~/api/services/AccessoryNoteAPI'
 import GarmentAccessoryAPI from '~/api/services/GarmentAccessoryAPI'
@@ -9,6 +10,7 @@ import ProductAPI from '~/api/services/ProductAPI'
 import ProductColorAPI from '~/api/services/ProductColorAPI'
 import { TableItemWithKey, UseTableProps } from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
+import { RootState } from '~/store/store'
 import { AccessoryNote, GarmentAccessory, GarmentAccessoryNote, Product, ProductColor } from '~/typing'
 import { dateComparator, numberComparator } from '~/utils/helpers'
 import { GarmentAccessoryTableDataType } from '../type'
@@ -24,6 +26,7 @@ export interface GarmentAccessoryNewRecordProps {
 
 export default function useGarmentAccessory(table: UseTableProps<GarmentAccessoryTableDataType>) {
   const { setLoading, setDataSource, handleConfirmCancelEditing } = table
+  const currentUser = useSelector((state: RootState) => state.user)
 
   // Services
   const productService = useAPIService<Product>(ProductAPI)
@@ -31,7 +34,6 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
   const garmentAccessoryService = useAPIService<GarmentAccessory>(GarmentAccessoryAPI)
   const productColorService = useAPIService<ProductColor>(ProductColorAPI)
   const garmentAccessoryNoteService = useAPIService<GarmentAccessoryNote>(GarmentAccessoryNoteAPI)
-
   // UI
   const { message } = AntApp.useApp()
 
@@ -191,24 +193,26 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
         )
       }
 
-      await garmentAccessoryNoteService.updateItemsBy?.(
-        { field: 'productID', key: record.id! },
-        newRecord.garmentAccessoryNotes!.map((item) => {
-          return {
-            ...item,
-            productID: record.id!,
-            garmentAccessoryID: record.garmentAccessory?.id,
-            noteStatus: 'enough',
-            status: 'active'
-          }
-        }),
-        setLoading,
-        (meta) => {
-          if (!meta?.success) {
-            throw new Error('API update GarmentAccessoryNote failed')
-          }
-        }
-      )
+      if (newRecord.garmentAccessoryNotes) {
+        await GarmentAccessoryNoteAPI.updateItemsBy?.(
+          { field: 'productID', key: record.id! },
+          newRecord.garmentAccessoryNotes!.map((garmentAccessoryNote) => {
+            return {
+              accessoryNoteID: garmentAccessoryNote.accessoryNoteID,
+              garmentAccessoryID: record.garmentAccessory?.id,
+              productID: record.id
+            }
+          }) as GarmentAccessoryNote[],
+          currentUser.user.accessToken!
+        )
+          .then((meta) => {
+            if (!meta?.success) throw new Error('API update Garment Accessory Note failed')
+            console.log(meta)
+          })
+          .catch((err) => {
+            throw new Error(`${err}`)
+          })
+      }
       message.success('Success!')
     } catch (error: any) {
       message.error(`${error.message}`)
@@ -258,27 +262,19 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
           field: 'productID',
           key: record.id!
         },
-        {
-          amountCutting: null,
-          passingDeliveryDate: null,
-          syncStatus: null
-        },
+        { amountCutting: null, passingDeliveryDate: null, syncStatus: null },
         setLoading,
         async (meta, msg) => {
-          if (!meta?.success) {
-            throw new Error('API delete GarmentAccessory failed')
-          }
-          await garmentAccessoryNoteService.updateItemsBy(
+          if (!meta?.success) throw new Error('API delete GarmentAccessory failed')
+
+          await garmentAccessoryNoteService.deleteItemBy(
             {
               field: 'productID',
               key: record.id!
             },
-            [],
             setLoading,
             (meta2) => {
-              if (!meta2?.success) {
-                throw new Error('API delete GarmentAccessoryNote failed')
-              }
+              if (!meta2?.success) throw new Error('API delete GarmentAccessoryNote failed')
             }
           )
           onDataSuccess?.(meta)
@@ -287,6 +283,7 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
       )
     } catch (error) {
       console.error(error)
+      message.error(`${error}`)
     } finally {
       loadData()
       setLoading(false)

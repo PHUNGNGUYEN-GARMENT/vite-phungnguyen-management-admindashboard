@@ -5,7 +5,7 @@ import { ColumnType } from 'antd/lib/table'
 import { useEffect, useRef, useState } from 'react'
 import { ResponseDataType, defaultRequestBody } from '~/api/client'
 import { ProductTableDataType } from '~/pages/product/type'
-import DayJS, { DatePattern } from '~/utils/date-formatter'
+import { dateFormatter } from '~/utils/date-formatter'
 import { cn } from '~/utils/helpers'
 import ActionRow, { ActionProps } from '../ActionRow'
 
@@ -89,7 +89,7 @@ const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: s
       dataIndex: 'createdAt',
       width: '5%',
       render: (_value: any, record: T) => {
-        return <span>{DayJS(record.createdAt).format(DatePattern.display)}</span>
+        return <span>{dateFormatter(record.createdAt)}</span>
       }
     },
     {
@@ -98,7 +98,7 @@ const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: s
       width: '5%',
       responsive: ['md'],
       render: (_value: any, record: ProductTableDataType) => {
-        return <span>{DayJS(record.updatedAt).format(DatePattern.display)}</span>
+        return <span>{dateFormatter(record.updatedAt)}</span>
       }
     }
   ]

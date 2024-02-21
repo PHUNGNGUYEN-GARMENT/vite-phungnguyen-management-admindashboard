@@ -1,5 +1,6 @@
 import client, { RequestBodyType, ResponseDataType } from '~/api/client'
 import { Importation } from '~/typing'
+import { errorFormatter } from '~/utils/promise-formatter'
 
 const NAMESPACE = 'importations'
 
@@ -25,6 +26,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -53,34 +55,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
-        throw Error(`${error}`)
-      })
-  },
-  createOrUpdateItemBy: async (
-    query: { field: string; key: React.Key },
-    item: Importation,
-    accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
-    return await client
-      .post(
-        `${NAMESPACE}/createOrUpdate/${query.field}/${query.key}`,
-        {
-          ...item,
-          status: item.status ?? 'active'
-        },
-        {
-          headers: {
-            authorization: accessToken
-          }
-        }
-      )
-      .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
-      })
-      .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -98,6 +73,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -118,6 +94,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -141,6 +118,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -164,6 +142,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -194,6 +173,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -211,6 +191,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   }

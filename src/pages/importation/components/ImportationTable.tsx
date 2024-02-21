@@ -3,6 +3,7 @@ import { Divider, Flex, Space } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
 import { useEffect } from 'react'
+import { useSelector } from 'react-redux'
 import useDevice from '~/components/hooks/useDevice'
 import useTable from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
@@ -11,6 +12,7 @@ import ExpandableItemRow from '~/components/sky-ui/SkyTable/ExpandableItemRow'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import { ProductTableDataType } from '~/pages/product/type'
+import { RootState } from '~/store/store'
 import {
   breakpoint,
   dateValidatorChange,
@@ -43,6 +45,7 @@ const ImportationTable: React.FC<Props> = ({ productRecord }) => {
     importationService
   } = useImportationTable(table)
   const { width } = useDevice()
+  const currentUser = useSelector((state: RootState) => state.user)
 
   useEffect(() => {
     console.log(productRecord)
@@ -58,6 +61,7 @@ const ImportationTable: React.FC<Props> = ({ productRecord }) => {
           inputType='number'
           required={true}
           initialValue={numberValidatorInit(record.quantity)}
+          value={newRecord.quantity}
           onValueChange={(val: number) => setNewRecord({ ...newRecord, quantity: numberValidatorChange(val) })}
         >
           <SkyTableTypography status={record.status}>{numberValidatorDisplay(record.quantity)}</SkyTableTypography>
@@ -86,7 +90,7 @@ const ImportationTable: React.FC<Props> = ({ productRecord }) => {
       title: 'Lô nhập',
       dataIndex: 'quantity',
       width: '15%',
-      responsive: ['md'],
+      // responsive: ['md'],
       render: (_value: any, record: ImportationTableDataType) => {
         return columns.quantity(record)
       }
@@ -95,7 +99,7 @@ const ImportationTable: React.FC<Props> = ({ productRecord }) => {
       title: 'Ngày nhập',
       dataIndex: 'dateImported',
       width: '15%',
-      responsive: ['lg'],
+      responsive: ['sm'],
       render: (_value: any, record: ImportationTableDataType) => {
         return columns.dateImported(record)
       }
@@ -144,19 +148,19 @@ const ImportationTable: React.FC<Props> = ({ productRecord }) => {
             onConfirmCancelEditing: () => table.handleConfirmCancelEditing(),
             onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),
             onConfirmDelete: (record) => handleConfirmDelete(record),
-            isShow: true
+            isShow: currentUser.userRoles.includes('admin')
           }}
           expandable={{
             expandedRowRender: (record) => {
               return (
-                <Flex vertical className='w-full md:w-1/2'>
+                <Flex vertical className='w-full'>
                   <Space direction='vertical' size={10} split={<Divider className='my-0 py-0' />}>
-                    {!(width >= breakpoint.md) && (
+                    {/* {!(width >= breakpoint.md) && (
                       <ExpandableItemRow title='Lô nhập:' isEditing={table.isEditing(record.id!)}>
                         {columns.quantity(record)}
                       </ExpandableItemRow>
-                    )}
-                    {!(width >= breakpoint.lg) && (
+                    )} */}
+                    {!(width >= breakpoint.sm) && (
                       <ExpandableItemRow title='Ngày nhập:' isEditing={table.isEditing(record.id!)}>
                         {columns.dateImported(record)}
                       </ExpandableItemRow>
@@ -165,6 +169,7 @@ const ImportationTable: React.FC<Props> = ({ productRecord }) => {
                 </Flex>
               )
             },
+            showExpandColumn: !(width >= breakpoint.sm),
             columnWidth: '0.001%'
           }}
         />

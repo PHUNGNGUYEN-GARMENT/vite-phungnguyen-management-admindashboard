@@ -70,8 +70,8 @@ export default function useImportationTable(table: UseTableProps<ImportationTabl
     try {
       if (newRecord) {
         console.log('Importation progressing: ', newRecord)
-        await importationService.updateItemBy(
-          { field: 'productID', key: record.key },
+        await importationService.updateItemByPk(
+          record.id!,
           {
             ...newRecord
           },

@@ -1,6 +1,6 @@
 import client, { RequestBodyType, ResponseDataType } from '~/api/client'
 import { GarmentAccessoryNote } from '~/typing'
-
+import { errorFormatter } from '~/utils/promise-formatter'
 const NAMESPACE = 'garment-accessory-notes'
 
 export default {
@@ -25,6 +25,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -42,6 +43,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -70,6 +72,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -98,6 +101,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -115,6 +119,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -135,6 +140,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -158,6 +164,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -185,6 +192,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -197,11 +205,15 @@ export default {
     accessToken: string
   ): Promise<ResponseDataType | undefined> => {
     return client
-      .post(`${NAMESPACE}/updateItems/${query.field}/${query.key}`, recordsToUpdate, {
-        headers: {
-          authorization: accessToken
+      .post(
+        `${NAMESPACE}/updateItems/${query.field}/${query.key}`,
+        { garmentAccessoryNotes: recordsToUpdate },
+        {
+          headers: {
+            authorization: accessToken
+          }
         }
-      })
+      )
       .then((res) => {
         if (res.data) {
           return res.data as ResponseDataType
@@ -209,6 +221,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -239,6 +252,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -256,6 +270,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -276,6 +291,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   }

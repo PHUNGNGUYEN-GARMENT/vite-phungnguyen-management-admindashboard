@@ -4,22 +4,6 @@ import { User } from '~/typing'
 const NAMESPACE = 'users'
 
 export default {
-  register: async (user: User): Promise<ResponseDataType | undefined> => {
-    return await client
-      .post(`${NAMESPACE}/auth/register`, {
-        ...user,
-        status: user.status ?? 'active'
-      })
-      .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
-      })
-      .catch(function (error) {
-        throw Error(`${error}`)
-      })
-  },
   login: async (user: User): Promise<ResponseDataType | undefined> => {
     return await client
       .post(`${NAMESPACE}/auth/login`, user)
@@ -31,8 +15,8 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
-        throw Error('')
       })
   },
   sendEmail: async (emailToSend: string): Promise<ResponseDataType | undefined> => {
@@ -46,6 +30,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   },
@@ -60,6 +45,7 @@ export default {
         return res.data
       })
       .catch(function (error) {
+        errorFormatter(error)
         throw Error(`${error}`)
       })
   }

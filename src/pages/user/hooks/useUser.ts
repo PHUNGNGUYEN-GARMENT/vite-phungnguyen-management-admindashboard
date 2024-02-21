@@ -35,41 +35,48 @@ export default function useUser(table: UseTableProps<UserTableDataType>) {
   const [userRoles, setUserRoles] = useState<UserRole[]>([])
 
   const loadData = async () => {
-    await userService.getListItems(
-      {
-        ...defaultRequestBody,
-        paginator: { page: userService.page, pageSize: defaultRequestBody.paginator?.pageSize }
-      },
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          setUsers(meta.data as User[])
+    try {
+      setLoading(true)
+      await userService.getListItems(
+        {
+          ...defaultRequestBody,
+          paginator: { page: userService.page, pageSize: defaultRequestBody.paginator?.pageSize }
+        },
+        setLoading,
+        (meta) => {
+          if (meta?.success) {
+            setUsers(meta.data as User[])
+          }
         }
-      }
-    )
-    await userRoleService.getListItems(
-      { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
+      )
+      await userRoleService.getListItems(
+        { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
+        setLoading,
+        (meta) => {
+          if (!meta?.success) throw new Error(`${meta?.message}`)
           setUserRoles(meta.data as UserRole[])
         }
-      }
-    )
-    await roleService.getListItems(
-      { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          setRoles(meta.data as Role[])
+      )
+
+      await roleService.getListItems(
+        { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
+        setLoading,
+        (meta) => {
+          if (meta?.success) {
+            setRoles(meta.data as Role[])
+          }
         }
-      }
-    )
+      )
+    } catch (error) {
+      console.error(`${error}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
     loadData()
-  }, [])
+  }, [currentUser.user.accessToken])
 
   useEffect(() => {
     selfConvertDataSource(users, userRoles)
@@ -116,20 +123,21 @@ export default function useUser(table: UseTableProps<UserTableDataType>) {
             }
           })
         }
-        await userRoleService.updateItemsBy?.(
+        await UserRoleAPI.updateIDsBy?.(
           { field: 'userID', key: record.id! },
           newRecord.userRoles!.map((item) => {
-            return {
-              ...item
-            }
-          }),
-          setLoading,
-          (meta) => {
+            return item.roleID
+          }) as number[],
+          currentUser.user.accessToken!
+        )
+          .then((meta) => {
             if (!meta?.success) {
               throw new Error('API update UserRole failed')
             }
-          }
-        )
+          })
+          .catch((err) => {
+            throw new Error(`${err}`)
+          })
         message.success('Success!')
       } catch (error) {
         console.error(error)
@@ -159,12 +167,13 @@ export default function useUser(table: UseTableProps<UserTableDataType>) {
         setLoading,
         async (meta, msg) => {
           const newUser = meta?.data as User
+          console.log(newUser)
           if (!meta?.success) {
             throw new Error(msg)
           }
           await UserRoleAPI.updateIDsBy?.(
             { field: 'userID', key: newUser.id! },
-            { roleIDs: newRoleIDs },
+            newRoleIDs,
             currentUser.user.accessToken ?? ''
           ).then((meta) => {
             if (!meta?.success) throw new Error(`${meta?.message}`)

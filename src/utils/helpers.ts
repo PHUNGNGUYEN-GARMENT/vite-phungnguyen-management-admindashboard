@@ -2,7 +2,7 @@
 import { clsx, type ClassValue } from 'clsx'
 import dayjs from 'dayjs'
 import { twMerge } from 'tailwind-merge'
-import DayJS, { DatePattern } from './date-formatter'
+import { dateFormatter } from './date-formatter'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -47,18 +47,18 @@ export const textValidatorDisplay = (text?: string | null): string => {
   return text ? text : '-'
 }
 
-export const dateValidatorDisplay = (date?: string | null): string => {
-  return date ? DayJS(date).format(DatePattern.display) : '--/--/----'
+export const dateValidatorDisplay = (date?: string | number | Date | dayjs.Dayjs | null | undefined): string => {
+  return date ? dateFormatter(date) : '--/--/----'
 }
 
-export const dateTimeValidatorDisplay = (date?: string | null): string => {
-  return date ? DayJS(date).format(DatePattern.dateTimeDisplay) : '--/--/----'
+export const dateTimeValidatorDisplay = (date?: string | number | Date | dayjs.Dayjs | null | undefined): string => {
+  return date ? dateFormatter(date) : '--/--/----'
 }
 
 // Validator value change
 
 export const dateValidatorChange = (date?: string | number | dayjs.Dayjs | Date | null | undefined): string | null => {
-  return date ? DayJS(date).toISOString() : null
+  return date ? dateFormatter(date, 'iso8601') : null
 }
 
 export const textValidatorChange = (text: string): string => {
@@ -71,8 +71,10 @@ export const numberValidatorChange = (number: number): number => {
 
 // Validator initial value
 
-export const dateValidatorInit = (date?: string | null): dayjs.Dayjs | undefined => {
-  return date ? DayJS(date) : undefined
+export const dateValidatorInit = (
+  date?: string | number | Date | dayjs.Dayjs | null | undefined
+): dayjs.Dayjs | undefined => {
+  return date ? dayjs(date) : undefined
 }
 
 export const textValidatorInit = (text?: string | null): string | undefined => {
@@ -85,14 +87,21 @@ export const numberValidatorInit = (number?: number | null): number | undefined 
 
 // Validator
 
-export const dateValidator = (date?: string | null): boolean => {
-  return date ? DayJS(date).isValid() : false
+export const dateValidator = (date?: string | number | Date | dayjs.Dayjs | null | undefined): boolean => {
+  return date ? dayjs(date).isValid() : false
 }
 
-export const dateComparator = (date1?: string | null, date2?: string | null): boolean => {
-  return date1 && date2
-    ? dayjs(date1).isValid() && dayjs(date2).isValid() && dayjs(date1).diff(date2, 'days') !== 0
-    : false
+export const dateComparator = (
+  date1?: string | number | Date | dayjs.Dayjs | null | undefined,
+  date2?: string | number | Date | dayjs.Dayjs | null | undefined
+): boolean => {
+  // Kiểm tra tính hợp lệ của các ngày tháng đầu vào
+  if (!date1 || !date2 || !dayjs(date1).isValid() || !dayjs(date2).isValid()) {
+    return false
+  }
+
+  // So sánh ngày của hai ngày tháng
+  return dayjs(date1).startOf('day').diff(dayjs(date2).startOf('day'), 'days') !== 0
 }
 
 export const textValidator = (text?: string | null): boolean => {

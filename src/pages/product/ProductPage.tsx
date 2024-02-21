@@ -306,7 +306,7 @@ const ProductPage: React.FC = () => {
           expandable={{
             expandedRowRender: (record: ProductTableDataType) => {
               return (
-                <Flex className='w-full lg:w-1/2' vertical gap={10}>
+                <Flex className='w-full' vertical gap={10}>
                   <Space direction='vertical' size={10} split={<Divider className='my-0 py-0' />}>
                     {!(width >= breakpoint.sm) && (
                       <ExpandableItemRow title='Số lượng PO:' isEditing={table.isEditing(record.id!)}>
