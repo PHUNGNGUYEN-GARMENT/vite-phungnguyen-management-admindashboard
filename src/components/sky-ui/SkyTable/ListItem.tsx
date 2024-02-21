@@ -49,7 +49,7 @@ const ListItem: React.FC<Props> = ({
           {label ? (
             typeof label === 'string' ? (
               <>
-                {isEditing && user.user.isAdmin ? (
+                {isEditing && user.userRoles.includes('admin') ? (
                   <Form.Item name={name} initialValue={label} className='m-0'>
                     <Input size='large' className='text-lg font-medium' />
                   </Form.Item>
@@ -78,7 +78,7 @@ const ListItem: React.FC<Props> = ({
           />
         </Flex>
         {props.children}
-        {user.user.isAdmin && dateCreation && (
+        {user.userRoles.includes('admin') && dateCreation && (
           <Flex vertical gap={10}>
             <Flex className='w-full' align='center' justify='start' gap={5}>
               <Typography.Text type='secondary' className='w-40 font-medium'>

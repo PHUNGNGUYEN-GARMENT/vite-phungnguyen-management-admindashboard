@@ -93,7 +93,6 @@ export interface User {
   otp?: string | null
   appPassword?: string | null
   accessToken?: string | null
-  isAdmin?: boolean
   workDescription?: string | null
   birthday?: string | null
   status?: ItemStatusType | null

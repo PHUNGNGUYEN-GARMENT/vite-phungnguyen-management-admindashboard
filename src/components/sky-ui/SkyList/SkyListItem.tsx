@@ -31,14 +31,17 @@ const SkyListItem = <
   children,
   ...props
 }: SkyListItemProps<T>) => {
-  const user = useSelector((state: RootState) => state.user)
+  const currentUser = useSelector((state: RootState) => state.user)
 
   return (
     <List.Item className='mb-5 rounded-sm bg-white'>
       <Flex vertical className='w-full' gap={10}>
         <Flex align='center' justify='space-between' gap={10}>
           <Flex>
-            <EditableStateCell {...props} isEditing={(labelEditing && props.isEditing && user.user.isAdmin) ?? false}>
+            <EditableStateCell
+              {...props}
+              isEditing={(labelEditing && props.isEditing && currentUser.userRoles.includes('admin')) ?? false}
+            >
               <SkyTableTypography className='text-lg font-semibold' status={record.status}>
                 {label}
               </SkyTableTypography>
@@ -74,7 +77,7 @@ const SkyListItem = <
           />
         </Flex>
         {children}
-        {user.user.isAdmin && isDateCreation && (
+        {currentUser.userRoles.includes('admin') && isDateCreation && (
           <Flex vertical gap={10}>
             <Flex className='w-full' align='center' justify='start' gap={5}>
               <Typography.Text type='secondary' className='w-40 font-medium'>
