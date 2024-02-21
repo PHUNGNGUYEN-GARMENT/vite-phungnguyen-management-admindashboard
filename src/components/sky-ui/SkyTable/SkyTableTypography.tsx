@@ -9,7 +9,7 @@ export interface SkyTableTypographyProps extends BlockProps {
   required?: boolean
 }
 
-const SkyTableTypography = ({ status, ...props }: SkyTableTypographyProps) => {
+const SkyTableTypography = ({ status, required, ...props }: SkyTableTypographyProps) => {
   return (
     <Typography.Text
       {...props}
@@ -17,7 +17,7 @@ const SkyTableTypography = ({ status, ...props }: SkyTableTypographyProps) => {
       className={cn('w-full flex-shrink-0', props.className)}
       type={props.type ? props.type : status === 'deleted' ? 'danger' : undefined}
     >
-      {props.children} {props.required && <DotRequired />}
+      {props.children} {required && <DotRequired />}
     </Typography.Text>
   )
 }

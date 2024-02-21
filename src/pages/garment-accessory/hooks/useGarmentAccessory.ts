@@ -169,9 +169,7 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
             },
             setLoading,
             (meta) => {
-              if (!meta?.success) {
-                throw new Error('API update GarmentAccessory failed')
-              }
+              if (!meta?.success) throw new Error('API update GarmentAccessory failed')
             }
           )
         }
@@ -186,9 +184,7 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
           },
           setLoading,
           (meta) => {
-            if (!meta?.success) {
-              throw new Error('API create GarmentAccessory failed')
-            }
+            if (!meta?.success) throw new Error('API create GarmentAccessory failed')
           }
         )
       }

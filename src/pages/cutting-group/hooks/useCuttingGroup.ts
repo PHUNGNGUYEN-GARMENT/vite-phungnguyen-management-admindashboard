@@ -26,6 +26,10 @@ export default function useCuttingGroup(table: UseTableProps<CuttingGroupTableDa
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [searchText, setSearchText] = useState<string>('')
   const [newRecord, setNewRecord] = useState<CuttingGroupNewRecordProps>({
+    quantityRealCut: null,
+    timeCut: null,
+    dateSendEmbroidered: null,
+    quantityDeliveredBTP: null,
     productColorID: null,
     cuttingGroupID: null,
     syncStatus: null,
@@ -113,47 +117,68 @@ export default function useCuttingGroup(table: UseTableProps<CuttingGroupTableDa
     console.log({ old: record, new: newRecord })
     try {
       if (newRecord) {
-        if (!numberValidator(newRecord.quantityRealCut)) {
+        if (newRecord.quantityRealCut && !numberValidator(newRecord.quantityRealCut))
           throw new Error('Quantity must be than zero!')
-        }
-        if (!dateValidator(newRecord.timeCut)) {
-          throw new Error('Invalid time cut!')
-        }
-        if (newRecord.dateSendEmbroidered && !dateValidator(newRecord.dateSendEmbroidered)) {
+
+        if (newRecord.timeCut && !dateValidator(newRecord.timeCut)) throw new Error('Invalid time cut!')
+
+        if (newRecord.dateSendEmbroidered && !dateValidator(newRecord.dateSendEmbroidered))
           throw new Error('Invalid date send embroidered!')
-        }
-        if (newRecord.quantityDeliveredBTP && !numberValidator(newRecord.quantityDeliveredBTP)) {
+
+        if (newRecord.quantityDeliveredBTP && !numberValidator(newRecord.quantityDeliveredBTP))
           throw new Error('Invalid quantity delivery BTP!')
-        }
-        if (newRecord.quantityArrived1Th && !numberValidator(newRecord.quantityArrived1Th)) {
+
+        if (newRecord.quantityArrived1Th && !numberValidator(newRecord.quantityArrived1Th))
           throw new Error('Invalid 1!')
-        }
-        if (newRecord.quantityArrived2Th && !numberValidator(newRecord.quantityArrived2Th)) {
+
+        if (newRecord.quantityArrived2Th && !numberValidator(newRecord.quantityArrived2Th))
           throw new Error('Invalid 2!')
-        }
-        if (newRecord.quantityArrived3Th && !numberValidator(newRecord.quantityArrived3Th)) {
+
+        if (newRecord.quantityArrived3Th && !numberValidator(newRecord.quantityArrived3Th))
           throw new Error('Invalid 3!')
-        }
-        if (newRecord.quantityArrived4Th && !numberValidator(newRecord.quantityArrived4Th)) {
+
+        if (newRecord.quantityArrived4Th && !numberValidator(newRecord.quantityArrived4Th))
           throw new Error('Invalid 4!')
-        }
-        if (newRecord.quantityArrived5Th && !numberValidator(newRecord.quantityArrived5Th)) {
+
+        if (newRecord.quantityArrived5Th && !numberValidator(newRecord.quantityArrived5Th))
           throw new Error('Invalid 5!')
-        }
-        if (newRecord.quantityArrived6Th && !numberValidator(newRecord.quantityArrived6Th)) {
+
+        if (newRecord.quantityArrived6Th && !numberValidator(newRecord.quantityArrived6Th))
           throw new Error('Invalid 6!')
-        }
-        if (newRecord.quantityArrived7Th && !numberValidator(newRecord.quantityArrived7Th)) {
+
+        if (newRecord.quantityArrived7Th && !numberValidator(newRecord.quantityArrived7Th))
           throw new Error('Invalid 7!')
-        }
-        if (newRecord.quantityArrived8Th && !numberValidator(newRecord.quantityArrived8Th)) {
+
+        if (newRecord.quantityArrived8Th && !numberValidator(newRecord.quantityArrived8Th))
           throw new Error('Invalid 8!')
-        }
-        if (newRecord.quantityArrived9Th && !numberValidator(newRecord.quantityArrived9Th)) {
+
+        if (newRecord.quantityArrived9Th && !numberValidator(newRecord.quantityArrived9Th))
           throw new Error('Invalid 9!')
-        }
-        if (newRecord.quantityArrived10Th && !numberValidator(newRecord.quantityArrived10Th)) {
+
+        if (newRecord.quantityArrived10Th && !numberValidator(newRecord.quantityArrived10Th))
           throw new Error('Invalid 10!')
+
+        if (
+          !record.cuttingGroup &&
+          (newRecord.quantityRealCut ||
+            newRecord.timeCut ||
+            newRecord.dateSendEmbroidered ||
+            newRecord.quantityDeliveredBTP ||
+            newRecord.quantityArrived1Th ||
+            newRecord.quantityArrived2Th ||
+            newRecord.quantityArrived3Th ||
+            newRecord.quantityArrived4Th ||
+            newRecord.quantityArrived5Th ||
+            newRecord.quantityArrived6Th ||
+            newRecord.quantityArrived7Th ||
+            newRecord.quantityArrived8Th ||
+            newRecord.quantityArrived9Th ||
+            newRecord.quantityArrived10Th)
+        ) {
+          console.log('add new')
+          await cuttingGroupService.createNewItem({ ...newRecord, productID: record.id }, setLoading, (meta) => {
+            if (!meta?.success) throw new Error('API create group failed')
+          })
         }
         if (record.cuttingGroup) {
           console.log('CuttingGroup progressing: ', newRecord)
@@ -164,18 +189,9 @@ export default function useCuttingGroup(table: UseTableProps<CuttingGroupTableDa
             },
             setLoading,
             (meta) => {
-              if (!meta?.success) {
-                throw new Error('API update group failed')
-              }
+              if (!meta?.success) throw new Error('API update group failed')
             }
           )
-        } else {
-          console.log('add new')
-          await cuttingGroupService.createNewItem({ ...newRecord, productID: record.id }, setLoading, (meta) => {
-            if (!meta?.success) {
-              throw new Error('API update group failed')
-            }
-          })
         }
         message.success('Success!')
       }

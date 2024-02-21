@@ -392,26 +392,30 @@ const GarmentAccessoryPage: React.FC<Props> = () => {
                   <Space direction='vertical' size={10} split={<Divider className='my-0 w-full py-0' />}>
                     {!(width >= breakpoint.md) && (
                       <>
-                        <ExpandableItemRow title='Cắt được:' isEditing={table.isEditing(record.id!)}>
+                        <ExpandableItemRow className='w-1/2' title='Cắt được:' isEditing={table.isEditing(record.id!)}>
                           {columns.garmentAccessory.amountCutting(record)}
                         </ExpandableItemRow>
-                        <ExpandableItemRow title='Còn lại:' isEditing={table.isEditing(record.id!)}>
+                        <ExpandableItemRow className='w-1/2' title='Còn lại:' isEditing={table.isEditing(record.id!)}>
                           {columns.garmentAccessory.remainingAmount(record)}
                         </ExpandableItemRow>
                       </>
                     )}
                     {!(width >= breakpoint.lg) && (
-                      <ExpandableItemRow title='Ngày giao chuyền:' isEditing={table.isEditing(record.id!)}>
+                      <ExpandableItemRow
+                        className='w-1/2'
+                        title='Ngày giao chuyền:'
+                        isEditing={table.isEditing(record.id!)}
+                      >
                         {columns.garmentAccessory.passingDeliveryDate(record)}
                       </ExpandableItemRow>
                     )}
                     {!(width >= breakpoint.md) && (
-                      <ExpandableItemRow title='Đồng bộ PL:' isEditing={table.isEditing(record.id!)}>
+                      <ExpandableItemRow className='w-1/2' title='Đồng bộ PL:' isEditing={table.isEditing(record.id!)}>
                         {columns.garmentAccessory.syncStatus(record)}
                       </ExpandableItemRow>
                     )}
                     {!(width >= breakpoint.xl) && (
-                      <ExpandableItemRow title='Ghi chú:' isEditing={table.isEditing(record.id!)}>
+                      <ExpandableItemRow className='w-1/2' title='Ghi chú:' isEditing={table.isEditing(record.id!)}>
                         {columns.garmentAccessory.accessoryNotes(record)}
                       </ExpandableItemRow>
                     )}

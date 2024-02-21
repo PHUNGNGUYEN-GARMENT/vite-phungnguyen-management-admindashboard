@@ -76,7 +76,7 @@ function EditableStateCell({
 }: EditableStateCellProps) {
   const [visible, setVisible] = useState<boolean>(false)
 
-  const inputNode = (): React.ReactNode => {
+  const inputNode = ((): React.ReactNode => {
     switch (inputType) {
       case 'colorpicker':
         return (
@@ -257,7 +257,7 @@ function EditableStateCell({
         return (
           <Input
             {...inputProps}
-            required
+            required={required}
             title={title}
             placeholder={placeholder}
             name={dataIndex}
@@ -272,9 +272,9 @@ function EditableStateCell({
           />
         )
     }
-  }
+  })()
 
-  return <>{isEditing ? (editableRender ? editableRender : inputNode()) : restProps.children}</>
+  return <>{isEditing ? (editableRender ? editableRender : inputNode) : restProps.children}</>
 }
 
 export default memo(EditableStateCell)
