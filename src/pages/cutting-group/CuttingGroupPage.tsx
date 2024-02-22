@@ -523,7 +523,7 @@ const SampleSewingPage = () => {
           }
         },
         {
-          title: 'Còn lại',
+          title: 'SL còn lại',
           dataIndex: 'amountQuantityEmbroidered',
           width: '10%',
           render: (_value: any, record: CuttingGroupTableDataType) => {
@@ -531,7 +531,7 @@ const SampleSewingPage = () => {
           }
         },
         {
-          title: 'Option',
+          title: 'In thêu?',
           dataIndex: 'syncStatus',
           width: '15%',
           render: (_value: any, record: CuttingGroupTableDataType) => {
@@ -592,7 +592,7 @@ const SampleSewingPage = () => {
           expandable={{
             expandedRowRender: (record) => {
               return (
-                <Flex gap={30} vertical>
+                <Flex gap={30} vertical className='overflow-hidden'>
                   <Flex vertical>
                     <Space direction='vertical' size={10} split={<Divider className='my-0 w-full py-0' />}>
                       {!(width >= breakpoint.md) && (
@@ -642,7 +642,7 @@ const SampleSewingPage = () => {
                           </ExpandableItemRow>
                           <ExpandableItemRow
                             className='w-1/2'
-                            title='Số lượng in thêu còn lại:'
+                            title='SL còn lại:'
                             isEditing={table.isEditing(record.id!)}
                           >
                             {columns.embroidered.amountQuantityEmbroidered(record)}
@@ -676,117 +676,113 @@ const SampleSewingPage = () => {
                       )}
                     </Space>
                   </Flex>
-                  <Flex vertical>
-                    <Space direction='vertical' size={10} split={<Divider className='my-0 w-full py-0' />}>
-                      {!(width >= breakpoint.xxl) && (
-                        <>
-                          <Flex justify='center' align='center' className='flex-col md:flex-row' gap={10}>
-                            <SkyTableTypography code strong className='w-fit'>
-                              Lần 1:
-                            </SkyTableTypography>
-                            <Flex className='w-full' gap={20}>
-                              <ExpandableItemRow
-                                className='w-fit pr-5'
-                                title='SL về:'
-                                isEditing={table.isEditing(record.id!)}
-                              >
-                                {columns.embroideringArrived.th1.quantityArrived(record)}
-                              </ExpandableItemRow>
-                              <ExpandableItemRow
-                                className='w-fit pr-5'
-                                title='Ngày về:'
-                                isEditing={table.isEditing(record.id!)}
-                              >
-                                {columns.embroideringArrived.th1.dateArrived(record)}
-                              </ExpandableItemRow>
-                            </Flex>
-                          </Flex>
-                          <Flex justify='center' align='center' className='flex-col md:flex-row' gap={10}>
-                            <SkyTableTypography code strong className='w-fit'>
-                              Lần 2:
-                            </SkyTableTypography>
-                            <Flex className='w-full' gap={20}>
-                              <ExpandableItemRow
-                                className='w-fit pr-5'
-                                title='SL về:'
-                                isEditing={table.isEditing(record.id!)}
-                              >
-                                {columns.embroideringArrived.th2.quantityArrived(record)}
-                              </ExpandableItemRow>
-                              <ExpandableItemRow
-                                className='w-fit pr-5'
-                                title='Ngày về:'
-                                isEditing={table.isEditing(record.id!)}
-                              >
-                                {columns.embroideringArrived.th2.dateArrived(record)}
-                              </ExpandableItemRow>
-                            </Flex>
-                          </Flex>
-                          <Flex justify='center' align='center' className='flex-col md:flex-row' gap={10}>
-                            <SkyTableTypography code strong className='w-fit'>
-                              Lần 3:
-                            </SkyTableTypography>
-                            <Flex className='w-full' gap={20}>
-                              <ExpandableItemRow
-                                className='w-fit pr-5'
-                                title='SL về:'
-                                isEditing={table.isEditing(record.id!)}
-                              >
-                                {columns.embroideringArrived.th3.quantityArrived(record)}
-                              </ExpandableItemRow>
-                              <ExpandableItemRow
-                                className='w-fit pr-5'
-                                title='Ngày về:'
-                                isEditing={table.isEditing(record.id!)}
-                              >
-                                {columns.embroideringArrived.th3.dateArrived(record)}
-                              </ExpandableItemRow>
-                            </Flex>
-                          </Flex>
-                          <Flex justify='center' align='center' className='flex-col md:flex-row' gap={10}>
-                            <SkyTableTypography code strong className='w-fit'>
-                              Lần 4:
-                            </SkyTableTypography>
-                            <Flex className='w-full' gap={20}>
-                              <ExpandableItemRow
-                                className='w-fit pr-5'
-                                title='SL về:'
-                                isEditing={table.isEditing(record.id!)}
-                              >
-                                {columns.embroideringArrived.th4.quantityArrived(record)}
-                              </ExpandableItemRow>
-                              <ExpandableItemRow
-                                className='w-fit pr-5'
-                                title='Ngày về:'
-                                isEditing={table.isEditing(record.id!)}
-                              >
-                                {columns.embroideringArrived.th4.dateArrived(record)}
-                              </ExpandableItemRow>
-                            </Flex>
-                          </Flex>
-                          <Flex justify='center' align='center' className='flex-col md:flex-row' gap={10}>
-                            <SkyTableTypography code strong className='w-fit'>
-                              Lần 5:
-                            </SkyTableTypography>
-                            <Flex className='w-full' gap={20}>
-                              <ExpandableItemRow
-                                className='w-fit pr-5'
-                                title='SL về:'
-                                isEditing={table.isEditing(record.id!)}
-                              >
-                                {columns.embroideringArrived.th5.quantityArrived(record)}
-                              </ExpandableItemRow>
-                              <ExpandableItemRow
-                                className='w-fit pr-5'
-                                title='Ngày về:'
-                                isEditing={table.isEditing(record.id!)}
-                              >
-                                {columns.embroideringArrived.th5.dateArrived(record)}
-                              </ExpandableItemRow>
-                            </Flex>
-                          </Flex>
-                        </>
-                      )}
+                  <Flex vertical className=''>
+                    <Space direction='vertical' size={10} split={<Divider className='my-0 py-0' />}>
+                      <Flex justify='center' align='center' className='max-w-screen flex-col md:flex-row' gap={10}>
+                        <SkyTableTypography code strong className='w-fit'>
+                          Lần 1:
+                        </SkyTableTypography>
+                        <Flex className='w-full' gap={20}>
+                          <ExpandableItemRow
+                            className='w-fit pr-5'
+                            title='SL về:'
+                            isEditing={table.isEditing(record.id!)}
+                          >
+                            {columns.embroideringArrived.th1.quantityArrived(record)}
+                          </ExpandableItemRow>
+                          <ExpandableItemRow
+                            className='w-fit pr-5'
+                            title='Ngày về:'
+                            isEditing={table.isEditing(record.id!)}
+                          >
+                            {columns.embroideringArrived.th1.dateArrived(record)}
+                          </ExpandableItemRow>
+                        </Flex>
+                      </Flex>
+                      <Flex justify='center' align='center' className='flex-col md:flex-row' gap={10}>
+                        <SkyTableTypography code strong className='w-fit'>
+                          Lần 2:
+                        </SkyTableTypography>
+                        <Flex className='w-full' gap={20}>
+                          <ExpandableItemRow
+                            className='w-fit pr-5'
+                            title='SL về:'
+                            isEditing={table.isEditing(record.id!)}
+                          >
+                            {columns.embroideringArrived.th2.quantityArrived(record)}
+                          </ExpandableItemRow>
+                          <ExpandableItemRow
+                            className='w-fit pr-5'
+                            title='Ngày về:'
+                            isEditing={table.isEditing(record.id!)}
+                          >
+                            {columns.embroideringArrived.th2.dateArrived(record)}
+                          </ExpandableItemRow>
+                        </Flex>
+                      </Flex>
+                      <Flex justify='center' align='center' className='flex-col md:flex-row' gap={10}>
+                        <SkyTableTypography code strong className='w-fit'>
+                          Lần 3:
+                        </SkyTableTypography>
+                        <Flex className='w-full' gap={20}>
+                          <ExpandableItemRow
+                            className='w-fit pr-5'
+                            title='SL về:'
+                            isEditing={table.isEditing(record.id!)}
+                          >
+                            {columns.embroideringArrived.th3.quantityArrived(record)}
+                          </ExpandableItemRow>
+                          <ExpandableItemRow
+                            className='w-fit pr-5'
+                            title='Ngày về:'
+                            isEditing={table.isEditing(record.id!)}
+                          >
+                            {columns.embroideringArrived.th3.dateArrived(record)}
+                          </ExpandableItemRow>
+                        </Flex>
+                      </Flex>
+                      <Flex justify='center' align='center' className='flex-col md:flex-row' gap={10}>
+                        <SkyTableTypography code strong className='w-fit'>
+                          Lần 4:
+                        </SkyTableTypography>
+                        <Flex className='w-full' gap={20}>
+                          <ExpandableItemRow
+                            className='w-fit pr-5'
+                            title='SL về:'
+                            isEditing={table.isEditing(record.id!)}
+                          >
+                            {columns.embroideringArrived.th4.quantityArrived(record)}
+                          </ExpandableItemRow>
+                          <ExpandableItemRow
+                            className='w-fit pr-5'
+                            title='Ngày về:'
+                            isEditing={table.isEditing(record.id!)}
+                          >
+                            {columns.embroideringArrived.th4.dateArrived(record)}
+                          </ExpandableItemRow>
+                        </Flex>
+                      </Flex>
+                      <Flex justify='center' align='center' className='flex-col md:flex-row' gap={10}>
+                        <SkyTableTypography code strong className='w-fit'>
+                          Lần 5:
+                        </SkyTableTypography>
+                        <Flex className='w-full' gap={20}>
+                          <ExpandableItemRow
+                            className='w-fit pr-5'
+                            title='SL về:'
+                            isEditing={table.isEditing(record.id!)}
+                          >
+                            {columns.embroideringArrived.th5.quantityArrived(record)}
+                          </ExpandableItemRow>
+                          <ExpandableItemRow
+                            className='w-fit pr-5'
+                            title='Ngày về:'
+                            isEditing={table.isEditing(record.id!)}
+                          >
+                            {columns.embroideringArrived.th5.dateArrived(record)}
+                          </ExpandableItemRow>
+                        </Flex>
+                      </Flex>
                     </Space>
                   </Flex>
                 </Flex>

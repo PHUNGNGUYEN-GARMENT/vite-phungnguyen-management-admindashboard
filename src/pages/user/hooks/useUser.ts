@@ -207,9 +207,9 @@ export default function useUser(table: UseTableProps<UserTableDataType>) {
       const resError: ResponseDataType = error.data
       message.error(`${resError.message}`)
     } finally {
+      setLoading(false)
       setOpenModal(false)
       loadData()
-      setLoading(false)
     }
   }
 
