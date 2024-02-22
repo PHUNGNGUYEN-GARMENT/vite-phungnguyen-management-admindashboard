@@ -28,18 +28,26 @@ export default function useColor(table: UseTableProps<ColorTableDataType>) {
   const [colorNew, setColorNew] = useState<Color | undefined>(undefined)
 
   const loadData = async () => {
-    await colorService.getListItems(
-      {
-        ...defaultRequestBody,
-        paginator: { page: colorService.page, pageSize: defaultRequestBody.paginator?.pageSize }
-      },
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          setColors(meta.data as Color[])
+    try {
+      setLoading(true)
+      await colorService.getListItems(
+        {
+          ...defaultRequestBody,
+          paginator: { page: colorService.page, pageSize: defaultRequestBody.paginator?.pageSize }
+        },
+        setLoading,
+        (meta) => {
+          if (meta?.success) {
+            setColors(meta.data as Color[])
+          }
         }
-      }
-    )
+      )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -84,9 +92,9 @@ export default function useColor(table: UseTableProps<ColorTableDataType>) {
           )
         }
         message.success('Success!')
-      } catch (error) {
-        console.error(error)
-        message.error('Failed')
+      } catch (error: any) {
+        const resError: ResponseDataType = error.data
+        message.error(`${resError.message}`)
       } finally {
         setLoading(false)
         handleConfirmCancelEditing()
@@ -115,8 +123,9 @@ export default function useColor(table: UseTableProps<ColorTableDataType>) {
           }
         }
       )
-    } catch (error) {
-      console.error(error)
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
     } finally {
       setLoading(false)
       setOpenModal(false)
@@ -127,18 +136,24 @@ export default function useColor(table: UseTableProps<ColorTableDataType>) {
     record: TableItemWithKey<ColorTableDataType>,
     onDataSuccess?: (meta: ResponseDataType | undefined) => void
   ) => {
-    console.log(record)
-    await colorService.updateItemByPk(record.id!, { status: 'deleted' }, setLoading, (meta, msg) => {
-      if (meta) {
-        if (meta.success) {
-          handleConfirmDeleting(record.id!)
-          message.success('Deleted!')
+    try {
+      await colorService.updateItemByPk(record.id!, { status: 'deleted' }, setLoading, (meta, msg) => {
+        if (meta) {
+          if (meta.success) {
+            handleConfirmDeleting(record.id!)
+            message.success('Deleted!')
+          }
+        } else {
+          message.error(msg)
         }
-      } else {
-        message.error(msg)
-      }
-      onDataSuccess?.(meta)
-    })
+        onDataSuccess?.(meta)
+      })
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handlePageChange = async (_page: number) => {
@@ -155,44 +170,65 @@ export default function useColor(table: UseTableProps<ColorTableDataType>) {
   }
 
   const handleResetClick = async () => {
-    setSearchText('')
-    await colorService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        selfConvertDataSource(meta?.data as Color[])
-      }
-    })
-  }
-
-  const handleSortChange = async (checked: boolean) => {
-    await colorService.sortedListItems(
-      checked ? 'asc' : 'desc',
-      setLoading,
-      (meta) => {
+    try {
+      setSearchText('')
+      await colorService.getListItems(defaultRequestBody, setLoading, (meta) => {
         if (meta?.success) {
           selfConvertDataSource(meta?.data as Color[])
         }
-      },
-      { field: 'name', term: searchText }
-    )
+      })
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleSearch = async (value: string) => {
-    if (value.length > 0) {
-      await colorService.getListItems(
-        {
-          ...defaultRequestBody,
-          search: {
-            field: 'name',
-            term: value
-          }
-        },
+  const handleSortChange = async (checked: boolean) => {
+    try {
+      await colorService.sortedListItems(
+        checked ? 'asc' : 'desc',
         setLoading,
         (meta) => {
           if (meta?.success) {
             selfConvertDataSource(meta?.data as Color[])
           }
-        }
+        },
+        { field: 'name', term: searchText }
       )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSearch = async (value: string) => {
+    try {
+      if (value.length > 0) {
+        await colorService.getListItems(
+          {
+            ...defaultRequestBody,
+            search: {
+              field: 'name',
+              term: value
+            }
+          },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              selfConvertDataSource(meta?.data as Color[])
+            }
+          }
+        )
+      }
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
     }
   }
 

@@ -29,18 +29,26 @@ export default function useImportationTable(table: UseTableProps<ImportationTabl
 
   // New
   const loadData = async () => {
-    await importationService.getListItems(
-      {
-        ...defaultRequestBody,
-        paginator: { page: importationService.page, pageSize: defaultRequestBody.paginator?.pageSize }
-      },
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          setImportations(meta.data as Importation[])
+    try {
+      setLoading(true)
+      await importationService.getListItems(
+        {
+          ...defaultRequestBody,
+          paginator: { page: importationService.page, pageSize: defaultRequestBody.paginator?.pageSize }
+        },
+        setLoading,
+        (meta) => {
+          if (meta?.success) {
+            setImportations(meta.data as Importation[])
+          }
         }
-      }
-    )
+      )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -67,36 +75,47 @@ export default function useImportationTable(table: UseTableProps<ImportationTabl
     // const row = (await form.validateFields()) as any
     console.log({ old: record, new: newRecord })
     try {
+      setLoading(true)
       if (newRecord) {
         console.log('Importation progressing: ', newRecord)
-        await importationService.updateItemByPk(
-          record.id!,
-          {
-            ...newRecord
-          },
-          setLoading,
-          (meta) => {
-            if (!meta?.success) {
-              throw new Error('API update failed')
+        try {
+          await importationService.updateItemByPk(
+            record.id!,
+            {
+              ...newRecord
+            },
+            setLoading,
+            (meta) => {
+              if (!meta?.success) {
+                throw new Error('API update failed')
+              }
             }
-          }
-        )
+          )
+        } catch (error: any) {
+          const resError: ResponseDataType = error
+          throw resError
+        }
       } else {
         console.log('add new')
-        await importationService.createNewItem(newRecord, table.setLoading, (meta) => {
-          if (!meta?.success) {
-            throw new Error('API create failed')
-          }
-        })
+        try {
+          await importationService.createNewItem(newRecord, table.setLoading, (meta) => {
+            if (!meta?.success) {
+              throw new Error('API create failed')
+            }
+          })
+        } catch (error: any) {
+          const resError: ResponseDataType = error
+          throw resError
+        }
       }
       message.success('Success!')
-    } catch (error) {
-      console.error(error)
-      message.error('Failed')
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
     } finally {
-      setLoading(false)
       handleConfirmCancelEditing()
       loadData()
+      setLoading(false)
     }
   }
 
@@ -118,13 +137,13 @@ export default function useImportationTable(table: UseTableProps<ImportationTabl
           }
         }
       )
-    } catch (error) {
-      console.error(error)
-      message.error('Failed!')
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
     } finally {
-      setLoading(false)
       setOpenModal(false)
       loadData()
+      setLoading(false)
     }
   }
 
@@ -133,6 +152,7 @@ export default function useImportationTable(table: UseTableProps<ImportationTabl
     onDataSuccess?: (meta: ResponseDataType | undefined) => void
   ) => {
     try {
+      setLoading(true)
       await importationService.deleteItemByPk(record.id!, setLoading, (meta, msg) => {
         if (!meta?.success) {
           throw new Error('API delete failed')
@@ -140,26 +160,35 @@ export default function useImportationTable(table: UseTableProps<ImportationTabl
         message.success(msg)
         onDataSuccess?.(meta)
       })
-    } catch (error) {
-      console.error(error)
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
     } finally {
       loadData()
-      setLoading(false)
       setOpenModal(false)
+      setLoading(false)
     }
   }
 
   const handlePageChange = async (_page: number) => {
-    await importationService.pageChange(
-      _page,
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          selfConvertDataSource(meta?.data as Product[])
-        }
-      },
-      { field: 'productCode', term: searchText }
-    )
+    try {
+      setLoading(true)
+      await importationService.pageChange(
+        _page,
+        setLoading,
+        (meta) => {
+          if (meta?.success) {
+            selfConvertDataSource(meta?.data as Product[])
+          }
+        },
+        { field: 'productCode', term: searchText }
+      )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleResetClick = async () => {
@@ -168,35 +197,51 @@ export default function useImportationTable(table: UseTableProps<ImportationTabl
   }
 
   const handleSortChange = async (checked: boolean) => {
-    await importationService.sortedListItems(
-      checked ? 'asc' : 'desc',
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          selfConvertDataSource(meta?.data as Product[])
-        }
-      },
-      { field: 'productCode', term: searchText }
-    )
-  }
-
-  const handleSearch = async (value: string) => {
-    if (value.length > 0) {
-      await importationService.getListItems(
-        {
-          ...defaultRequestBody,
-          search: {
-            field: 'productCode',
-            term: value
-          }
-        },
+    try {
+      setLoading(true)
+      await importationService.sortedListItems(
+        checked ? 'asc' : 'desc',
         setLoading,
         (meta) => {
           if (meta?.success) {
             selfConvertDataSource(meta?.data as Product[])
           }
-        }
+        },
+        { field: 'productCode', term: searchText }
       )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSearch = async (value: string) => {
+    try {
+      setLoading(true)
+      if (value.length > 0) {
+        await importationService.getListItems(
+          {
+            ...defaultRequestBody,
+            search: {
+              field: 'productCode',
+              term: value
+            }
+          },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              selfConvertDataSource(meta?.data as Product[])
+            }
+          }
+        )
+      }
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
     }
   }
 

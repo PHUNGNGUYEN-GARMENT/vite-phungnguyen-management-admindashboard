@@ -1,6 +1,6 @@
 import { App as AntApp } from 'antd'
 import { useEffect, useState } from 'react'
-import { RequestBodyType, ResponseDataType, defaultRequestBody } from '~/api/client'
+import { ResponseDataType, defaultRequestBody } from '~/api/client'
 import AccessoryNoteAPI from '~/api/services/AccessoryNoteAPI'
 import { TableItemWithKey, UseTableProps } from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
@@ -28,11 +28,19 @@ export default function useAccessoryNote(table: UseTableProps<AccessoryNoteTable
   const [accessoryNoteNew, setAccessoryNoteNew] = useState<AccessoryNote | undefined>(undefined)
 
   const loadData = async () => {
-    await accessoryNoteService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        setAccessoryNotes(meta.data as AccessoryNote[])
-      }
-    })
+    try {
+      setLoading(true)
+      await accessoryNoteService.getListItems(defaultRequestBody, setLoading, (meta) => {
+        if (meta?.success) {
+          setAccessoryNotes(meta.data as AccessoryNote[])
+        }
+      })
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -74,9 +82,9 @@ export default function useAccessoryNote(table: UseTableProps<AccessoryNoteTable
           )
         }
         message.success('Success!')
-      } catch (error) {
-        console.error(error)
-        message.error('Failed')
+      } catch (error: any) {
+        const resError: ResponseDataType = error.data
+        message.error(`${resError.message}`)
       } finally {
         setLoading(false)
         handleConfirmCancelEditing()
@@ -105,8 +113,9 @@ export default function useAccessoryNote(table: UseTableProps<AccessoryNoteTable
           }
         }
       )
-    } catch (error) {
-      console.error(error)
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
     } finally {
       setLoading(false)
       setOpenModal(false)
@@ -118,78 +127,111 @@ export default function useAccessoryNote(table: UseTableProps<AccessoryNoteTable
     onDataSuccess?: (meta: ResponseDataType | undefined) => void
   ) => {
     console.log(record)
-    await accessoryNoteService.deleteItemByPk(record.id!, setLoading, (meta, msg) => {
-      if (meta) {
-        if (meta.success) {
-          handleConfirmDeleting(record.id!)
-          message.success(msg)
+    try {
+      setLoading(true)
+      await accessoryNoteService.deleteItemByPk(record.id!, setLoading, (meta, msg) => {
+        if (meta) {
+          if (meta.success) {
+            handleConfirmDeleting(record.id!)
+            message.success(msg)
+          }
+        } else {
+          message.error(msg)
         }
-      } else {
-        message.error(msg)
-      }
-      onDataSuccess?.(meta)
-    })
+        onDataSuccess?.(meta)
+      })
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handlePageChange = async (_page: number) => {
-    accessoryNoteService.setPage(_page)
-    const body: RequestBodyType = {
-      ...defaultRequestBody,
-      paginator: {
-        page: _page,
-        pageSize: 5
-      },
-      search: {
-        field: 'name',
-        term: searchText
-      }
-    }
-    await accessoryNoteService.getListItems(body, setLoading, (meta) => {
-      if (meta?.success) {
-        selfConvertDataSource(meta?.data as AccessoryNote[])
-      }
-    })
-  }
-
-  const handleResetClick = async () => {
-    setSearchText('')
-    await accessoryNoteService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        selfConvertDataSource(meta?.data as AccessoryNote[])
-      }
-    })
-  }
-
-  const handleSortChange = async (checked: boolean) => {
-    await accessoryNoteService.sortedListItems(
-      checked ? 'asc' : 'desc',
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          selfConvertDataSource(meta?.data as AccessoryNote[])
-        }
-      },
-      { field: 'name', term: searchText }
-    )
-  }
-
-  const handleSearch = async (value: string) => {
-    if (value.length > 0) {
-      await accessoryNoteService.getListItems(
-        {
-          ...defaultRequestBody,
-          search: {
-            field: 'name',
-            term: value
-          }
-        },
+    try {
+      setLoading(true)
+      await accessoryNoteService.pageChange(
+        _page,
         setLoading,
         (meta) => {
           if (meta?.success) {
             selfConvertDataSource(meta?.data as AccessoryNote[])
           }
-        }
+        },
+        { field: 'name', term: searchText }
       )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleResetClick = async () => {
+    try {
+      setLoading(true)
+      setSearchText('')
+      await accessoryNoteService.getListItems(defaultRequestBody, setLoading, (meta) => {
+        if (meta?.success) {
+          selfConvertDataSource(meta?.data as AccessoryNote[])
+        }
+      })
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSortChange = async (checked: boolean) => {
+    try {
+      setLoading(true)
+      await accessoryNoteService.sortedListItems(
+        checked ? 'asc' : 'desc',
+        setLoading,
+        (meta) => {
+          if (meta?.success) {
+            selfConvertDataSource(meta?.data as AccessoryNote[])
+          }
+        },
+        { field: 'name', term: searchText }
+      )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSearch = async (value: string) => {
+    try {
+      setLoading(true)
+      if (value.length > 0) {
+        await accessoryNoteService.getListItems(
+          {
+            ...defaultRequestBody,
+            search: {
+              field: 'name',
+              term: value
+            }
+          },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              selfConvertDataSource(meta?.data as AccessoryNote[])
+            }
+          }
+        )
+      }
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
     }
   }
 

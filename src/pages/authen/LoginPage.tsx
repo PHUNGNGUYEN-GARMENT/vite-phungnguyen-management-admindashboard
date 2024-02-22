@@ -2,6 +2,7 @@ import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons'
 import { App as AntApp, Button, Flex, Form, Input, Typography } from 'antd'
 import React, { HTMLAttributes, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { ResponseDataType } from '~/api/client'
 import AuthAPI from '~/api/services/AuthAPI'
 import logo from '~/assets/logo.svg'
 import useLocalStorage from '~/hooks/useLocalStorage'
@@ -45,9 +46,7 @@ const LoginPage: React.FC<Props> = ({ ...props }) => {
       setLoading(true)
       // Create a new request to login user
       await AuthAPI.login(user).then((meta) => {
-        if (!meta?.success) {
-          throw new Error(meta?.message)
-        }
+        if (!meta?.success) throw new Error(meta?.message)
         const userLogged = meta.data as User
         if (userLogged) {
           // Save to local storage
@@ -58,8 +57,9 @@ const LoginPage: React.FC<Props> = ({ ...props }) => {
         // Navigation to '/' (Dashboard page) if login success
         navigate('/')
       })
-    } catch (error) {
-      message.error(`${error}`)
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
     } finally {
       setLoading(false)
     }

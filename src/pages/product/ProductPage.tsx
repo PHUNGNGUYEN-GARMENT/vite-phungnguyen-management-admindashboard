@@ -267,10 +267,12 @@ const ProductPage: React.FC = () => {
         onSearch={(value) => handleSearch(value)}
         onSortChange={(checked) => handleSortChange(checked)}
         onResetClick={{
-          onClick: () => handleResetClick()
+          onClick: () => handleResetClick(),
+          isShow: currentUser.userRoles.includes('admin') || currentUser.userRoles.includes('product_manager')
         }}
         onAddNewClick={{
-          onClick: () => setOpenModal(true)
+          onClick: () => setOpenModal(true),
+          isShow: currentUser.userRoles.includes('admin') || currentUser.userRoles.includes('product_manager')
         }}
       >
         <SkyTable

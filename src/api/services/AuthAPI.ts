@@ -1,5 +1,6 @@
 import client, { ResponseDataType } from '~/api/client'
 import { User } from '~/typing'
+import { responseFormatter, throwErrorFormatter } from '~/utils/response-formatter'
 
 const NAMESPACE = 'users'
 
@@ -8,45 +9,30 @@ export default {
     return await client
       .post(`${NAMESPACE}/auth/login`, user)
       .then((res) => {
-        console.log(res)
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
+        return responseFormatter(res)
       })
       .catch(function (error) {
-        errorFormatter(error)
-        throw Error(`${error}`)
+        throwErrorFormatter(error)
       })
   },
   sendEmail: async (emailToSend: string): Promise<ResponseDataType | undefined> => {
     return await client
       .post(`${NAMESPACE}/auth/send-email/${emailToSend}`)
       .then((res) => {
-        console.log(res)
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
+        return responseFormatter(res)
       })
       .catch(function (error) {
-        errorFormatter(error)
-        throw Error(`${error}`)
+        throwErrorFormatter(error)
       })
   },
   verifyOTP: async (user: { email: string; otp: string }): Promise<ResponseDataType | undefined> => {
     return await client
       .post(`${NAMESPACE}/auth/verify-otp/${user.email}`, { otp: user.otp })
       .then((res) => {
-        console.log(res)
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
+        return responseFormatter(res)
       })
       .catch(function (error) {
-        errorFormatter(error)
-        throw Error(`${error}`)
+        throwErrorFormatter(error)
       })
   }
 }

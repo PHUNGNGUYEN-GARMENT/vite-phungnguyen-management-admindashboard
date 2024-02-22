@@ -6,7 +6,6 @@ import GroupAPI from '~/api/services/GroupAPI'
 import PrintAPI from '~/api/services/PrintAPI'
 import AddNewTitle from '~/components/sky-ui/AddNewTitle'
 import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
-import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import useAPIService from '~/hooks/useAPIService'
 import { Color, Group, Print } from '~/typing'
 import DayJS from '~/utils/date-formatter'
@@ -91,125 +90,90 @@ const ModalAddNewProduct: React.FC<Props> = ({ loading, openModal, setOpenModal,
       onCancel={handleCancel}
     >
       <Spin spinning={loading} tip='loading'>
-        <Form form={form} {...props}>
+        <Form labelCol={{ span: 8 }} labelAlign='left' labelWrap form={form} {...props}>
           <Flex vertical gap={20} className='w-full sm:w-[400px]'>
-            <Flex align='center' className='w-full'>
-              <SkyTableTypography required className='w-32' status={'active'}>
-                Mã Code
-              </SkyTableTypography>
-              <EditableFormCell
-                isEditing={true}
-                title='Mã Code'
-                placeholder='Mã Code...'
-                dataIndex='productCode'
-                inputType='text'
-                required
-              />
-            </Flex>
-            <Flex align='center' className='w-full'>
-              <SkyTableTypography required className='w-32' status={'active'}>
-                Số lượng PO
-              </SkyTableTypography>
-              <EditableFormCell
-                isEditing={true}
-                title='Số lượng PO'
-                dataIndex='quantityPO'
-                placeholder='Số lượng PO...'
-                inputType='number'
-                required
-              />
-            </Flex>
-            <Flex align='center' className='w-full'>
-              <SkyTableTypography className='w-32' status={'active'}>
-                Mã màu:
-              </SkyTableTypography>
-              <EditableFormCell
-                isEditing={true}
-                title='Mã màu:'
-                dataIndex='colorID'
-                inputType='colorselector'
-                placeholder='Chọn mã màu...'
-                selectProps={{
-                  options: colors.map((item) => {
-                    return {
-                      label: item.name,
-                      value: item.id,
-                      key: item.hexColor
-                    }
-                  })
-                }}
-              />
-            </Flex>
-            <Flex className='w-full' align='center'>
-              <SkyTableTypography className='w-32' status={'active'}>
-                Nhóm:
-              </SkyTableTypography>
-              <EditableFormCell
-                isEditing={true}
-                title='Nhóm:'
-                dataIndex='groupID'
-                inputType='select'
-                placeholder='Chọn nhóm...'
-                selectProps={{
-                  options: groups.map((item) => {
-                    return {
-                      label: item.name,
-                      value: item.id,
-                      key: item.id
-                    }
-                  })
-                }}
-              />
-            </Flex>
-            <Flex className='w-full' align='center'>
-              <SkyTableTypography className='w-32' status={'active'}>
-                Nơi in:
-              </SkyTableTypography>
-              <EditableFormCell
-                isEditing={true}
-                title='Nơi in:'
-                dataIndex='printID'
-                inputType='select'
-                placeholder='Chọn nơi in...'
-                selectProps={{
-                  options: prints.map((item) => {
-                    return {
-                      label: item.name,
-                      value: item.id,
-                      key: item.id
-                    }
-                  })
-                }}
-              />
-            </Flex>
-            <Flex className='w-full' align='center'>
-              <SkyTableTypography className='w-32' required status={'active'}>
-                Ngày nhập NPL:
-              </SkyTableTypography>
-              <EditableFormCell
-                isEditing={true}
-                title='Ngày nhập NPL:'
-                dataIndex='dateInputNPL'
-                inputType='datepicker'
-                required
-                placeholder='Ngày nhập NPL...'
-                initialValue={DayJS(Date.now())}
-              />
-            </Flex>
-            <Flex className='w-full' align='center'>
-              <SkyTableTypography className='w-32' required status={'active'}>
-                Ngày xuất FCR:
-              </SkyTableTypography>
-              <EditableFormCell
-                isEditing={true}
-                title='Ngày xuất FCR:'
-                dataIndex='dateOutputFCR'
-                inputType='datepicker'
-                required
-                placeholder='Ngày xuất FCR...'
-                initialValue={DayJS(Date.now())}
-              />
-            </Flex>
+            <EditableFormCell
+              isEditing={true}
+              title='Mã Code'
+              placeholder='Mã Code...'
+              dataIndex='productCode'
+              inputType='text'
+              required
+            />
+            <EditableFormCell
+              isEditing={true}
+              title='Số lượng PO'
+              dataIndex='quantityPO'
+              placeholder='Số lượng PO...'
+              inputType='number'
+              required
+            />
+            <EditableFormCell
+              isEditing={true}
+              title='Mã màu:'
+              dataIndex='colorID'
+              inputType='colorselector'
+              placeholder='Chọn mã màu...'
+              selectProps={{
+                options: colors.map((item) => {
+                  return {
+                    label: item.name,
+                    value: item.id,
+                    key: item.hexColor
+                  }
+                })
+              }}
+            />
+            <EditableFormCell
+              isEditing={true}
+              title='Nhóm:'
+              dataIndex='groupID'
+              inputType='select'
+              placeholder='Chọn nhóm...'
+              selectProps={{
+                options: groups.map((item) => {
+                  return {
+                    label: item.name,
+                    value: item.id,
+                    key: item.id
+                  }
+                })
+              }}
+            />
+            <EditableFormCell
+              isEditing={true}
+              title='Nơi in:'
+              dataIndex='printID'
+              inputType='select'
+              placeholder='Chọn nơi in...'
+              selectProps={{
+                options: prints.map((item) => {
+                  return {
+                    label: item.name,
+                    value: item.id,
+                    key: item.id
+                  }
+                })
+              }}
+            />
+            <EditableFormCell
+              isEditing={true}
+              title='Ngày nhập NPL:'
+              dataIndex='dateInputNPL'
+              inputType='datepicker'
+              required
+              placeholder='Ngày nhập NPL...'
+              initialValue={DayJS(Date.now())}
+            />
+            <EditableFormCell
+              isEditing={true}
+              title='Ngày xuất FCR:'
+              dataIndex='dateOutputFCR'
+              inputType='datepicker'
+              required
+              placeholder='Ngày xuất FCR...'
+              initialValue={DayJS(Date.now())}
+            />
           </Flex>
         </Form>
       </Spin>

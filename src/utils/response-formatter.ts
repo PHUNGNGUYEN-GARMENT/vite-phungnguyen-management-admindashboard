@@ -1,6 +1,7 @@
-import { AxiosError } from 'axios'
+import { AxiosError, AxiosResponse } from 'axios'
+import { ResponseDataType } from '~/api/client'
 
-export const errorFormatter = (error: AxiosError) => {
+export const logError = (error: AxiosError) => {
   if (error.response) {
     // The request was made and the server responded with a status code
     // that falls out of the range of 2xx
@@ -15,4 +16,18 @@ export const errorFormatter = (error: AxiosError) => {
     console.log('Error', error.message)
   }
   console.log(error.config)
+}
+
+export const throwErrorFormatter = (error: any) => {
+  const axiosError: AxiosError = error
+  logError(axiosError)
+
+  throw axiosError.response
+}
+
+export const responseFormatter = (res: AxiosResponse<any, any>) => {
+  if (res.data) {
+    return res.data as ResponseDataType
+  }
+  return res.data
 }

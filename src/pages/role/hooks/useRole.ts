@@ -25,11 +25,19 @@ export default function useRole(table: UseTableProps<RoleTableDataType>) {
   const [roles, setRoles] = useState<Role[]>([])
 
   const loadData = async () => {
-    await roleService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        setRoles(meta.data as Role[])
-      }
-    })
+    try {
+      setLoading(true)
+      await roleService.getListItems(defaultRequestBody, setLoading, (meta) => {
+        if (meta?.success) {
+          setRoles(meta.data as Role[])
+        }
+      })
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -56,19 +64,18 @@ export default function useRole(table: UseTableProps<RoleTableDataType>) {
     // const row = (await form.validateFields()) as any
     console.log({ old: record, new: newRecord })
     try {
+      setLoading(true)
       await roleService.updateItemByPk(record.id!, { ...newRecord }, setLoading, (meta) => {
-        if (!meta?.success) {
-          throw new Error('API update failed')
-        }
+        if (!meta?.success) throw new Error('API update failed')
+        message.success('Success!')
       })
-      message.success('Success!')
-    } catch (error) {
-      console.error(error)
-      message.error('Failed')
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
     } finally {
-      setLoading(false)
       handleConfirmCancelEditing()
       loadData()
+      setLoading(false)
     }
   }
 
@@ -82,19 +89,17 @@ export default function useRole(table: UseTableProps<RoleTableDataType>) {
         },
         setLoading,
         async (meta, msg) => {
-          if (!meta?.success) {
-            throw new Error(msg)
-          }
+          if (!meta?.success) throw new Error(`${msg}`)
           message.success(msg)
         }
       )
-    } catch (error) {
-      console.error(error)
-      message.success(`${error}`)
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
     } finally {
-      setLoading(false)
       setOpenModal(false)
       loadData()
+      setLoading(false)
     }
   }
 
@@ -106,77 +111,108 @@ export default function useRole(table: UseTableProps<RoleTableDataType>) {
     try {
       setLoading(true)
       await roleService.deleteItemByPk(record.id!, setLoading, (meta, msg) => {
-        if (meta) {
-          if (meta.success) {
-            handleConfirmDeleting(record.id!)
-            message.success(msg)
-          }
-        } else {
-          message.error(msg)
-        }
+        if (!meta?.success) throw new Error(`${msg}`)
+        handleConfirmDeleting(record.id!)
+        message.success(msg)
         onDataSuccess?.(meta)
       })
-    } catch (error) {
-      console.error(`${error}`)
-      message.error(`${error}`)
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
     } finally {
-      setLoading(false)
       loadData()
+      setLoading(false)
     }
   }
 
   const handlePageChange = async (_page: number) => {
-    await roleService.pageChange(
-      _page,
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          selfConvertDataSource(meta?.data as Role[])
-        }
-      },
-      { field: 'desc', term: searchText }
-    )
-  }
-
-  const handleResetClick = async () => {
-    setSearchText('')
-    await roleService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        selfConvertDataSource(meta?.data as Role[])
-      }
-    })
-  }
-
-  const handleSortChange = async (checked: boolean) => {
-    await roleService.sortedListItems(
-      checked ? 'asc' : 'desc',
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          selfConvertDataSource(meta?.data as Role[])
-        }
-      },
-      { field: 'desc', term: searchText }
-    )
-  }
-
-  const handleSearch = async (value: string) => {
-    if (value.length > 0) {
-      await roleService.getListItems(
-        {
-          ...defaultRequestBody,
-          search: {
-            field: 'desc',
-            term: value
-          }
-        },
+    try {
+      setLoading(true)
+      await roleService.pageChange(
+        _page,
         setLoading,
         (meta) => {
           if (meta?.success) {
             selfConvertDataSource(meta?.data as Role[])
           }
-        }
+        },
+        { field: 'desc', term: searchText }
       )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      loadData()
+      setLoading(false)
+    }
+  }
+
+  const handleResetClick = async () => {
+    try {
+      setLoading(true)
+      setSearchText('')
+      await roleService.getListItems(defaultRequestBody, setLoading, (meta) => {
+        if (meta?.success) {
+          selfConvertDataSource(meta?.data as Role[])
+        }
+      })
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      loadData()
+      setLoading(false)
+    }
+  }
+
+  const handleSortChange = async (checked: boolean) => {
+    try {
+      setLoading(true)
+      await roleService.sortedListItems(
+        checked ? 'asc' : 'desc',
+        setLoading,
+        (meta) => {
+          if (meta?.success) {
+            selfConvertDataSource(meta?.data as Role[])
+          }
+        },
+        { field: 'desc', term: searchText }
+      )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      loadData()
+      setLoading(false)
+    }
+  }
+
+  const handleSearch = async (value: string) => {
+    try {
+      setLoading(true)
+      if (value.length > 0) {
+        await roleService.getListItems(
+          {
+            ...defaultRequestBody,
+            search: {
+              field: 'desc',
+              term: value
+            }
+          },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              selfConvertDataSource(meta?.data as Role[])
+            }
+          }
+        )
+      }
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      loadData()
+      setLoading(false)
     }
   }
 

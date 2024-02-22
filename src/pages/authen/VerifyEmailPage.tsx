@@ -1,13 +1,14 @@
-import { App as AntApp, Button, Flex, Form, Input, Typography } from 'antd'
+import { App, Button, Flex, Form, Input, Typography } from 'antd'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { ResponseDataType } from '~/api/client'
 import AuthAPI from '~/api/services/AuthAPI'
 import logo from '~/assets/logo.svg'
 import useLocalStorage from '~/hooks/useLocalStorage'
 
 const VerifyEmailPage = () => {
   const [emailStored, setEmailStored] = useLocalStorage('email-stored', '')
-  const { message } = AntApp.useApp()
+  const { message } = App.useApp()
   const [form] = Form.useForm()
   const [loading, setLoading] = useState<boolean>(false)
   const [email, setEmail] = useState<string>('')
@@ -29,12 +30,13 @@ const VerifyEmailPage = () => {
             message.success(`OTP Send!`)
             navigate('/verify-otp')
           })
-          .catch((err) => {
-            message.error(`${err.message}`)
+          .catch((err: any) => {
+            throw err
           })
       }
     } catch (error: any) {
-      message.error(`${error.message}`)
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
     } finally {
       setLoading(false)
     }

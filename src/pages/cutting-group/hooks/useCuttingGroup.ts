@@ -53,36 +53,61 @@ export default function useCuttingGroup(table: UseTableProps<CuttingGroupTableDa
   const [sampleSewingNew, setCuttingGroupNew] = useState<CuttingGroup | undefined>(undefined)
 
   const loadData = async () => {
-    await productService.getListItems(
-      {
-        ...defaultRequestBody,
-        paginator: { page: productService.page, pageSize: defaultRequestBody.paginator?.pageSize }
-      },
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          setProducts(meta.data as Product[])
-        }
+    try {
+      setLoading(true)
+      try {
+        await productService.getListItems(
+          {
+            ...defaultRequestBody,
+            paginator: { page: productService.page, pageSize: defaultRequestBody.paginator?.pageSize }
+          },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              setProducts(meta.data as Product[])
+            }
+          }
+        )
+      } catch (error: any) {
+        const resError: ResponseDataType = error
+        throw resError
       }
-    )
-    await productColorService.getListItems(
-      { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          setProductColors(meta.data as ProductColor[])
-        }
+
+      try {
+        await productColorService.getListItems(
+          { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              setProductColors(meta.data as ProductColor[])
+            }
+          }
+        )
+      } catch (error: any) {
+        const resError: ResponseDataType = error
+        throw resError
       }
-    )
-    await cuttingGroupService.getListItems(
-      { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          setCuttingGroups(meta.data as CuttingGroup[])
-        }
+
+      try {
+        await cuttingGroupService.getListItems(
+          { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              setCuttingGroups(meta.data as CuttingGroup[])
+            }
+          }
+        )
+      } catch (error: any) {
+        const resError: ResponseDataType = error
+        throw resError
       }
-    )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -115,6 +140,7 @@ export default function useCuttingGroup(table: UseTableProps<CuttingGroupTableDa
     // const row = (await form.validateFields()) as any
     console.log({ old: record, new: newRecord })
     try {
+      setLoading(true)
       if (newRecord) {
         if (newRecord.quantityRealCut && !numberValidator(newRecord.quantityRealCut))
           throw new Error('Quantity must be than zero!')
@@ -175,31 +201,42 @@ export default function useCuttingGroup(table: UseTableProps<CuttingGroupTableDa
             newRecord.quantityArrived10Th)
         ) {
           console.log('add new')
-          await cuttingGroupService.createNewItem({ ...newRecord, productID: record.id }, setLoading, (meta) => {
-            if (!meta?.success) throw new Error('API create group failed')
-          })
+          try {
+            await cuttingGroupService.createNewItem({ ...newRecord, productID: record.id }, setLoading, (meta) => {
+              if (!meta?.success) throw new Error('API create group failed')
+            })
+          } catch (error: any) {
+            const resError: ResponseDataType = error
+            throw resError
+          }
         }
         if (record.cuttingGroup) {
           console.log('CuttingGroup progressing: ', newRecord)
-          await cuttingGroupService.updateItemBy(
-            { field: 'productID', key: record.key },
-            {
-              ...newRecord
-            },
-            setLoading,
-            (meta) => {
-              if (!meta?.success) throw new Error('API update group failed')
-            }
-          )
+          try {
+            await cuttingGroupService.updateItemBy(
+              { field: 'productID', key: record.key },
+              {
+                ...newRecord
+              },
+              setLoading,
+              (meta) => {
+                if (!meta?.success) throw new Error('API update group failed')
+              }
+            )
+          } catch (error: any) {
+            const resError: ResponseDataType = error
+            throw resError
+          }
         }
         message.success('Success!')
       }
     } catch (error: any) {
-      message.error(error.message)
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
     } finally {
-      setLoading(false)
-      handleConfirmCancelEditing()
       loadData()
+      handleConfirmCancelEditing()
+      setLoading(false)
     }
   }
 
@@ -218,20 +255,17 @@ export default function useCuttingGroup(table: UseTableProps<CuttingGroupTableDa
         },
         setLoading,
         async (meta, msg) => {
-          if (meta?.data) {
-            setCuttingGroupNew(meta.data as CuttingGroup)
-            message.success(msg)
-          } else {
-            console.log('Errr')
-            message.error(msg)
-          }
+          if (!meta?.success) throw new Error(`${meta?.message}`)
+          setCuttingGroupNew(meta.data as CuttingGroup)
+          message.success(msg)
         }
       )
-    } catch (error) {
-      console.error(error)
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
     } finally {
-      setLoading(false)
       setOpenModal(false)
+      setLoading(false)
     }
   }
 
@@ -240,17 +274,17 @@ export default function useCuttingGroup(table: UseTableProps<CuttingGroupTableDa
     onDataSuccess?: (meta: ResponseDataType | undefined) => void
   ) => {
     try {
+      setLoading(true)
       if (record.cuttingGroup) {
         await cuttingGroupService.deleteItemByPk(record.cuttingGroup.id!, setLoading, (meta, msg) => {
-          if (!meta?.success) {
-            throw new Error('API delete failed')
-          }
+          if (!meta?.success) throw new Error('API delete failed')
           message.success(msg)
           onDataSuccess?.(meta)
         })
       }
-    } catch (error) {
-      console.error(error)
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
     } finally {
       loadData()
       setLoading(false)
@@ -259,16 +293,24 @@ export default function useCuttingGroup(table: UseTableProps<CuttingGroupTableDa
   }
 
   const handlePageChange = async (_page: number) => {
-    await productService.pageChange(
-      _page,
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          selfConvertDataSource(meta?.data as Product[])
-        }
-      },
-      { field: 'productCode', term: searchText }
-    )
+    try {
+      setLoading(true)
+      await productService.pageChange(
+        _page,
+        setLoading,
+        (meta) => {
+          if (meta?.success) {
+            selfConvertDataSource(meta?.data as Product[])
+          }
+        },
+        { field: 'productCode', term: searchText }
+      )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleResetClick = async () => {
@@ -278,35 +320,51 @@ export default function useCuttingGroup(table: UseTableProps<CuttingGroupTableDa
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleSortChange = async (checked: boolean, _event: React.MouseEvent<HTMLButtonElement>) => {
-    await productService.sortedListItems(
-      checked ? 'asc' : 'desc',
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          selfConvertDataSource(meta?.data as Product[])
-        }
-      },
-      { field: 'productCode', term: searchText }
-    )
-  }
-
-  const handleSearch = async (value: string) => {
-    if (value.length > 0) {
-      await productService.getListItems(
-        {
-          ...defaultRequestBody,
-          search: {
-            field: 'productCode',
-            term: value
-          }
-        },
+    try {
+      setLoading(true)
+      await productService.sortedListItems(
+        checked ? 'asc' : 'desc',
         setLoading,
         (meta) => {
           if (meta?.success) {
             selfConvertDataSource(meta?.data as Product[])
           }
-        }
+        },
+        { field: 'productCode', term: searchText }
       )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSearch = async (value: string) => {
+    try {
+      setLoading(true)
+      if (value.length > 0) {
+        await productService.getListItems(
+          {
+            ...defaultRequestBody,
+            search: {
+              field: 'productCode',
+              term: value
+            }
+          },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              selfConvertDataSource(meta?.data as Product[])
+            }
+          }
+        )
+      }
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
     }
   }
 

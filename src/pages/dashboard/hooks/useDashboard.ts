@@ -1,5 +1,6 @@
+import { App as AntApp } from 'antd'
 import { useEffect, useState } from 'react'
-import { defaultRequestBody } from '~/api/client'
+import { ResponseDataType, defaultRequestBody } from '~/api/client'
 import CompletionAPI from '~/api/services/CompletionAPI'
 import ProductAPI from '~/api/services/ProductAPI'
 import ProductColorAPI from '~/api/services/ProductColorAPI'
@@ -27,6 +28,8 @@ export default function useDashboard(table: UseTableProps<DashboardTableDataType
   const sewingLineDeliveryService = useAPIService<SewingLineDelivery>(SewingLineDeliveryAPI)
   const completionService = useAPIService<Completion>(CompletionAPI)
 
+  const { message } = AntApp.useApp()
+
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [searchText, setSearchText] = useState<string>('')
   const [newRecord, setNewRecord] = useState<ProductNewRecordProps>({})
@@ -37,47 +40,78 @@ export default function useDashboard(table: UseTableProps<DashboardTableDataType
   const [completions, setCompletions] = useState<Completion[]>([])
 
   const loadData = async (defaultLoading?: boolean) => {
-    await productService.getListItems(
-      defaultLoading
-        ? defaultRequestBody
-        : {
-            ...defaultRequestBody,
-            paginator: { page: productService.page, pageSize: defaultRequestBody.paginator?.pageSize }
-          },
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          setProducts(meta.data as Product[])
-        }
+    try {
+      setLoading(true)
+      try {
+        await productService.getListItems(
+          defaultLoading
+            ? defaultRequestBody
+            : {
+                ...defaultRequestBody,
+                paginator: { page: productService.page, pageSize: defaultRequestBody.paginator?.pageSize }
+              },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              setProducts(meta.data as Product[])
+            }
+          }
+        )
+      } catch (error: any) {
+        const resError: ResponseDataType = error
+        throw resError
       }
-    )
-    await productColorService.getListItems(
-      { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          setProductColors(meta.data as ProductColor[])
-        }
+
+      try {
+        await productColorService.getListItems(
+          { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              setProductColors(meta.data as ProductColor[])
+            }
+          }
+        )
+      } catch (error: any) {
+        const resError: ResponseDataType = error
+        throw resError
       }
-    )
-    await sewingLineDeliveryService.getListItems(
-      { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          setSewingLineDeliveries(meta.data as SewingLineDelivery[])
-        }
+
+      try {
+        await sewingLineDeliveryService.getListItems(
+          { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              setSewingLineDeliveries(meta.data as SewingLineDelivery[])
+            }
+          }
+        )
+      } catch (error: any) {
+        const resError: ResponseDataType = error
+        throw resError
       }
-    )
-    await completionService.getListItems(
-      { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          setCompletions(meta.data as Completion[])
-        }
+
+      try {
+        await completionService.getListItems(
+          { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              setCompletions(meta.data as Completion[])
+            }
+          }
+        )
+      } catch (error: any) {
+        const resError: ResponseDataType = error
+        throw resError
       }
-    )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -111,16 +145,24 @@ export default function useDashboard(table: UseTableProps<DashboardTableDataType
   }
 
   const handlePageChange = async (_page: number) => {
-    await productService.pageChange(
-      _page,
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          selfConvertDataSource(meta?.data as Product[])
-        }
-      },
-      { field: 'productCode', term: searchText }
-    )
+    try {
+      setLoading(true)
+      await productService.pageChange(
+        _page,
+        setLoading,
+        (meta) => {
+          if (meta?.success) {
+            selfConvertDataSource(meta?.data as Product[])
+          }
+        },
+        { field: 'productCode', term: searchText }
+      )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleResetClick = async () => {
@@ -130,35 +172,51 @@ export default function useDashboard(table: UseTableProps<DashboardTableDataType
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleSortChange = async (checked: boolean, _event: React.MouseEvent<HTMLButtonElement>) => {
-    await productService.sortedListItems(
-      checked ? 'asc' : 'desc',
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          selfConvertDataSource(meta?.data as Product[])
-        }
-      },
-      { field: 'productCode', term: searchText }
-    )
-  }
-
-  const handleSearch = async (value: string) => {
-    if (value.length > 0) {
-      await productService.getListItems(
-        {
-          ...defaultRequestBody,
-          search: {
-            field: 'productCode',
-            term: value
-          }
-        },
+    try {
+      setLoading(true)
+      await productService.sortedListItems(
+        checked ? 'asc' : 'desc',
         setLoading,
         (meta) => {
           if (meta?.success) {
             selfConvertDataSource(meta?.data as Product[])
           }
-        }
+        },
+        { field: 'productCode', term: searchText }
       )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSearch = async (value: string) => {
+    try {
+      setLoading(true)
+      if (value.length > 0) {
+        await productService.getListItems(
+          {
+            ...defaultRequestBody,
+            search: {
+              field: 'productCode',
+              term: value
+            }
+          },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              selfConvertDataSource(meta?.data as Product[])
+            }
+          }
+        )
+      }
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
     }
   }
 

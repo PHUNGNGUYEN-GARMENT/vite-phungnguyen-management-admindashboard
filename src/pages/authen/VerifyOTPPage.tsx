@@ -2,6 +2,7 @@ import { App as AntApp, Button, Flex, Typography } from 'antd'
 import { InputOTP } from 'antd-input-otp'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { ResponseDataType } from '~/api/client'
 import AuthAPI from '~/api/services/AuthAPI'
 import logo from '~/assets/logo.svg'
 import useCountdownTimer from '~/hooks/useCountdownTimer'
@@ -36,7 +37,8 @@ const VerifyOTPPage = () => {
           })
       }
     } catch (error: any) {
-      message.error(`${error.message}`)
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
     } finally {
       setLoading(false)
     }

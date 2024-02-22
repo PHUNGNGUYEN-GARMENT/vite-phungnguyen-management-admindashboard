@@ -1,7 +1,7 @@
 import { App as AntApp } from 'antd'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { RequestBodyType, ResponseDataType, defaultRequestBody } from '~/api/client'
+import { ResponseDataType, defaultRequestBody } from '~/api/client'
 import AccessoryNoteAPI from '~/api/services/AccessoryNoteAPI'
 import GarmentAccessoryAPI from '~/api/services/GarmentAccessoryAPI'
 import GarmentAccessoryNoteAPI from '~/api/services/GarmentAccessoryNoteAPI'
@@ -59,60 +59,97 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
   const [garmentAccessoryNew, setGarmentAccessoryNew] = useState<GarmentAccessory | undefined>(undefined)
 
   const loadData = async () => {
-    await productService.getListItems(
-      {
-        ...defaultRequestBody,
-        paginator: { page: productService.page, pageSize: defaultRequestBody.paginator?.pageSize }
-      },
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          setProducts(meta.data as Product[])
-        }
+    try {
+      setLoading(true)
+      try {
+        await productService.getListItems(
+          {
+            ...defaultRequestBody,
+            paginator: { page: productService.page, pageSize: defaultRequestBody.paginator?.pageSize }
+          },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              setProducts(meta.data as Product[])
+            }
+          }
+        )
+      } catch (error: any) {
+        const resError: ResponseDataType = error
+        throw resError
       }
-    )
-    await productColorService.getListItems(
-      {
-        ...defaultRequestBody,
-        paginator: { page: 1, pageSize: -1 }
-      },
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          setProductColors(meta.data as ProductColor[])
-        }
+
+      try {
+        await productColorService.getListItems(
+          {
+            ...defaultRequestBody,
+            paginator: { page: 1, pageSize: -1 }
+          },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              setProductColors(meta.data as ProductColor[])
+            }
+          }
+        )
+      } catch (error: any) {
+        const resError: ResponseDataType = error
+        throw resError
       }
-    )
-    await garmentAccessoryService.getListItems(
-      {
-        ...defaultRequestBody,
-        paginator: { page: 1, pageSize: -1 }
-      },
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          setGarmentAccessories(meta.data as GarmentAccessory[])
-        }
+
+      try {
+        await garmentAccessoryService.getListItems(
+          {
+            ...defaultRequestBody,
+            paginator: { page: 1, pageSize: -1 }
+          },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              setGarmentAccessories(meta.data as GarmentAccessory[])
+            }
+          }
+        )
+      } catch (error: any) {
+        const resError: ResponseDataType = error
+        throw resError
       }
-    )
-    await garmentAccessoryNoteService.getListItems(
-      { ...defaultRequestBody, paginator: { pageSize: -1, page: 1 } },
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          setGarmentAccessoryNotes(meta.data as GarmentAccessoryNote[])
-        }
+
+      try {
+        await garmentAccessoryNoteService.getListItems(
+          { ...defaultRequestBody, paginator: { pageSize: -1, page: 1 } },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              setGarmentAccessoryNotes(meta.data as GarmentAccessoryNote[])
+            }
+          }
+        )
+      } catch (error: any) {
+        const resError: ResponseDataType = error
+        throw resError
       }
-    )
-    await accessoryNoteService.getListItems(
-      { ...defaultRequestBody, paginator: { pageSize: -1, page: 1 } },
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          setAccessoryNotes(meta.data as AccessoryNote[])
-        }
+
+      try {
+        await accessoryNoteService.getListItems(
+          { ...defaultRequestBody, paginator: { pageSize: -1, page: 1 } },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              setAccessoryNotes(meta.data as AccessoryNote[])
+            }
+          }
+        )
+      } catch (error: any) {
+        const resError: ResponseDataType = error
+        throw resError
       }
-    )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -150,6 +187,7 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
     // const row = (await form.validateFields()) as any
     console.log({ old: record, new: newRecord })
     try {
+      setLoading(true)
       if (record.garmentAccessory) {
         // Update GarmentAccessory
         if (
@@ -159,62 +197,73 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
           !newRecord.syncStatus
         ) {
           console.log('Update GarmentAccessory')
-          await garmentAccessoryService.updateItemByPk(
-            record.garmentAccessory.id!,
+          try {
+            await garmentAccessoryService.updateItemByPk(
+              record.garmentAccessory.id!,
+              {
+                amountCutting: newRecord.amountCutting,
+                passingDeliveryDate: newRecord.passingDeliveryDate,
+                syncStatus: newRecord.syncStatus
+              },
+              setLoading,
+              (meta) => {
+                if (!meta?.success) throw new Error('API update GarmentAccessory failed')
+              }
+            )
+          } catch (error: any) {
+            const resError: ResponseDataType = error
+            throw resError
+          }
+        }
+      } else {
+        console.log('Create GarmentAccessory')
+        try {
+          await garmentAccessoryService.createNewItem(
             {
+              productID: record.id!,
               amountCutting: newRecord.amountCutting,
               passingDeliveryDate: newRecord.passingDeliveryDate,
               syncStatus: newRecord.syncStatus
             },
             setLoading,
             (meta) => {
-              if (!meta?.success) throw new Error('API update GarmentAccessory failed')
+              if (!meta?.success) throw new Error('API create GarmentAccessory failed')
             }
           )
+        } catch (error: any) {
+          const resError: ResponseDataType = error
+          throw resError
         }
-      } else {
-        console.log('Create GarmentAccessory')
-        await garmentAccessoryService.createNewItem(
-          {
-            productID: record.id!,
-            amountCutting: newRecord.amountCutting,
-            passingDeliveryDate: newRecord.passingDeliveryDate,
-            syncStatus: newRecord.syncStatus
-          },
-          setLoading,
-          (meta) => {
-            if (!meta?.success) throw new Error('API create GarmentAccessory failed')
-          }
-        )
       }
 
       if (newRecord.garmentAccessoryNotes) {
-        await GarmentAccessoryNoteAPI.updateItemsBy?.(
-          { field: 'productID', key: record.id! },
-          newRecord.garmentAccessoryNotes!.map((garmentAccessoryNote) => {
-            return {
-              accessoryNoteID: garmentAccessoryNote.accessoryNoteID,
-              garmentAccessoryID: record.garmentAccessory?.id,
-              productID: record.id
-            }
-          }) as GarmentAccessoryNote[],
-          currentUser.user.accessToken!
-        )
-          .then((meta) => {
+        try {
+          await GarmentAccessoryNoteAPI.updateItemsBy?.(
+            { field: 'productID', key: record.id! },
+            newRecord.garmentAccessoryNotes!.map((garmentAccessoryNote) => {
+              return {
+                accessoryNoteID: garmentAccessoryNote.accessoryNoteID,
+                garmentAccessoryID: record.garmentAccessory?.id,
+                productID: record.id
+              }
+            }) as GarmentAccessoryNote[],
+            currentUser.user.accessToken!
+          ).then((meta) => {
             if (!meta?.success) throw new Error('API update Garment Accessory Note failed')
-            console.log(meta)
           })
-          .catch((err) => {
-            throw new Error(`${err}`)
-          })
+        } catch (error: any) {
+          const resError: ResponseDataType = error
+          throw resError
+        }
       }
       message.success('Success!')
     } catch (error: any) {
-      message.error(`${error.message}`)
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
     } finally {
-      setLoading(false)
-      handleConfirmCancelEditing()
       loadData()
+      handleConfirmCancelEditing()
+      setLoading(false)
     }
   }
 
@@ -229,20 +278,17 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
         },
         setLoading,
         async (meta, msg) => {
-          if (meta?.data) {
-            setGarmentAccessoryNew(meta.data as GarmentAccessory)
-            message.success(msg)
-          } else {
-            console.log('Errr')
-            message.error(msg)
-          }
+          if (!meta?.success) throw new Error(`${msg}`)
+          setGarmentAccessoryNew(meta.data as GarmentAccessory)
+          message.success(msg)
         }
       )
-    } catch (error) {
-      console.error(error)
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
     } finally {
-      setLoading(false)
       setOpenModal(false)
+      setLoading(false)
     }
   }
 
@@ -251,6 +297,7 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
     onDataSuccess?: (meta: ResponseDataType | undefined) => void
   ) => {
     try {
+      setLoading(true)
       await garmentAccessoryService.updateItemBy(
         {
           field: 'productID',
@@ -260,24 +307,28 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
         setLoading,
         async (meta, msg) => {
           if (!meta?.success) throw new Error('API delete GarmentAccessory failed')
-
-          await garmentAccessoryNoteService.deleteItemBy(
-            {
-              field: 'productID',
-              key: record.id!
-            },
-            setLoading,
-            (meta2) => {
-              if (!meta2?.success) throw new Error('API delete GarmentAccessoryNote failed')
-            }
-          )
-          onDataSuccess?.(meta)
-          message.success(msg)
+          try {
+            await garmentAccessoryNoteService.deleteItemBy(
+              {
+                field: 'productID',
+                key: record.id!
+              },
+              setLoading,
+              (meta2) => {
+                if (!meta2?.success) throw new Error('API delete GarmentAccessoryNote failed')
+                onDataSuccess?.(meta)
+                message.success(msg)
+              }
+            )
+          } catch (error: any) {
+            const resError: ResponseDataType = error
+            throw resError
+          }
         }
       )
-    } catch (error) {
-      console.error(error)
-      message.error(`${error}`)
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
     } finally {
       loadData()
       setLoading(false)
@@ -285,23 +336,25 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
   }
 
   const handlePageChange = async (_page: number) => {
-    productService.setPage(_page)
-    const body: RequestBodyType = {
-      ...defaultRequestBody,
-      paginator: {
-        page: _page,
-        pageSize: 5
-      },
-      search: {
-        field: 'productCode',
-        term: searchText
-      }
+    try {
+      setLoading(true)
+      await productService.pageChange(
+        _page,
+        setLoading,
+        (meta) => {
+          if (meta?.success) {
+            selfConvertDataSource(meta?.data as Product[])
+          }
+        },
+        { field: 'productCode', term: searchText }
+      )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      loadData()
+      setLoading(false)
     }
-    await productService.getListItems(body, setLoading, (meta) => {
-      if (meta?.success) {
-        selfConvertDataSource(meta?.data as Product[])
-      }
-    })
   }
 
   const handleResetClick = async () => {
@@ -311,35 +364,52 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleSortChange = async (checked: boolean, _event: React.MouseEvent<HTMLButtonElement>) => {
-    await productService.sortedListItems(
-      checked ? 'asc' : 'desc',
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          selfConvertDataSource(meta?.data as Product[])
-        }
-      },
-      { field: 'productCode', term: searchText }
-    )
-  }
-
-  const handleSearch = async (value: string) => {
-    if (value.length > 0) {
-      await productService.getListItems(
-        {
-          ...defaultRequestBody,
-          search: {
-            field: 'productCode',
-            term: value
-          }
-        },
+    try {
+      setLoading(true)
+      await productService.sortedListItems(
+        checked ? 'asc' : 'desc',
         setLoading,
         (meta) => {
           if (meta?.success) {
             selfConvertDataSource(meta?.data as Product[])
           }
-        }
+        },
+        { field: 'productCode', term: searchText }
       )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      loadData()
+      setLoading(false)
+    }
+  }
+
+  const handleSearch = async (value: string) => {
+    try {
+      if (value.length > 0) {
+        await productService.getListItems(
+          {
+            ...defaultRequestBody,
+            search: {
+              field: 'productCode',
+              term: value
+            }
+          },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              selfConvertDataSource(meta?.data as Product[])
+            }
+          }
+        )
+      }
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      loadData()
+      setLoading(false)
     }
   }
 

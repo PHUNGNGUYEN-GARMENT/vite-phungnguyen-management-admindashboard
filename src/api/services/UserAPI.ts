@@ -1,6 +1,6 @@
 import client, { RequestBodyType, ResponseDataType } from '~/api/client'
 import { User } from '~/typing'
-import { errorFormatter } from '~/utils/promise-formatter'
+import { responseFormatter, throwErrorFormatter } from '~/utils/response-formatter'
 const NAMESPACE = 'users'
 
 export default {
@@ -11,42 +11,30 @@ export default {
         status: user.status ?? 'active'
       })
       .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
+        return responseFormatter(res)
       })
       .catch(function (error) {
-        errorFormatter(error)
-        throw Error(`${error}`)
+        throwErrorFormatter(error)
       })
   },
   getItemByPk: async (id: number): Promise<ResponseDataType | undefined> => {
     return client
       .get(`${NAMESPACE}/${id}`)
       .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
+        return responseFormatter(res)
       })
       .catch(function (error) {
-        errorFormatter(error)
-        throw Error(`${error}`)
+        throwErrorFormatter(error)
       })
   },
   getItemBy: async (query: { field: string; key: React.Key }): Promise<ResponseDataType | undefined> => {
     return client
       .get(`${NAMESPACE}/${query.field}/${query.key}`)
       .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
+        return responseFormatter(res)
       })
       .catch(function (error) {
-        errorFormatter(error)
-        throw Error(`${error}`)
+        throwErrorFormatter(error)
       })
   },
   getItems: async (bodyRequest: RequestBodyType): Promise<ResponseDataType | undefined> => {
@@ -55,14 +43,10 @@ export default {
         ...bodyRequest
       })
       .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
+        return responseFormatter(res)
       })
       .catch(function (error) {
-        errorFormatter(error)
-        throw Error(`${error}`)
+        throwErrorFormatter(error)
       })
   },
   userRolesFromAccessToken: async (accessToken: string): Promise<ResponseDataType | undefined> => {
@@ -73,14 +57,10 @@ export default {
         }
       })
       .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
+        return responseFormatter(res)
       })
       .catch(function (error) {
-        errorFormatter(error)
-        throw Error(`${error}`)
+        throwErrorFormatter(error)
       })
   },
   userFromAccessToken: async (accessToken: string): Promise<ResponseDataType | undefined> => {
@@ -91,28 +71,20 @@ export default {
         }
       })
       .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
+        return responseFormatter(res)
       })
       .catch(function (error) {
-        errorFormatter(error)
-        throw Error(`${error}`)
+        throwErrorFormatter(error)
       })
   },
   updateItemByPk: async (id: number, item: User): Promise<ResponseDataType | undefined> => {
     return await client
       .put(`${NAMESPACE}/${id}`, item)
       .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
+        return responseFormatter(res)
       })
       .catch(function (error) {
-        errorFormatter(error)
-        throw Error(`${error}`)
+        throwErrorFormatter(error)
       })
   },
   updateItemBy: async (
@@ -125,28 +97,20 @@ export default {
     return client
       .put(`${NAMESPACE}/${query.field}/${query.key}`, item)
       .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
+        return responseFormatter(res)
       })
       .catch(function (error) {
-        errorFormatter(error)
-        throw Error(`${error}`)
+        throwErrorFormatter(error)
       })
   },
   deleteItemByPk: async (id: number): Promise<ResponseDataType | undefined> => {
     return client
       .delete(`${NAMESPACE}/${id}`)
       .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
+        return responseFormatter(res)
       })
       .catch(function (error) {
-        errorFormatter(error)
-        throw Error(`${error}`)
+        throwErrorFormatter(error)
       })
   }
 }

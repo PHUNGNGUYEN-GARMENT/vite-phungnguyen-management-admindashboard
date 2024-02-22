@@ -34,35 +34,57 @@ export default function useSampleSewing(table: UseTableProps<SampleSewingTableDa
   const [sampleSewingNew, setSampleSewingNew] = useState<SampleSewing | undefined>(undefined)
 
   const loadData = async () => {
-    await productService.getListItems(
-      {
-        ...defaultRequestBody,
-        paginator: { page: productService.page, pageSize: defaultRequestBody.paginator?.pageSize }
-      },
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          setProducts(meta.data as Product[])
-        }
+    try {
+      setLoading(true)
+      try {
+        await productService.getListItems(
+          {
+            ...defaultRequestBody,
+            paginator: { page: productService.page, pageSize: defaultRequestBody.paginator?.pageSize }
+          },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              setProducts(meta.data as Product[])
+            }
+          }
+        )
+      } catch (error: any) {
+        const resError: ResponseDataType = error
+        throw resError
       }
-    )
-    await productColorService.getListItems(
-      {
-        ...defaultRequestBody,
-        paginator: { page: 1, pageSize: -1 }
-      },
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          setProductColors(meta.data as ProductColor[])
-        }
+      try {
+        await productColorService.getListItems(
+          {
+            ...defaultRequestBody,
+            paginator: { page: 1, pageSize: -1 }
+          },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              setProductColors(meta.data as ProductColor[])
+            }
+          }
+        )
+      } catch (error: any) {
+        const resError: ResponseDataType = error
+        throw resError
       }
-    )
-    await sampleSewingService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        setSampleSewings(meta.data as SampleSewing[])
+      try {
+        await sampleSewingService.getListItems(defaultRequestBody, setLoading, (meta, msg) => {
+          if (!meta?.success) throw new Error(msg)
+          setSampleSewings(meta.data as SampleSewing[])
+        })
+      } catch (error: any) {
+        const resError: ResponseDataType = error
+        throw resError
       }
-    })
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -95,43 +117,54 @@ export default function useSampleSewing(table: UseTableProps<SampleSewingTableDa
     // const row = (await form.validateFields()) as any
     console.log({ old: record, new: newRecord })
     try {
+      setLoading(true)
       if (newRecord && record.sampleSewing) {
         console.log('SampleSewing progressing: ', newRecord)
-        await sampleSewingService.updateItemByPk(
-          newRecord.id!,
-          {
-            dateSubmissionNPL: newRecord.dateSubmissionNPL,
-            dateApprovalPP: newRecord.dateApprovalPP,
-            dateApprovalSO: newRecord.dateApprovalSO,
-            dateSubmissionFirstTime: newRecord.dateSubmissionFirstTime,
-            dateSubmissionSecondTime: newRecord.dateSubmissionSecondTime,
-            dateSubmissionThirdTime: newRecord.dateSubmissionThirdTime,
-            dateSubmissionForthTime: newRecord.dateSubmissionForthTime,
-            dateSubmissionFifthTime: newRecord.dateSubmissionFifthTime
-          },
-          setLoading,
-          (meta) => {
-            if (!meta?.success) {
-              throw new Error('API update group failed')
+        try {
+          await sampleSewingService.updateItemByPk(
+            newRecord.id!,
+            {
+              dateSubmissionNPL: newRecord.dateSubmissionNPL,
+              dateApprovalPP: newRecord.dateApprovalPP,
+              dateApprovalSO: newRecord.dateApprovalSO,
+              dateSubmissionFirstTime: newRecord.dateSubmissionFirstTime,
+              dateSubmissionSecondTime: newRecord.dateSubmissionSecondTime,
+              dateSubmissionThirdTime: newRecord.dateSubmissionThirdTime,
+              dateSubmissionForthTime: newRecord.dateSubmissionForthTime,
+              dateSubmissionFifthTime: newRecord.dateSubmissionFifthTime
+            },
+            setLoading,
+            (meta, msg) => {
+              if (!meta?.success) throw new Error(msg)
             }
-          }
-        )
+          )
+        } catch (error: any) {
+          const resError: ResponseDataType = error
+          throw resError
+        }
       } else {
         console.log('add new')
-        await sampleSewingService.createNewItem({ ...newRecord, productID: record.id }, table.setLoading, (meta) => {
-          if (!meta?.success) {
-            throw new Error('API update group failed')
-          }
-        })
+        try {
+          await sampleSewingService.createNewItem(
+            { ...newRecord, productID: record.id },
+            table.setLoading,
+            (meta, msg) => {
+              if (!meta?.success) throw new Error(msg)
+            }
+          )
+        } catch (error: any) {
+          const resError: ResponseDataType = error
+          throw resError
+        }
       }
       message.success('Success!')
-    } catch (error) {
-      console.error(error)
-      message.error('Failed')
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
     } finally {
-      setLoading(false)
       handleConfirmCancelEditing()
       loadData()
+      setLoading(false)
     }
   }
 
@@ -153,20 +186,17 @@ export default function useSampleSewing(table: UseTableProps<SampleSewingTableDa
         },
         setLoading,
         async (meta, msg) => {
-          if (meta?.data) {
-            setSampleSewingNew(meta.data as SampleSewing)
-            message.success(msg)
-          } else {
-            console.log('Errr')
-            message.error(msg)
-          }
+          if (!meta?.success) throw new Error(`${msg}`)
+          setSampleSewingNew(meta.data as SampleSewing)
+          message.success(msg)
         }
       )
-    } catch (error) {
-      console.error(error)
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
     } finally {
-      setLoading(false)
       setOpenModal(false)
+      setLoading(false)
     }
   }
 
@@ -175,17 +205,18 @@ export default function useSampleSewing(table: UseTableProps<SampleSewingTableDa
     onDataSuccess?: (meta: ResponseDataType | undefined) => void
   ) => {
     try {
+      setLoading(true)
       if (record.sampleSewing) {
         await sampleSewingService.deleteItemByPk(record.sampleSewing.id!, setLoading, (meta, msg) => {
-          if (!meta?.success) {
-            throw new Error('API delete failed')
-          }
+          if (!meta?.success) throw new Error(msg)
+
           message.success(msg)
           onDataSuccess?.(meta)
         })
       }
-    } catch (error) {
-      console.error(error)
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
     } finally {
       loadData()
       setLoading(false)
@@ -194,16 +225,24 @@ export default function useSampleSewing(table: UseTableProps<SampleSewingTableDa
   }
 
   const handlePageChange = async (_page: number) => {
-    await productService.pageChange(
-      _page,
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          selfConvertDataSource(meta?.data as Product[])
-        }
-      },
-      { field: 'productCode', term: searchText }
-    )
+    try {
+      setLoading(true)
+      await productService.pageChange(
+        _page,
+        setLoading,
+        (meta) => {
+          if (meta?.success) {
+            selfConvertDataSource(meta?.data as Product[])
+          }
+        },
+        { field: 'productCode', term: searchText }
+      )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleResetClick = async () => {
@@ -212,35 +251,51 @@ export default function useSampleSewing(table: UseTableProps<SampleSewingTableDa
   }
 
   const handleSortChange = async (checked: boolean) => {
-    await productService.sortedListItems(
-      checked ? 'asc' : 'desc',
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          selfConvertDataSource(meta?.data as Product[])
-        }
-      },
-      { field: 'productCode', term: searchText }
-    )
-  }
-
-  const handleSearch = async (value: string) => {
-    if (value.length > 0) {
-      await productService.getListItems(
-        {
-          ...defaultRequestBody,
-          search: {
-            field: 'productCode',
-            term: value
-          }
-        },
+    try {
+      setLoading(true)
+      await productService.sortedListItems(
+        checked ? 'asc' : 'desc',
         setLoading,
         (meta) => {
           if (meta?.success) {
             selfConvertDataSource(meta?.data as Product[])
           }
-        }
+        },
+        { field: 'productCode', term: searchText }
       )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSearch = async (value: string) => {
+    try {
+      setLoading(true)
+      if (value.length > 0) {
+        await productService.getListItems(
+          {
+            ...defaultRequestBody,
+            search: {
+              field: 'productCode',
+              term: value
+            }
+          },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              selfConvertDataSource(meta?.data as Product[])
+            }
+          }
+        )
+      }
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
     }
   }
 

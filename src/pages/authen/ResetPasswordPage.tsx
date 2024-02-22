@@ -1,6 +1,7 @@
 import { App as AntApp, Button, Flex, Form, Typography } from 'antd'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { ResponseDataType } from '~/api/client'
 import UserAPI from '~/api/services/UserAPI'
 import logo from '~/assets/logo.svg'
 import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
@@ -33,7 +34,8 @@ const ResetPasswordPage = () => {
         message.success(`Success`)
       })
     } catch (error: any) {
-      message.error(`${error.message}`)
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
     } finally {
       setLoading(false)
     }

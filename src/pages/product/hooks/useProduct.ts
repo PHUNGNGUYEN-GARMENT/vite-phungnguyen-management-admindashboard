@@ -74,47 +74,71 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
   const loadData = async () => {
     try {
       setLoading(true)
-      await productService.getListItems(
-        {
-          ...defaultRequestBody,
-          paginator: { page: productService.page, pageSize: defaultRequestBody.paginator?.pageSize }
-        },
-        setLoading,
-        (meta) => {
-          if (meta?.success) {
-            setProducts(meta.data as Product[])
+      try {
+        await productService.getListItems(
+          {
+            ...defaultRequestBody,
+            paginator: { page: productService.page, pageSize: defaultRequestBody.paginator?.pageSize }
+          },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              setProducts(meta.data as Product[])
+            }
           }
-        }
-      )
-      await productColorService.getListItems(
-        { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
-        setLoading,
-        (meta) => {
-          if (meta?.success) {
-            setProductColors(meta.data as ProductColor[])
+        )
+      } catch (error: any) {
+        const resError: ResponseDataType = error
+        throw resError
+      }
+
+      try {
+        await productColorService.getListItems(
+          { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              setProductColors(meta.data as ProductColor[])
+            }
           }
-        }
-      )
-      await productGroupService.getListItems(
-        { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
-        setLoading,
-        (meta) => {
-          if (meta?.success) {
-            setProductGroups(meta.data as ProductGroup[])
+        )
+      } catch (error: any) {
+        const resError: ResponseDataType = error
+        throw resError
+      }
+
+      try {
+        await productGroupService.getListItems(
+          { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              setProductGroups(meta.data as ProductGroup[])
+            }
           }
-        }
-      )
-      await printablePlaceService.getListItems(
-        { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
-        setLoading,
-        (meta) => {
-          if (meta?.success) {
-            setPrintablePlaces(meta.data as PrintablePlace[])
+        )
+      } catch (error: any) {
+        const resError: ResponseDataType = error
+        throw resError
+      }
+
+      try {
+        await printablePlaceService.getListItems(
+          { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              setPrintablePlaces(meta.data as PrintablePlace[])
+            }
           }
-        }
-      )
-    } catch (error) {
-      console.error(error)
+        )
+      } catch (error: any) {
+        const resError: ResponseDataType = error
+        throw resError
+      }
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
     } finally {
       setLoading(false)
     }
@@ -151,6 +175,7 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
   const handleSaveClick = async (record: TableItemWithKey<ProductTableDataType>) => {
     // const row = (await form.validateFields()) as any
     try {
+      setLoading(true)
       if (newRecord) {
         console.log({ old: record, new: newRecord })
         if (
@@ -160,71 +185,91 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
           dateComparator(newRecord.dateOutputFCR, record.dateOutputFCR)
         ) {
           console.log('Product progressing...')
-          await productService.updateItemByPk(
-            record.id!,
-            {
-              productCode: newRecord.productCode,
-              quantityPO: newRecord.quantityPO,
-              dateInputNPL: newRecord.dateInputNPL,
-              dateOutputFCR: newRecord.dateOutputFCR
-            },
-            setLoading,
-            (meta) => {
-              if (!meta?.success) throw new Error('API update Product failed')
-            }
-          )
+          try {
+            await productService.updateItemByPk(
+              record.id!,
+              {
+                productCode: newRecord.productCode,
+                quantityPO: newRecord.quantityPO,
+                dateInputNPL: newRecord.dateInputNPL,
+                dateOutputFCR: newRecord.dateOutputFCR
+              },
+              setLoading,
+              (meta) => {
+                if (!meta?.success) throw new Error('API update Product failed')
+              }
+            )
+          } catch (error: any) {
+            const resError: ResponseDataType = error
+            throw resError
+          }
         }
         if (
           (newRecord.colorID && !record.productColor?.colorID) ||
           numberComparator(newRecord.colorID, record.productColor?.colorID)
         ) {
           console.log('Product color progressing...')
-          await productColorService.createOrUpdateItemBy(
-            { field: 'productID', key: record.key! },
-            { colorID: newRecord.colorID },
-            setLoading,
-            (meta) => {
-              if (!meta?.success) throw new Error('API update ProductColor failed')
-            }
-          )
+          try {
+            await productColorService.createOrUpdateItemBy(
+              { field: 'productID', key: record.key! },
+              { colorID: newRecord.colorID },
+              setLoading,
+              (meta) => {
+                if (!meta?.success) throw new Error('API update ProductColor failed')
+              }
+            )
+          } catch (error: any) {
+            const resError: ResponseDataType = error
+            throw resError
+          }
         }
         if (
           (newRecord.groupID && !record.productGroup?.groupID) ||
           numberComparator(newRecord.groupID, record.productGroup?.groupID)
         ) {
           console.log('ProductGroup progressing...')
-          await productGroupService.createOrUpdateItemBy(
-            { field: 'productID', key: record.key! },
-            { groupID: newRecord.groupID },
-            setLoading,
-            (meta) => {
-              if (!meta?.success) throw new Error('API update ProductGroup failed')
-            }
-          )
+          try {
+            await productGroupService.createOrUpdateItemBy(
+              { field: 'productID', key: record.key! },
+              { groupID: newRecord.groupID },
+              setLoading,
+              (meta) => {
+                if (!meta?.success) throw new Error('API update ProductGroup failed')
+              }
+            )
+          } catch (error: any) {
+            const resError: ResponseDataType = error
+            throw resError
+          }
         }
         if (
           (newRecord.printID && !record.printablePlace?.printID) ||
           numberComparator(newRecord.printID, record.printablePlace?.printID)
         ) {
           console.log('PrintablePlace progressing...')
-          await printablePlaceService.createOrUpdateItemBy(
-            { field: 'productID', key: record.key! },
-            { printID: newRecord.printID },
-            setLoading,
-            (meta) => {
-              if (!meta?.success) throw new Error('API update PrintablePlace failed')
-            }
-          )
+          try {
+            await printablePlaceService.createOrUpdateItemBy(
+              { field: 'productID', key: record.key! },
+              { printID: newRecord.printID },
+              setLoading,
+              (meta) => {
+                if (!meta?.success) throw new Error('API update PrintablePlace failed')
+              }
+            )
+          } catch (error: any) {
+            const resError: ResponseDataType = error
+            throw resError
+          }
         }
         message.success('Success!')
       }
-    } catch (error) {
-      console.error(error)
-      message.error('Failed')
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
     } finally {
-      setLoading(false)
       handleConfirmCancelEditing()
       loadData()
+      setLoading(false)
     }
   }
 
@@ -241,10 +286,11 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
         },
         setLoading,
         async (meta) => {
-          if (meta?.success) {
-            const productNew = meta.data as Product
-            if (formAddNew.colorID) {
-              console.log('Product color created')
+          if (!meta?.success) throw new Error('Create new product item failed!')
+          const productNew = meta.data as Product
+          if (formAddNew.colorID) {
+            console.log('Product color created')
+            try {
               await productColorService.createNewItem(
                 { productID: productNew.id!, colorID: formAddNew.colorID },
                 setLoading,
@@ -254,9 +300,14 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
                   }
                 }
               )
+            } catch (error: any) {
+              const resError: ResponseDataType = error
+              throw resError
             }
-            if (formAddNew.groupID) {
-              console.log('Product group created')
+          }
+          if (formAddNew.groupID) {
+            console.log('Product group created')
+            try {
               await productGroupService.createNewItem(
                 { productID: productNew.id!, groupID: formAddNew.groupID },
                 setLoading,
@@ -266,9 +317,14 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
                   }
                 }
               )
+            } catch (error: any) {
+              const resError: ResponseDataType = error
+              throw resError
             }
-            if (formAddNew.printID) {
-              console.log('Product print created')
+          }
+          if (formAddNew.printID) {
+            console.log('Product print created')
+            try {
               await printablePlaceService.createNewItem(
                 { productID: productNew.id!, printID: formAddNew.printID },
                 setLoading,
@@ -278,20 +334,21 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
                   }
                 }
               )
+            } catch (error: any) {
+              const resError: ResponseDataType = error
+              throw resError
             }
-          } else {
-            throw new Error('Create new product item failed!')
           }
         }
       )
       message.success('Success')
-    } catch (error) {
-      console.error(error)
-      message.error(`${error}`)
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
     } finally {
-      setLoading(false)
       setOpenModal(false)
       loadData()
+      setLoading(false)
     }
   }
 
@@ -299,30 +356,46 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
     item: TableItemWithKey<ProductTableDataType>,
     onDataSuccess?: (meta: ResponseDataType | undefined) => void
   ) => {
-    await productService.updateItemByPk(item.id!, { status: 'deleted' }, setLoading, (meta, msg) => {
-      if (meta) {
-        if (meta.success) {
-          handleConfirmDeleting(item.id!)
-          message.success(msg)
+    try {
+      setLoading(true)
+      await productService.updateItemByPk(item.id!, { status: 'deleted' }, setLoading, (meta, msg) => {
+        if (meta) {
+          if (meta.success) {
+            handleConfirmDeleting(item.id!)
+            message.success(msg)
+          }
+        } else {
+          message.error(msg)
         }
-      } else {
-        message.error(msg)
-      }
-      onDataSuccess?.(meta)
-    })
+        onDataSuccess?.(meta)
+      })
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handlePageChange = async (_page: number) => {
-    await productService.pageChange(
-      _page,
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          selfConvertDataSource(meta?.data as Product[])
-        }
-      },
-      { field: 'productCode', term: searchText }
-    )
+    try {
+      setLoading(true)
+      await productService.pageChange(
+        _page,
+        setLoading,
+        (meta) => {
+          if (meta?.success) {
+            selfConvertDataSource(meta?.data as Product[])
+          }
+        },
+        { field: 'productCode', term: searchText }
+      )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleResetClick = async () => {
@@ -331,35 +404,51 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
   }
 
   const handleSortChange = async (checked: boolean) => {
-    await productService.sortedListItems(
-      checked ? 'asc' : 'desc',
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          selfConvertDataSource(meta?.data as Product[])
-        }
-      },
-      { field: 'productCode', term: searchText }
-    )
-  }
-
-  const handleSearch = async (value: string) => {
-    if (value.length > 0) {
-      await productService.getListItems(
-        {
-          ...defaultRequestBody,
-          search: {
-            field: 'productCode',
-            term: value
-          }
-        },
+    try {
+      setLoading(true)
+      await productService.sortedListItems(
+        checked ? 'asc' : 'desc',
         setLoading,
         (meta) => {
           if (meta?.success) {
             selfConvertDataSource(meta?.data as Product[])
           }
-        }
+        },
+        { field: 'productCode', term: searchText }
       )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSearch = async (value: string) => {
+    try {
+      setLoading(true)
+      if (value.length > 0) {
+        await productService.getListItems(
+          {
+            ...defaultRequestBody,
+            search: {
+              field: 'productCode',
+              term: value
+            }
+          },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              selfConvertDataSource(meta?.data as Product[])
+            }
+          }
+        )
+      }
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
     }
   }
 

@@ -32,42 +32,67 @@ export default function useImportation(table: UseTableProps<ImportationPageDataT
 
   // New
   const loadData = async () => {
-    await productService.getListItems(
-      {
-        ...defaultRequestBody,
-        paginator: { page: productService.page, pageSize: defaultRequestBody.paginator?.pageSize }
-      },
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          setProducts(meta.data as Product[])
-        }
+    try {
+      setLoading(true)
+      try {
+        await productService.getListItems(
+          {
+            ...defaultRequestBody,
+            paginator: { page: productService.page, pageSize: defaultRequestBody.paginator?.pageSize }
+          },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              setProducts(meta.data as Product[])
+            }
+          }
+        )
+      } catch (error: any) {
+        const resError: ResponseDataType = error
+        throw resError
       }
-    )
-    await productColorService.getListItems(
-      {
-        ...defaultRequestBody,
-        paginator: { page: 1, pageSize: -1 }
-      },
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          setProductColors(meta.data as ProductColor[])
-        }
+
+      try {
+        await productColorService.getListItems(
+          {
+            ...defaultRequestBody,
+            paginator: { page: 1, pageSize: -1 }
+          },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              setProductColors(meta.data as ProductColor[])
+            }
+          }
+        )
+      } catch (error: any) {
+        const resError: ResponseDataType = error
+        throw resError
       }
-    )
-    await importationService.getListItems(
-      {
-        ...defaultRequestBody,
-        paginator: { page: 1, pageSize: -1 }
-      },
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          setImportations(meta.data as Importation[])
-        }
+
+      try {
+        await importationService.getListItems(
+          {
+            ...defaultRequestBody,
+            paginator: { page: 1, pageSize: -1 }
+          },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              setImportations(meta.data as Importation[])
+            }
+          }
+        )
+      } catch (error: any) {
+        const resError: ResponseDataType = error
+        throw resError
       }
-    )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -100,6 +125,7 @@ export default function useImportation(table: UseTableProps<ImportationPageDataT
     // const row = (await form.validateFields()) as any
     console.log({ old: record, new: newRecord })
     try {
+      setLoading(true)
       if (newRecord && record.importation) {
         console.log('Importation progressing: ', newRecord)
         await importationService.updateItemBy(
@@ -127,9 +153,9 @@ export default function useImportation(table: UseTableProps<ImportationPageDataT
       console.error(error)
       message.error('Failed')
     } finally {
-      setLoading(false)
       handleConfirmCancelEditing()
       loadData()
+      setLoading(false)
     }
   }
 
@@ -144,20 +170,17 @@ export default function useImportation(table: UseTableProps<ImportationPageDataT
         },
         setLoading,
         async (meta, msg) => {
-          if (!meta?.success) {
-            throw new Error('API create failed')
-          } else {
-            message.success(msg)
-          }
+          if (!meta?.success) throw new Error('API create failed')
+          message.success(msg)
         }
       )
-    } catch (error) {
-      console.error(error)
-      message.error('Failed!')
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
     } finally {
-      setLoading(false)
-      setOpenModal(false)
       loadData()
+      setOpenModal(false)
+      setLoading(false)
     }
   }
 
@@ -168,33 +191,41 @@ export default function useImportation(table: UseTableProps<ImportationPageDataT
     try {
       if (record.importation) {
         await importationService.deleteItemByPk(record.importation.id!, setLoading, (meta, msg) => {
-          if (!meta?.success) {
-            throw new Error('API delete failed')
-          }
+          if (!meta?.success) throw new Error('API delete failed')
+
           message.success(msg)
           onDataSuccess?.(meta)
         })
       }
-    } catch (error) {
-      console.error(error)
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
     } finally {
       loadData()
-      setLoading(false)
       setOpenModal(false)
+      setLoading(false)
     }
   }
 
   const handlePageChange = async (_page: number) => {
-    await productService.pageChange(
-      _page,
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          selfConvertDataSource(meta?.data as Product[])
-        }
-      },
-      { field: 'productCode', term: searchText }
-    )
+    try {
+      setLoading(true)
+      await productService.pageChange(
+        _page,
+        setLoading,
+        (meta) => {
+          if (meta?.success) {
+            selfConvertDataSource(meta?.data as Product[])
+          }
+        },
+        { field: 'productCode', term: searchText }
+      )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleResetClick = async () => {
@@ -203,35 +234,51 @@ export default function useImportation(table: UseTableProps<ImportationPageDataT
   }
 
   const handleSortChange = async (checked: boolean) => {
-    await productService.sortedListItems(
-      checked ? 'asc' : 'desc',
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          selfConvertDataSource(meta?.data as Product[])
-        }
-      },
-      { field: 'productCode', term: searchText }
-    )
-  }
-
-  const handleSearch = async (value: string) => {
-    if (value.length > 0) {
-      await productService.getListItems(
-        {
-          ...defaultRequestBody,
-          search: {
-            field: 'productCode',
-            term: value
-          }
-        },
+    try {
+      setLoading(true)
+      await productService.sortedListItems(
+        checked ? 'asc' : 'desc',
         setLoading,
         (meta) => {
           if (meta?.success) {
             selfConvertDataSource(meta?.data as Product[])
           }
-        }
+        },
+        { field: 'productCode', term: searchText }
       )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSearch = async (value: string) => {
+    try {
+      setLoading(true)
+      if (value.length > 0) {
+        await productService.getListItems(
+          {
+            ...defaultRequestBody,
+            search: {
+              field: 'productCode',
+              term: value
+            }
+          },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              selfConvertDataSource(meta?.data as Product[])
+            }
+          }
+        )
+      }
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
     }
   }
 

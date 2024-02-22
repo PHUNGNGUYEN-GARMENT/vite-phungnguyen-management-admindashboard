@@ -36,42 +36,67 @@ export default function useCompletion(table: UseTableProps<CompletionTableDataTy
   const [completions, setCompletions] = useState<Completion[]>([])
 
   const loadData = async () => {
-    await productService.getListItems(
-      {
-        ...defaultRequestBody,
-        paginator: { page: productService.page, pageSize: defaultRequestBody.paginator?.pageSize }
-      },
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          setProducts(meta.data as Product[])
-        }
+    try {
+      setLoading(true)
+      try {
+        await productService.getListItems(
+          {
+            ...defaultRequestBody,
+            paginator: { page: productService.page, pageSize: defaultRequestBody.paginator?.pageSize }
+          },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              setProducts(meta.data as Product[])
+            }
+          }
+        )
+      } catch (error: any) {
+        const resError: ResponseDataType = error
+        throw resError
       }
-    )
-    await productColorService.getListItems(
-      {
-        ...defaultRequestBody,
-        paginator: { page: 1, pageSize: -1 }
-      },
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          setProductColors(meta.data as ProductColor[])
-        }
+
+      try {
+        await productColorService.getListItems(
+          {
+            ...defaultRequestBody,
+            paginator: { page: 1, pageSize: -1 }
+          },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              setProductColors(meta.data as ProductColor[])
+            }
+          }
+        )
+      } catch (error: any) {
+        const resError: ResponseDataType = error
+        throw resError
       }
-    )
-    await completionService.getListItems(
-      {
-        ...defaultRequestBody,
-        paginator: { page: 1, pageSize: -1 }
-      },
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          setCompletions(meta.data as Completion[])
-        }
+
+      try {
+        await completionService.getListItems(
+          {
+            ...defaultRequestBody,
+            paginator: { page: 1, pageSize: -1 }
+          },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              setCompletions(meta.data as Completion[])
+            }
+          }
+        )
+      } catch (error: any) {
+        const resError: ResponseDataType = error
+        throw resError
       }
-    )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -115,38 +140,48 @@ export default function useCompletion(table: UseTableProps<CompletionTableDataTy
           dateComparator(newRecord.passFIDate, record.completion.passFIDate)
         ) {
           console.log('Update')
-          await completionService.updateItemByPk(
-            record.completion.id!,
+          try {
+            await completionService.updateItemByPk(
+              record.completion.id!,
+              {
+                ...newRecord
+              },
+              setLoading,
+              (meta) => {
+                if (!meta?.success) {
+                  throw new Error('API update failed')
+                }
+              }
+            )
+          } catch (error: any) {
+            const resError: ResponseDataType = error
+            throw resError
+          }
+        }
+      } else {
+        console.log('Create')
+        try {
+          await completionService.createNewItem(
             {
+              productID: record.id!,
               ...newRecord
             },
             setLoading,
             (meta) => {
               if (!meta?.success) {
-                throw new Error('API update failed')
+                throw new Error('API create failed')
               }
             }
           )
+        } catch (error: any) {
+          const resError: ResponseDataType = error
+          throw resError
         }
-      } else {
-        console.log('Create')
-        await completionService.createNewItem(
-          {
-            productID: record.id!,
-            ...newRecord
-          },
-          setLoading,
-          (meta) => {
-            if (!meta?.success) {
-              throw new Error('API create failed')
-            }
-          }
-        )
       }
-
       message.success('Success!')
     } catch (error: any) {
-      message.error(`${error.message}`)
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
     } finally {
       setLoading(false)
       handleConfirmCancelEditing()
@@ -194,8 +229,9 @@ export default function useCompletion(table: UseTableProps<CompletionTableDataTy
           message.success(msg)
         }
       )
-    } catch (error) {
-      console.error(error)
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
     } finally {
       loadData()
       setLoading(false)
@@ -203,16 +239,23 @@ export default function useCompletion(table: UseTableProps<CompletionTableDataTy
   }
 
   const handlePageChange = async (_page: number) => {
-    await productService.pageChange(
-      _page,
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          selfConvertDataSource(meta?.data as Product[])
-        }
-      },
-      { field: 'productCode', term: searchText }
-    )
+    try {
+      await productService.pageChange(
+        _page,
+        setLoading,
+        (meta) => {
+          if (meta?.success) {
+            selfConvertDataSource(meta?.data as Product[])
+          }
+        },
+        { field: 'productCode', term: searchText }
+      )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleResetClick = async () => {
@@ -221,35 +264,49 @@ export default function useCompletion(table: UseTableProps<CompletionTableDataTy
   }
 
   const handleSortChange = async (checked: boolean) => {
-    await productService.sortedListItems(
-      checked ? 'asc' : 'desc',
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          selfConvertDataSource(meta?.data as Product[])
-        }
-      },
-      { field: 'productCode', term: searchText }
-    )
-  }
-
-  const handleSearch = async (value: string) => {
-    if (value.length > 0) {
-      await productService.getListItems(
-        {
-          ...defaultRequestBody,
-          search: {
-            field: 'productCode',
-            term: value
-          }
-        },
+    try {
+      await productService.sortedListItems(
+        checked ? 'asc' : 'desc',
         setLoading,
         (meta) => {
           if (meta?.success) {
             selfConvertDataSource(meta?.data as Product[])
           }
-        }
+        },
+        { field: 'productCode', term: searchText }
       )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSearch = async (value: string) => {
+    try {
+      if (value.length > 0) {
+        await productService.getListItems(
+          {
+            ...defaultRequestBody,
+            search: {
+              field: 'productCode',
+              term: value
+            }
+          },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              selfConvertDataSource(meta?.data as Product[])
+            }
+          }
+        )
+      }
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
     }
   }
 

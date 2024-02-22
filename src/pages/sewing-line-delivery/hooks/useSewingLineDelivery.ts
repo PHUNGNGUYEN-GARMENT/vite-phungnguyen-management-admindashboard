@@ -1,6 +1,6 @@
 import { App as AntApp } from 'antd'
 import { useEffect, useState } from 'react'
-import { RequestBodyType, ResponseDataType, defaultRequestBody } from '~/api/client'
+import { ResponseDataType, defaultRequestBody } from '~/api/client'
 import ProductAPI from '~/api/services/ProductAPI'
 import ProductColorAPI from '~/api/services/ProductColorAPI'
 import SewingLineAPI from '~/api/services/SewingLineAPI'
@@ -38,34 +38,62 @@ export default function useSewingLineDelivery(table: UseTableProps<SewingLineDel
   const [garmentAccessoryNew, setGarmentAccessoryNew] = useState<GarmentAccessory | undefined>(undefined)
 
   const loadData = async () => {
-    await productService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        setProducts(meta.data as Product[])
+    try {
+      setLoading(true)
+      try {
+        await productService.getListItems(defaultRequestBody, setLoading, (meta) => {
+          if (meta?.success) {
+            setProducts(meta.data as Product[])
+          }
+        })
+      } catch (error: any) {
+        const resError: ResponseDataType = error
+        throw resError
       }
-    })
-    await productColorService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        setProductColors(meta.data as ProductColor[])
+      try {
+        await productColorService.getListItems(defaultRequestBody, setLoading, (meta) => {
+          if (meta?.success) {
+            setProductColors(meta.data as ProductColor[])
+          }
+        })
+      } catch (error: any) {
+        const resError: ResponseDataType = error
+        throw resError
       }
-    })
-    await sewingLineDeliveryService.getListItems(
-      { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          setSewingLineDeliveries(meta.data as SewingLineDelivery[])
-        }
+      try {
+        await sewingLineDeliveryService.getListItems(
+          { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              setSewingLineDeliveries(meta.data as SewingLineDelivery[])
+            }
+          }
+        )
+      } catch (error: any) {
+        const resError: ResponseDataType = error
+        throw resError
       }
-    )
-    await sewingLineService.getListItems(
-      { ...defaultRequestBody, paginator: { pageSize: -1, page: 1 }, sorting: { direction: 'asc', column: 'id' } },
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          setSewingLines(meta.data as SewingLine[])
-        }
+      try {
+        await sewingLineService.getListItems(
+          { ...defaultRequestBody, paginator: { pageSize: -1, page: 1 }, sorting: { direction: 'asc', column: 'id' } },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              setSewingLines(meta.data as SewingLine[])
+            }
+          }
+        )
+      } catch (error: any) {
+        const resError: ResponseDataType = error
+        throw resError
       }
-    )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -99,56 +127,63 @@ export default function useSewingLineDelivery(table: UseTableProps<SewingLineDel
     // const row = (await form.validateFields()) as any
     console.log({ old: record, new: newRecord })
     try {
+      setLoading(true)
       if (newRecord) {
         if (record.sewingLineDeliveries) {
           // Update GarmentAccessory
           console.log('Update SewingLineDelivery')
-          await sewingLineDeliveryService.updateItemsBy(
-            { field: 'productID', key: record.id! },
-            newRecord.map((item) => {
-              return {
-                quantityOriginal: item.quantityOriginal ?? null,
-                quantitySewed: item.quantitySewed ?? null,
-                expiredDate: item.expiredDate ?? null,
-                sewingLineID: item.sewingLineID ?? null
-              } as SewingLineDelivery
-            }),
-            setLoading,
-            (meta) => {
-              if (!meta?.success) {
-                throw new Error('API update SewingLineDelivery failed')
+          try {
+            await sewingLineDeliveryService.updateItemsBy(
+              { field: 'productID', key: record.id! },
+              newRecord.map((item) => {
+                return {
+                  quantityOriginal: item.quantityOriginal ?? null,
+                  quantitySewed: item.quantitySewed ?? null,
+                  expiredDate: item.expiredDate ?? null,
+                  sewingLineID: item.sewingLineID ?? null
+                } as SewingLineDelivery
+              }),
+              setLoading,
+              (meta) => {
+                if (!meta?.success) throw new Error('API update SewingLineDelivery failed')
               }
-            }
-          )
+            )
+          } catch (error: any) {
+            const resError: ResponseDataType = error
+            throw resError
+          }
         } else {
           console.log('Create SewingLineDelivery')
-          await sewingLineDeliveryService.createNewItems(
-            newRecord.map((i) => {
-              return {
-                productID: record.id,
-                quantityOriginal: i.quantityOriginal,
-                quantitySewed: i.quantitySewed,
-                expiredDate: i.expiredDate,
-                sewingLineID: i.sewingLineID
-              } as SewingLineDelivery
-            }),
-            setLoading,
-            (meta) => {
-              if (!meta?.success) {
-                throw new Error('API create GarmentAccessory failed')
+          try {
+            await sewingLineDeliveryService.createNewItems(
+              newRecord.map((i) => {
+                return {
+                  productID: record.id,
+                  quantityOriginal: i.quantityOriginal,
+                  quantitySewed: i.quantitySewed,
+                  expiredDate: i.expiredDate,
+                  sewingLineID: i.sewingLineID
+                } as SewingLineDelivery
+              }),
+              setLoading,
+              (meta) => {
+                if (!meta?.success) throw new Error('API create GarmentAccessory failed')
               }
-            }
-          )
+            )
+          } catch (error: any) {
+            const resError: ResponseDataType = error
+            throw resError
+          }
         }
       }
-
       message.success('Success!')
     } catch (error: any) {
-      message.error(`${error.message}`)
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
     } finally {
-      setLoading(false)
       handleConfirmCancelEditing()
       loadData()
+      setLoading(false)
     }
   }
 
@@ -185,6 +220,7 @@ export default function useSewingLineDelivery(table: UseTableProps<SewingLineDel
     onDataSuccess?: (meta: ResponseDataType | undefined) => void
   ) => {
     try {
+      setLoading(true)
       await sewingLineDeliveryService.deleteItemBy(
         {
           field: 'productID',
@@ -192,16 +228,16 @@ export default function useSewingLineDelivery(table: UseTableProps<SewingLineDel
         },
         setLoading,
         async (meta, msg) => {
-          if (!meta?.success) {
-            throw new Error('API delete GarmentAccessory failed')
-          }
+          if (!meta?.success) throw new Error('API delete GarmentAccessory failed')
+
           // Other service here...
           onDataSuccess?.(meta)
           message.success(msg)
         }
       )
-    } catch (error) {
-      console.error(error)
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
     } finally {
       loadData()
       setLoading(false)
@@ -209,23 +245,24 @@ export default function useSewingLineDelivery(table: UseTableProps<SewingLineDel
   }
 
   const handlePageChange = async (_page: number) => {
-    productService.setPage(_page)
-    const body: RequestBodyType = {
-      ...defaultRequestBody,
-      paginator: {
-        page: _page,
-        pageSize: 5
-      },
-      search: {
-        field: 'productCode',
-        term: searchText
-      }
+    try {
+      setLoading(true)
+      await productService.pageChange(
+        _page,
+        setLoading,
+        (meta) => {
+          if (meta?.success) {
+            selfConvertDataSource(meta?.data as Product[])
+          }
+        },
+        { field: 'productCode', term: searchText }
+      )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
     }
-    await productService.getListItems(body, setLoading, (meta) => {
-      if (meta?.success) {
-        selfConvertDataSource(meta?.data as Product[])
-      }
-    })
   }
 
   const handleResetClick = async () => {
@@ -234,35 +271,51 @@ export default function useSewingLineDelivery(table: UseTableProps<SewingLineDel
   }
 
   const handleSortChange = async (checked: boolean) => {
-    await productService.sortedListItems(
-      checked ? 'asc' : 'desc',
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          selfConvertDataSource(meta?.data as Product[])
-        }
-      },
-      { field: 'productCode', term: searchText }
-    )
-  }
-
-  const handleSearch = async (value: string) => {
-    if (value.length > 0) {
-      await productService.getListItems(
-        {
-          ...defaultRequestBody,
-          search: {
-            field: 'productCode',
-            term: value
-          }
-        },
+    try {
+      setLoading(true)
+      await productService.sortedListItems(
+        checked ? 'asc' : 'desc',
         setLoading,
         (meta) => {
           if (meta?.success) {
             selfConvertDataSource(meta?.data as Product[])
           }
-        }
+        },
+        { field: 'productCode', term: searchText }
       )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSearch = async (value: string) => {
+    try {
+      setLoading(true)
+      if (value.length > 0) {
+        await productService.getListItems(
+          {
+            ...defaultRequestBody,
+            search: {
+              field: 'productCode',
+              term: value
+            }
+          },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              selfConvertDataSource(meta?.data as Product[])
+            }
+          }
+        )
+      }
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
     }
   }
 

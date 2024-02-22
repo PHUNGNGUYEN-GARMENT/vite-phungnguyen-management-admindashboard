@@ -28,18 +28,26 @@ export default function useSewingLine(table: UseTableProps<SewingLineTableDataTy
   const [SewingLineNew, setSewingLineNew] = useState<SewingLine | undefined>(undefined)
 
   const loadData = async () => {
-    await sewingLineService.getListItems(
-      {
-        ...defaultRequestBody,
-        paginator: { page: sewingLineService.page, pageSize: defaultRequestBody.paginator?.pageSize }
-      },
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          setSewingLines(meta.data as SewingLine[])
+    try {
+      setLoading(true)
+      await sewingLineService.getListItems(
+        {
+          ...defaultRequestBody,
+          paginator: { page: sewingLineService.page, pageSize: defaultRequestBody.paginator?.pageSize }
+        },
+        setLoading,
+        (meta) => {
+          if (meta?.success) {
+            setSewingLines(meta.data as SewingLine[])
+          }
         }
-      }
-    )
+      )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -65,25 +73,24 @@ export default function useSewingLine(table: UseTableProps<SewingLineTableDataTy
   const handleSaveClick = async (record: TableItemWithKey<SewingLineTableDataType>, newRecord: any) => {
     // const row = (await form.validateFields()) as any
     console.log({ old: record, new: newRecord })
-    if (newRecord) {
-      try {
+    try {
+      setLoading(true)
+      if (newRecord) {
         if (newRecord.name && newRecord.name !== record.name) {
           console.log('SewingLine progressing...')
           await sewingLineService.updateItemByPk(record.id!, { name: newRecord.name }, setLoading, (meta) => {
-            if (!meta?.success) {
-              throw new Error('API update SewingLine failed')
-            }
+            if (!meta?.success) throw new Error('API update SewingLine failed')
           })
         }
         message.success('Success!')
-      } catch (error) {
-        console.error(error)
-        message.error('Failed')
-      } finally {
-        setLoading(false)
-        handleConfirmCancelEditing()
-        loadData()
       }
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      handleConfirmCancelEditing()
+      loadData()
+      setLoading(false)
     }
   }
 
@@ -97,20 +104,17 @@ export default function useSewingLine(table: UseTableProps<SewingLineTableDataTy
         },
         setLoading,
         async (meta, msg) => {
-          if (meta?.data) {
-            setSewingLineNew(meta.data as SewingLine)
-            message.success(msg)
-          } else {
-            console.log('Errr')
-            message.error(msg)
-          }
+          if (!meta?.success) throw new Error(msg)
+          setSewingLineNew(meta.data as SewingLine)
+          message.success(msg)
         }
       )
-    } catch (error) {
-      console.error(error)
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
     } finally {
-      setLoading(false)
       setOpenModal(false)
+      setLoading(false)
     }
   }
 
@@ -119,71 +123,106 @@ export default function useSewingLine(table: UseTableProps<SewingLineTableDataTy
     onDataSuccess?: (meta: ResponseDataType | undefined) => void
   ) => {
     console.log(record)
-    await sewingLineService.deleteItemByPk(record.id!, setLoading, (meta, msg) => {
-      if (meta) {
-        if (meta.success) {
-          handleConfirmDeleting(record.id!)
-          message.success(msg)
-        }
-      } else {
-        message.error(msg)
-      }
-      onDataSuccess?.(meta)
-    })
+    try {
+      setLoading(true)
+      await sewingLineService.deleteItemByPk(record.id!, setLoading, (meta, msg) => {
+        if (!meta?.success) throw new Error(msg)
+        handleConfirmDeleting(record.id!)
+        onDataSuccess?.(meta)
+        message.success(msg)
+      })
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handlePageChange = async (_page: number) => {
-    await sewingLineService.pageChange(
-      _page,
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          selfConvertDataSource(meta?.data as SewingLine[])
-        }
-      },
-      { field: 'name', term: searchText }
-    )
-  }
-
-  const handleResetClick = async () => {
-    setSearchText('')
-    await sewingLineService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        selfConvertDataSource(meta?.data as SewingLine[])
-      }
-    })
-  }
-
-  const handleSortChange = async (checked: boolean) => {
-    await sewingLineService.sortedListItems(
-      checked ? 'asc' : 'desc',
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          selfConvertDataSource(meta?.data as SewingLine[])
-        }
-      },
-      { field: 'name', term: searchText }
-    )
-  }
-
-  const handleSearch = async (value: string) => {
-    if (value.length > 0) {
-      await sewingLineService.getListItems(
-        {
-          ...defaultRequestBody,
-          search: {
-            field: 'name',
-            term: value
-          }
-        },
+    try {
+      setLoading(true)
+      await sewingLineService.pageChange(
+        _page,
         setLoading,
         (meta) => {
           if (meta?.success) {
             selfConvertDataSource(meta?.data as SewingLine[])
           }
-        }
+        },
+        { field: 'name', term: searchText }
       )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleResetClick = async () => {
+    try {
+      setLoading(true)
+      setSearchText('')
+      await sewingLineService.getListItems(defaultRequestBody, setLoading, (meta) => {
+        if (meta?.success) {
+          selfConvertDataSource(meta?.data as SewingLine[])
+        }
+      })
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSortChange = async (checked: boolean) => {
+    try {
+      setLoading(true)
+      await sewingLineService.sortedListItems(
+        checked ? 'asc' : 'desc',
+        setLoading,
+        (meta) => {
+          if (meta?.success) {
+            selfConvertDataSource(meta?.data as SewingLine[])
+          }
+        },
+        { field: 'name', term: searchText }
+      )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSearch = async (value: string) => {
+    try {
+      setLoading(true)
+      if (value.length > 0) {
+        await sewingLineService.getListItems(
+          {
+            ...defaultRequestBody,
+            search: {
+              field: 'name',
+              term: value
+            }
+          },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              selfConvertDataSource(meta?.data as SewingLine[])
+            }
+          }
+        )
+      }
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
     }
   }
 

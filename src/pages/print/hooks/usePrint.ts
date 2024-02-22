@@ -1,6 +1,6 @@
 import { App as AntApp } from 'antd'
 import { useEffect, useState } from 'react'
-import { RequestBodyType, ResponseDataType, defaultRequestBody } from '~/api/client'
+import { ResponseDataType, defaultRequestBody } from '~/api/client'
 import PrintAPI from '~/api/services/PrintAPI'
 import { TableItemWithKey, UseTableProps } from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
@@ -28,18 +28,26 @@ export default function usePrint(table: UseTableProps<PrintTableDataType>) {
   const [groupNew, setGroupNew] = useState<Print | undefined>(undefined)
 
   const loadData = async () => {
-    await printService.getListItems(
-      {
-        ...defaultRequestBody,
-        paginator: { page: printService.page, pageSize: defaultRequestBody.paginator?.pageSize }
-      },
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          setPrints(meta.data as Print[])
+    try {
+      setLoading(true)
+      await printService.getListItems(
+        {
+          ...defaultRequestBody,
+          paginator: { page: printService.page, pageSize: defaultRequestBody.paginator?.pageSize }
+        },
+        setLoading,
+        (meta) => {
+          if (meta?.success) {
+            setPrints(meta.data as Print[])
+          }
         }
-      }
-    )
+      )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -62,28 +70,25 @@ export default function usePrint(table: UseTableProps<PrintTableDataType>) {
     )
   }
 
-  const handleSaveClick = async (record: TableItemWithKey<PrintTableDataType>, newRecord: any) => {
+  const handleSaveClick = async (record: TableItemWithKey<PrintTableDataType>) => {
     // const row = (await form.validateFields()) as any
     console.log({ old: record, new: newRecord })
-    if (newRecord) {
-      try {
-        if (newRecord.name && newRecord.name !== record.name) {
-          console.log('Group progressing...')
-          await printService.updateItemByPk(record.id!, { name: newRecord.name }, setLoading, (meta) => {
-            if (!meta?.success) {
-              throw new Error('API update group failed')
-            }
-          })
-        }
-        message.success('Success!')
-      } catch (error) {
-        console.error(error)
-        message.error('Failed')
-      } finally {
-        setLoading(false)
-        handleConfirmCancelEditing()
-        loadData()
+    try {
+      setLoading(true)
+      if (newRecord.name && newRecord.name !== record.name) {
+        console.log('Group progressing...')
+        await printService.updateItemByPk(record.id!, { name: newRecord.name }, setLoading, (meta) => {
+          if (!meta?.success) throw new Error('API update group failed')
+        })
       }
+      message.success('Success!')
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+      handleConfirmCancelEditing()
+      loadData()
     }
   }
 
@@ -97,20 +102,17 @@ export default function usePrint(table: UseTableProps<PrintTableDataType>) {
         },
         setLoading,
         async (meta, msg) => {
-          if (meta?.data) {
-            setGroupNew(meta.data as Print)
-            message.success(msg)
-          } else {
-            console.log('Errr')
-            message.error(msg)
-          }
+          if (!meta?.success) throw new Error(`${msg}`)
+          setGroupNew(meta.data as Print)
+          message.success(msg)
         }
       )
-    } catch (error) {
-      console.error(error)
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
     } finally {
-      setLoading(false)
       setOpenModal(false)
+      setLoading(false)
     }
   }
 
@@ -119,78 +121,107 @@ export default function usePrint(table: UseTableProps<PrintTableDataType>) {
     onDataSuccess?: (meta: ResponseDataType | undefined) => void
   ) => {
     console.log(record)
-    await printService.updateItemByPk(record.id!, { status: 'deleted' }, setLoading, (meta, msg) => {
-      if (meta) {
-        if (meta.success) {
-          handleConfirmDeleting(record.id!)
-          message.success('Deleted!')
-        }
-      } else {
-        message.error(msg)
-      }
-      onDataSuccess?.(meta)
-    })
+    try {
+      setLoading(true)
+      await printService.updateItemByPk(record.id!, { status: 'deleted' }, setLoading, (meta, msg) => {
+        if (!meta?.success) throw new Error(`${msg}`)
+        handleConfirmDeleting(record.id!)
+        message.success('Deleted!')
+        onDataSuccess?.(meta)
+      })
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setOpenModal(false)
+      setLoading(false)
+    }
   }
 
   const handlePageChange = async (_page: number) => {
-    printService.setPage(_page)
-    const body: RequestBodyType = {
-      ...defaultRequestBody,
-      paginator: {
-        page: _page,
-        pageSize: 5
-      },
-      search: {
-        field: 'name',
-        term: searchText
-      }
-    }
-    await printService.getListItems(body, setLoading, (meta) => {
-      if (meta?.success) {
-        selfConvertDataSource(meta?.data as Print[])
-      }
-    })
-  }
-
-  const handleResetClick = async () => {
-    setSearchText('')
-    await printService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        selfConvertDataSource(meta?.data as Print[])
-      }
-    })
-  }
-
-  const handleSortChange = async (checked: boolean) => {
-    await printService.sortedListItems(
-      checked ? 'asc' : 'desc',
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          selfConvertDataSource(meta?.data as Print[])
-        }
-      },
-      { field: 'name', term: searchText }
-    )
-  }
-
-  const handleSearch = async (value: string) => {
-    if (value.length > 0) {
-      await printService.getListItems(
-        {
-          ...defaultRequestBody,
-          search: {
-            field: 'name',
-            term: value
-          }
-        },
+    try {
+      setLoading(true)
+      await printService.pageChange(
+        _page,
         setLoading,
         (meta) => {
           if (meta?.success) {
             selfConvertDataSource(meta?.data as Print[])
           }
-        }
+        },
+        { field: 'name', term: searchText }
       )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleResetClick = async () => {
+    try {
+      setLoading(true)
+      setSearchText('')
+      await printService.getListItems(defaultRequestBody, setLoading, (meta) => {
+        if (meta?.success) {
+          selfConvertDataSource(meta?.data as Print[])
+        }
+      })
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSortChange = async (checked: boolean) => {
+    try {
+      setLoading(true)
+      await printService.sortedListItems(
+        checked ? 'asc' : 'desc',
+        setLoading,
+        (meta) => {
+          if (meta?.success) {
+            selfConvertDataSource(meta?.data as Print[])
+          }
+        },
+        { field: 'name', term: searchText }
+      )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSearch = async (value: string) => {
+    try {
+      setLoading(true)
+      if (value.length > 0) {
+        await printService.getListItems(
+          {
+            ...defaultRequestBody,
+            search: {
+              field: 'name',
+              term: value
+            }
+          },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              selfConvertDataSource(meta?.data as Print[])
+            }
+          }
+        )
+      }
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
     }
   }
 

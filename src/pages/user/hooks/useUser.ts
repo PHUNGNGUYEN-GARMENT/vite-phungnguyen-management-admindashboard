@@ -36,38 +36,55 @@ export default function useUser(table: UseTableProps<UserTableDataType>) {
   const loadData = async () => {
     try {
       setLoading(true)
-      await userService.getListItems(
-        {
-          ...defaultRequestBody,
-          paginator: { page: userService.page, pageSize: defaultRequestBody.paginator?.pageSize }
-        },
-        setLoading,
-        (meta) => {
-          if (meta?.success) {
-            setUsers(meta.data as User[])
+      try {
+        await userService.getListItems(
+          {
+            ...defaultRequestBody,
+            paginator: { page: userService.page, pageSize: defaultRequestBody.paginator?.pageSize }
+          },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              setUsers(meta.data as User[])
+            }
           }
-        }
-      )
-      await userRoleService.getListItems(
-        { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
-        setLoading,
-        (meta) => {
-          if (!meta?.success) throw new Error(`${meta?.message}`)
-          setUserRoles(meta.data as UserRole[])
-        }
-      )
+        )
+      } catch (error: any) {
+        const resError: ResponseDataType = error
+        throw resError
+      }
 
-      await roleService.getListItems(
-        { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
-        setLoading,
-        (meta) => {
-          if (meta?.success) {
-            setRoles(meta.data as Role[])
+      try {
+        await userRoleService.getListItems(
+          { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
+          setLoading,
+          (meta) => {
+            if (!meta?.success) throw new Error(`${meta?.message}`)
+            setUserRoles(meta.data as UserRole[])
           }
-        }
-      )
-    } catch (error) {
-      console.error(`${error}`)
+        )
+      } catch (error: any) {
+        const resError: ResponseDataType = error
+        throw resError
+      }
+
+      try {
+        await roleService.getListItems(
+          { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              setRoles(meta.data as Role[])
+            }
+          }
+        )
+      } catch (error: any) {
+        const resError: ResponseDataType = error
+        throw resError
+      }
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
     } finally {
       setLoading(false)
     }
@@ -97,8 +114,9 @@ export default function useUser(table: UseTableProps<UserTableDataType>) {
   const handleSaveClick = async (record: TableItemWithKey<UserTableDataType>) => {
     // const row = (await form.validateFields()) as any
     console.log({ old: record, new: newRecord })
-    if (newRecord) {
-      try {
+    try {
+      if (newRecord) {
+        setLoading(true)
         if (
           !record.email ||
           textComparator(newRecord.email, record.email) ||
@@ -116,36 +134,39 @@ export default function useUser(table: UseTableProps<UserTableDataType>) {
           textComparator(newRecord.birthday, record.birthday)
         ) {
           console.log('User progressing...')
-          await userService.updateItemByPk(record.id!, { ...newRecord }, setLoading, (meta) => {
-            if (!meta?.success) {
-              throw new Error('API update group failed')
-            }
-          })
+          try {
+            await userService.updateItemByPk(record.id!, { ...newRecord }, setLoading, (meta) => {
+              if (!meta?.success) throw new Error('API update group failed')
+            })
+          } catch (error: any) {
+            const resError: ResponseDataType = error
+            throw resError
+          }
         }
-        await UserRoleAPI.updateIDsBy?.(
-          { field: 'userID', key: record.id! },
-          newRecord.userRoles!.map((item) => {
-            return item.roleID
-          }) as number[],
-          currentUser.user.accessToken!
-        )
-          .then((meta) => {
-            if (!meta?.success) {
-              throw new Error('API update UserRole failed')
-            }
+        try {
+          await UserRoleAPI.updateIDsBy?.(
+            { field: 'userID', key: record.id! },
+            newRecord.userRoles!.map((item) => {
+              return item.roleID
+            }) as number[],
+            currentUser.user.accessToken!
+          ).then((meta) => {
+            if (!meta?.success) throw new Error('API update UserRole failed')
           })
-          .catch((err) => {
-            throw new Error(`${err}`)
-          })
+        } catch (error: any) {
+          const resError: ResponseDataType = error
+          throw resError
+        }
+
         message.success('Success!')
-      } catch (error) {
-        console.error(error)
-        message.error('Failed')
-      } finally {
-        setLoading(false)
-        handleConfirmCancelEditing()
-        loadData()
       }
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      handleConfirmCancelEditing()
+      loadData()
+      setLoading(false)
     }
   }
 
@@ -166,26 +187,29 @@ export default function useUser(table: UseTableProps<UserTableDataType>) {
         async (meta, msg) => {
           const newUser = meta?.data as User
           console.log(newUser)
-          if (!meta?.success) {
-            throw new Error(msg)
+          if (!meta?.success) throw new Error(msg)
+          try {
+            await UserRoleAPI.updateIDsBy?.(
+              { field: 'userID', key: newUser.id! },
+              newRoleIDs,
+              currentUser.user.accessToken ?? ''
+            ).then((meta) => {
+              if (!meta?.success) throw new Error(`${meta?.message}`)
+            })
+            message.success(msg)
+          } catch (error: any) {
+            const resError: ResponseDataType = error
+            throw resError
           }
-          await UserRoleAPI.updateIDsBy?.(
-            { field: 'userID', key: newUser.id! },
-            newRoleIDs,
-            currentUser.user.accessToken ?? ''
-          ).then((meta) => {
-            if (!meta?.success) throw new Error(`${meta?.message}`)
-          })
-          message.success(msg)
         }
       )
-    } catch (error) {
-      console.error(error)
-      message.error(`${error}`)
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
     } finally {
-      setLoading(false)
       setOpenModal(false)
       loadData()
+      setLoading(false)
     }
   }
 
@@ -193,66 +217,106 @@ export default function useUser(table: UseTableProps<UserTableDataType>) {
     record: TableItemWithKey<UserTableDataType>,
     onDataSuccess?: (meta: ResponseDataType | undefined) => void
   ) => {
-    await userService.deleteItemByPk(record.id!, setLoading, (meta, msg) => {
-      if (!meta?.success) throw new Error(`${msg}`)
-      handleConfirmDeleting(record.id!)
-      message.success(msg)
-      onDataSuccess?.(meta)
-    })
+    try {
+      setLoading(true)
+      await userService.deleteItemByPk(record.id!, setLoading, (meta, msg) => {
+        if (!meta?.success) throw new Error(`${msg}`)
+        handleConfirmDeleting(record.id!)
+        message.success(msg)
+        onDataSuccess?.(meta)
+      })
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handlePageChange = async (_page: number) => {
-    await userService.pageChange(
-      _page,
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          selfConvertDataSource(meta?.data as User[])
-        }
-      },
-      { field: 'fullName', term: searchText }
-    )
-  }
-
-  const handleResetClick = async () => {
-    setSearchText('')
-    await userService.getListItems(defaultRequestBody, setLoading, (meta) => {
-      if (meta?.success) {
-        selfConvertDataSource(meta?.data as User[])
-      }
-    })
-  }
-
-  const handleSortChange = async (checked: boolean) => {
-    await userService.sortedListItems(
-      checked ? 'asc' : 'desc',
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          selfConvertDataSource(meta?.data as User[])
-        }
-      },
-      { field: 'fullName', term: searchText }
-    )
-  }
-
-  const handleSearch = async (value: string) => {
-    if (value.length > 0) {
-      await userService.getListItems(
-        {
-          ...defaultRequestBody,
-          search: {
-            field: 'fullName',
-            term: value
-          }
-        },
+    try {
+      setLoading(true)
+      await userService.pageChange(
+        _page,
         setLoading,
         (meta) => {
           if (meta?.success) {
             selfConvertDataSource(meta?.data as User[])
           }
-        }
+        },
+        { field: 'fullName', term: searchText }
       )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleResetClick = async () => {
+    try {
+      setLoading(true)
+      setSearchText('')
+      await userService.getListItems(defaultRequestBody, setLoading, (meta) => {
+        if (meta?.success) {
+          selfConvertDataSource(meta?.data as User[])
+        }
+      })
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSortChange = async (checked: boolean) => {
+    try {
+      setLoading(true)
+      await userService.sortedListItems(
+        checked ? 'asc' : 'desc',
+        setLoading,
+        (meta) => {
+          if (meta?.success) {
+            selfConvertDataSource(meta?.data as User[])
+          }
+        },
+        { field: 'fullName', term: searchText }
+      )
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSearch = async (value: string) => {
+    try {
+      setLoading(true)
+      if (value.length > 0) {
+        await userService.getListItems(
+          {
+            ...defaultRequestBody,
+            search: {
+              field: 'fullName',
+              term: value
+            }
+          },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              selfConvertDataSource(meta?.data as User[])
+            }
+          }
+        )
+      }
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
     }
   }
 

@@ -1,5 +1,6 @@
 import client, { RequestBodyType, ResponseDataType } from '~/api/client'
 import { AccessoryNote } from '~/typing'
+import { responseFormatter, throwErrorFormatter } from '~/utils/response-formatter'
 
 const NAMESPACE = 'accessory-notes'
 
@@ -19,14 +20,10 @@ export default {
         }
       )
       .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
+        return responseFormatter(res)
       })
       .catch(function (error) {
-        errorFormatter(error)
-        throw Error(`${error}`)
+        throwErrorFormatter(error)
       })
   },
   getItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType | undefined> => {
@@ -37,14 +34,10 @@ export default {
         }
       })
       .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
+        return responseFormatter(res)
       })
       .catch(function (error) {
-        errorFormatter(error)
-        throw Error(`${error}`)
+        throwErrorFormatter(error)
       })
   },
   getItemBy: async (
@@ -58,14 +51,10 @@ export default {
         }
       })
       .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
+        return responseFormatter(res)
       })
       .catch(function (error) {
-        errorFormatter(error)
-        throw Error(`${error}`)
+        throwErrorFormatter(error)
       })
   },
   getItems: async (bodyRequest: RequestBodyType, accessToken: string): Promise<ResponseDataType | undefined> => {
@@ -82,14 +71,10 @@ export default {
         }
       )
       .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
+        return responseFormatter(res)
       })
       .catch(function (error) {
-        errorFormatter(error)
-        throw Error(`${error}`)
+        throwErrorFormatter(error)
       })
   },
   updateItemByPk: async (
@@ -104,14 +89,10 @@ export default {
         }
       })
       .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
+        return responseFormatter(res)
       })
       .catch(function (error) {
-        errorFormatter(error)
-        throw Error(`${error}`)
+        throwErrorFormatter(error)
       })
   },
   updateItemBy: async (
@@ -129,14 +110,10 @@ export default {
         }
       })
       .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
+        return responseFormatter(res)
       })
       .catch(function (error) {
-        errorFormatter(error)
-        throw Error(`${error}`)
+        throwErrorFormatter(error)
       })
   },
   deleteItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType | undefined> => {
@@ -147,14 +124,10 @@ export default {
         }
       })
       .then((res) => {
-        if (res.data) {
-          return res.data as ResponseDataType
-        }
-        return res.data
+        return responseFormatter(res)
       })
       .catch(function (error) {
-        errorFormatter(error)
-        throw Error(`${error}`)
+        throwErrorFormatter(error)
       })
   }
 }
