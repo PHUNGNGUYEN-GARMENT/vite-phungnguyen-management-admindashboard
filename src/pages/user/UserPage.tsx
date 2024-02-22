@@ -284,7 +284,7 @@ const UserPage = () => {
         onSortChange={(checked) => handleSortChange(checked)}
         onResetClick={{
           onClick: () => handleResetClick(),
-          isShow: currentUser.userRoles.includes('admin')
+          isShow: true
         }}
         onAddNewClick={{
           onClick: () => setOpenModal(true),

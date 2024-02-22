@@ -3,6 +3,7 @@ import { ColumnsType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
 import { Check } from 'lucide-react'
 import React from 'react'
+import { useSelector } from 'react-redux'
 import useDevice from '~/components/hooks/useDevice'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
@@ -10,6 +11,7 @@ import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import ExpandableItemRow from '~/components/sky-ui/SkyTable/ExpandableItemRow'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
+import { RootState } from '~/store/store'
 import {
   breakpoint,
   dateValidatorChange,
@@ -42,6 +44,7 @@ const FinishPage: React.FC<Props> = () => {
     productService
   } = useCompletion(table)
   const { width } = useDevice()
+  const currentUser = useSelector((state: RootState) => state.user)
 
   const columns = {
     productCode: (record: CompletionTableDataType) => {
@@ -475,7 +478,8 @@ const FinishPage: React.FC<Props> = () => {
         onSearch={(value) => handleSearch(value)}
         onSortChange={(checked) => handleSortChange(checked)}
         onResetClick={{
-          onClick: () => handleResetClick()
+          onClick: () => handleResetClick(),
+          isShow: true
         }}
       >
         <SkyTable
@@ -511,7 +515,7 @@ const FinishPage: React.FC<Props> = () => {
             onConfirmCancelEditing: () => table.handleConfirmCancelEditing(),
             onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),
             onConfirmDelete: (record) => handleConfirmDelete(record),
-            isShow: true
+            isShow: currentUser.userRoles.includes('admin') || currentUser.userRoles.includes('completion_manager')
           }}
           expandable={{
             expandedRowRender: (record) => {

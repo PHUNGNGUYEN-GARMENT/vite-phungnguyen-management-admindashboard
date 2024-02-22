@@ -352,7 +352,6 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
       const resError: ResponseDataType = error.data
       message.error(`${resError.message}`)
     } finally {
-      loadData()
       setLoading(false)
     }
   }

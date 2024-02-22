@@ -142,7 +142,6 @@ export default function useRole(table: UseTableProps<RoleTableDataType>) {
       const resError: ResponseDataType = error.data
       message.error(`${resError.message}`)
     } finally {
-      loadData()
       setLoading(false)
     }
   }
@@ -182,7 +181,6 @@ export default function useRole(table: UseTableProps<RoleTableDataType>) {
       const resError: ResponseDataType = error.data
       message.error(`${resError.message}`)
     } finally {
-      loadData()
       setLoading(false)
     }
   }

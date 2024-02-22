@@ -123,11 +123,12 @@ const RolePage = () => {
         onSearch={(value) => handleSearch(value)}
         onSortChange={(checked) => handleSortChange(checked)}
         onResetClick={{
-          onClick: () => handleResetClick()
+          onClick: () => handleResetClick(),
+          isShow: true
         }}
         onAddNewClick={{
           onClick: () => setOpenModal(true),
-          isShow: true
+          isShow: currentUser.userRoles.includes('admin')
         }}
       >
         <SkyTable

@@ -552,7 +552,8 @@ const SampleSewingPage = () => {
         onSearch={(value) => handleSearch(value)}
         onSortChange={(checked, e) => handleSortChange(checked, e)}
         onResetClick={{
-          onClick: () => handleResetClick()
+          onClick: () => handleResetClick(),
+          isShow: true
         }}
       >
         <SkyTable

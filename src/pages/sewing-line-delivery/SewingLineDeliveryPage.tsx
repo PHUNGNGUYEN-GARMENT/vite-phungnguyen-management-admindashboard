@@ -1,6 +1,7 @@
 import { ColorPicker, Divider, Flex, Space } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import dayjs, { Dayjs } from 'dayjs'
+import { useSelector } from 'react-redux'
 import useDevice from '~/components/hooks/useDevice'
 import useTable from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
@@ -8,6 +9,7 @@ import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import ExpandableItemRow from '~/components/sky-ui/SkyTable/ExpandableItemRow'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
+import { RootState } from '~/store/store'
 import { SewingLineDelivery } from '~/typing'
 import { dateFormatter } from '~/utils/date-formatter'
 import {
@@ -38,6 +40,7 @@ const SewingLineDeliveryPage = () => {
     sewingLines
   } = useSewingLineDelivery(table)
   const { width } = useDevice()
+  const currentUser = useSelector((state: RootState) => state.user)
 
   const columns = {
     productCode: (record: SewingLineDeliveryTableDataType) => {
@@ -581,7 +584,8 @@ const SewingLineDeliveryPage = () => {
         onSearch={(value) => handleSearch(value)}
         onSortChange={(checked) => handleSortChange(checked)}
         onResetClick={{
-          onClick: () => handleResetClick()
+          onClick: () => handleResetClick(),
+          isShow: true
         }}
       >
         <SkyTable
@@ -614,7 +618,7 @@ const SewingLineDeliveryPage = () => {
             onConfirmCancelEditing: () => table.handleConfirmCancelEditing(),
             onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),
             onConfirmDelete: (record) => handleConfirmDelete(record),
-            isShow: true
+            isShow: currentUser.userRoles.includes('admin') || currentUser.userRoles.includes('sewing_line_manager')
           }}
           expandable={{
             expandedRowRender: (record: SewingLineDeliveryTableDataType) => {

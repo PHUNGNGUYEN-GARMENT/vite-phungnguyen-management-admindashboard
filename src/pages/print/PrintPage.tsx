@@ -70,7 +70,7 @@ const PrintTable: React.FC<Props> = () => {
         onSortChange={(checked) => handleSortChange(checked)}
         onResetClick={{
           onClick: () => handleResetClick(),
-          isShow: currentUser.userRoles.includes('admin')
+          isShow: true
         }}
         onAddNewClick={{
           onClick: () => setOpenModal(true),
@@ -96,7 +96,7 @@ const PrintTable: React.FC<Props> = () => {
               }
             },
             onSave: {
-              onClick: (_e, record) => handleSaveClick(record!, newRecord)
+              onClick: (_e, record) => handleSaveClick(record!)
             },
             onDelete: {
               onClick: (_e, record) => table.handleStartDeleting(record!.key!)

@@ -69,7 +69,7 @@ const SewingLinePage: React.FC<Props> = () => {
         onSortChange={(checked) => handleSortChange(checked)}
         onResetClick={{
           onClick: () => handleResetClick(),
-          isShow: currentUser.userRoles.includes('admin')
+          isShow: true
         }}
         onAddNewClick={{
           onClick: () => setOpenModal(true),
@@ -103,7 +103,7 @@ const SewingLinePage: React.FC<Props> = () => {
             onConfirmCancelEditing: () => table.handleConfirmCancelEditing(),
             onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),
             onConfirmDelete: (record) => handleConfirmDelete(record),
-            isShow: currentUser.userRoles.includes('admin') || currentUser.userRoles.includes('sewing_line_manager')
+            isShow: currentUser.userRoles.includes('admin')
           }}
         />
       </BaseLayout>

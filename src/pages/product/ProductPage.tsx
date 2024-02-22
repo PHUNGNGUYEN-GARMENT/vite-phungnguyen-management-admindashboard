@@ -268,7 +268,7 @@ const ProductPage: React.FC = () => {
         onSortChange={(checked) => handleSortChange(checked)}
         onResetClick={{
           onClick: () => handleResetClick(),
-          isShow: currentUser.userRoles.includes('admin') || currentUser.userRoles.includes('product_manager')
+          isShow: true
         }}
         onAddNewClick={{
           onClick: () => setOpenModal(true),

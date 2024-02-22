@@ -88,7 +88,7 @@ const AccessoryNotePage: React.FC<Props> = () => {
         onSortChange={(checked) => handleSortChange(checked)}
         onResetClick={{
           onClick: () => handleResetClick(),
-          isShow: currentUser.userRoles.includes('admin')
+          isShow: true
         }}
         onAddNewClick={{
           onClick: () => setOpenModal(true),

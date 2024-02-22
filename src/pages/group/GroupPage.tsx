@@ -1,10 +1,12 @@
 import { ColumnsType } from 'antd/es/table'
+import { useSelector } from 'react-redux'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import ProtectedLayout from '~/components/layout/ProtectedLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
+import { RootState } from '~/store/store'
 import ModalAddNewGroup from './components/ModalAddNewGroup'
 import useGroup from './hooks/useGroup'
 import { GroupTableDataType } from './type'
@@ -30,6 +32,7 @@ const GroupPage: React.FC<Props> = () => {
     handlePageChange,
     groupService
   } = useGroup(table)
+  const currentUser = useSelector((state: RootState) => state.user)
 
   const columns: ColumnsType<GroupTableDataType> = [
     {
@@ -65,10 +68,12 @@ const GroupPage: React.FC<Props> = () => {
         onSearch={(value) => handleSearch(value)}
         onSortChange={(checked, e) => handleSortChange(checked, e)}
         onResetClick={{
-          onClick: () => handleResetClick()
+          onClick: () => handleResetClick(),
+          isShow: true
         }}
         onAddNewClick={{
-          onClick: () => setOpenModal(true)
+          onClick: () => setOpenModal(true),
+          isShow: currentUser.userRoles.includes('admin')
         }}
       >
         <SkyTable
@@ -90,7 +95,7 @@ const GroupPage: React.FC<Props> = () => {
               }
             },
             onSave: {
-              onClick: (_e, record) => handleSaveClick(record!, newRecord)
+              onClick: (_e, record) => handleSaveClick(record!)
             },
             onDelete: {
               onClick: (_e, record) => table.handleStartDeleting(record!.key!)
@@ -98,7 +103,7 @@ const GroupPage: React.FC<Props> = () => {
             onConfirmCancelEditing: () => table.handleConfirmCancelEditing(),
             onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),
             onConfirmDelete: (record) => handleConfirmDelete(record),
-            isShow: true
+            isShow: currentUser.userRoles.includes('admin')
           }}
         />
       </BaseLayout>
