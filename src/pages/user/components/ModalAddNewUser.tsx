@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 import { Flex, Form, Modal, Spin } from 'antd'
 import React, { memo, useEffect, useState } from 'react'
 import { defaultRequestBody } from '~/api/client'

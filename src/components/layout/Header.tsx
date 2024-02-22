@@ -17,7 +17,6 @@ interface Props extends React.HTMLAttributes<HTMLElement> {
   onMenuClick: (event: React.MouseEvent<HTMLElement, globalThis.MouseEvent>) => void
 }
 
-// eslint-disable-next-line no-empty-pattern
 const Header: React.FC<Props> = ({ onMenuClick, ...props }) => {
   const [openProfile, setOpenProfile] = useState<boolean>(false)
   const [, setAccessTokenStored] = useLocalStorage<string>('accessToken', '')

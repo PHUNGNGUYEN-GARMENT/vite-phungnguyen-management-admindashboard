@@ -1,10 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/ban-types */
 import { Flex, Input, List, Typography } from 'antd'
 import { useSelector } from 'react-redux'
 import { RootState } from '~/store/store'
 import { ItemStatusType } from '~/typing'
-import DayJS, { DatePattern } from '~/utils/date-formatter'
+import { dateFormatter } from '~/utils/date-formatter'
 import ActionRow, { ActionProps } from '../ActionRow'
 import EditableStateCell, { EditableStateCellProps } from '../SkyTable/EditableStateCell'
 import SkyTableTypography from '../SkyTable/SkyTableTypography'
@@ -86,7 +84,7 @@ const SkyListItem = <
               <Input
                 name='createdAt'
                 className='w-full'
-                defaultValue={record?.createdAt && DayJS(record.createdAt).format(DatePattern.display)}
+                defaultValue={record?.createdAt && dateFormatter(record.createdAt, 'dateOnly')}
                 readOnly
               />
             </Flex>
@@ -97,7 +95,7 @@ const SkyListItem = <
               <Input
                 name='createdAt'
                 className='w-full'
-                defaultValue={record?.updatedAt && DayJS(record.updatedAt).format(DatePattern.display)}
+                defaultValue={record?.updatedAt && dateFormatter(record.updatedAt, 'dateOnly')}
                 readOnly
               />
             </Flex>

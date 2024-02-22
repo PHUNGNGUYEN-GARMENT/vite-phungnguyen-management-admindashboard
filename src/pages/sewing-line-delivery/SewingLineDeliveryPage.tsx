@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ColorPicker, Divider, Flex, Space } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import dayjs, { Dayjs } from 'dayjs'
@@ -10,8 +8,8 @@ import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import ExpandableItemRow from '~/components/sky-ui/SkyTable/ExpandableItemRow'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import { SewingLine } from '~/typing'
-import DayJS from '~/utils/date-formatter'
+import { SewingLineDelivery } from '~/typing'
+import { dateFormatter } from '~/utils/date-formatter'
 import {
   breakpoint,
   cn,
@@ -37,16 +35,14 @@ const SewingLineDeliveryPage = () => {
     handleConfirmDelete,
     handlePageChange,
     productService,
-    sewingLines,
-    sewingLineDeliveryRecordTemp,
-    setSewingLineDeliveryRecordTemp
+    sewingLines
   } = useSewingLineDelivery(table)
   const { width } = useDevice()
 
   const columns = {
     productCode: (record: SewingLineDeliveryTableDataType) => {
       return (
-        <EditableStateCell isEditing={false} dataIndex='productCode' title='Mã hàng' inputType='text' required={true}>
+        <EditableStateCell isEditing={false} dataIndex='productCode' title='Mã hàng' inputType='text' required>
           <SkyTableTypography status={'active'} className='flex gap-[2px] font-bold'>
             {textValidatorDisplay(record.productCode)}
           </SkyTableTypography>
@@ -56,26 +52,14 @@ const SewingLineDeliveryPage = () => {
 
     quantityPO: (record: SewingLineDeliveryTableDataType) => {
       return (
-        <EditableStateCell
-          isEditing={false}
-          dataIndex='quantityPO'
-          title='Số lượng PO'
-          inputType='number'
-          required={true}
-        >
+        <EditableStateCell isEditing={false} dataIndex='quantityPO' title='Số lượng PO' inputType='number' required>
           <SkyTableTypography status={'active'}>{numberValidatorDisplay(record.quantityPO)}</SkyTableTypography>
         </EditableStateCell>
       )
     },
     dateOutputFCR: (record: SewingLineDeliveryTableDataType) => {
       return (
-        <EditableStateCell
-          isEditing={false}
-          dataIndex='dateOutputFCR'
-          title='FCR'
-          inputType='datepicker'
-          required={true}
-        >
+        <EditableStateCell isEditing={false} dataIndex='dateOutputFCR' title='FCR' inputType='datepicker' required>
           <SkyTableTypography status={'active'}>
             {record.dateOutputFCR && dateValidatorDisplay(record.dateOutputFCR)}
           </SkyTableTypography>
@@ -96,7 +80,7 @@ const SewingLineDeliveryPage = () => {
         </EditableStateCell>
       )
     },
-    accessoryNotes: (record: SewingLineDeliveryTableDataType) => {
+    sewingLines: (record: SewingLineDeliveryTableDataType) => {
       const sewingLinesFiltered = sewingLines.filter(
         (item) =>
           record.sewingLineDeliveries &&
@@ -105,10 +89,10 @@ const SewingLineDeliveryPage = () => {
       return (
         <EditableStateCell
           isEditing={table.isEditing(record.key!)}
-          dataIndex='accessoryNotes'
+          dataIndex='sewingLines'
           title='Chuyền may'
           inputType='multipleselect'
-          required={true}
+          required
           selectProps={{
             options: sewingLines.map((item) => {
               return {
@@ -124,13 +108,13 @@ const SewingLineDeliveryPage = () => {
             })
           }}
           onValueChange={(values: number[]) => {
-            setNewRecord({
-              sewingLineDeliveriesToUpdate: values.map((sewingLineID) => {
+            setNewRecord(
+              values.map((sewingLineID) => {
                 return {
                   sewingLineID: sewingLineID
-                }
+                } as SewingLineDelivery
               })
-            })
+            )
           }}
         >
           <Space size='small' wrap>
@@ -196,13 +180,33 @@ const SewingLineDeliveryPage = () => {
     },
     {
       title: 'Chuyền may',
-      dataIndex: 'accessoryNotes',
+      dataIndex: 'sewingLines',
       responsive: ['xl'],
       render: (_value: any, record: SewingLineDeliveryTableDataType) => {
-        return columns.accessoryNotes(record)
+        return columns.sewingLines(record)
       }
     }
   ]
+
+  const findItemAndUpdateAtIndex = (sewingLineIDRecord: number, newRecordToUpdate: SewingLineDelivery) => {
+    const newRecordNew = newRecord
+    if (newRecordNew.length > 0) {
+      const itemIndexFound = newRecordNew.findIndex((record) => record.sewingLineID === sewingLineIDRecord)
+      if (itemIndexFound !== -1) {
+        // Update record at index
+        const itemAtIndex = newRecordNew[itemIndexFound]
+        newRecordNew[itemIndexFound] = { ...itemAtIndex, ...newRecordToUpdate }
+      }
+      // else {
+      //   // Create new record
+      //   newRecordNew.push({ ...newRecordToUpdate })
+      // }
+    } else {
+      newRecordNew.push({ ...newRecordToUpdate })
+    }
+    // console.log(newRecordNew)
+    // setNewRecord(newRecordNew)
+  }
 
   const expandableColumns = (data: SewingLineDeliveryTableDataType): ColumnsType<ExpandableTableDataType> => {
     const items = sewingLines.filter((item) =>
@@ -241,31 +245,34 @@ const SewingLineDeliveryPage = () => {
                   dataIndex='quantityOriginal'
                   title='SL Vào chuyền'
                   inputType='number'
-                  required={true}
+                  required
                   initialValue={record.quantityOriginal && numberValidatorDisplay(record.quantityOriginal)}
                   value={
-                    newRecord.sewingLineDeliveriesToUpdate &&
-                    numberValidatorDisplay(
-                      newRecord.sewingLineDeliveriesToUpdate!.find((i) => i.sewingLineID === item.id)?.quantityOriginal
-                    )
+                    newRecord &&
+                    numberValidatorDisplay(newRecord.find((i) => i.sewingLineID === item.id)?.quantityOriginal)
                   }
                   onValueChange={(val) => {
-                    setSewingLineDeliveryRecordTemp({ quantityOriginal: val })
-                    const newRecords = [...newRecord.sewingLineDeliveriesToUpdate!]
-                    const index = newRecords.findIndex((i) => i.sewingLineID === item.id)
-                    if (index !== -1) {
-                      newRecords[index].quantityOriginal = val
-                      setNewRecord({ sewingLineDeliveriesToUpdate: newRecords })
-                    } else {
-                      const recordNews = newRecords.filter((i) => i.sewingLineID !== item.id)
-                      recordNews.push({
-                        quantityOriginal: val,
-                        quantitySewed: sewingLineDeliveryRecordTemp.quantitySewed,
-                        expiredDate: sewingLineDeliveryRecordTemp.expiredDate,
-                        sewingLineID: item.id
-                      })
-                      setNewRecord({ sewingLineDeliveriesToUpdate: recordNews })
-                    }
+                    // setSewingLineDeliveryRecordTemp({ quantityOriginal: val })
+                    findItemAndUpdateAtIndex(item.id!, {
+                      quantityOriginal: val ? val : null
+                    })
+                    // const newRecords = newRecord.sewingLineDeliveriesToUpdate
+                    //   ? [...newRecord.sewingLineDeliveriesToUpdate]
+                    //   : []
+                    // const index = newRecords.findIndex((i) => i.sewingLineID === item.id)
+                    // if (index !== -1) {
+                    //   newRecords[index].quantityOriginal = val
+                    //   setNewRecord({ sewingLineDeliveriesToUpdate: newRecords })
+                    // } else {
+                    //   const recordNews = newRecords.filter((i) => i.sewingLineID !== item.id)
+                    //   recordNews.push({
+                    //     quantityOriginal: val,
+                    //     quantitySewed: sewingLineDeliveryRecordTemp.quantitySewed,
+                    //     expiredDate: sewingLineDeliveryRecordTemp.expiredDate,
+                    //     sewingLineID: item.id
+                    //   })
+                    //   setNewRecord({ sewingLineDeliveriesToUpdate: recordNews })
+                    // }
                   }}
                 >
                   <SkyTableTypography status={record.status}>
@@ -289,31 +296,34 @@ const SewingLineDeliveryPage = () => {
                   dataIndex='sewed'
                   title='May được'
                   inputType='number'
-                  required={true}
+                  required
                   initialValue={record.quantitySewed && numberValidatorDisplay(record.quantitySewed)}
                   value={
-                    newRecord.sewingLineDeliveriesToUpdate &&
-                    numberValidatorDisplay(
-                      newRecord.sewingLineDeliveriesToUpdate!.find((i) => i.sewingLineID === item.id)?.quantitySewed
-                    )
+                    newRecord &&
+                    numberValidatorDisplay(newRecord!.find((i) => i.sewingLineID === item.id)?.quantitySewed)
                   }
                   onValueChange={(val) => {
-                    setSewingLineDeliveryRecordTemp({ quantitySewed: val })
-                    const newRecords = [...newRecord.sewingLineDeliveriesToUpdate!]
-                    const index = newRecords.findIndex((i) => i.sewingLineID === item.id)
-                    if (index !== -1) {
-                      newRecords[index].quantitySewed = val
-                      setNewRecord({ sewingLineDeliveriesToUpdate: newRecords })
-                    } else {
-                      const recordNews = newRecords.filter((i) => i.sewingLineID !== item.id)
-                      recordNews.push({
-                        quantityOriginal: sewingLineDeliveryRecordTemp.quantityOriginal,
-                        quantitySewed: val,
-                        expiredDate: sewingLineDeliveryRecordTemp.expiredDate,
-                        sewingLineID: item.id
-                      })
-                      setNewRecord({ sewingLineDeliveriesToUpdate: recordNews })
-                    }
+                    findItemAndUpdateAtIndex(item.id!, {
+                      quantitySewed: val ? val : null
+                    })
+                    // setSewingLineDeliveryRecordTemp({ quantitySewed: val })
+                    // const newRecords = newRecord.sewingLineDeliveriesToUpdate
+                    //   ? [...newRecord.sewingLineDeliveriesToUpdate]
+                    //   : []
+                    // const index = newRecords.findIndex((i) => i.sewingLineID === item.id)
+                    // if (index !== -1) {
+                    //   newRecords[index].quantitySewed = val
+                    //   setNewRecord({ sewingLineDeliveriesToUpdate: newRecords })
+                    // } else {
+                    //   const recordNews = newRecords.filter((i) => i.sewingLineID !== item.id)
+                    //   recordNews.push({
+                    //     quantityOriginal: sewingLineDeliveryRecordTemp.quantityOriginal,
+                    //     quantitySewed: val,
+                    //     expiredDate: sewingLineDeliveryRecordTemp.expiredDate,
+                    //     sewingLineID: item.id
+                    //   })
+                    //   setNewRecord({ sewingLineDeliveriesToUpdate: recordNews })
+                    // }
                   }}
                 >
                   <SkyTableTypography status={record.status}>
@@ -337,7 +347,7 @@ const SewingLineDeliveryPage = () => {
                   dataIndex='amountQuantity'
                   title='SL Còn lại'
                   inputType='number'
-                  required={true}
+                  required
                 >
                   <SkyTableTypography status={record.status}>
                     {numberValidatorDisplay(
@@ -363,26 +373,30 @@ const SewingLineDeliveryPage = () => {
                   dataIndex='expiredDate'
                   title='Ngày dự kiến hoàn thành'
                   inputType='datepicker'
-                  required={true}
-                  initialValue={sewingLineDeliveryRecord?.expiredDate}
+                  required
+                  initialValue={
+                    sewingLineDeliveryRecord?.expiredDate ? dayjs(sewingLineDeliveryRecord?.expiredDate) : undefined
+                  }
                   onValueChange={(val: Dayjs) => {
-                    if (val) {
-                      setSewingLineDeliveryRecordTemp({ expiredDate: DayJS(val).toISOString() })
-                      const newRecords = [...newRecord.sewingLineDeliveriesToUpdate!]
-                      const index = newRecords.findIndex((i) => i.sewingLineID === item.id)
-                      if (index !== -1) {
-                        newRecords[index].expiredDate = DayJS(val).toISOString()
-                        setNewRecord({ sewingLineDeliveriesToUpdate: newRecords })
-                      } else {
-                        const recordNews = newRecords.filter((i) => i.sewingLineID !== item.id)
-                        recordNews.push({
-                          quantitySewed: sewingLineDeliveryRecordTemp.quantitySewed,
-                          expiredDate: DayJS(val).toISOString(),
-                          sewingLineID: item.id
-                        })
-                        setNewRecord({ sewingLineDeliveriesToUpdate: recordNews })
-                      }
-                    }
+                    findItemAndUpdateAtIndex(item.id!, {
+                      expiredDate: val ? dateFormatter(val) : null
+                    })
+                    // setSewingLineDeliveryRecordTemp({ expiredDate: val ? dateFormatter(val, 'iso8601') : null })
+                    // const newRecords = [...newRecord.sewingLineDeliveriesToUpdate!]
+                    // const index = newRecords.findIndex((i) => i.sewingLineID === item.id)
+
+                    // if (index !== -1) {
+                    //   newRecords[index].expiredDate = val ? dateFormatter(val, 'iso8601') : null
+                    //   setNewRecord({ sewingLineDeliveriesToUpdate: newRecords })
+                    // } else {
+                    //   const recordNews = newRecords.filter((i) => i.sewingLineID !== item.id)
+                    //   recordNews.push({
+                    //     quantitySewed: sewingLineDeliveryRecordTemp.quantitySewed,
+                    //     expiredDate: val ? dateFormatter(val, 'iso8601') : null,
+                    //     sewingLineID: item.id
+                    //   })
+                    //   setNewRecord({ sewingLineDeliveriesToUpdate: recordNews })
+                    // }
                   }}
                 >
                   <SkyTableTypography
@@ -404,7 +418,7 @@ const SewingLineDeliveryPage = () => {
     })
   }
 
-  // const accessoryNotes = {
+  // const sewingLines = {
   //   quantityOriginal: (record: SewingLineDeliveryTableDataType, item: SewingLineDelivery) => {
   //     const sewingLineDeliveryRecord = record.sewingLineDeliveries
   //       ? record.sewingLineDeliveries.find((i) => i.sewingLineID === item.id)
@@ -415,7 +429,7 @@ const SewingLineDeliveryPage = () => {
   //         dataIndex='quantityOriginal'
   //         title='SL Vào chuyền'
   //         inputType='number'
-  //         required={true}
+  //         required
   //         initialValue={item.quantityOriginal && numberValidatorDisplay(item.quantityOriginal)}
   //         value={
   //           newRecord.sewingLineDeliveriesToUpdate &&
@@ -458,7 +472,7 @@ const SewingLineDeliveryPage = () => {
   //         dataIndex='sewed'
   //         title='May được'
   //         inputType='number'
-  //         required={true}
+  //         required
   //         initialValue={item.quantitySewed && numberValidatorDisplay(item.quantitySewed)}
   //         value={
   //           newRecord.sewingLineDeliveriesToUpdate &&
@@ -501,7 +515,7 @@ const SewingLineDeliveryPage = () => {
   //         dataIndex='amountQuantity'
   //         title='SL Còn lại'
   //         inputType='number'
-  //         required={true}
+  //         required
   //       >
   //         <SkyTableTypography status={record.status}>
   //           {numberValidatorDisplay(
@@ -522,21 +536,21 @@ const SewingLineDeliveryPage = () => {
   //         dataIndex='expiredDate'
   //         title='Ngày dự kiến hoàn thành'
   //         inputType='datepicker'
-  //         required={true}
+  //         required
   //         initialValue={sewingLineDeliveryRecord?.expiredDate}
   //         onValueChange={(val: Dayjs) => {
   //           if (val) {
-  //             setSewingLineDeliveryRecordTemp({ expiredDate: DayJS(val).toISOString() })
+  //             setSewingLineDeliveryRecordTemp({ expiredDate: dateFormatter(val, 'iso8601') })
   //             const newRecords = [...newRecord.sewingLineDeliveriesToUpdate!]
   //             const index = newRecords.findIndex((i) => i.sewingLineID === item.id)
   //             if (index !== -1) {
-  //               newRecords[index].expiredDate = DayJS(val).toISOString()
+  //               newRecords[index].expiredDate = dateFormatter(val, 'iso8601')
   //               setNewRecord({ sewingLineDeliveriesToUpdate: newRecords })
   //             } else {
   //               const recordNews = newRecords.filter((i) => i.sewingLineID !== item.id)
   //               recordNews.push({
   //                 quantitySewed: sewingLineDeliveryRecordTemp.quantitySewed,
-  //                 expiredDate: DayJS(val).toISOString(),
+  //                 expiredDate: dateFormatter(val, 'iso8601'),
   //                 sewingLineID: item.id
   //               })
   //               setNewRecord({ sewingLineDeliveriesToUpdate: recordNews })
@@ -565,7 +579,7 @@ const SewingLineDeliveryPage = () => {
         onDateCreationChange={(enable) => table.setDateCreation(enable)}
         onSearchChange={(e) => setSearchText(e.target.value)}
         onSearch={(value) => handleSearch(value)}
-        onSortChange={(checked, e) => handleSortChange(checked, e)}
+        onSortChange={(checked) => handleSortChange(checked)}
         onResetClick={{
           onClick: () => handleResetClick()
         }}
@@ -586,11 +600,7 @@ const SewingLineDeliveryPage = () => {
             onEdit: {
               onClick: (_e, record) => {
                 if (record?.sewingLineDeliveries) {
-                  setNewRecord({
-                    sewingLineDeliveriesToUpdate: record.sewingLineDeliveries.map((item) => {
-                      return item as SewingLine
-                    })
-                  })
+                  setNewRecord(record.sewingLineDeliveries)
                 }
                 table.handleStartEditing(record!.key!)
               }
@@ -625,7 +635,7 @@ const SewingLineDeliveryPage = () => {
                         )}
                         {!(width >= breakpoint.xl) && (
                           <ExpandableItemRow title='Ngày xuất FCR:' isEditing={table.isEditing(record.id!)}>
-                            {columns.accessoryNotes(record)}
+                            {columns.sewingLines(record)}
                           </ExpandableItemRow>
                         )}
                       </Space>
@@ -645,19 +655,19 @@ const SewingLineDeliveryPage = () => {
                                 title='SL vào chuyền:'
                                 isEditing={table.isEditing(record.id!)}
                               >
-                                {accessoryNotes.quantityOriginal(record, item)}
+                                {sewingLines.quantityOriginal(record, item)}
                               </ExpandableItemRow>
                               <ExpandableItemRow title='SL may được:' isEditing={table.isEditing(record.id!)}>
-                                {accessoryNotes.quantitySewed(record, item)}
+                                {sewingLines.quantitySewed(record, item)}
                               </ExpandableItemRow>
                               <ExpandableItemRow title='SL còn lại:' isEditing={false}>
-                                {accessoryNotes.amountQuantity(record, item)}
+                                {sewingLines.amountQuantity(record, item)}
                               </ExpandableItemRow>
                               <ExpandableItemRow
                                 title='Ngày dự kiến hoàn thành:'
                                 isEditing={table.isEditing(record.id!)}
                               >
-                                {accessoryNotes.expiredDate(record, item)}
+                                {sewingLines.expiredDate(record, item)}
                               </ExpandableItemRow>
                             </Space>
                           </Flex>

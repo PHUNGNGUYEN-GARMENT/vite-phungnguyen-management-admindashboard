@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react'
 import { RequestBodyType, ResponseDataType, defaultRequestBody } from '~/api/client'
 import { ItemStatusType, SortDirection } from '~/typing'

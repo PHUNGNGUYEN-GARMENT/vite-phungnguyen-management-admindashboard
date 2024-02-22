@@ -1,6 +1,5 @@
 import { AxiosError } from 'axios'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const errorFormatter = (error: AxiosError) => {
   if (error.response) {
     // The request was made and the server responded with a status code

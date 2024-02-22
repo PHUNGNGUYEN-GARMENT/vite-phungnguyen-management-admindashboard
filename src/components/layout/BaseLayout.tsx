@@ -63,41 +63,40 @@ const BaseLayout: React.FC<Props> = ({
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
-  const callApi = async () => {
-    try {
-      onLoading?.(true)
-      setLoading(true)
-      if (accessTokenStored) {
-        UserAPI.userRolesFromAccessToken(accessTokenStored)
-          .then((meta) => {
-            if (!meta?.success) {
-              throw new Error(meta?.message)
-            }
-            const userRoles = meta.data as UserRole[]
-            dispatch(
-              setUserRoleAction(
-                userRoles.map((userRole) => {
-                  return userRole.role?.role as UserRoleType
-                })
-              )
-            )
-            dispatch(setUserAction(meta.meta as User))
-          })
-          .catch((error) => {
-            console.error(error)
-          })
-      } else {
-        navigate('/login')
-      }
-    } catch (error) {
-      console.error(error)
-    } finally {
-      onLoading?.(false)
-      setLoading(false)
-    }
-  }
-
   useEffect(() => {
+    const callApi = async () => {
+      try {
+        onLoading?.(true)
+        setLoading(true)
+        if (accessTokenStored) {
+          UserAPI.userRolesFromAccessToken(accessTokenStored)
+            .then((meta) => {
+              if (!meta?.success) {
+                throw new Error(meta?.message)
+              }
+              const userRoles = meta.data as UserRole[]
+              dispatch(
+                setUserRoleAction(
+                  userRoles.map((userRole) => {
+                    return userRole.role?.role as UserRoleType
+                  })
+                )
+              )
+              dispatch(setUserAction(meta.meta as User))
+            })
+            .catch((error) => {
+              console.error(error)
+            })
+        } else {
+          navigate('/login')
+        }
+      } catch (error) {
+        console.error(error)
+      } finally {
+        onLoading?.(false)
+        setLoading(false)
+      }
+    }
     callApi()
   }, [])
 

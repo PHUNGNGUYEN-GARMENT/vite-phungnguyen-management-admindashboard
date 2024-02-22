@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Color as AntColor } from 'antd/es/color-picker'
 import { ColumnsType } from 'antd/es/table'
 import { ColorPicker } from 'antd/lib'
@@ -12,7 +11,6 @@ import { textValidatorDisplay } from '~/utils/helpers'
 import ModalAddNewColor from './components/ModalAddNewColor'
 import useColor from './hooks/useColor'
 import { ColorTableDataType } from './type'
-// import ColorTable from './components/ColorTable'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
@@ -94,7 +92,7 @@ const ColorPage: React.FC<Props> = () => {
         onDateCreationChange={(enable) => table.setDateCreation(enable)}
         onSearchChange={(e) => setSearchText(e.target.value)}
         onSearch={(value) => handleSearch(value)}
-        onSortChange={(checked, e) => handleSortChange(checked, e)}
+        onSortChange={(checked) => handleSortChange(checked)}
         onResetClick={{
           onClick: () => handleResetClick()
         }}

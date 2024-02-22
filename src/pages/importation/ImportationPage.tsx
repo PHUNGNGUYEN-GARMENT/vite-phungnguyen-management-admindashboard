@@ -1,9 +1,8 @@
-import useDevice from '~/components/hooks/useDevice'
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ColorPicker, Divider, Flex, Space } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
 import { useSelector } from 'react-redux'
+import useDevice from '~/components/hooks/useDevice'
 import useTable from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
@@ -147,7 +146,7 @@ const ImportationPage = () => {
         onDateCreationChange={(enable) => table.setDateCreation(enable)}
         onSearchChange={(e) => setSearchText(e.target.value)}
         onSearch={(value) => handleSearch(value)}
-        onSortChange={(checked, e) => handleSortChange(checked, e)}
+        onSortChange={(checked) => handleSortChange(checked)}
         onResetClick={{
           onClick: () => handleResetClick()
         }}

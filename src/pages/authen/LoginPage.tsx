@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons'
 import { App as AntApp, Button, Flex, Form, Input, Typography } from 'antd'
 import React, { HTMLAttributes, useEffect, useState } from 'react'

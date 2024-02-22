@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 import { Flex, Form, Input, Modal, Typography } from 'antd'
 import React, { memo } from 'react'
 import AddNewTitle from '~/components/sky-ui/AddNewTitle'

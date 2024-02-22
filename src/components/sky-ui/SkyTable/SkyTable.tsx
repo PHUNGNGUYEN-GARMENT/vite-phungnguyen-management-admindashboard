@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Table } from 'antd'
 import type { ColumnsType, TableProps } from 'antd/es/table'
 import { ColumnType } from 'antd/lib/table'

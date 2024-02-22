@@ -1,10 +1,9 @@
-/* eslint-disable react-refresh/only-export-components */
 import { Flex, Form, Input, List, Typography } from 'antd'
 import React, { memo } from 'react'
 import { useSelector } from 'react-redux'
 import ItemAction from '~/components/sky-ui/SkyTable/ItemAction'
 import { RootState } from '~/store/store'
-import DayJS, { DatePattern } from '~/utils/date-formatter'
+import { dateFormatter } from '~/utils/date-formatter'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
   itemId: React.Key
@@ -84,23 +83,13 @@ const ListItem: React.FC<Props> = ({
               <Typography.Text type='secondary' className='w-40 font-medium'>
                 Created at
               </Typography.Text>
-              <Input
-                name='createdAt'
-                className='w-full'
-                defaultValue={DayJS(createdAt).format(DatePattern.display)}
-                readOnly
-              />
+              <Input name='createdAt' className='w-full' defaultValue={dateFormatter(createdAt, 'dateOnly')} readOnly />
             </Flex>
             <Flex className='w-full' align='center' justify='start' gap={5}>
               <Typography.Text type='secondary' className='w-40 font-medium'>
                 Updated at
               </Typography.Text>
-              <Input
-                name='createdAt'
-                className='w-full'
-                defaultValue={DayJS(updatedAt).format(DatePattern.display)}
-                readOnly
-              />
+              <Input name='createdAt' className='w-full' defaultValue={dateFormatter(updatedAt, 'dateOnly')} readOnly />
             </Flex>
           </Flex>
         )}

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ColorPicker, Flex, Space } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
@@ -128,13 +127,13 @@ const SewingLineDeliveryTable: React.FC = () => {
               })
             }}
             onValueChange={(values: number[]) => {
-              setNewRecord({
-                sewingLineDeliveriesToUpdate: values.map((sewingLineID) => {
+              setNewRecord(
+                values.map((sewingLineID) => {
                   return {
                     sewingLineID: sewingLineID
                   }
                 })
-              })
+              )
             }}
           >
             <Space size='small' wrap>
@@ -202,18 +201,16 @@ const SewingLineDeliveryTable: React.FC = () => {
                   required={true}
                   initialValue={record.quantityOriginal && numberValidatorDisplay(record.quantityOriginal)}
                   value={
-                    newRecord.sewingLineDeliveriesToUpdate &&
-                    numberValidatorDisplay(
-                      newRecord.sewingLineDeliveriesToUpdate!.find((i) => i.sewingLineID === item.id)?.quantityOriginal
-                    )
+                    newRecord &&
+                    numberValidatorDisplay(newRecord.find((i) => i.sewingLineID === item.id)?.quantityOriginal)
                   }
                   onValueChange={(val) => {
                     setSewingLineDeliveryRecordTemp({ quantityOriginal: val })
-                    const newRecords = [...newRecord.sewingLineDeliveriesToUpdate!]
+                    const newRecords = [...newRecord]
                     const index = newRecords.findIndex((i) => i.sewingLineID === item.id)
                     if (index !== -1) {
                       newRecords[index].quantityOriginal = val
-                      setNewRecord({ sewingLineDeliveriesToUpdate: newRecords })
+                      setNewRecord(newRecords)
                     } else {
                       const recordNews = newRecords.filter((i) => i.sewingLineID !== item.id)
                       recordNews.push({
@@ -222,7 +219,7 @@ const SewingLineDeliveryTable: React.FC = () => {
                         expiredDate: sewingLineDeliveryRecordTemp.expiredDate,
                         sewingLineID: item.id
                       })
-                      setNewRecord({ sewingLineDeliveriesToUpdate: recordNews })
+                      setNewRecord(recordNews)
                     }
                   }}
                 >
@@ -250,18 +247,16 @@ const SewingLineDeliveryTable: React.FC = () => {
                   required={true}
                   initialValue={record.quantitySewed && numberValidatorDisplay(record.quantitySewed)}
                   value={
-                    newRecord.sewingLineDeliveriesToUpdate &&
-                    numberValidatorDisplay(
-                      newRecord.sewingLineDeliveriesToUpdate!.find((i) => i.sewingLineID === item.id)?.quantitySewed
-                    )
+                    newRecord &&
+                    numberValidatorDisplay(newRecord.find((i) => i.sewingLineID === item.id)?.quantitySewed)
                   }
                   onValueChange={(val) => {
                     setSewingLineDeliveryRecordTemp({ quantitySewed: val })
-                    const newRecords = [...newRecord.sewingLineDeliveriesToUpdate!]
+                    const newRecords = [...newRecord]
                     const index = newRecords.findIndex((i) => i.sewingLineID === item.id)
                     if (index !== -1) {
                       newRecords[index].quantitySewed = val
-                      setNewRecord({ sewingLineDeliveriesToUpdate: newRecords })
+                      setNewRecord(newRecords)
                     } else {
                       const recordNews = newRecords.filter((i) => i.sewingLineID !== item.id)
                       recordNews.push({
@@ -270,7 +265,7 @@ const SewingLineDeliveryTable: React.FC = () => {
                         expiredDate: sewingLineDeliveryRecordTemp.expiredDate,
                         sewingLineID: item.id
                       })
-                      setNewRecord({ sewingLineDeliveriesToUpdate: recordNews })
+                      setNewRecord(recordNews)
                     }
                   }}
                 >
@@ -320,11 +315,11 @@ const SewingLineDeliveryTable: React.FC = () => {
                   onValueChange={(val: Dayjs) => {
                     if (val) {
                       setSewingLineDeliveryRecordTemp({ expiredDate: DayJS(val).toISOString() })
-                      const newRecords = [...newRecord.sewingLineDeliveriesToUpdate!]
+                      const newRecords = [...newRecord]
                       const index = newRecords.findIndex((i) => i.sewingLineID === item.id)
                       if (index !== -1) {
                         newRecords[index].expiredDate = DayJS(val).toISOString()
-                        setNewRecord({ sewingLineDeliveriesToUpdate: newRecords })
+                        setNewRecord(newRecords)
                       } else {
                         const recordNews = newRecords.filter((i) => i.sewingLineID !== item.id)
                         recordNews.push({
@@ -332,7 +327,7 @@ const SewingLineDeliveryTable: React.FC = () => {
                           expiredDate: DayJS(val).toISOString(),
                           sewingLineID: item.id
                         })
-                        setNewRecord({ sewingLineDeliveriesToUpdate: recordNews })
+                        setNewRecord(recordNews)
                       }
                     }
                   }}
@@ -377,11 +372,11 @@ const SewingLineDeliveryTable: React.FC = () => {
             onEdit: {
               onClick: (_e, record) => {
                 if (record?.sewingLineDeliveries) {
-                  setNewRecord({
-                    sewingLineDeliveriesToUpdate: record.sewingLineDeliveries.map((item) => {
+                  setNewRecord(
+                    record.sewingLineDeliveries.map((item) => {
                       return item as SewingLine
                     })
-                  })
+                  )
                 }
                 table.handleStartEditing(record!.key!)
               }

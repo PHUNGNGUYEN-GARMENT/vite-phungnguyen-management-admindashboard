@@ -12,35 +12,34 @@ const ProtectedLayout: React.FC<Props> = ({ children }) => {
   const [accessTokenStored] = useLocalStorage<string>('accessToken', '')
   const navigate = useNavigate()
 
-  const callApi = async () => {
-    try {
-      setLoading(true)
-      if (accessTokenStored) {
-        UserAPI.userRolesFromAccessToken(accessTokenStored)
-          .then((meta) => {
-            if (!meta?.success) {
-              throw new Error(meta?.message)
-            }
-            const userRoles = meta.data as UserRole[]
-            const userRolesType = userRoles.map((userRole) => {
-              return userRole.role?.role as UserRoleType
-            })
-            if (!userRolesType.includes('admin')) navigate('/')
-          })
-          .catch((error) => {
-            console.error(error)
-          })
-      } else {
-        navigate('/login')
-      }
-    } catch (error) {
-      console.error(error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
   useEffect(() => {
+    const callApi = async () => {
+      try {
+        setLoading(true)
+        if (accessTokenStored) {
+          UserAPI.userRolesFromAccessToken(accessTokenStored)
+            .then((meta) => {
+              if (!meta?.success) {
+                throw new Error(meta?.message)
+              }
+              const userRoles = meta.data as UserRole[]
+              const userRolesType = userRoles.map((userRole) => {
+                return userRole.role?.role as UserRoleType
+              })
+              if (!userRolesType.includes('admin')) navigate('/')
+            })
+            .catch((error) => {
+              console.error(error)
+            })
+        } else {
+          navigate('/login')
+        }
+      } catch (error) {
+        console.error(error)
+      } finally {
+        setLoading(false)
+      }
+    }
     callApi()
   }, [])
 

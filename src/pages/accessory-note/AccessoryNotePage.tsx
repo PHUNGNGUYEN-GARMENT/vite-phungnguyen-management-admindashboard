@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ColumnType } from 'antd/es/table'
 import { useSelector } from 'react-redux'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
@@ -86,7 +85,7 @@ const AccessoryNotePage: React.FC<Props> = () => {
         onDateCreationChange={(enable) => table.setDateCreation(enable)}
         onSearchChange={(e) => setSearchText(e.target.value)}
         onSearch={(value) => handleSearch(value)}
-        onSortChange={(checked, e) => handleSortChange(checked, e)}
+        onSortChange={(checked) => handleSortChange(checked)}
         onResetClick={{
           onClick: () => handleResetClick(),
           isShow: currentUser.userRoles.includes('admin')

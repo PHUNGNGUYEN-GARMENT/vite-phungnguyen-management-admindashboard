@@ -1,9 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable react-refresh/only-export-components */
 import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons'
 import { Checkbox, ColorPicker, DatePicker, Flex, Form, Input, InputNumber, Select, Table, Typography } from 'antd'
-import { memo, useState } from 'react'
+import { memo } from 'react'
 import { cn } from '~/utils/helpers'
 import { EditableStateCellProps } from './EditableStateCell'
 
@@ -29,15 +26,12 @@ function EditableFormCell({
   selectProps,
   initialValue,
   onValueChange,
-  setLoading,
   required,
   inputType,
   readonly,
   disabled,
   ...restProps
 }: EditableFormCellProps) {
-  const [passwordVisible, setPasswordVisible] = useState<boolean>(false)
-
   const inputNode = ((): React.ReactNode => {
     switch (inputType) {
       case 'colorpicker':

@@ -8,9 +8,7 @@ import SideNav from './sidenav/SideNav'
 const { Sider, Content } = Layout
 
 const Main: React.FC = () => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [openDrawer, setOpenDrawer] = useState(false)
-  // const [collapsed, setCollapsed] = useState(false)
 
   return (
     <Layout className='w-full bg-background' hasSider>

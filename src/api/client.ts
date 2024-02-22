@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * All the necessary configuration will be handled in the client.js.
  * We can specify what is the URL to call API or specify logic that should be used reused for every API call.

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ColorPicker } from 'antd'
 import type { Color as AntColor } from 'antd/es/color-picker'
 import { ColumnType } from 'antd/es/table'
@@ -92,7 +91,7 @@ const ColorTable: React.FC<Props> = () => {
         onDateCreationChange={(enable) => table.setDateCreation(enable)}
         onSearchChange={(e) => setSearchText(e.target.value)}
         onSearch={(value) => handleSearch(value)}
-        onSortChange={(checked, e) => handleSortChange(checked, e)}
+        onSortChange={(checked) => handleSortChange(checked)}
         onResetClick={{
           onClick: () => handleResetClick()
         }}

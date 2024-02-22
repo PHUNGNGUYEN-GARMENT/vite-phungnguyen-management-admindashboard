@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { App as AntApp } from 'antd'
 import { useEffect, useState } from 'react'
 import { RequestBodyType, ResponseDataType, defaultRequestBody } from '~/api/client'
@@ -10,10 +9,6 @@ import { TableItemWithKey, UseTableProps } from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
 import { GarmentAccessory, Product, ProductColor, SewingLine, SewingLineDelivery } from '~/typing'
 import { SewingLineDeliveryTableDataType } from '../type'
-
-export interface SewingLineDeliveryNewRecordProps {
-  sewingLineDeliveriesToUpdate?: SewingLineDelivery[]
-}
 
 export default function useSewingLineDelivery(table: UseTableProps<SewingLineDeliveryTableDataType>) {
   const { setLoading, setDataSource, handleConfirmCancelEditing } = table
@@ -30,7 +25,7 @@ export default function useSewingLineDelivery(table: UseTableProps<SewingLineDel
   // State changes
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [searchText, setSearchText] = useState<string>('')
-  const [newRecord, setNewRecord] = useState<SewingLineDeliveryNewRecordProps>({})
+  const [newRecord, setNewRecord] = useState<SewingLineDelivery[]>([])
   const [sewingLineDeliveryRecordTemp, setSewingLineDeliveryRecordTemp] = useState<SewingLineDelivery>({})
 
   // List
@@ -104,18 +99,18 @@ export default function useSewingLineDelivery(table: UseTableProps<SewingLineDel
     // const row = (await form.validateFields()) as any
     console.log({ old: record, new: newRecord })
     try {
-      if (newRecord.sewingLineDeliveriesToUpdate) {
+      if (newRecord) {
         if (record.sewingLineDeliveries) {
           // Update GarmentAccessory
           console.log('Update SewingLineDelivery')
           await sewingLineDeliveryService.updateItemsBy(
             { field: 'productID', key: record.id! },
-            newRecord.sewingLineDeliveriesToUpdate.map((item) => {
+            newRecord.map((item) => {
               return {
-                quantityOriginal: item.quantityOriginal,
-                quantitySewed: item.quantitySewed,
-                expiredDate: item.expiredDate,
-                sewingLineID: item.sewingLineID
+                quantityOriginal: item.quantityOriginal ?? null,
+                quantitySewed: item.quantitySewed ?? null,
+                expiredDate: item.expiredDate ?? null,
+                sewingLineID: item.sewingLineID ?? null
               } as SewingLineDelivery
             }),
             setLoading,
@@ -128,7 +123,7 @@ export default function useSewingLineDelivery(table: UseTableProps<SewingLineDel
         } else {
           console.log('Create SewingLineDelivery')
           await sewingLineDeliveryService.createNewItems(
-            newRecord.sewingLineDeliveriesToUpdate.map((i) => {
+            newRecord.map((i) => {
               return {
                 productID: record.id,
                 quantityOriginal: i.quantityOriginal,
@@ -157,7 +152,6 @@ export default function useSewingLineDelivery(table: UseTableProps<SewingLineDel
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleAddNewItem = async (formAddNew: any) => {
     try {
       console.log(formAddNew)
@@ -239,8 +233,7 @@ export default function useSewingLineDelivery(table: UseTableProps<SewingLineDel
     loadData()
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleSortChange = async (checked: boolean, _event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleSortChange = async (checked: boolean) => {
     await productService.sortedListItems(
       checked ? 'asc' : 'desc',
       setLoading,

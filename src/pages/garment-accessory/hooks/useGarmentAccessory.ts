@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { App as AntApp } from 'antd'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
@@ -219,7 +218,6 @@ export default function useGarmentAccessory(table: UseTableProps<GarmentAccessor
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleAddNewItem = async (formAddNew: any) => {
     try {
       console.log(formAddNew)

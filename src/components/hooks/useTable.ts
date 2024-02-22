@@ -83,7 +83,6 @@ export default function useTable<T extends { key?: React.Key }>(initValue: Table
   const handleStartSaveEditing = async (key: React.Key, itemToUpdate: T, onDataSuccess?: (updatedItem: T) => void) => {
     try {
       setLoading(true)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const newData = [...dataSource]
       const index = newData.findIndex((item) => key === item.key)
       if (index > -1) {

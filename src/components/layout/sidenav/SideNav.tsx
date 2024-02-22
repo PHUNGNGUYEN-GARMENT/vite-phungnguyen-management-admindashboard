@@ -26,7 +26,6 @@ function getItem(label: React.ReactNode, key: React.Key, icon?: React.ReactNode,
   } as MenuItem
 }
 
-// eslint-disable-next-line no-empty-pattern
 const SideNav: React.FC<Props> = ({ openDrawer, setOpenDrawer, ...props }) => {
   const { pathname } = useLocation()
   const [selectedKey, setSelectedKey] = useState<string>(appRoutes[0].key)

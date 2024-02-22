@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable react-refresh/only-export-components */
 import { Flex } from 'antd'
 import { memo } from 'react'
 import { cn } from '~/utils/helpers'

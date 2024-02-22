@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ColorPicker, Divider, Flex, Progress, Space, Typography } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import { Check } from 'lucide-react'

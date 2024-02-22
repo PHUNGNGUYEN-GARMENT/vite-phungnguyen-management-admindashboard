@@ -37,11 +37,7 @@ export type SideType = {
   name: string
   path: string
   role?: UserRoleType
-  component:
-    | React.LazyExoticComponent<() => JSX.Element>
-    | React.ReactNode
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    | any
+  component: React.LazyExoticComponent<() => JSX.Element> | React.ReactNode | any
   isGroup?: boolean
   icon: string
 }

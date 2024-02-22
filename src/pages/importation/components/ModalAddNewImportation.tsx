@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 import { Flex, Form, Modal } from 'antd'
 import React, { memo } from 'react'
 import AddNewTitle from '~/components/sky-ui/AddNewTitle'
@@ -13,7 +12,6 @@ interface Props extends React.HTMLAttributes<HTMLElement> {
   productRecord: ProductTableDataType
   setOpenModal: (enable: boolean) => void
   setLoading: (enable: boolean) => void
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onAddNew: (itemToAddNew: any) => void
 }
 

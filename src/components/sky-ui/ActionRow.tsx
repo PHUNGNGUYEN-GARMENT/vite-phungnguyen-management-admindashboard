@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button, Flex, Popconfirm as PopConfirm } from 'antd'
 import { BaseButtonProps } from 'antd/es/button/button'
 import React, { HTMLAttributes } from 'react'

@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 import { Flex, Typography } from 'antd'
 import React, { HTMLAttributes, memo } from 'react'
 import { TableItemWithKey } from '~/components/hooks/useTable'

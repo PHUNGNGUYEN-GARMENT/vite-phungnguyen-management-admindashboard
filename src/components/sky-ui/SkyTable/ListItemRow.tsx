@@ -1,9 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable react-refresh/only-export-components */
 import { Flex } from 'antd'
 import React, { memo } from 'react'
 import { ItemStatusType } from '~/typing'
-import DayJS, { DatePattern } from '~/utils/date-formatter'
+import { dateFormatter } from '~/utils/date-formatter'
 import { cn } from '~/utils/helpers'
 import EditableStateCell, { EditableStateCellProps } from './EditableStateCell'
 import SkyTableTypography from './SkyTableTypography'
@@ -32,7 +30,7 @@ const ListItemRow = ({ ...props }: Props) => {
               ? props.render
               : props.inputType !== 'datepicker'
                 ? props.value
-                : DayJS(props.value).format(DatePattern.display)}
+                : dateFormatter(props.value, 'dateOnly')}
           </SkyTableTypography>
         )}
       </EditableStateCell>

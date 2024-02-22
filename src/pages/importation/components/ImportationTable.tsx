@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Divider, Flex, Space } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
@@ -114,7 +113,7 @@ const ImportationTable: React.FC<Props> = ({ productRecord }) => {
         onDateCreationChange={(enable) => table.setDateCreation(enable)}
         onSearchChange={(e) => setSearchText(e.target.value)}
         onSearch={(value) => handleSearch(value)}
-        onSortChange={(checked, e) => handleSortChange(checked, e)}
+        onSortChange={(checked) => handleSortChange(checked)}
         onResetClick={{
           onClick: () => handleResetClick()
         }}

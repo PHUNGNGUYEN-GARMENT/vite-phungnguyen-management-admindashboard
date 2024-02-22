@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 import { Flex, Form, Modal, Spin } from 'antd'
 import React, { memo, useEffect, useState } from 'react'
 import { defaultRequestBody } from '~/api/client'
@@ -27,7 +26,6 @@ interface Props extends React.HTMLAttributes<HTMLElement> {
   loading: boolean
   setOpenModal: (enable: boolean) => void
   setLoading: (enable: boolean) => void
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onAddNew: (recordToAddNew: ProductAddNewProps) => void
 }
 

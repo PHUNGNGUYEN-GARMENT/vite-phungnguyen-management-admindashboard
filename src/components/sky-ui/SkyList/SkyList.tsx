@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { List, ListProps } from 'antd'
 import { ResponseDataType } from '~/api/client'
 import { ActionProps } from '../ActionRow'

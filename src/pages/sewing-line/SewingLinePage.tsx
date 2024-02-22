@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ColumnType } from 'antd/es/table'
 import { useSelector } from 'react-redux'
 import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
@@ -67,7 +66,7 @@ const SewingLinePage: React.FC<Props> = () => {
         onDateCreationChange={(enable) => table.setDateCreation(enable)}
         onSearchChange={(e) => setSearchText(e.target.value)}
         onSearch={(value) => handleSearch(value)}
-        onSortChange={(checked, e) => handleSortChange(checked, e)}
+        onSortChange={(checked) => handleSortChange(checked)}
         onResetClick={{
           onClick: () => handleResetClick(),
           isShow: currentUser.userRoles.includes('admin')
@@ -104,7 +103,7 @@ const SewingLinePage: React.FC<Props> = () => {
             onConfirmCancelEditing: () => table.handleConfirmCancelEditing(),
             onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),
             onConfirmDelete: (record) => handleConfirmDelete(record),
-            isShow: currentUser.userRoles.includes('admin') || currentUser.userRoles.includes('cutting_group_manager')
+            isShow: currentUser.userRoles.includes('admin') || currentUser.userRoles.includes('sewing_line_manager')
           }}
         />
       </BaseLayout>

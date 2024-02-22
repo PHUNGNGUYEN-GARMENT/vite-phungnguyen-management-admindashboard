@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { App as AntApp } from 'antd'
 import { useEffect, useState } from 'react'
 import { RequestBodyType, ResponseDataType, defaultRequestBody } from '~/api/client'
@@ -86,7 +85,6 @@ export default function useAccessoryNote(table: UseTableProps<AccessoryNoteTable
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleAddNewItem = async (formAddNew: any) => {
     try {
       console.log(formAddNew)
@@ -162,8 +160,7 @@ export default function useAccessoryNote(table: UseTableProps<AccessoryNoteTable
     })
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleSortChange = async (checked: boolean, _event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleSortChange = async (checked: boolean) => {
     await accessoryNoteService.sortedListItems(
       checked ? 'asc' : 'desc',
       setLoading,

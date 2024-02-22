@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { App as AntApp } from 'antd'
 import { useEffect, useState } from 'react'
 import { RequestBodyType, ResponseDataType, defaultRequestBody } from '~/api/client'
@@ -81,7 +80,6 @@ export default function useGroup(table: UseTableProps<GroupTableDataType>) {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleAddNewItem = async (formAddNew: any) => {
     try {
       console.log(formAddNew)

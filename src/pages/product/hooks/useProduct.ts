@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { App as AntApp } from 'antd'
 import { useEffect, useState } from 'react'
 import { ResponseDataType, defaultRequestBody } from '~/api/client'
@@ -229,7 +228,6 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleAddNewItem = async (formAddNew: ProductAddNewProps) => {
     try {
       console.log(formAddNew)
@@ -332,8 +330,7 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
     loadData()
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleSortChange = async (checked: boolean, _event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleSortChange = async (checked: boolean) => {
     await productService.sortedListItems(
       checked ? 'asc' : 'desc',
       setLoading,

@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable react-refresh/only-export-components */
 import {
   Button,
   Checkbox,
@@ -18,7 +15,7 @@ import {
 } from 'antd'
 import { InputProps, TextAreaProps } from 'antd/es/input'
 import { SelectProps } from 'antd/es/select'
-import dayjs from 'dayjs'
+import { DatePickerProps } from 'antd/lib'
 import { Eye, EyeOff } from 'lucide-react'
 import { HTMLAttributes, memo, useState } from 'react'
 import { InputType } from '~/typing'
@@ -37,6 +34,7 @@ export interface EditableStateCellProps extends HTMLAttributes<HTMLElement> {
   inputNumberProps?: InputNumberProps
   textAreaProps?: TextAreaProps
   inputProps?: InputProps
+  datePickerProps?: DatePickerProps
   inputType?: InputType
   required?: boolean
   allowClear?: boolean
@@ -54,11 +52,11 @@ function EditableStateCell({
   isEditing,
   dataIndex,
   title,
-  subtitle,
   placeholder,
   allowClear,
   value,
   colorPickerProps,
+  datePickerProps,
   checkboxProps,
   inputNumberProps,
   textAreaProps,
@@ -66,7 +64,6 @@ function EditableStateCell({
   inputProps,
   initialValue,
   onValueChange,
-  setLoading,
   required,
   inputType,
   disabled,
@@ -198,15 +195,16 @@ function EditableStateCell({
       case 'datepicker':
         return (
           <DatePicker
+            {...datePickerProps}
             title={title}
             placeholder={placeholder}
             name={dataIndex}
             required={required}
             onChange={(val) => onValueChange?.(val)}
             disabled={disabled}
-            // value={value && DayJS(value)}
-            defaultValue={dayjs(initialValue)}
-            format={'DD/MM/YYYY'}
+            value={value}
+            defaultValue={initialValue}
+            format={datePickerProps?.format ?? 'DD/MM/YYYY'}
             className={cn('w-full', restProps.className)}
           />
         )
