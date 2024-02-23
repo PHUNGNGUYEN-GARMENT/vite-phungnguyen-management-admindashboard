@@ -1,3 +1,7 @@
-export default {
-  baseUrl: 'http://localhost:5001/api'
+// import 'dotenv/config'
+
+const appConfig = {
+  baseURL: import.meta.env.VITE_BASE_URL ?? ''
 }
+
+export default appConfig

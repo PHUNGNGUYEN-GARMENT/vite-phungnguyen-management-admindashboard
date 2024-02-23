@@ -5,7 +5,7 @@
  */
 
 import axios, { AxiosInstance } from 'axios'
-import appConfig from '~/config/app.config'
+import axiosConfig from '~/config/axios.config'
 import { ItemStatusType, SortDirection } from '~/typing'
 
 export type ResponseDataType = {
@@ -56,9 +56,6 @@ export const defaultRequestBody: RequestBodyType = {
   }
 }
 
-const client: AxiosInstance = axios.create({
-  baseURL: appConfig.baseUrl,
-  timeout: 10000
-})
+const client: AxiosInstance = axios.create(axiosConfig)
 
 export default client
