@@ -71,9 +71,8 @@ const BaseLayout: React.FC<Props> = ({
         if (accessTokenStored) {
           UserAPI.userRolesFromAccessToken(accessTokenStored)
             .then((meta) => {
-              if (!meta?.success) {
-                throw new Error(meta?.message)
-              }
+              if (!meta?.success) throw new Error(meta?.message)
+
               const userRoles = meta.data as UserRole[]
               dispatch(
                 setUserRoleAction(

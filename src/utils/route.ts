@@ -12,7 +12,6 @@ import {
   PrintIcon,
   SewingMachineIcon,
   UserIcon,
-  UserRoleIcon,
   WarehouseIcon
 } from '~/assets/icons'
 import { UserRoleType } from '~/typing'
@@ -22,7 +21,7 @@ const ColorPage = lazy(() => import('~/pages/color/ColorPage'))
 const GroupPage = lazy(() => import('~/pages/group/GroupPage'))
 const NotePage = lazy(() => import('~/pages/accessory-note/AccessoryNotePage'))
 const UserPage = lazy(() => import('~/pages/user/UserPage'))
-const RolePage = lazy(() => import('~/pages/role/RolePage'))
+// const RolePage = lazy(() => import('~/pages/role/RolePage'))
 const GarmentAccessoryPage = lazy(() => import('~/pages/garment-accessory/GarmentAccessoryPage'))
 const PrintPage = lazy(() => import('~/pages/print/PrintPage'))
 const ProductPage = lazy(() => import('~/pages/product/ProductPage'))
@@ -177,13 +176,13 @@ export const appRoutes: SideType[] = [
     role: 'admin',
     component: UserPage,
     icon: UserIcon
-  },
-  {
-    key: '15',
-    name: 'Vai trò',
-    path: 'roles',
-    role: 'admin',
-    component: RolePage,
-    icon: UserRoleIcon
   }
+  // {
+  //   key: '15',
+  //   name: 'Vai trò',
+  //   path: 'roles',
+  //   role: 'admin',
+  //   component: RolePage,
+  //   icon: UserRoleIcon
+  // }
 ]

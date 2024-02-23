@@ -10,7 +10,7 @@ interface AppUser {
 
 const initialState: AppUser = {
   user: {},
-  userRoles: ['staff'],
+  userRoles: [],
   userTemp: { user: {}, isResetPassword: false }
 }
 

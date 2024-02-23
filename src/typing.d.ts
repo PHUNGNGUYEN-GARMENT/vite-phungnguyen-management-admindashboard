@@ -2,10 +2,14 @@ export type UserRoleType =
   | 'admin'
   | 'product_manager'
   | 'importation_manager'
-  | 'sample_sewing_manager'
   | 'accessory_manager'
   | 'cutting_group_manager'
+  | 'sample_sewing_manager'
   | 'completion_manager'
+  | 'plan_manager'
+  | 'hcns_manager'
+  | 'accountant_manager'
+  | 'sewing_manager'
   | 'sewing_line_manager'
   | 'staff'
 
@@ -63,6 +67,7 @@ export interface Role {
   id?: number
   userID?: number | null
   role?: UserRoleType | null
+  isAdmin?: boolean | null
   shortName?: string | null
   desc?: string | null
   status?: ItemStatusType | null
