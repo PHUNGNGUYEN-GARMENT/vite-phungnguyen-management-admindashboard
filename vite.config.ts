@@ -1,7 +1,7 @@
 import react from '@vitejs/plugin-react-swc'
-import 'dotenv/config'
 import path from 'path'
 import { defineConfig } from 'vite'
+import 'dotenv/config'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -11,5 +11,8 @@ export default defineConfig({
       '~': path.resolve(__dirname, './src')
     }
   },
-  server: { host: true }
+  server: { host: true },
+  preview: {
+    port: Number(process.env.PORT)
+  }
 })
